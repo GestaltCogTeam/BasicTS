@@ -1,0 +1,3 @@
+[submodule "easytorch"]
+	path = easytorch
+	url = https://github.com/cnstark/easytorch.git
