@@ -1,6 +1,5 @@
 import os
 import sys
-import sys
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 from utils.serialization import load_pkl
 
