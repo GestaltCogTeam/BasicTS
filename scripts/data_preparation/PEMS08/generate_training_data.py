@@ -21,8 +21,17 @@ PEMS08 dataset (traffic flow dataset) default settings:
         predicting the traffic speed
 """
 
-# data preprocessing
 def MinMaxnormalization(data, output_dir, train_index):
+    """min-max normalization.
+
+    Args:
+        data (np.array): raw time series data.
+        output_dir (str): output dir path.
+        train_index (list): train index.
+
+    Returns:
+        np.array: normalized raw time series data.
+    """
     # L, N, C
     data_train = data[:train_index[-1][1], ...]
 
@@ -46,6 +55,11 @@ def MinMaxnormalization(data, output_dir, train_index):
     return data_norm
 
 def generate_data(args):
+    """preprocess and generate train/valid/test datasets.
+
+    Args:
+        args (Namespace): args for processing data.
+    """
     C = args.C
     seq_len_short = args.seq_len_short
     add_time_in_day = True
