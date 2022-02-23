@@ -20,7 +20,7 @@ PEMS-BAY dataset (traffic speed dataset) default settings:
         predicting the traffic speed
 """
 
-def standard_transform(data, output_dir, train_index):
+def standard_transform(data: np.array, output_dir: str, train_index: list) -> np.array:
     """standard normalization.
 
     Args:

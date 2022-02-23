@@ -8,7 +8,7 @@ import torch
 from torch.utils.data import Dataset
 
 class BaseDataset(Dataset):
-    def __init__(self, raw_file_path, index_file_path, mode, **kwargs) -> None:
+    def __init__(self, raw_file_path: str, index_file_path: str, mode: str, **kwargs) -> None:
         super().__init__()
         assert mode in ['train', 'valid', 'test'], "error mode"
         # read raw data (normalized)
@@ -18,17 +18,16 @@ class BaseDataset(Dataset):
         # read index
         self.index = load_pkl(index_file_path)[mode]
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> tuple:
         """get a sample.
 
         Args:
-            index (tuple): the iteration index (not the self.index)
+            index (int): the iteration index (not the self.index)
 
         Returns:
             tuple: (future_data, history_data), where the shape of each is L x N x C.
         """
         idx = list(self.index[index])
-        idx[0] = [1,2,3,4,5,6,7,8,9,11]
         if isinstance(idx[0], int):
             # continuous index
             history_data  = self.data[idx[0]:idx[1]]

@@ -21,7 +21,7 @@ PEMS08 dataset (traffic flow dataset) default settings:
         predicting the traffic speed
 """
 
-def MinMaxnormalization(data, output_dir, train_index):
+def MinMaxnormalization(data: np.array, output_dir: str, train_index: list) -> np.array:
     """min-max normalization.
 
     Args:
