@@ -38,12 +38,12 @@ def MinMaxnormalization(data: np.array, output_dir: str, train_index: list) -> n
     _max = data_train.max(axis=(0, 1), keepdims=True)
     _min = data_train.min(axis=(0, 1), keepdims=True)
 
-    print('max:', _max)
-    print('min:', _min)
-    args = {}
-    args['max'] = _max
-    args['min']  = _min
-    pickle.dump(args, open(output_dir + "/args.pkl", 'wb'))
+    print('max:', _max[0][0][0])
+    print('min:', _min[0][0][0])
+    scaler = {}
+    scaler['func'] = re_max_min_normalization
+    scaler['args'] = {"max":_max[0][0][0], "min":_min[0][0][0]}
+    pickle.dump(scaler, open(output_dir + "/scaler.pkl", 'wb'))
 
     def normalize(x):
         x = 1. * (x - _min) / (_max - _min)
@@ -53,6 +53,12 @@ def MinMaxnormalization(data: np.array, output_dir: str, train_index: list) -> n
     data_norm = normalize(data)
 
     return data_norm
+
+def re_max_min_normalization(x, **kwargs):
+    _min, _max = kwargs['min'][0, 0, 0], kwargs['max'][0, 0, 0]
+    x = (x + 1.) / 2.
+    x = 1. * x * (_max - _min) + _min
+    return x
 
 def generate_data(args):
     """preprocess and generate train/valid/test datasets.

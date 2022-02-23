@@ -29,9 +29,11 @@
     - raw_data: np.array, L x N x C. L: 时间序列总长度, N: 多变量时间序列数量, C: 特征数量
     - other
 
-- `args.pkl`: dict of list
-  - keys: 归一化/反归一化参数，例如mean/std, min/max
-  - values: 值
+- `scaler.pkl`: dict of list
+  - keys:
+    - args: 归一化/反归一化参数，例如mean/std, min/max
+    - func: 反归一化函数
+  - values
 
 借助numpy强大的功能，这样的操作方式可以在保证速度的情况下，极大地满足可扩展性，满足几乎所有模型的数据读取需求。
 

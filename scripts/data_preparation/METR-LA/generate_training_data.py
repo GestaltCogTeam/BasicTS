@@ -38,16 +38,22 @@ def standard_transform(data: np.array, output_dir: str, train_index: list) -> np
 
     print("mean (training data):", mean)
     print("std (training data):", std)
-    args = {}
-    args['mean'] = mean
-    args['std']  = std
-    pickle.dump(args, open(output_dir + "/args.pkl", 'wb'))
+    scaler = {}
+    scaler['func'] = standard_re_transform
+    scaler['args'] = {"mean":mean, "std":std}
+    pickle.dump(scaler, open(output_dir + "/scaler.pkl", 'wb'))
     
     def normalize(x):
         return (x - mean) / std
     
     data_norm = normalize(data)
     return data_norm
+
+def standard_re_transform(x, **kwargs):
+    mean, std = kwargs['mean'], kwargs['std']
+    x = x * std
+    x = x + mean
+    return x
 
 def generate_data(args):
     """preprocess and generate train/valid/test datasets.
