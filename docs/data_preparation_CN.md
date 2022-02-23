@@ -43,5 +43,5 @@
 
 ## Reference
 
-[1] Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting \\
+[1] Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting\
 [2] Learning Dynamics and Heterogeneity of Spatial-Temporal Graph Data for Trafﬁc Forecasting
