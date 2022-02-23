@@ -41,7 +41,7 @@ def MinMaxnormalization(data: np.array, output_dir: str, train_index: list) -> n
     print('max:', _max[0][0][0])
     print('min:', _min[0][0][0])
     scaler = {}
-    scaler['func'] = re_max_min_normalization
+    scaler['func'] = re_max_min_normalization.__name__
     scaler['args'] = {"max":_max[0][0][0], "min":_min[0][0][0]}
     pickle.dump(scaler, open(output_dir + "/scaler.pkl", 'wb'))
 

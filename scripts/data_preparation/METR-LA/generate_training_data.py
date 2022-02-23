@@ -39,7 +39,7 @@ def standard_transform(data: np.array, output_dir: str, train_index: list) -> np
     print("mean (training data):", mean)
     print("std (training data):", std)
     scaler = {}
-    scaler['func'] = standard_re_transform
+    scaler['func'] = standard_re_transform.__name__
     scaler['args'] = {"mean":mean, "std":std}
     pickle.dump(scaler, open(output_dir + "/scaler.pkl", 'wb'))
     
