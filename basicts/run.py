@@ -9,9 +9,10 @@ setproctitle.setproctitle("STEP")
 
 def parse_args():
     parser = ArgumentParser(description='Run time series forecasting model in BasicTS framework based on EasyTorch!')
-    # parser.add_argument('-opt', '--cfg', required=True, help='training config')
+    parser.add_argument('-opt', '--cfg', required=True, help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/HI/HI_METR-LA.py', help='training config')
-    parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_PEMS04.py', help='training config')
     parser.add_argument('--gpus', default=None, help='visible gpus')
     return parser.parse_args()
 
