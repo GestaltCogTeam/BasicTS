@@ -4,9 +4,6 @@ sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 from argparse import ArgumentParser
 from easytorch.easytorch import launch_training
 
-import setproctitle
-setproctitle.setproctitle("STEP")
-
 def parse_args():
     parser = ArgumentParser(description='Run time series forecasting model in BasicTS framework based on EasyTorch!')
     parser.add_argument('-opt', '--cfg', required=True, help='training config')

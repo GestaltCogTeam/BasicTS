@@ -1,5 +1,6 @@
 import os
 import time
+import setproctitle
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
@@ -34,6 +35,10 @@ class BaseRunner(Runner):
 
         # gradient clip
         self.clip    = cfg['TRAIN'].get('CLIP', None)
+
+        # set proctitle
+        proctitle_name = "{0}({1})".format(cfg['MODEL'].get("NAME", " "), cfg.get("DATASET_NAME", " "))
+        setproctitle.setproctitle("{0}@BasicTS".format(proctitle_name))
 
         # Note: other modules, like model, optim, scheduler and so on, have been defined in the super().__init__() function.
 
