@@ -14,7 +14,7 @@
 但也有一些特殊情况，时间序列的样本是不连续的，例如许多包含多分辨率思想的工作[1][2].
 
 为了提供**统一、通用**的data pipline，我们采用存储所有样本的index，而非训练样本的方式。
-具体来说，预处理代码将为每个数据集产生三个文件：
+具体来说，预处理代码将为每个数据集产生四个文件：
 
 - `index.pkl`: dict of list
   - keys: train, valid, test
@@ -34,6 +34,8 @@
     - args: 归一化/反归一化参数，例如mean/std, min/max
     - func: 反归一化函数
   - values
+
+- `adj_mx.pkl`: the pre-defined adjacent matrix
 
 借助numpy强大的功能，这样的操作方式可以在保证速度的情况下，极大地满足可扩展性，满足几乎所有模型的数据读取需求。
 
