@@ -42,6 +42,14 @@ class BaseRunner(Runner):
 
         # Note: other modules, like model, optim, scheduler and so on, have been defined in the super().__init__() function.
 
+    def build_train_data_loader(self, cfg: dict) -> DataLoader:
+        train_data_loader = super().build_train_data_loader(cfg)
+        if cfg['TRAIN'].get('SETUP_GRAPH', False):
+            for data in train_data_loader:
+                self.setup_graph(data)
+                break
+        return train_data_loader
+
     @staticmethod
     def build_test_dataset(cfg: dict):
         """It can be implement to build dataset for validation (not necessary).
@@ -100,50 +108,7 @@ class BaseRunner(Runner):
         Args:
             cfg (dict): config
         """
-
-        # init training param
-        self.num_epochs = cfg['TRAIN']['NUM_EPOCHS']
-        self.start_epoch = 0
-        self.ckpt_save_strategy = cfg['TRAIN'].get('CKPT_SAVE_STRATEGY')
-
-        # train data loader
-        self.train_data_loader = self.build_train_data_loader(cfg)
-        self.register_epoch_meter('train_time', 'train', '{:.2f} (s)', plt=False)
-
-        if cfg['TRAIN'].get('SETUP_GRAPH'):
-            for data in self.train_data_loader:
-                # data loop
-                self.setup_graph(data)
-                break
-
-        # create optim
-        self.optim = build_optim(cfg['TRAIN']['OPTIM'], self.model)
-        self.logger.info('set optim: ' + str(self.optim))
-
-        # create lr_scheduler
-        if hasattr(cfg['TRAIN'], 'LR_SCHEDULER'):
-            self.scheduler = build_lr_scheduler(cfg['TRAIN']['LR_SCHEDULER'], self.optim)
-            self.logger.info('set lr_scheduler: ' + str(self.scheduler))
-            self.register_epoch_meter('lr', 'train', '{:.2e}')
-
-        # fine tune
-        if hasattr(cfg['TRAIN'], 'FINETUNE_FROM'):
-            self.load_model(cfg['TRAIN']['FINETUNE_FROM'])
-            self.logger.info('start fine tuning')
-
-        # resume
-        self.load_model_resume()
-
-        # init tensorboard(after resume)
-        if is_master():
-            self.tensorboard_writer = SummaryWriter(
-                os.path.join(self.ckpt_save_dir, 'tensorboard'),
-                purge_step=(self.start_epoch + 1) if self.start_epoch != 0 else None
-            )
-
-        # init validation
-        if hasattr(cfg, 'VAL'):
-            self.init_validation(cfg)
+        super().init_training(cfg)
         # init test
         if hasattr(cfg, 'TEST'):
             self.init_test(cfg)
