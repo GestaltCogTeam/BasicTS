@@ -7,7 +7,7 @@ data normalization and re-normalization
 # ====================================== re-normalizations ====================================== #
 @SCALER_REGISTRY.register()
 def re_max_min_normalization(x, **kwargs):
-    _min, _max = kwargs['min'][0, 0, 0], kwargs['max'][0, 0, 0]
+    _min, _max = kwargs['min'], kwargs['max']
     x = (x + 1.) / 2.
     x = 1. * x * (_max - _min) + _min
     return x
