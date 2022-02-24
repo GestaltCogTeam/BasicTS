@@ -6,6 +6,7 @@ output/
 datasets/model/*
 .VSCodeCounter/
 log/
+checkpoints/
 
 *.npz
 *.npy
