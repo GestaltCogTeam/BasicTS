@@ -60,19 +60,19 @@ CFG.TRAIN.LOSS = l1_loss
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
-    "lr":0.005,
-    "weight_decay":1.0e-5,
+    "lr":0.002,
+    "weight_decay":0.0001,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[50],
-    "gamma":0.1
+    "milestones":[1, 50, 100],
+    "gamma":0.5
 }
 
 # ================= train ================= #
 CFG.TRAIN.CLIP       = 5
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
