@@ -99,7 +99,7 @@ CFG.VAL.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
 CFG.VAL.DATA.BATCH_SIZE     = 64
 CFG.VAL.DATA.PREFETCH       = False
-CFG.VAL.DATA.SHUFFLE        = True
+CFG.VAL.DATA.SHUFFLE        = False
 CFG.VAL.DATA.NUM_WORKERS    = 2
 CFG.VAL.DATA.PIN_MEMORY     = False
 
@@ -113,6 +113,6 @@ CFG.TEST.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
 CFG.TEST.DATA.BATCH_SIZE    = 64
 CFG.TEST.DATA.PREFETCH      = False
-CFG.TEST.DATA.SHUFFLE       = True
+CFG.TEST.DATA.SHUFFLE       = False
 CFG.TEST.DATA.NUM_WORKERS   = 2
 CFG.TEST.DATA.PIN_MEMORY    = False
