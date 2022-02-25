@@ -25,8 +25,8 @@ CFG.SEED    = 1
 CFG.CUDNN_ENABLED = True
 CFG.METRICS = {
     "MAE": masked_mae,
-    "MAPE": masked_mape,
-    "RMSE": masked_rmse
+    "RMSE": masked_rmse,
+    "MAPE": masked_mape
 }
 
 # ================= model ================= #

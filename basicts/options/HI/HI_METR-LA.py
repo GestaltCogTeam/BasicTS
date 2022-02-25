@@ -23,8 +23,8 @@ CFG.SEED    = 1
 CFG.CUDNN_ENABLED = True
 CFG.METRICS = {
     "MAE": masked_mae,
-    "MAPE": masked_mape,
-    "RMSE": masked_rmse
+    "RMSE": masked_rmse,
+    "MAPE": masked_mape
 }
 
 # ================= model ================= #
@@ -35,6 +35,8 @@ CFG.MODEL.PARAM = {
     'input_length': 12,
     'output_length': 12
 }
+CFG.MODEL.FROWARD_FEATURES = [0, 1]            # traffic speed, time in day
+CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()

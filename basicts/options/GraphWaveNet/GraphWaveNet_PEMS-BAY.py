@@ -18,7 +18,7 @@ CFG = EasyDict()
 CFG.DESCRIPTION = 'Graph WaveNet model configuration'
 CFG.RUNNER  = GraphWaveNetRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
+CFG.DATASET_NAME  = "PEMS-BAY"
 CFG.DATASET_TYPE  = 'Traffic speed'
 CFG.GPU_NUM = 1
 CFG.SEED    = 1
@@ -35,7 +35,7 @@ CFG.MODEL.NAME  = 'Graph WaveNet'
 CFG.MODEL.ARCH  = GraphWaveNet
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
-    "num_nodes" : 207, 
+    "num_nodes" : 325, 
     "supports"  :[torch.tensor(i) for i in adj_mx],
     "dropout"   : 0.3, 
     "gcn_bool"  : True, 

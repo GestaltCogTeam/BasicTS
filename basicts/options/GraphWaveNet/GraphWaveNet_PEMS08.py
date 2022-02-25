@@ -18,8 +18,8 @@ CFG = EasyDict()
 CFG.DESCRIPTION = 'Graph WaveNet model configuration'
 CFG.RUNNER  = GraphWaveNetRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
-CFG.DATASET_TYPE  = 'Traffic speed'
+CFG.DATASET_NAME  = "PEMS08"
+CFG.DATASET_TYPE  = 'Traffic flow'
 CFG.GPU_NUM = 1
 CFG.SEED    = 1
 CFG.CUDNN_ENABLED = True
@@ -35,7 +35,7 @@ CFG.MODEL.NAME  = 'Graph WaveNet'
 CFG.MODEL.ARCH  = GraphWaveNet
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
-    "num_nodes" : 207, 
+    "num_nodes" : 170, 
     "supports"  :[torch.tensor(i) for i in adj_mx],
     "dropout"   : 0.3, 
     "gcn_bool"  : True, 
@@ -66,13 +66,13 @@ CFG.TRAIN.OPTIM.PARAM= {
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[1, 50],
+    "milestones":[1, 50, 100],
     "gamma":0.5
 }
 
 # ================= train ================= #
 CFG.TRAIN.CLIP       = 5
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])

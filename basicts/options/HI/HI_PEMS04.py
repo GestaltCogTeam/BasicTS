@@ -1,24 +1,22 @@
 import os
 from easydict import EasyDict
-import torch
 # architecture 
-from basicts.archs.GraphWaveNet_arch import GraphWaveNet
+from basicts.archs.HI_arch import HINetwork
 # runner
-from basicts.runners.GraphWaveNet_runner import GraphWaveNetRunner
+from basicts.runners.HI_runner import HIRunner
 from basicts.data.base_dataset import BaseDataset
 from basicts.metrics.mae import masked_mae
 from basicts.metrics.mape import masked_mape
 from basicts.metrics.rmse import masked_rmse
 from basicts.losses.losses import l1_loss
-from basicts.utils.serialization import load_adj
 
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = 'Graph WaveNet model configuration'
-CFG.RUNNER  = GraphWaveNetRunner
+CFG.DESCRIPTION = 'HI model configuration'
+CFG.RUNNER  = HIRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
+CFG.DATASET_NAME  = "PEMS04"
 CFG.DATASET_TYPE  = 'Traffic speed'
 CFG.GPU_NUM = 1
 CFG.SEED    = 1
@@ -31,25 +29,11 @@ CFG.METRICS = {
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
-CFG.MODEL.NAME  = 'Graph WaveNet'
-CFG.MODEL.ARCH  = GraphWaveNet
-adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
+CFG.MODEL.NAME  = 'HINetwork'
+CFG.MODEL.ARCH  = HINetwork
 CFG.MODEL.PARAM = {
-    "num_nodes" : 207, 
-    "supports"  :[torch.tensor(i) for i in adj_mx],
-    "dropout"   : 0.3, 
-    "gcn_bool"  : True, 
-    "addaptadj" : True, 
-    "aptinit"   : None, 
-    "in_dim"    : 2,
-    "out_dim"   : 12,
-    "residual_channels" : 32,
-    "dilation_channels" : 32,
-    "skip_channels"     : 256,
-    "end_channels"      : 512,
-    "kernel_size"       : 2,
-    "blocks"            : 4,
-    "layers"            : 2
+    'input_length': 12,
+    'output_length': 12,
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1]            # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
@@ -60,14 +44,14 @@ CFG.TRAIN.LOSS = l1_loss
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
-    "lr":0.002,
-    "weight_decay":0.0001,
+    "lr":0.005,
+    "weight_decay":1.0e-5,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[1, 50],
-    "gamma":0.5
+    "milestones":[50],
+    "gamma":0.1
 }
 
 # ================= train ================= #
