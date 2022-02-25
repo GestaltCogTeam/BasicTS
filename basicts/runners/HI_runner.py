@@ -15,6 +15,9 @@ class HIRunner(BaseRunner):
         self.dataset_name = cfg['DATASET_NAME']
         self.null_val = cfg['TRAIN'].get('NULL_VAL', np.nan)        # different datasets have different null_values. For example, 0.0 in traffic speed dataset, nan in traffic flow dataset.
         self.dataset_type = cfg['DATASET_TYPE']
+        self.forward_features = cfg['MODEL'].get('FROWARD_FEATURES', None)
+        self.target_features = cfg['MODEL'].get('TARGET_FEATURES', None)
+
         # read scaler for re-normalization
         self.scaler = load_pkl("datasets/" + self.dataset_name + "/scaler.pkl")
         # define loss
@@ -128,11 +131,33 @@ class HIRunner(BaseRunner):
         """reshape data to fit the target model.
 
         Args:
-            data (torch.Tensor): input history data.
+            data (torch.Tensor): input history data, shape [B, L, N, C]
 
         Returns:
             torch.Tensor: reshaped data
         """
+        # reshape data
+        pass
+        # select feature using self.forward_features
+        pass
+        if self.forward_features is not None:
+            data = data[:, :, :, self.forward_features]
+        return data
+    
+    def data_i_reshape(self, data: torch.Tensor) -> torch.Tensor:
+        """reshape data back to the BasicTS framework
+
+        Args:
+            data (torch.Tensor): prediction of the model with arbitrary shape.
+
+        Returns:
+            torch.Tensor: reshaped data with shape [B, L, N, C]
+        """
+        # reshape data
+        pass
+        # select feature using self.target_features
+        pass
+        data = data[:, :, :, self.target_features]
         return data
 
     def train_iters(self, epoch, iter_index, data):
@@ -150,19 +175,21 @@ class HIRunner(BaseRunner):
 
         # preprocess
         future_data, history_data = data
-        history_data    = self.to_running_device(history_data)
-        future_data     = self.to_running_device(future_data)
+        history_data    = self.to_running_device(history_data)      # B, L, N, C
+        future_data     = self.to_running_device(future_data)       # B, L, N, C
+        B, L, N, C      = history_data.shape
+        
         history_data    = self.data_reshaper(history_data)
-        future_data     = self.data_reshaper(future_data)
 
         # feed forward
-        prediction_data = self.model(history_data=history_data, batch_seen=iter_num, epoch=epoch)
+        prediction_data = self.model(history_data=history_data, batch_seen=iter_num, epoch=epoch)   # B, L, N, C
+        assert list(prediction_data.shape)[:3] == [B, L, N], "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
         # post process
-        prediction_data = prediction_data[..., 0]
-        future_data     = future_data[..., 0]
+        prediction = self.data_i_reshape(prediction_data)
+        real_value = self.data_i_reshape(future_data)
         # re-scale data
-        prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction_data, **self.scaler['args'])
-        real_value = SCALER_REGISTRY.get(self.scaler['func'])(future_data, **self.scaler['args'])
+        prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
+        real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
         # loss
         loss = self.loss(prediction, real_value, self.null_val)
         # metrics
@@ -183,17 +210,19 @@ class HIRunner(BaseRunner):
         future_data, history_data = data
         history_data    = self.to_running_device(history_data)
         future_data     = self.to_running_device(future_data)
+        B, L, N, C      = history_data.shape
+
         history_data    = self.data_reshaper(history_data)
-        future_data     = self.data_reshaper(future_data)
 
         # feed forward
-        prediction_data = self.model(history_data=history_data)
+        prediction_data = self.model(history_data=history_data)   # B, L, N, C
+        assert list(prediction_data.shape)[:3] == [B, L, N], "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
         # post process
-        prediction_data = prediction_data[..., 0]
-        future_data     = future_data[..., 0]
+        prediction = self.data_i_reshape(prediction_data)
+        real_value = self.data_i_reshape(future_data)
         # re-scale data
-        prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction_data, **self.scaler['args'])
-        real_value = SCALER_REGISTRY.get(self.scaler['func'])(future_data, **self.scaler['args'])
+        prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
+        real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
         # loss
         mae  = self.loss(prediction, real_value, self.null_val)
         # metrics
@@ -230,26 +259,32 @@ class HIRunner(BaseRunner):
         prediction = torch.cat(prediction,dim=0)
         real_value = torch.cat(real_value, dim=0)
         # post process
-        prediction = prediction[..., 0]
-        real_value = real_value[..., 0]
+        prediction = self.data_i_reshape(prediction)
+        real_value = self.data_i_reshape(real_value)
         # re-scale data
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
         # summarize the results.
-        # test performance of different horizon
+        ## test performance of different horizon
+        prediction = prediction.squeeze(-1)
+        real_value = real_value.squeeze(-1)
         for i in range(12):
             # For horizon i, only calculate the metrics **at that time** slice here.
-            pred    = prediction[:,:,i]
-            real    = real_value[:,:,i]
+            pred    = prediction[:,i,:]
+            real    = real_value[:,i,:]
             # metrics
             metric_results = {}
             for metric_name, metric_func in self.metrics.items():
                 metric_item = metric_func(pred, real, self.null_val)
-                self.update_epoch_meter('test_'+metric_name, metric_item.item())
                 metric_results[metric_name] = metric_item.item()
             log     = 'Evaluate best model on test data for horizon {:d}, Test MAE: {:.4f}, Test RMSE: {:.4f}, Test MAPE: {:.4f}'
             log     = log.format(i+1, metric_results['MAE'], metric_results['RMSE'], metric_results['MAPE'])
             self.logger.info(log)
+        ## test performance overall
+        for metric_name, metric_func in self.metrics.items():
+            metric_item = metric_func(prediction, real_value, self.null_val)
+            self.update_epoch_meter('test_'+metric_name, metric_item.item())
+            metric_results[metric_name] = metric_item.item()
 
         test_end_time = time.time()
         self.update_epoch_meter('test_time', test_end_time - test_start_time)
@@ -265,11 +300,13 @@ class HIRunner(BaseRunner):
         future_data, history_data = data
         history_data    = self.to_running_device(history_data)
         future_data     = self.to_running_device(future_data)
+        B, L, N, C      = history_data.shape
+
         history_data    = self.data_reshaper(history_data)
-        future_data     = self.data_reshaper(future_data)
 
         # feed forward
         prediction_data = self.model(history_data=history_data)
+        assert list(prediction_data.shape)[:3] == [B, L, N], "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
         return prediction_data, future_data
 
     def backward(self, loss: torch.Tensor):
