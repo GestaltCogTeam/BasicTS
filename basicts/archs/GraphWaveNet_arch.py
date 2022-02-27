@@ -4,6 +4,10 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import sys
 
+"""
+    Paper: Graph WaveNet for Deep Spatial-Temporal Graph Modeling
+    Ref Official Code: https://github.com/nnzhan/Graph-WaveNet/blob/master/model.py
+"""
 
 class nconv(nn.Module):
     def __init__(self):

@@ -316,8 +316,3 @@ class HIRunner(BaseRunner):
             loss (torch.Tensor): loss
         """
         pass
-        # self.optim.zero_grad()
-        # loss.backward()
-        # if hasattr(self, 'clip'):
-        #     torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip)
-        # self.optim.step()

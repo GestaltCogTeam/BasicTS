@@ -2,6 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+"""
+    Paper: Historical Inertia: A Neglected but Powerful Baseline for Long Sequence Time-series Forecasting
+"""
+
 class HINetwork(nn.Module):
     def __init__(self, input_length: int, output_length: int, channel=None, reverse=False):
         """we use HI[1] as the baseline model for the pipline.
@@ -19,10 +23,6 @@ class HINetwork(nn.Module):
         self.output_length   = output_length
         self.channel         = channel
         self.reverse         = reverse
-        self.MLP             = nn.Sequential(nn.Linear(input_length, 8*input_length),
-                                            nn.ReLU(),
-                                            nn.Linear(8*input_length, output_length),
-                                            )
 
     def forward(self, history_data: torch.Tensor, **kwargs) -> torch.Tensor:
         """feed forward function.
