@@ -31,6 +31,7 @@ BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](h
 | AGCRN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
 | D2STGNN       | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
 | Other Models  |         |          |        |        |        |        |                |
+
 For the results and more details about models and datasets, please refer to the [pdf](TODO)(Todo).
 
 ## 2. Dependencies
