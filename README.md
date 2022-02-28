@@ -15,6 +15,22 @@ BasicTS为用户提供使用统一的、标准的Pipline（他是公平的，但
 BasicTS基于一个易用、强大的开源神经网络训练框架easytorch开发。
 
 ## 1. Supported Models and Datasets
+| Model\Dataset | METR-LA | PEMS-BAY | PEMS04 | PEMS08 | PEMS03 | PEMS07 | Other Datasets |
+| ------------- | ------- | -------- | ------ | ------ | ------ | ------ | -------------- |
+| AR            | Done    | Done     | Done   | Done   | Todo   | Todo   |                |
+| VAR           | Done    | Done     | Done   | Done   | Todo   | Todo   |                |
+| HI            | Done    | Done     | Done   | Done   | Todo   | Todo   |                |
+| Graph WaveNet | Done    | Done     | Done   | Done   | Todo   | Todo   |                |
+| DCRNN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
+| MTGNN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
+| GTS           | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
+| STGCN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
+| ASTGCN        | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
+| DGCRN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
+| AGCRN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
+| D2STGNN       | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
+| Other Models  |         |          |        |        |        |        |                |
+For the results and more details about models and datasets, please refer to the [pdf](TODO)(Todo).
 
 ## 2. Dependencies
 
@@ -45,7 +61,6 @@ config&shape&m&runner
 - [ ] : Add more model. Models that have official pytorch codes first.
   - [ ] RNN-based: DCRNN, GTS, DGCRN
   - [ ] CNN-based: MTGNN
-  - [ ] Traditional: HA, VAR, SVR, ARIMA
   - [ ] Others: D2STGNN, STEP, AGCRN
 
 ## References
