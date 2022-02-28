@@ -18,21 +18,21 @@ BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](h
 
 | Model\Dataset | METR-LA | PEMS-BAY | PEMS04 | PEMS08 | PEMS03 | PEMS07 | Other Datasets |
 | ------------- | ------- | -------- | ------ | ------ | ------ | ------ | -------------- |
-| AR            | Done    | Done     | Done   | Done   | Todo   | Todo   |                |
-| VAR           | Done    | Done     | Done   | Done   | Todo   | Todo   |                |
-| HI            | Done    | Done     | Done   | Done   | Todo   | Todo   |                |
-| Graph WaveNet | Done    | Done     | Done   | Done   | Todo   | Todo   |                |
-| DCRNN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
-| MTGNN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
-| GTS           | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
-| STGCN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
-| ASTGCN        | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
-| DGCRN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
-| AGCRN         | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
-| D2STGNN       | Todo    | Todo     | Todo   | Todo   | Todo   | Todo   |                |
-| Other Models  |         |          |        |        |        |        |                |
+| AR            | ✅      | ✅       | ✅      | ✅     | 🕐      | 🕐     |                |
+| VAR           | ✅      | ✅       | ✅      | ✅     | 🕐      | 🕐     |                |
+| HI            | ✅      | ✅       | ✅      | ✅     | 🕐      | 🕐     |                |
+| Graph WaveNet | ✅      | ✅       | ✅      | ✅     | 🕐      | 🕐     |                |
+| DCRNN         | ✅      | ✅       | ✅      | ✅     | 🕐      | 🕐     |                |
+| MTGNN         | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| GTS           | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| STGCN         | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| ASTGCN        | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| DGCRN         | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| AGCRN         | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| D2STGNN       | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| Other Models  |        |          |         |        |        |        |                |
 
-For the results and more details about models and datasets, please refer to the [pdf](TODO)(Todo).
+For the results and more details about models and datasets, please refer to the [pdf](TODO)(🕐).
 
 ## 2. Dependencies
 

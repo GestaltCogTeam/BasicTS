@@ -24,7 +24,7 @@ if not resume:
 CFG.DESCRIPTION = 'DCRNN model configuration'
 CFG.RUNNER  = DCRNNRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
+CFG.DATASET_NAME  = "PEMS08"
 CFG.DATASET_TYPE  = 'Traffic speed'
 CFG.GPU_NUM = 1
 CFG.SEED    = 1
@@ -46,7 +46,7 @@ CFG.MODEL.PARAM = {
     "horizon"           : 12,
     "input_dim"         : 2,
     "max_diffusion_step": 2,
-    "num_nodes"         : 207,
+    "num_nodes"         : 170,
     "num_rnn_layers"    : 2,
     "output_dim"        : 1,
     "rnn_units"         : 64,

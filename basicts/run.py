@@ -16,7 +16,11 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/Stat/Stat_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/Stat/Stat_PEMS08.py', help='training config')
 
-    parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_METR-LA.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_METR-LA.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_PEMS-BAY.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_PEMS04.py', help='training config')
+    parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_PEMS08.py', help='training config')
+
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_PEMS-BAY.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_PEMS04.py', help='training config')
