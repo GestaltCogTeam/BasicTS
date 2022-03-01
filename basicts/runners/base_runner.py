@@ -145,7 +145,7 @@ class BaseRunner(Runner):
 
         self.optim.zero_grad()
         loss.backward()
-        if hasattr(self, 'clip'):
+        if self.clip is not None:
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip)
         self.optim.step()
     
