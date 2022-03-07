@@ -32,7 +32,8 @@ BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](h
 | D2STGNN       | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
 | Other Models  |         |         |         |        |        |        |                |
 
-For the results and more details about models and datasets, please refer to the [pdf](TODO)(🕐).
+For the results and more details about models and datasets, please refer to the [pdf](./results/BasicTS_draft.pdf) (draft).
+For the training logs, please refer to `results/$MODEL_NAME/`.
 
 ## 2. Dependencies
 
