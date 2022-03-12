@@ -5,21 +5,6 @@ import numpy as np
 from scipy.sparse import linalg
 import torch
 
-def check_nan_inf(tensor, raise_ex=True):
-    # nan
-    nan = torch.any(torch.isnan(tensor))
-    # inf
-    inf = torch.any(torch.isinf(tensor))
-    # raise
-    if raise_ex and (nan or inf):
-        raise Exception({"nan":nan, "inf":inf})
-    return {"nan":nan, "inf":inf}, nan or inf
-
-def remove_nan_inf(tensor):
-    tensor = torch.where(torch.isnan(tensor), torch.zeros_like(tensor), tensor)
-    tensor = torch.where(torch.isinf(tensor), torch.zeros_like(tensor), tensor)
-    return tensor
-
 def calculate_symmetric_normalized_laplacian(adj):
     r"""
     Description:
