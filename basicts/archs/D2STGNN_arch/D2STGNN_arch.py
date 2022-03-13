@@ -34,7 +34,7 @@ class D2STGNN(nn.Module):
         self._num_nodes     = model_args['num_nodes']
         self._k_s           = model_args['k_s']
         self._k_t           = model_args['k_t']
-        self._num_layers    = 5
+        self._num_layers    = model_args['num_layers']
 
         model_args['use_pre']   = False
         model_args['dy_graph']  = True
