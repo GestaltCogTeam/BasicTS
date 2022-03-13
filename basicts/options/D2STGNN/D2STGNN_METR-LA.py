@@ -21,7 +21,7 @@ CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "METR-LA"
 CFG.DATASET_TYPE  = 'Traffic speed'
 CFG.GPU_NUM = 1
-CFG.SEED    = 0
+CFG.SEED    = 1
 CFG.CUDNN_ENABLED = True
 CFG.METRICS = {
     "MAE": masked_mae,
@@ -37,16 +37,17 @@ adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletran
 CFG.MODEL.PARAM = {
     "num_feat"  : 1,
     "num_hidden": 32,
-    "node_hidden": 10,
-    "time_emb_dim": 10,
     "dropout"   : 0.1,
     "seq_length": 12,
     "k_t"       : 3,
     "k_s"       : 2,
     "gap"       : 3,
-    "num_modalities": 2,
     "num_nodes" : 207,
-    "adjs"      : [torch.tensor(adj) for adj in adj_mx]
+    "adjs"      : [torch.tensor(adj) for adj in adj_mx],
+    "num_layers": 5,
+    "num_modalities": 2,
+    "node_hidden"   : 10,
+    "time_emb_dim"  : 10,
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
