@@ -25,8 +25,8 @@ class D2STGNNRunner(BaseRunner):
         # define metric
         self.metrics = cfg['METRICS']
         # curriculum learning
-        self.if_CL = cfg.TRAIN.get('CL', None)
-        if self.if_CL:
+        self.cl_param = cfg.TRAIN.get('CL', None)
+        if self.cl_param is not None:
             self.warm_up_epochs     = cfg.TRAIN.CL.get('WARM_EPOCHS')
             self.cl_epochs          = cfg.TRAIN.CL.get('CL_EPOCHS')
             self.prediction_length  = cfg.TRAIN.CL.get('PREDICTION_LENGTH')
@@ -205,7 +205,7 @@ class D2STGNNRunner(BaseRunner):
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
         # loss
-        if self.if_CL:
+        if self.cl_param:
             cl_length = self.curriculum_learning(epoch_num=epoch)
             loss = self.loss(prediction[:, :cl_length, :, :], real_value[:, :cl_length, :, :], self.null_val)
         else:
@@ -213,7 +213,7 @@ class D2STGNNRunner(BaseRunner):
         # metrics
         for metric_name, metric_func in self.metrics.items():
             metric_item = metric_func(prediction, real_value, self.null_val)
-            self.update_epoch_meter('train_'+metric_name, metric_item.item())
+            self.update_epoch_meter('train_' + metric_name, metric_item.item())
 
         return loss
 
