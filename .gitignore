@@ -7,6 +7,8 @@ datasets/model/*
 .VSCodeCounter/
 log/
 checkpoints/
+ret/*
+demo*
 
 *.npz
 *.npy
