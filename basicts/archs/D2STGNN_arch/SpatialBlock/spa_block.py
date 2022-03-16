@@ -15,17 +15,17 @@ class SpaBlock(nn.Module):
         # forecast
         self.forecast_branch    = Forecast(hidden_dim, fk_dim=fk_dim, **model_args)
         # backcast
-        self.backcast_branch    = nn.Linear(hidden_dim, hidden_dim)
+        self.backcast_branch    = nn.Sequential(nn.Linear(hidden_dim, 2*hidden_dim), nn.ReLU(), nn.Linear(2*hidden_dim, hidden_dim))
 
     def forward(self, X, X_spa, dynamic_graph, static_graph):
-        Z   = self.localized_st_conv(X_spa, dynamic_graph, static_graph)           # [batch_size, seq_len, num_nodes, hidden_dim]
+        Z   = self.localized_st_conv(X_spa, dynamic_graph, static_graph)
         # forecast branch
         forecast_hidden = self.forecast_branch(X_spa, Z, self.localized_st_conv, dynamic_graph, static_graph)
         # backcast branch
         backcast_seq    = self.backcast_branch(Z)    
         # Residual Decomposition
-        backcast_seq    = backcast_seq                                                              # [batch_size, seq_len, num_nodes, num_feat]
-        X               = X[:, -backcast_seq.shape[1]:, :, :]                                       # chunk
+        backcast_seq    = backcast_seq
+        X               = X[:, -backcast_seq.shape[1]:, :, :]
         backcast_seq_res= self.residual_decompose(X, backcast_seq)
 
         return backcast_seq_res, forecast_hidden

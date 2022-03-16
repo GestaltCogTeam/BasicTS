@@ -17,10 +17,6 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, X):
-        """
-        Args:
-            x: Tensor, shape [L, N, D]
-        """
         X = X + self.pe[:X.size(0)]
         X = self.dropout(X)
         return X
@@ -39,7 +35,7 @@ class TemBlock(nn.Module):
         # forecast
         self.forecast_block = Forecast(hidden_dim, fk_dim, **model_args)
         # backcast
-        self.backcast_fc    = nn.Linear(hidden_dim, hidden_dim)
+        self.backcast_fc    = nn.Sequential(nn.Linear(hidden_dim, 2*hidden_dim), nn.ReLU(), nn.Linear(2*hidden_dim, hidden_dim))
         # sub residual
         self.sub_and_norm   = ResidualDecomp([-1, -1, -1, hidden_dim])
 
@@ -50,7 +46,7 @@ class TemBlock(nn.Module):
         RNN_H_raw   = self.rnn_layer(X)
         ## Positional Encoding
         if self.pos_encoder is not None:
-            RNN_H   = self.pos_encoder(RNN_H_raw)                   # [B, L, N, D]
+            RNN_H   = self.pos_encoder(RNN_H_raw)                   
         else:
             RNN_H   = RNN_H_raw
         ## MultiHead Self Attention
@@ -62,7 +58,7 @@ class TemBlock(nn.Module):
         # backcast branch
         Z   = Z.reshape(seq_len, batch_size, num_nodes, num_feat)
         Z   = Z.transpose(0, 1)
-        backcast_seq    = self.backcast_fc(Z)                                   # [bs, seq_len, num_nodes, bk_dim]
-        backcast_seq_res= self.sub_and_norm(X, backcast_seq)                    # [bs, seq_len, num_nodes, bk_dim]
+        backcast_seq    = self.backcast_fc(Z)                                   
+        backcast_seq_res= self.sub_and_norm(X, backcast_seq)                    
 
         return backcast_seq_res, forecast_hidden
