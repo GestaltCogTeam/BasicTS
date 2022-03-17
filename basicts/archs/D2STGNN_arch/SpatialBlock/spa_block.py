@@ -15,7 +15,7 @@ class SpaBlock(nn.Module):
         # forecast
         self.forecast_branch    = Forecast(hidden_dim, fk_dim=fk_dim, **model_args)
         # backcast
-        self.backcast_branch    = nn.Sequential(nn.Linear(hidden_dim, 2*hidden_dim), nn.ReLU(), nn.Linear(2*hidden_dim, hidden_dim))
+        self.backcast_branch    = nn.Linear(hidden_dim, hidden_dim)
 
     def forward(self, X, X_spa, dynamic_graph, static_graph):
         Z   = self.localized_st_conv(X_spa, dynamic_graph, static_graph)

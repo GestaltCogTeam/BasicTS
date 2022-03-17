@@ -35,7 +35,7 @@ class TemBlock(nn.Module):
         # forecast
         self.forecast_block = Forecast(hidden_dim, fk_dim, **model_args)
         # backcast
-        self.backcast_fc    = nn.Sequential(nn.Linear(hidden_dim, 2*hidden_dim), nn.ReLU(), nn.Linear(2*hidden_dim, hidden_dim))
+        self.backcast_fc    = nn.Linear(hidden_dim, hidden_dim)
         # sub residual
         self.sub_and_norm   = ResidualDecomp([-1, -1, -1, hidden_dim])
 
