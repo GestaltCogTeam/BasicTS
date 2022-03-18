@@ -59,13 +59,12 @@ CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
     "lr":0.002,
-    "weight_decay":1.0e-5,
-    "eps":1.0e-8
+    "weight_decay":1.0e-4
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[1, 30, 38, 46, 54, 200],
+    "milestones":[1, 50, 100],
     "gamma":0.5
 }
 
@@ -89,8 +88,8 @@ CFG.TRAIN.DATA.NUM_WORKERS  = 2
 CFG.TRAIN.DATA.PIN_MEMORY   = False
 ## curriculum learning
 CFG.TRAIN.CL    = EasyDict()
-CFG.TRAIN.CL.WARM_EPOCHS    = 30
-CFG.TRAIN.CL.CL_EPOCHS      = 3
+CFG.TRAIN.CL.WARM_EPOCHS    = 0
+CFG.TRAIN.CL.CL_EPOCHS      = 6
 CFG.TRAIN.CL.PREDICTION_LENGTH  = 12
 
 # ================= validate ================= #

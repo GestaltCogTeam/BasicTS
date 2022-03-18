@@ -165,6 +165,7 @@ class D2STGNNRunner(BaseRunner):
         return data
 
     def curriculum_learning(self, epoch_num):
+        epoch_num -= 1
         # generate curriculum length
         if epoch_num < self.warm_up_epochs:
             # still warm up
