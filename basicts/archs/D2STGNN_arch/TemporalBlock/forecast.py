@@ -17,8 +17,8 @@ class Forecast(nn.Module):
         predict = [Z[-1, :, :].unsqueeze(0)]
         for _ in range(int(self.output_seq_len / self.model_args['gap'])-1):
             # RNN
-            _gru    = rnn_layer.gru_cell(predict[-1][0], RNN_H[-1]).unsqueeze(0)       # [1, B*N, D]
-            RNN_H   = torch.cat([RNN_H, _gru], dim=0)                                 # [L, B*N, D]
+            _gru    = rnn_layer.gru_cell(predict[-1][0], RNN_H[-1]).unsqueeze(0)
+            RNN_H   = torch.cat([RNN_H, _gru], dim=0)
             # Positional Encoding
             if pe is not None:
                 RNN_H = pe(RNN_H)
@@ -28,6 +28,6 @@ class Forecast(nn.Module):
         
         predict = torch.cat(predict, dim=0)
         predict = predict.reshape(-1, B, N, D)
-        predict = predict.transpose(0, 1)                                   # [bs, num_nodes, seq_len, hidden_dim]
+        predict = predict.transpose(0, 1)
         predict = self.forecast_fc(predict)
         return predict

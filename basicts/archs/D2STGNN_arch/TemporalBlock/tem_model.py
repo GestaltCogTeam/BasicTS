@@ -19,7 +19,7 @@ class RNNLayer(nn.Module):
             output.append(hx)
         output  = th.stack(output, dim=0)
         output  = self.dropout(output)
-        return output                                       # [L, B*N, D]
+        return output
 
 class TransformerLayer(nn.Module):
     def __init__(self, hidden_dim, num_heads=4, dropout=None, bias=True):
@@ -28,6 +28,6 @@ class TransformerLayer(nn.Module):
         self.dropout                    = nn.Dropout(dropout)
 
     def forward(self, X, K, V):
-        Z   = self.multi_head_self_attention(X, K, V)[0]    # [L, B*N, D]
-        Z   = self.dropout(Z)                               # [L, B*N, D]
+        Z   = self.multi_head_self_attention(X, K, V)[0]
+        Z   = self.dropout(Z)
         return Z

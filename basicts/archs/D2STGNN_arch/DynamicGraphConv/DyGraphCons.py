@@ -10,18 +10,18 @@ class DynamicGraphConstructor(nn.Module):
         self.hidden_dim = model_args['num_hidden']              # hidden dimension of 
         self.node_dim   = model_args['node_hidden']         # trainable node embedding dimension
 
-        self.distance_function  = DistanceFunction(hidden_dim=self.hidden_dim, node_dim=self.node_dim, **model_args)
-        self.mask               = Mask(method='geograph', order=self.k_s, **model_args)
-        self.normalizer         = Normalizer(method='transition', **model_args)         # TODO: 测试不要transition（因为mask已经有了）
-        self.multi_order        = MultiOrder(method='multiplication', order=self.k_s, **model_args)
+        self.distance_function  = DistanceFunction(**model_args)
+        self.mask               = Mask(**model_args)
+        self.normalizer         = Normalizer()
+        self.multi_order        = MultiOrder(order=self.k_s)
 
     def st_localization(self, graph_ordered):
         st_local_graph = []
         for modality_i in graph_ordered:
             for k_order_graph in modality_i:
                 k_order_graph = k_order_graph.unsqueeze(-2).expand(-1, -1, self.k_t, -1)
-                k_order_graph = k_order_graph.reshape(k_order_graph.shape[0], k_order_graph.shape[1], k_order_graph.shape[2] * k_order_graph.shape[3])         # TODO: 这里需要测试是不是按照预想的方式进行的拼接
-                st_local_graph.append(k_order_graph)                # [num_nodes, kernel_size x num_nodes]
+                k_order_graph = k_order_graph.reshape(k_order_graph.shape[0], k_order_graph.shape[1], k_order_graph.shape[2] * k_order_graph.shape[3])
+                st_local_graph.append(k_order_graph)
         return st_local_graph
 
     def forward(self, **inputs):
@@ -38,7 +38,7 @@ class DynamicGraphConstructor(nn.Module):
         dist_mx = self.normalizer(dist_mx)
         # multi order
         mul_mx  = self.multi_order(dist_mx)
-        # spatial temporal localization (for subsequential computation) 静态图的muti-order和st localization放在一起了，在`Spa_block.get_graph`中。
+        # spatial temporal localization
         dynamic_graphs = self.st_localization(mul_mx)
         
         return dynamic_graphs

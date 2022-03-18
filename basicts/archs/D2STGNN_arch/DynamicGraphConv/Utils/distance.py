@@ -6,7 +6,7 @@ import torch.nn.functional as F
 class DistanceFunction(nn.Module):
     def __init__(self, **model_args):
         super().__init__()
-        # attri
+        # attributes
         self.hidden_dim = model_args['num_hidden']              # hidden dimension of 
         self.node_dim   = model_args['node_hidden']
         self.time_slot_emb_dim  = self.hidden_dim
@@ -32,7 +32,6 @@ class DistanceFunction(nn.Module):
 
     def forward(self, X, E_d, E_u, T_D, D_W):
         # last pooling
-        # TODO: test mean pooling
         T_D = T_D[:, -1, :, :]
         D_W = D_W[:, -1, :, :]
         # dynamic information

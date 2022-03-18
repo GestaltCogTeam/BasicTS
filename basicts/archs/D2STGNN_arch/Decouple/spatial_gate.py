@@ -2,11 +2,14 @@ import torch
 import torch.nn as nn
 
 class SpatialGate(nn.Module):
+    r"""
+    The spatial gate module.
+    """
     def __init__(self, node_emb_dim, time_emb_dim, hidden_dim, input_seq_len):
         super().__init__()
         self.FC1    = nn.Linear(2 * node_emb_dim + time_emb_dim * 2, hidden_dim)
         self.act    = nn.ReLU()
-        self.FC2    = nn.Linear(hidden_dim, 1)        # only for gwnet padding
+        self.FC2    = nn.Linear(hidden_dim, 1)
 
     def forward(self, node_embedding1, node_embedding2, T_D, D_W, X):
         B, L, N, D = T_D.shape
