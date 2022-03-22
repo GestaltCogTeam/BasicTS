@@ -23,6 +23,7 @@ class HINetwork(nn.Module):
         self.output_length   = output_length
         self.channel         = channel
         self.reverse         = reverse
+        self.fake_param      = nn.Linear(1, 1)
 
     def forward(self, history_data: torch.Tensor, **kwargs) -> torch.Tensor:
         """feed forward function.
