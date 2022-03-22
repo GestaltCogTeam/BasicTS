@@ -1,5 +1,5 @@
 import torch
-from basicts.runners.traffic_runner import TrafficRunner
+from basicts.runners.base_traffic_runner import TrafficRunner
 
 class DCRNNRunner(TrafficRunner):
     def __init__(self, cfg: dict):
