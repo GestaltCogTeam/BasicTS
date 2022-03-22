@@ -29,7 +29,7 @@ BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](h
 | ASTGCN        | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
 | DGCRN         | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
 | AGCRN         | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
-| D2STGNN       | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| D2STGNN       | ✅      | ✅       | ✅      | ✅     | 🕐      | 🕐     |                |
 | Other Models  |         |         |         |        |        |        |                |
 
 For the results and more details about models and datasets, please refer to the [pdf](./results/BasicTS_draft.pdf) (draft).
