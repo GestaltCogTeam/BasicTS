@@ -21,7 +21,7 @@ class BaseRunner(Runner):
                 - support gradient clip
                 - support setup_graph for the models acting like tensorflow
                 - support find unused parameters when using DDP
-                - move train data loop outside the `train` function
+                - move train/validate data loop outside the `train`/`validate` function
         Args:
             cfg (dict): on in one configurations
         """
@@ -169,7 +169,7 @@ class BaseRunner(Runner):
         test_start_time = time.time()
         self.model.eval()
 
-        # test loop
+        # test
         self.test()
 
         test_end_time = time.time()
@@ -220,7 +220,7 @@ class BaseRunner(Runner):
         """train data loop
 
         Args:
-            data_iter (tqdm.std.tqdm): data iterator
+            data_iter (tqdm): data iterator
             epoch (int): epoch number
         """
         for iter_index, data in enumerate(data_iter):
@@ -288,3 +288,41 @@ class BaseRunner(Runner):
         ))
 
         self.on_training_end()
+
+    def validate_data_loop(self):
+        """validate data loop
+        """
+        for iter_index, data in enumerate(self.val_data_loader):
+            self.val_iters(iter_index, data)
+
+    @torch.no_grad()
+    @master_only
+    def validate(self, cfg: dict = None, train_epoch: int = None):
+        """Validate model.
+
+        Args:
+            cfg (dict, optional): config
+            train_epoch (int, optional): current epoch if in training process.
+        """
+
+        # init validation if not in training process
+        if train_epoch is None:
+            self.init_validation(cfg)
+
+        self.on_validating_start()
+
+        val_start_time = time.time()
+        self.model.eval()
+
+        # val loop
+        self.validate_data_loop()
+
+        val_end_time = time.time()
+        self.update_epoch_meter('val_time', val_end_time - val_start_time)
+        # print val meters
+        self.print_epoch_meters('val')
+        if train_epoch is not None:
+            # tensorboard plt meters
+            self.plt_epoch_meters('val', train_epoch // self.val_interval)
+
+        self.on_validating_end()
