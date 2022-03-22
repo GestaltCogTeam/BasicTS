@@ -5,11 +5,13 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
+from tqdm import tqdm
 from easytorch.easytorch import Runner
 from easytorch.easytorch.utils.dist import master_only
 from easytorch.easytorch.utils import get_local_rank, is_master, master_only
 from easytorch.easytorch.core.data_loader import build_data_loader
 from basicts.data.transforms import *
+from easytorch.easytorch.utils.timer import TimePredictor
 
 class BaseRunner(Runner):
     def __init__(self, cfg: dict):
@@ -19,6 +21,7 @@ class BaseRunner(Runner):
                 - support gradient clip
                 - support setup_graph for the models acting like tensorflow
                 - support find unused parameters when using DDP
+                - move train data loop outside the `train` function
         Args:
             cfg (dict): on in one configurations
         """
@@ -212,3 +215,76 @@ class BaseRunner(Runner):
         """
 
         raise NotImplementedError()
+
+    def train_data_loop(self, data_iter: tqdm, epoch: int):
+        """train data loop
+
+        Args:
+            data_iter (tqdm.std.tqdm): data iterator
+            epoch (int): epoch number
+        """
+        for iter_index, data in enumerate(data_iter):
+            loss = self.train_iters(epoch, iter_index, data)
+            if loss is not None:
+                self.backward(loss)
+
+    def train(self, cfg: dict):
+        """Train model.
+
+        Train process:
+        [init_training]
+        for in train_epoch
+            [on_epoch_start]
+            for in train iters
+                [train_iters]
+            [on_epoch_end] ------> Epoch Val: val every n epoch
+                                    [on_validating_start]
+                                    for in val iters
+                                        val iter
+                                    [on_validating_end]
+        [on_training_end]
+
+        Args:
+            cfg (dict): config
+        """
+
+        self.init_training(cfg)
+
+        # train time predictor
+        train_time_predictor = TimePredictor(self.start_epoch, self.num_epochs)
+
+        # training loop
+        for epoch_index in range(self.start_epoch, self.num_epochs):
+            epoch = epoch_index + 1
+            self.on_epoch_start(epoch)
+            epoch_start_time = time.time()
+            # start training
+            self.model.train()
+
+            # tqdm process bar
+            data_iter = tqdm(self.train_data_loader) if get_local_rank() == 0 else self.train_data_loader
+
+            # data loop
+            self.train_data_loop(data_iter=data_iter, epoch=epoch)
+            # update lr_scheduler
+            if self.scheduler is not None:
+                self.scheduler.step()
+
+            epoch_end_time = time.time()
+            # epoch time
+            self.update_epoch_meter('train_time', epoch_end_time - epoch_start_time)
+            self.on_epoch_end(epoch)
+
+            expected_end_time = train_time_predictor.get_expected_end_time(epoch)
+
+            # estimate training finish time
+            if epoch < self.num_epochs:
+                self.logger.info('The estimated training finish time is {}'.format(
+                    time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(expected_end_time))))
+
+        # log training finish time
+        self.logger.info('The training finished at {}'.format(
+            time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        ))
+
+        self.on_training_end()

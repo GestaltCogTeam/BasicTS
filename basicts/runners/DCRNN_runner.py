@@ -46,7 +46,7 @@ class DCRNNRunner(TrafficRunner):
         data = data[:, :, :, self.target_features]
         return data
 
-    def forward(self, data: tuple, iter_num: int = None, epoch:int = None, train:bool = True) -> tuple:
+    def forward(self, data: tuple, iter_num: int = None, epoch:int = None, train:bool = True, **kwargs) -> tuple:
         """feed forward process for train, val, and test. Note that the outputs are NOT re-scaled.
 
         Args:
