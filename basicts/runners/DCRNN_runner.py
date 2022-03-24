@@ -21,9 +21,7 @@ class DCRNNRunner(TrafficRunner):
             torch.Tensor: reshaped data
         """
         # select feature using self.forward_features
-        if channel != None:
-            data = data[:, :, :, channel]
-        elif self.forward_features is not None:
+        if self.forward_features is not None:
             data = data[:, :, :, self.forward_features]
         # reshape data [B, L, N, C] -> [L, B, N*C] (DCRNN required)
         B, L, N, C = data.shape
@@ -65,7 +63,7 @@ class DCRNNRunner(TrafficRunner):
         
         history_data    = self.data_reshaper(history_data)
         if train:
-            future_data_    = self.data_reshaper(future_data, channel=[0])
+            future_data_    = self.data_reshaper(future_data, channel=[0])      # teacher forcing only use the first dimension
         else:
             future_data_    = None
 
