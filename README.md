@@ -63,6 +63,7 @@ config&shape&m&runner
   - [ ] RNN-based: DCRNN, GTS, DGCRN
   - [ ] CNN-based: MTGNN
   - [ ] Others: D2STGNN, STEP, AGCRN
+- [ ] : Support models like ASTGCN, ASTGNN, which take multi-periodicities data as input.
 
 ## References
 
