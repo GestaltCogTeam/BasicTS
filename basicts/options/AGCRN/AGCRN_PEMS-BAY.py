@@ -9,7 +9,7 @@ from basicts.data.base_dataset import BaseDataset
 from basicts.metrics.mae import masked_mae
 from basicts.metrics.mape import masked_mape
 from basicts.metrics.rmse import masked_rmse
-from basicts.losses.losses import l1_loss
+from basicts.losses.losses import maksed_l1_loss
 from basicts.utils.serialization import load_adj
 
 CFG = EasyDict()
@@ -50,21 +50,21 @@ CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()
-CFG.TRAIN.LOSS = l1_loss
+CFG.TRAIN.LOSS = maksed_l1_loss
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
     "lr":0.003,
 }
-# CFG.TRAIN.LR_SCHEDULER = EasyDict()
-# CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
-# CFG.TRAIN.LR_SCHEDULER.PARAM= {
-#     "milestones":[5, 20, 40, 70],
-#     "gamma":0.3
-# }
+CFG.TRAIN.LR_SCHEDULER = EasyDict()
+CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
+CFG.TRAIN.LR_SCHEDULER.PARAM= {
+    "milestones":[5, 20, 40, 70],
+    "gamma":0.3
+}
 
 # ================= train ================= #
-# CFG.TRAIN.CLIP       = 5
+CFG.TRAIN.CLIP       = 5
 CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',

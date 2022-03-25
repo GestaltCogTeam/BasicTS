@@ -1,1 +1,1 @@
-from basicts.metrics.mae import masked_mae as l1_loss
+from basicts.metrics.mae import masked_mae as maksed_l1_loss
