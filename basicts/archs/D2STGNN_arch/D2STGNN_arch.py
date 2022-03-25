@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+"""
+    Paper: Decoupled Dynamic Spatial-Temporal Graph Neural Network for Traffic Forecasting
+    Official Code: https://github.com/zezhishao/D2STGNN
+"""
 
 from basicts.archs.D2STGNN_arch.SpatialBlock import SpaBlock
 from basicts.archs.D2STGNN_arch.TemporalBlock import TemBlock

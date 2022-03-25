@@ -2,6 +2,11 @@ import torch
 import torch.nn as nn
 from basicts.archs.AGCRN_arch.AGCRNCell import AGCRNCell
 
+"""
+    Paper: Adaptive Graph Convolutional Recurrent Network for Trafﬁc Forecasting
+    Official Code: https://github.com/LeiBAI/AGCRN
+"""
+
 class AVWDCRNN(nn.Module):
     def __init__(self, node_num, dim_in, dim_out, cheb_k, embed_dim, num_layers=1):
         super(AVWDCRNN, self).__init__()
