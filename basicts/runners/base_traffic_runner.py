@@ -186,12 +186,12 @@ class TrafficRunner(BaseRunner):
         # loss
         if self.cl_param:
             cl_length = self.curriculum_learning(epoch_num=epoch)
-            loss = self.loss(prediction[:, :cl_length, :, :], real_value[:, :cl_length, :, :], self.null_val)
+            loss = self.loss(prediction[:, :cl_length, :, :], real_value[:, :cl_length, :, :], null_val=self.null_val)
         else:
-            loss = self.loss(prediction, real_value, self.null_val)
+            loss = self.loss(prediction, real_value, null_val=self.null_val)
         # metrics
         for metric_name, metric_func in self.metrics.items():
-            metric_item = metric_func(prediction, real_value, self.null_val)
+            metric_item = metric_func(prediction, real_value, null_val=self.null_val)
             self.update_epoch_meter('train_'+metric_name, metric_item.item())
         return loss
 
@@ -207,10 +207,10 @@ class TrafficRunner(BaseRunner):
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
         # loss
-        mae  = self.loss(prediction, real_value, self.null_val)
+        mae  = self.loss(prediction, real_value, null_val=self.null_val)
         # metrics
         for metric_name, metric_func in self.metrics.items():
-            metric_item = metric_func(prediction, real_value, self.null_val)
+            metric_item = metric_func(prediction, real_value, null_val=self.null_val)
             self.update_epoch_meter('val_'+metric_name, metric_item.item())
 
     @torch.no_grad()
@@ -242,13 +242,13 @@ class TrafficRunner(BaseRunner):
             # metrics
             metric_results = {}
             for metric_name, metric_func in self.metrics.items():
-                metric_item = metric_func(pred, real, self.null_val)
+                metric_item = metric_func(pred, real, null_val=self.null_val)
                 metric_results[metric_name] = metric_item.item()
             log     = 'Evaluate best model on test data for horizon {:d}, Test MAE: {:.4f}, Test RMSE: {:.4f}, Test MAPE: {:.4f}'
             log     = log.format(i+1, metric_results['MAE'], metric_results['RMSE'], metric_results['MAPE'])
             self.logger.info(log)
         ## test performance overall
         for metric_name, metric_func in self.metrics.items():
-            metric_item = metric_func(prediction, real_value, self.null_val)
+            metric_item = metric_func(prediction, real_value, null_val=self.null_val)
             self.update_epoch_meter('test_'+metric_name, metric_item.item())
             metric_results[metric_name] = metric_item.item()
