@@ -7,7 +7,7 @@ import os
 """
 PEMS04 dataset (traffic flow dataset) default settings:
     - normalization:
-        min-max norm
+        standard norm
     - dataset division: 
         6:2:2
     - windows size:
@@ -21,8 +21,9 @@ PEMS04 dataset (traffic flow dataset) default settings:
     - target:
         predicting the traffic speed
 """
-def MinMaxnormalization(data: np.array, output_dir: str, train_index: list) -> np.array:
-    """min-max normalization.
+
+def standard_transform(data: np.array, output_dir: str, train_index: list) -> np.array:
+    """standard normalization.
 
     Args:
         data (np.array): raw time series data.
@@ -32,32 +33,28 @@ def MinMaxnormalization(data: np.array, output_dir: str, train_index: list) -> n
     Returns:
         np.array: normalized raw time series data.
     """
-    # L, N, C
-    data_train = data[:train_index[-1][1], ...]
+    # data: L, N, C
+    data_train  = data[:train_index[-1][1], ...]
+    
+    mean, std   = data_train[..., 0].mean(), data_train[..., 0].std()
 
-    _max = data_train.max(axis=(0, 1), keepdims=True)
-    _min = data_train.min(axis=(0, 1), keepdims=True)
-
-    print('max:', _max[0][0][0])
-    print('min:', _min[0][0][0])
+    print("mean (training data):", mean)
+    print("std (training data):", std)
     scaler = {}
-    scaler['func'] = re_max_min_normalization.__name__
-    scaler['args'] = {"max":_max[0][0][0], "min":_min[0][0][0]}
+    scaler['func'] = standard_re_transform.__name__
+    scaler['args'] = {"mean":mean, "std":std}
     pickle.dump(scaler, open(output_dir + "/scaler.pkl", 'wb'))
-
+    
     def normalize(x):
-        x = 1. * (x - _min) / (_max - _min)
-        x = 2. * x - 1.
-        return x
-
+        return (x - mean) / std
+    
     data_norm = normalize(data)
-
     return data_norm
 
-def re_max_min_normalization(x, **kwargs):
-    _min, _max = kwargs['min'][0, 0, 0], kwargs['max'][0, 0, 0]
-    x = (x + 1.) / 2.
-    x = 1. * x * (_max - _min) + _min
+def standard_re_transform(x, **kwargs):
+    mean, std = kwargs['mean'], kwargs['std']
+    x = x * std
+    x = x + mean
     return x
 
 def generate_data(args):
@@ -94,7 +91,7 @@ def generate_data(args):
     valid_index = index_list[train_num_short: train_num_short + valid_num_short]
     test_index  = index_list[train_num_short + valid_num_short: train_num_short + valid_num_short + test_num_short]
     
-    scaler = MinMaxnormalization
+    scaler = standard_transform
     data_norm = scaler(data, output_dir, train_index)
 
     # add external feature
