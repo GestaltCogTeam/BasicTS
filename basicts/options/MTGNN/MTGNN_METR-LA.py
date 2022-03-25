@@ -35,7 +35,7 @@ CFG.MODEL.NAME  = 'MTGNN'
 CFG.MODEL.ARCH  = MTGNN_arch
 _, adj_mx = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 num_nodes = 207
-# adj_mx = torch.tensor(adj_mx)-torch.eye(num_nodes)
+adj_mx = torch.tensor(adj_mx)-torch.eye(num_nodes)
 CFG.MODEL.PARAM = {
     "gcn_true"  : True, 
     "buildA_true": True,
