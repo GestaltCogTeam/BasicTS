@@ -36,7 +36,7 @@ CFG.MODEL.ARCH  = AGCRN
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
     "num_nodes" : 325, 
-    "input_dim" : 1,
+    "input_dim" : 2,
     "rnn_units": 64,
     "output_dim": 1,
     "horizon"   : 12,
@@ -45,7 +45,7 @@ CFG.MODEL.PARAM = {
     "embed_dim" : 10,
     "cheb_k"    : 2
 }
-CFG.MODEL.FROWARD_FEATURES = [0]            # traffic speed, time in day
+CFG.MODEL.FROWARD_FEATURES = [0, 1]            # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
 
 # ================= optim ================= #
