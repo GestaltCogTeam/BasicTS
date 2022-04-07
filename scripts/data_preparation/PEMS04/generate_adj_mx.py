@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import csv
 import pickle
@@ -149,16 +150,21 @@ def get_adjacency_matrix_2direction(distance_df_filename, num_of_vertices, id_fi
                     distaneA[j, i] = distance
             return A, distaneA
 
-direction = True
-distance_df_filename, num_of_vertices, id_filename = "datasets/raw_data/PEMS04/PEMS04.csv", 307, None
-if direction:
-    adj_mx, distance_mx = get_adjacency_matrix_2direction(distance_df_filename, num_of_vertices, id_filename=None)
-else:
-    adj_mx, distance_mx = get_adjacency_matrix(distance_df_filename, num_of_vertices, id_filename=None)
-# TODO: the self loop is missing
-add_self_loop = False
-if add_self_loop:
-    adj_mx = adj_mx + np.identity(adj_mx.shape[0])
-    distance_mx = distance_mx + np.identity(distance_mx.shape[0])
-pickle.dump(adj_mx, open("datasets/raw_data/PEMS04/adj_mx_04.pkl", 'wb'))
-pickle.dump(distance_mx, open("datasets/raw_data/PEMS04/adj_mx_04_distance.pkl", 'wb'))
+def generate_adj_PEMS04():
+    direction = True
+    distance_df_filename, num_of_vertices = "datasets/raw_data/PEMS04/PEMS04.csv", 307
+    if os.path.exists(distance_df_filename.split(".")[0] + ".txt"):
+        id_filename = distance_df_filename.split(".")[0] + ".txt"
+    else:
+        id_filename = None
+    if direction:
+        adj_mx, distance_mx = get_adjacency_matrix_2direction(distance_df_filename, num_of_vertices, id_filename=id_filename)
+    else:
+        adj_mx, distance_mx = get_adjacency_matrix(distance_df_filename, num_of_vertices, id_filename=id_filename)
+    # TODO: the self loop is missing
+    add_self_loop = False
+    if add_self_loop:
+        adj_mx = adj_mx + np.identity(adj_mx.shape[0])
+        distance_mx = distance_mx + np.identity(distance_mx.shape[0])
+    pickle.dump(adj_mx, open("datasets/raw_data/PEMS04/adj_PEMS04.pkl", 'wb'))
+    pickle.dump(distance_mx, open("datasets/raw_data/PEMS04/adj_PEMS04_distance.pkl", 'wb'))

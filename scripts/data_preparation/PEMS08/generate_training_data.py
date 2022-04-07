@@ -4,6 +4,8 @@ import shutil
 import numpy as np
 import os
 
+from generate_adj_mx import generate_adj_PEMS08
+
 """
 PEMS08 dataset (traffic flow dataset) default settings:
     - normalization:
@@ -122,7 +124,11 @@ def generate_data(args):
     data['raw_data'] = raw_data
     pickle.dump(data, open(output_dir + "/data.pkl", "wb"))
     # copy adj
-    shutil.copyfile(args.graph_file, output_dir + '/adj_mx.pkl')      # copy models
+    if os.path.exists(args.graph_file):
+        shutil.copyfile(args.graph_file, output_dir + '/adj_mx.pkl')      # copy models
+    else:
+        generate_adj_PEMS08()
+        shutil.copyfile(args.graph_file, output_dir + '/adj_mx.pkl')      # copy models
 
 if __name__ == "__main__":
     window_size     = 12                    # sliding window size for generating history sequence and target sequence
