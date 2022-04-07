@@ -7,6 +7,7 @@ datasets/model/*
 .VSCodeCounter/
 log/
 checkpoints/
+datasets/raw_data/*
 ret/*
 demo*
 
