@@ -59,12 +59,13 @@ CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
     "lr":0.002,
-    "weight_decay":1.0e-4
+    "weight_decay":1.0e-5,
+    "eps":1.0e-8
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[1, 50, 100],
+    "milestones":[1, 30, 38, 46, 54, 200],
     "gamma":0.5
 }
 
@@ -81,15 +82,15 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 32
+CFG.TRAIN.DATA.BATCH_SIZE   = 16
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2
 CFG.TRAIN.DATA.PIN_MEMORY   = False
 ## curriculum learning
 CFG.TRAIN.CL    = EasyDict()
-CFG.TRAIN.CL.WARM_EPOCHS    = 0
-CFG.TRAIN.CL.CL_EPOCHS      = 6
+CFG.TRAIN.CL.WARM_EPOCHS    = 30
+CFG.TRAIN.CL.CL_EPOCHS      = 3
 CFG.TRAIN.CL.PREDICTION_LENGTH  = 12
 
 # ================= validate ================= #
@@ -100,7 +101,7 @@ CFG.VAL.DATA = EasyDict()
 ## read data
 CFG.VAL.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.VAL.DATA.BATCH_SIZE     = 32
+CFG.VAL.DATA.BATCH_SIZE     = 16
 CFG.VAL.DATA.PREFETCH       = False
 CFG.VAL.DATA.SHUFFLE        = False
 CFG.VAL.DATA.NUM_WORKERS    = 2
@@ -114,7 +115,7 @@ CFG.TEST.DATA = EasyDict()
 ## read data
 CFG.TEST.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TEST.DATA.BATCH_SIZE    = 32
+CFG.TEST.DATA.BATCH_SIZE    = 16
 CFG.TEST.DATA.PREFETCH      = False
 CFG.TEST.DATA.SHUFFLE       = False
 CFG.TEST.DATA.NUM_WORKERS   = 2
