@@ -46,8 +46,8 @@ CFG.MODEL.PARAM = {
     "adjs"      : [torch.tensor(adj) for adj in adj_mx],
     "num_layers": 5,
     "num_modalities": 2,
-    "node_hidden"   : 10,
-    "time_emb_dim"  : 10,
+    "node_hidden"   : 12,
+    "time_emb_dim"  : 12,
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
