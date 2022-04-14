@@ -18,8 +18,8 @@ CFG = EasyDict()
 CFG.DESCRIPTION = 'STNorm model configuration'
 CFG.RUNNER  = STNormRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
-CFG.DATASET_TYPE  = 'Traffic speed'
+CFG.DATASET_NAME  = "PEMS04"
+CFG.DATASET_TYPE  = 'Traffic flow'
 CFG.GPU_NUM = 1
 CFG.SEED    = 1
 CFG.CUDNN_ENABLED = True
@@ -35,7 +35,7 @@ CFG.MODEL.NAME  = 'STNorm'
 CFG.MODEL.ARCH  = STNorm
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
-    "num_nodes" : 207, 
+    "num_nodes" : 307, 
     "tnorm_bool": True,
     "snorm_bool": True,
     "in_dim"    : 2,

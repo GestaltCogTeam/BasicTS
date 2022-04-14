@@ -22,7 +22,6 @@ class SNorm(nn.Module):
         out = x_norm * self.gamma.view(1, -1, 1, 1) + self.beta.view(1, -1, 1, 1)
         return out
 
-
 class TNorm(nn.Module):
     def __init__(self,  num_nodes, channels, track_running_stats=True, momentum=0.1):
         super(TNorm, self).__init__()
@@ -51,7 +50,6 @@ class TNorm(nn.Module):
         x_norm = (x - mean) / (var + 0.00001) ** 0.5
         out = x_norm * self.gamma + self.beta
         return out
-
 
 class STNorm(nn.Module):
     def __init__(self, num_nodes, tnorm_bool, snorm_bool, in_dim,out_dim, channels,kernel_size,blocks,layers):
