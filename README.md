@@ -65,6 +65,7 @@ config&shape&m&runner
   - [ ] CNN-based: MTGNN
   - [ ] Others: D2STGNN, STEP, AGCRN
 - [ ] : Support models like ASTGCN, ASTGNN, which take multi-periodicities data as input.
+- [ ] : Mark models without fine-tuning
 
 ## References
 
