@@ -147,7 +147,7 @@ class GraphWaveNet(nn.Module):
             history_data (torch.Tensor): shape [B, C, N, L]
 
         Returns:
-            torch.Tensor: [B, C, N, L]
+            torch.Tensor: [B, L, N, 1]
         """
         input = history_data
         in_len = input.size(3)
@@ -215,7 +215,3 @@ class GraphWaveNet(nn.Module):
         x = F.relu(self.end_conv_1(x))
         x = self.end_conv_2(x)
         return x
-
-
-
-
