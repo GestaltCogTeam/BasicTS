@@ -7,6 +7,18 @@ from basicts.utils.registry import SCALER_REGISTRY
 from basicts.utils.serialization import load_pkl
 from easytorch.easytorch.utils.dist import master_only
 
+"""
+Runner for traffic datasets~(short-term forecasting datasets).
+- support curriculum learnin.
+- support gradient descent
+- metrics:
+    - MAE
+    - RMSE
+    - MAPE
+- evluate at horizon 3, 6, 12, and overall.
+- users must have to implement the `forward` function. `data_reshaper` and `data_i_reshape` can also be implemented to reshape the input data and prediction. 
+"""
+
 class TrafficRunner(BaseRunner):
     """runner for traffic datasets: metr-la, pems-bay, pems03, pems04, pems07, pems08.
         details:
