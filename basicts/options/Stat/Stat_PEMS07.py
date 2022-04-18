@@ -10,10 +10,6 @@ from basicts.metrics.mape import masked_mape
 from basicts.metrics.rmse import masked_rmse
 from basicts.losses.losses import maksed_l1_loss
 
-"""
-We temporarily use the configs of PEMS04 without fine-tune. 
-"""
-
 CFG = EasyDict()
 
 # ================= general ================= #

@@ -18,20 +18,23 @@ BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](h
 
 | Model\Dataset | METR-LA | PEMS-BAY | PEMS04 | PEMS08 | PEMS03 | PEMS07 | Other Datasets |
 |:-------------:|:-------:|:--------:|:------:|:------:|:------:|:------:|:--------------:|
-| AR            | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*     |                |
-| VAR           | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*    |                |
-| HI            | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*    |                |
-| Graph WaveNet | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*    |                |
-| DCRNN         | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*    |                |
-| MTGNN         | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*    |                |
+| AR            | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| VAR           | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| HI            | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| Graph WaveNet | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| DCRNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| MTGNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | GTS           | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
 | DGCRN         | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
-| AGCRN         | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*    |                |
-| STNorm        | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*    |                |
-| D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅*     | ✅*    |
+| AGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| STNorm        | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |
 | Other Models  |         |         |         |        |        |        |                |
 
 <font color=gray>*using default hyperparameters, no fine-tuning.</font>
+
+Although we have tried to tune the hyperparameters in `basicts/options` for every model and every dataset, there is no guarantee that they are optimal.
+Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
 For the results and more details about models and datasets, please refer to the [pdf](./results/BasicTS_draft.pdf) (draft).
 For the training logs, please refer to `results/$MODEL_NAME/`.

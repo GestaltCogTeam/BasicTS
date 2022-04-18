@@ -12,10 +12,6 @@ from basicts.metrics.rmse import masked_rmse
 from basicts.losses.losses import L1Loss
 from basicts.utils.serialization import load_adj
 
-"""
-We temporarily use the configs of PEMS04 without fine-tune. 
-"""
-
 CFG = EasyDict()
 
 # ================= general ================= #
