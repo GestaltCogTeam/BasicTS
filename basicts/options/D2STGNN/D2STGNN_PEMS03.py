@@ -12,10 +12,6 @@ from basicts.metrics.rmse import masked_rmse
 from basicts.losses.losses import maksed_l1_loss
 from basicts.utils.serialization import load_adj
 
-"""
-We temporarily use the configs of PEMS04 without fine-tune. 
-"""
-
 CFG = EasyDict()
 
 # ================= general ================= #
@@ -41,7 +37,7 @@ adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletran
 CFG.MODEL.PARAM = {
     "num_feat"  : 1,
     "num_hidden": 32,
-    "dropout"   : 0.1,
+    "dropout"   : 0.2,
     "seq_length": 12,
     "k_t"       : 3,
     "k_s"       : 2,
@@ -50,8 +46,8 @@ CFG.MODEL.PARAM = {
     "adjs"      : [torch.tensor(adj) for adj in adj_mx],
     "num_layers": 5,
     "num_modalities": 2,
-    "node_hidden"   : 12,
-    "time_emb_dim"  : 12,
+    "node_hidden"   : 10,
+    "time_emb_dim"  : 10,
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
