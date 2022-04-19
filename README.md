@@ -13,7 +13,6 @@ BasicTS (**Basic** **T**ime **S**eries)是一个受[BasicSR](https://github.com/
 目前仅专注于时间序列预测，后续可能会添加时间序列分类、异常检测等内容。
 BasicTS为用户提供使用统一的、标准的pipeline（他是公平的，但可能不是最快的），来提供流行的TS模型的复现和公平对比，以启发新的创新。
 BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](https://github.com/cnstark/easytorch) [2]开发。
-
 ## 1. Supported Models and Datasets
 
 | Model\Dataset | METR-LA | PEMS-BAY | PEMS04 | PEMS08 | PEMS03 | PEMS07 | Other Datasets |
@@ -56,6 +55,10 @@ config&shape&m&runner
 ## 5. Detailed Docs
 
 - data preparation: data_preparation.md and [data_preparation_CN.md](docs/data_preparation_CN.md)
+
+## 6. Main Results
+
+![Main results.](results/result.png)
 
 ## 6. TODO
 
