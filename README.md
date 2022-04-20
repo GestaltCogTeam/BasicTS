@@ -50,6 +50,8 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
 ## 4. Usage
 
+`git clone --recurse-submodules https://github.com/zezhishao/BasicTS.git`
+
 ### 4.1 Data Preparation and Preprocessing
 
 ### 4.2 Run a Time Series Forecasting Model
