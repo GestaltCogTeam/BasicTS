@@ -43,9 +43,10 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
 ## 2. Dependencies
 
+- python 3.9
+- pytorch 1.9.1
 
 ## 3. Codebase Designs and Conventions
-
 
 ## 4. Usage
 
