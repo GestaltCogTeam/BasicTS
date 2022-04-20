@@ -13,7 +13,10 @@ BasicTS (**Basic** **T**ime **S**eries)是一个受[BasicSR](https://github.com/
 目前仅专注于时间序列预测，后续可能会添加时间序列分类、异常检测等内容。
 BasicTS为用户提供使用统一的、标准的pipeline（他是公平的，但可能不是最快的），来提供流行的TS模型的复现和公平对比，以启发新的创新。
 BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](https://github.com/cnstark/easytorch) [2]开发。
+
 ## 1. Supported Models and Datasets
+
+### 1.1 Short-term Time Series Forecasting
 
 | Model\Dataset | METR-LA | PEMS-BAY | PEMS04 | PEMS08 | PEMS03 | PEMS07 | Other Datasets |
 |:-------------:|:-------:|:--------:|:------:|:------:|:------:|:------:|:--------------:|
@@ -30,27 +33,29 @@ BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](h
 | D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |
 | Other Models  |         |         |         |        |        |        |                |
 
-<font color=gray>*using default hyperparameters, no fine-tuning.</font>
+For the results and more details about models and datasets, please refer to the [pdf](./results/BasicTS_draft.pdf) (draft).
+If you need more features about BasicTS, e.g., more datasets or baselines, feel free to create an issue.
 
 Although we have tried to tune the hyperparameters in `basicts/options` for every model and every dataset, there is no guarantee that they are optimal.
 Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
-For the results and more details about models and datasets, please refer to the [pdf](./results/BasicTS_draft.pdf) (draft).
-For the training logs, please refer to `results/$MODEL_NAME/`.
+### 1.2 Long-term Time Series Forecasting
 
 ## 2. Dependencies
 
-## 3. Usage
 
-### 3.1 Data Preparation and Preprocessing
+## 3. Codebase Designs and Conventions
 
-### 3.2 Run a Time Series Forecasting Model
 
-### 3.3 Train a Custom Model
+## 4. Usage
+
+### 4.1 Data Preparation and Preprocessing
+
+### 4.2 Run a Time Series Forecasting Model
+
+### 4.3 Train a Custom Model
 
 config&shape&m&runner
-
-## 4. Codebase Designs and Conventions
 
 ## 5. Detailed Docs
 
@@ -60,20 +65,11 @@ config&shape&m&runner
 
 ![Main results.](results/result.png)
 
-## 6. TODO
+## 7. TODO
 
-- [ ] : add 1.
-- [ ] : add 3.3
-- [ ] : add 4
-- [ ] : add more docs
-- [ ] : add README.md for dataset
-- [ ] : upload datasets and training logs as well as the tensorboard to Google Drive and BaiDu Yun.
 - [ ] : Add more model. Models that have official pytorch codes first.
   - [ ] RNN-based: DCRNN, GTS, DGCRN
-  - [ ] CNN-based: MTGNN
-  - [ ] Others: D2STGNN, STEP, AGCRN
 - [ ] : Support models like ASTGCN, ASTGNN, which take multi-periodicities data as input.
-- [ ] : Mark models without fine-tuning
 
 ## References
 
