@@ -1,35 +1,34 @@
 import torch
 import torch.nn as nn
-from basicts.archs.BasicMTS_arch.decoder import DecoderNN
-
 from basicts.archs.BasicMTS_arch.encoder import EncoderNN
+from basicts.archs.BasicMTS_arch.decoder import DecoderNN
 
 class BasicMTS(nn.Module):
     def __init__(self, **model_args):
         super().__init__()
         # attributes
         print(model_args.keys())
-        num_nodes  = 207
-        node_dim   = 16
-        temp_dim   = 16
-        input_len  = 12
-        input_dim  = 3
-        embed_dim  = 32
-        output_len = 12
+        self.num_nodes  = model_args['num_nodes']
+        self.node_dim   = model_args['node_dim']
+        self.temp_dim   = model_args['temp_dim']
+        self.input_len  = model_args['input_len']
+        self.input_dim  = model_args['input_dim']
+        self.embed_dim  = model_args['embed_dim']
+        self.output_len = model_args['output_len']
 
         # networks
-        self.encoder = EncoderNN(input_dim, embed_dim, hidden_dim=embed_dim+node_dim+temp_dim*2)
+        self.encoder = EncoderNN(self.input_dim, self.input_len, self.embed_dim, hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*2)
         # spatial encoding
-        self.node_emb = nn.Parameter(torch.empty(num_nodes, node_dim))
+        self.node_emb = nn.Parameter(torch.empty(self.num_nodes, self.node_dim))
         nn.init.xavier_uniform_(self.node_emb)
         # temporal encoding
-        self.T_i_D_emb  = nn.Parameter(torch.empty(288, temp_dim))
-        self.D_i_W_emb  = nn.Parameter(torch.empty(7, temp_dim))
+        self.T_i_D_emb  = nn.Parameter(torch.empty(288, self.temp_dim))
+        self.D_i_W_emb  = nn.Parameter(torch.empty(7, self.temp_dim))
         nn.init.xavier_uniform_(self.T_i_D_emb)
         nn.init.xavier_uniform_(self.D_i_W_emb)
 
         # regression layer
-        self.decoder = DecoderNN(hidden_dim=256, out_dim=output_len)
+        self.decoder = DecoderNN(hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*2, out_dim=self.output_len)
 
     def forward(self, history_data: torch.Tensor, **kwargs) -> torch.Tensor:
         """feed forward.
@@ -44,7 +43,7 @@ class BasicMTS(nn.Module):
         history_data = history_data.transpose(1, 3)
         # normalization
         pass
-        X = history_data[..., [0, 1, 2]]
+        X = history_data[..., range(self.input_dim)]
         t_i_d_data   = history_data[..., 1]
         d_i_w_data   = history_data[..., 2]
 

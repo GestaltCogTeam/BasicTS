@@ -2,7 +2,6 @@ import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# from utils.log import clock
 
 class TCN(nn.Module):
     def __init__(self, input_dim, dilation_dim, skip_dim, dropout=0.3,  kernel_size=2, blocks=4, layers=2):
@@ -20,21 +19,22 @@ class TCN(nn.Module):
 
         receptive_field = 1
 
+        self.start_conv = nn.Conv2d(in_channels=input_dim, out_channels=dilation_dim, kernel_size=(1,1))
         for _ in range(blocks):
             additional_scope = kernel_size - 1
             new_dilation = 1
             for i in range(layers):
                 # dilated convolutions
-                self.filter_convs.append(nn.Conv2d(in_channels=input_dim, out_channels=dilation_dim, kernel_size=(1,kernel_size), dilation=new_dilation))
+                self.filter_convs.append(nn.Conv2d(in_channels=dilation_dim, out_channels=dilation_dim, kernel_size=(1,kernel_size), dilation=new_dilation))
 
-                self.gate_convs.append(nn.Conv1d(in_channels=input_dim, out_channels=dilation_dim, kernel_size=(1, kernel_size), dilation=new_dilation))
+                self.gate_convs.append(nn.Conv1d(in_channels=dilation_dim, out_channels=dilation_dim, kernel_size=(1, kernel_size), dilation=new_dilation))
 
                 # 1x1 convolution for residual connection
-                self.residual_convs.append(nn.Conv1d(in_channels=dilation_dim, out_channels=input_dim, kernel_size=(1, 1)))
+                self.residual_convs.append(nn.Conv1d(in_channels=dilation_dim, out_channels=dilation_dim, kernel_size=(1, 1)))
 
                 # 1x1 convolution for skip connection
                 self.skip_convs.append(nn.Conv1d(in_channels=dilation_dim, out_channels=skip_dim, kernel_size=(1, 1)))
-                self.bn.append(nn.BatchNorm2d(input_dim))
+                self.bn.append(nn.BatchNorm2d(dilation_dim))
                 new_dilation *=2
                 receptive_field += additional_scope
                 additional_scope *= 2
@@ -56,6 +56,7 @@ class TCN(nn.Module):
             x = nn.functional.pad(input,(self.receptive_field-in_len,0,0,0))
         else:
             x = input
+        x = self.start_conv(x)
         skip = 0
 
         # calculate the current adaptive adj matrix once per iteration

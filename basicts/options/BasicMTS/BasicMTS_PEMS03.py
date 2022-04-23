@@ -15,13 +15,13 @@ from basicts.utils.serialization import load_adj
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = 'Basic MTS model configuration'
+CFG.DESCRIPTION = 'BasicMTS model configuration'
 CFG.RUNNER  = BasicMTSRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
-CFG.DATASET_TYPE  = 'Traffic speed'
+CFG.DATASET_NAME  = "PEMS03"
+CFG.DATASET_TYPE  = 'Traffic flow'
 CFG.GPU_NUM = 1
-CFG.SEED    = 4
+CFG.SEED    = 42
 CFG.CUDNN_ENABLED = True
 CFG.METRICS = {
     "MAE": masked_mae,
@@ -34,10 +34,11 @@ CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'BasicMTS'
 CFG.MODEL.ARCH  = BasicMTS
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
+
 CFG.MODEL.PARAM = {
-    "num_nodes" : 207, 
-    'node_dim'  : 16,
-    'temp_dim'  : 16,
+    "num_nodes" : 358, 
+    'node_dim'  : 10,
+    'temp_dim'  : 10,
     'input_len' : 12,
     'input_dim' : 3,
     'embed_dim' : 32,
@@ -58,13 +59,13 @@ CFG.TRAIN.OPTIM.PARAM= {
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[1, 50, 80],
+    "milestones":[1, 50, 100],
     "gamma":0.5
 }
 
 # ================= train ================= #
 CFG.TRAIN.CLIP       = 5
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
