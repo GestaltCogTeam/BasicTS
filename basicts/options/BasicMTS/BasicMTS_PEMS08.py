@@ -35,7 +35,7 @@ CFG.MODEL.NAME  = 'BasicMTS'
 CFG.MODEL.ARCH  = BasicMTS
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
-    "num_nodes" : 358, 
+    "num_nodes" : 170, 
     'node_dim'  : 10,
     'temp_dim'  : 10,
     'input_len' : 12,
