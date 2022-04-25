@@ -37,11 +37,11 @@ adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletran
 
 CFG.MODEL.PARAM = {
     "num_nodes" : 358, 
-    'node_dim'  : 10,
-    'temp_dim'  : 10,
+    'node_dim'  : 32,
+    'temp_dim'  : 32,
     'input_len' : 12,
     'input_dim' : 3,
-    'embed_dim' : 64,
+    'embed_dim' : 32,
     'output_len': 12
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            # traffic speed, time in day

@@ -22,8 +22,9 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_PEMS08.py', help='training config')
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_METR-LA.py', help='training config')
+    parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS-BAY.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS04.py', help='training config')
-    parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS03.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS03.py', help='training config')
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_PEMS-BAY.py', help='training config')

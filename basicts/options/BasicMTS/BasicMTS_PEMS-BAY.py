@@ -15,11 +15,11 @@ from basicts.utils.serialization import load_adj
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = 'BasicMTS model configuration'
+CFG.DESCRIPTION = 'Basic MTS model configuration'
 CFG.RUNNER  = BasicMTSRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "PEMS04"
-CFG.DATASET_TYPE  = 'Traffic flow'
+CFG.DATASET_NAME  = "PEMS-BAY"
+CFG.DATASET_TYPE  = 'Traffic speed'
 CFG.GPU_NUM = 1
 CFG.SEED    = 4
 CFG.CUDNN_ENABLED = True
@@ -35,7 +35,7 @@ CFG.MODEL.NAME  = 'BasicMTS'
 CFG.MODEL.ARCH  = BasicMTS
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
-    "num_nodes" : 307, 
+    "num_nodes" : 325, 
     'node_dim'  : 32,
     'temp_dim'  : 32,
     'input_len' : 12,
@@ -58,13 +58,13 @@ CFG.TRAIN.OPTIM.PARAM= {
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[1, 50, 100],
+    "milestones":[1, 50, 80],
     "gamma":0.5
 }
 
 # ================= train ================= #
 CFG.TRAIN.CLIP       = 5
-CFG.TRAIN.NUM_EPOCHS = 200
+CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
