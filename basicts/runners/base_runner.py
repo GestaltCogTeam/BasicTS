@@ -309,7 +309,7 @@ class BaseRunner(Runner):
         if train_epoch is None:
             self.init_validation(cfg)
 
-        self.on_validating_start()
+        self.on_validating_start(train_epoch=train_epoch)
 
         val_start_time = time.time()
         self.model.eval()
@@ -325,4 +325,4 @@ class BaseRunner(Runner):
             # tensorboard plt meters
             self.plt_epoch_meters('val', train_epoch // self.val_interval)
 
-        self.on_validating_end()
+        self.on_validating_end(train_epoch=train_epoch)

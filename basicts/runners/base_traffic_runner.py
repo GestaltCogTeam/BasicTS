@@ -1,4 +1,5 @@
 import math
+from typing import Optional
 import torch
 from torch import nn
 import numpy as np
@@ -264,3 +265,13 @@ class TrafficRunner(BaseRunner):
             metric_item = metric_func(prediction, real_value, null_val=self.null_val)
             self.update_epoch_meter('test_'+metric_name, metric_item.item())
             metric_results[metric_name] = metric_item.item()
+
+    @master_only
+    def on_validating_end(self, train_epoch: Optional[int]):
+        """Callback at the end of validating.
+
+        Args:
+            train_epoch (Optional[int]): current epoch if in training process.
+        """
+        if train_epoch is not None:
+            self.save_best_model(train_epoch, 'val_MAE', greater_best=False)

@@ -41,7 +41,7 @@ CFG.MODEL.PARAM = {
     'temp_dim'  : 10,
     'input_len' : 12,
     'input_dim' : 3,
-    'embed_dim' : 32,
+    'embed_dim' : 64,
     'output_len': 12
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            # traffic speed, time in day
