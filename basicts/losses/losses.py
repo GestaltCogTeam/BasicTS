@@ -5,3 +5,6 @@ import torch.nn.functional as F
 
 def L1Loss(input, target, **kwargs):
     return F.l1_loss(input, target)
+
+def MSELoss(input, target, **kwargs):
+    return F.mse_loss(input, target)

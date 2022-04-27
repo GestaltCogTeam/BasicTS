@@ -18,8 +18,8 @@ CFG = EasyDict()
 CFG.DESCRIPTION = 'StemGNN model configuration'
 CFG.RUNNER  = StemGNNRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
-CFG.DATASET_TYPE  = 'Traffic speed'
+CFG.DATASET_NAME  = "PEMS04"
+CFG.DATASET_TYPE  = 'Traffic flow'
 CFG.GPU_NUM = 1
 CFG.SEED    = 1
 CFG.CUDNN_ENABLED = True
@@ -35,7 +35,7 @@ CFG.MODEL.NAME  = 'StemGNN'
 CFG.MODEL.ARCH  = StemGNN
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
-    "units":    207,
+    "units":    307,
     "stack_cnt": 2,
     "time_step": 12,
     "multi_layer": 5,
