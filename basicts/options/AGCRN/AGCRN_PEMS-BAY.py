@@ -9,7 +9,7 @@ from basicts.data.base_dataset import BaseDataset
 from basicts.metrics.mae import masked_mae
 from basicts.metrics.mape import masked_mape
 from basicts.metrics.rmse import masked_rmse
-from basicts.losses.losses import maksed_l1_loss
+from basicts.losses.losses import masked_l1_loss
 from basicts.utils.serialization import load_adj
 
 CFG = EasyDict()
@@ -50,7 +50,7 @@ CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()
-CFG.TRAIN.LOSS = maksed_l1_loss
+CFG.TRAIN.LOSS = masked_l1_loss
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
