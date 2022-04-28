@@ -50,20 +50,20 @@ CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
 CFG.TRAIN = EasyDict()
 CFG.TRAIN.LOSS = MSELoss
 CFG.TRAIN.OPTIM = EasyDict()
-CFG.TRAIN.OPTIM.TYPE = "RMSprop"
+CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
-    "lr":1e-4
+    "lr":0.002
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
-CFG.TRAIN.LR_SCHEDULER.TYPE = "ExponentialLR"
+CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
+    "milestones":[1, 50, 100],
     "gamma":0.5
 }
-CFG.TRAIN.LR_SCHEDULER.STEP = 5
 
 # ================= train ================= #
 # CFG.TRAIN.CLIP       = 5
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])

@@ -5,7 +5,6 @@ from basicts.runners.base_traffic_runner import TrafficRunner
 class StemGNNRunner(TrafficRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
-        self.decay_step = cfg.TRAIN.LR_SCHEDULER.STEP
 
     def data_reshaper(self, data: torch.Tensor) -> torch.Tensor:
         """reshape data to fit the target model.
@@ -35,20 +34,6 @@ class StemGNNRunner(TrafficRunner):
         # select feature using self.target_features
         data = data[:, :, :, self.target_features]
         return data
-
-    def train_data_loop(self, data_iter: tqdm, epoch: int):
-        """train data loop
-
-        Args:
-            data_iter (tqdm): data iterator
-            epoch (int): epoch number
-        """
-        if epoch % self.decay_step == 0:
-            self.scheduler.step()
-        for iter_index, data in enumerate(data_iter):
-            loss = self.train_iters(epoch, iter_index, data)
-            if loss is not None:
-                self.backward(loss)
 
     def forward(self, data: tuple, iter_num: int = None, epoch:int = None, train:bool = True, **kwargs) -> tuple:
         """feed forward process for train, val, and test. Note that the outputs are NOT re-scaled.
