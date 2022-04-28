@@ -35,7 +35,7 @@ CFG.MODEL.NAME  = 'StemGNN'
 CFG.MODEL.ARCH  = StemGNN
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
-    "units":    207,
+    "units":    325,
     "stack_cnt": 2,
     "time_step": 12,
     "multi_layer": 5,
