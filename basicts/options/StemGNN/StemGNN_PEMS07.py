@@ -12,13 +12,15 @@ from basicts.metrics.rmse import masked_rmse
 from basicts.losses.losses import masked_l1_loss
 from basicts.utils.serialization import load_adj
 
+"""Different from the official code, we use Adam as the optimizer and MAE as the loss function since they bring better performance."""
+
 CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = 'StemGNN model configuration'
 CFG.RUNNER  = StemGNNRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "PEMS03"
+CFG.DATASET_NAME  = "PEMS07"
 CFG.DATASET_TYPE  = 'Traffic flow'
 CFG.GPU_NUM = 1
 CFG.SEED    = 1
