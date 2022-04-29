@@ -23,7 +23,7 @@ class BaseRunner(Runner):
                 - support find unused parameters when using DDP
                 - move train/validate data loop outside the `train`/`validate` function
         Args:
-            cfg (dict): on in one configurations
+            cfg (dict): all in one configurations
         """
         super().__init__(cfg)
 
