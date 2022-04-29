@@ -102,7 +102,7 @@ python basicts/run.py -opt basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py
 
 ## 5. Detailed Docs
 
-- data preparation: data_preparation.md and [data_preparation_CN.md](docs/DataPreparation_CN.md)
+- data preparation: [data_preparation_CN.md](docs/DataPreparation_CN.md)
 🕐
 
 ## 6. Main Results
