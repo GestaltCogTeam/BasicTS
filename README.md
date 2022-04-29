@@ -6,12 +6,12 @@
 
 BasicTS (**Basic** **T**ime **S**eries) is an open-source PyTorch-based **time series** benchmark and toolbox motivated by [BasicSR](https://github.com/xinntao/BasicSR) [1].
 At present, it only focuses on **time series forecasting**, and may add time series classification, anomaly detection, etc., in the future.
-BasicTS provides users with a unified, standard pipeline (fair, but probably not the fastest), which provide reproduction and fair comparision of popular deep learning-based time series models to inspire new innovations.
+BasicTS provides users with a ***unified, standard pipeline***  (fair, but probably not the fastest), which provide **reproduction and fair comparision** of popular deep learning-based time series models to inspire new innovations.
 BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch) [2], an easy-to-use and powerful open source neural network training framework.
 
 BasicTS (**Basic** **T**ime **S**eries)是一个受[BasicSR](https://github.com/xinntao/BasicSR) [1]启发的基于PyTorch的开源时间序列Benchmark和工具箱。
 目前仅专注于时间序列预测，后续可能会添加时间序列分类、异常检测等内容。
-BasicTS为用户提供使用统一的、标准的pipeline（他是公平的，但可能不是最快的），来提供流行的基于深度学习的时间序列模型的复现和公平对比，以启发新的创新。
+BasicTS为用户提供 ***统一的、标准的*** pipeline（他是公平的，但可能不是最快的），来提供流行的基于深度学习的时间序列模型的**复现和公平对比** ，以启发新的创新。
 BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](https://github.com/cnstark/easytorch) [2]开发。
 
 ## 1. Supported Models and Datasets
