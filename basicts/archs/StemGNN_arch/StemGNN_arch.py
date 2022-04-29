@@ -9,12 +9,12 @@ import torch.nn.functional as F
         There are some difference in implementation described in the paper as well as the source code. 
         Details can be found in [here](https://github.com/microsoft/StemGNN/issues/12)
         We adopt the implementation of the code.
-    Details of different:
+    Details of difference:
         - No reconstruction loss.
         - No 1DConv.
         - Use chebyshev polynomials to reduce time complexity.
         - There is no the output layer composed of GLU and fully-connected (FC) sublayers as described in third paragraph in section 4.1.
-        - The experimental setting is not fair in StemGNN, and we can not reproduce the paper's performance
+        - The experimental setting is not fair in StemGNN, and we can not reproduce the paper's performance.
 """
 
 class GLU(nn.Module):
