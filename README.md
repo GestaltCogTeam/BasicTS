@@ -70,8 +70,6 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
 You can download the raw datasets at [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp) or [Baidu Yun](https://pan.baidu.com/s/18qonT9l1_NbvyAgpD4381g)(password: 0lrk), and unzip them to `datasets/raw_data/`.
 
-The raw data can be downloaded at this , and should be unzipped to datasets/raw_data/.
-
 #### 4.1.2 Data Preprocessing
 
 ```bash
