@@ -239,9 +239,6 @@ class TrafficRunner(BaseRunner):
             real_value.append(testy)
         prediction = torch.cat(prediction,dim=0)
         real_value = torch.cat(real_value, dim=0)
-        # post process
-        prediction = self.data_i_reshape(prediction)
-        real_value = self.data_i_reshape(real_value)
         # re-scale data
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
