@@ -81,13 +81,14 @@ def symmetric_message_passing_adj(adj):
         Renormalized message passing adj in `GCN`.
     """
     # add self loop
-    print("calculating the renormalized message passing adj, please ensure that self-loop has added to adj.")
+    adj         = adj + np.diag(np.ones(adj.shape[0], dtype=np.float32))
+    # print("calculating the renormalized message passing adj, please ensure that self-loop has added to adj.")
     adj         = sp.coo_matrix(adj)
     rowsum      = np.array(adj.sum(1))
     d_inv_sqrt  = np.power(rowsum, -0.5).flatten()
     d_inv_sqrt[np.isinf(d_inv_sqrt)] = 0.
     d_mat_inv_sqrt  = sp.diags(d_inv_sqrt)
-    mp_adj          = d_mat_inv_sqrt.dot(adj).transpose().dot(d_mat_inv_sqrt).astype(np.float32).todense()
+    mp_adj          = d_mat_inv_sqrt.dot(adj).transpose().dot(d_mat_inv_sqrt).astype(np.float32)
     return mp_adj
 
 def transition_matrix(adj):
