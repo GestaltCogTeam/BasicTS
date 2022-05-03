@@ -144,12 +144,12 @@ class GraphWaveNet(nn.Module):
         """feedforward function of Graph WaveNet
 
         Args:
-            history_data (torch.Tensor): shape [B, C, N, L]
+            history_data (torch.Tensor): shape [B, L, N, C]
 
         Returns:
             torch.Tensor: [B, L, N, 1]
         """
-        input = history_data
+        input = history_data.transpose(1, 3).contiguous()
         in_len = input.size(3)
         if in_len<self.receptive_field:
             x = nn.functional.pad(input,(self.receptive_field-in_len,0,0,0))

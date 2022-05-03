@@ -80,14 +80,14 @@ class MTGNN_arch(nn.Module):
         """feed forward of MTGNN
 
         Args:
-            history_data (torch.Tensor): history data with shape [B, C, N, L]
+            history_data (torch.Tensor): history data with shape [B, L, N, C]
             idx (int, optional): Graph Learning Hyperparameter. Defaults to None.
 
         Returns:
             torch.Tensor: prediction
         """
         # select feature
-        history_data = history_data[:, :2, :, :]
+        history_data = history_data.transpose(1, 3).contiguous()
         seq_len = history_data.size(3)
         assert seq_len==self.seq_length, 'input sequence length not equal to preset sequence length'
 

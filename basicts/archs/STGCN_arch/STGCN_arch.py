@@ -112,11 +112,12 @@ class STGCN(nn.Module):
         """STGCN feed forward.
 
         Args:
-            history_data (torch.Tensor): historical data with shape [B, N, L, C]
+            history_data (torch.Tensor): historical data with shape [B, L, N, C]
 
         Returns:
             torch.Tensor: Prediction with shape [B, L, N, 1]
         """
+        history_data = history_data.transpose(1, 2).contiguous()
         self.A_hat = self.A_hat.to(history_data.device)
         out1 = self.block1(history_data, self.A_hat)
         out2 = self.block2(out1, self.A_hat)

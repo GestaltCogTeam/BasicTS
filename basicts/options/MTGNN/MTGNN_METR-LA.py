@@ -21,7 +21,7 @@ CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "METR-LA"
 CFG.DATASET_TYPE  = 'Traffic speed'
 CFG.GPU_NUM = 1
-CFG.SEED    = 1
+CFG.SEED    = 2
 CFG.CUDNN_ENABLED = True
 CFG.METRICS = {
     "MAE": masked_mae,

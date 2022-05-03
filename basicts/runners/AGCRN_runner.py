@@ -5,24 +5,21 @@ class AGCRNRunner(TrafficRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
 
-    def data_reshaper(self, data: torch.Tensor) -> torch.Tensor:
-        """reshape data to fit the target model.
+    def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
+        """select input features.
 
         Args:
             data (torch.Tensor): input history data, shape [B, L, N, C]
-            channel (list): self-defined selected channels
         Returns:
             torch.Tensor: reshaped data
         """
         # select feature using self.forward_features
         if self.forward_features is not None:
             data = data[:, :, :, self.forward_features]
-        # reshape data to [B, L, N, C]
-        pass
         return data
     
-    def data_i_reshape(self, data: torch.Tensor) -> torch.Tensor:
-        """reshape data back to the BasicTS framework
+    def select_target_features(self, data: torch.Tensor) -> torch.Tensor:
+        """select target feature
 
         Args:
             data (torch.Tensor): prediction of the model with arbitrary shape.
@@ -30,8 +27,6 @@ class AGCRNRunner(TrafficRunner):
         Returns:
             torch.Tensor: reshaped data with shape [B, L, N, C]
         """
-        # reshape data
-        pass
         # select feature using self.target_features
         data = data[:, :, :, self.target_features]
         return data
@@ -53,12 +48,12 @@ class AGCRNRunner(TrafficRunner):
         future_data     = self.to_running_device(future_data)       # B, L, N, C
         B, L, N, C      = history_data.shape
         
-        history_data    = self.data_reshaper(history_data)
+        history_data    = self.select_input_features(history_data)
 
         # feed forward
         prediction_data = self.model(history_data=history_data)     # B, L, N, C
         assert list(prediction_data.shape)[:3] == [B, L, N], "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
         # post process
-        prediction = self.data_i_reshape(prediction_data)
-        real_value = self.data_i_reshape(future_data)
+        prediction = self.select_target_features(prediction_data)
+        real_value = self.select_target_features(future_data)
         return prediction, real_value

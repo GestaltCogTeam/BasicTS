@@ -124,7 +124,7 @@ class STNorm(nn.Module):
         Returns:
             torch.Tensor: [B, L, N, 1]
         """
-        input = history_data
+        input = history_data.transpose(1, 3).contiguous()
         in_len = input.size(3)
         if in_len<self.receptive_field:
             x = nn.functional.pad(input,(self.receptive_field-in_len,0,0,0))

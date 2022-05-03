@@ -37,10 +37,8 @@ class BasicMTS(nn.Module):
             history_data (torch.Tensor): history data with shape [B, L, N, C]
 
         Returns:
-            torch.Tensor: prediction
+            torch.Tensor: prediction wit shape [B, L, N, C]
         """
-        # reshape
-        history_data = history_data.transpose(1, 3)
         # normalization
         pass
         X = history_data[..., range(self.input_dim)]

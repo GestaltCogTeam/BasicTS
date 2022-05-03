@@ -12,7 +12,7 @@ class DCRNNRunner(TrafficRunner):
             pass
 
     def data_reshaper(self, data: torch.Tensor, channel=None) -> torch.Tensor:
-        """reshape data to fit the target model.
+        """select input features and reshape data to fit the target model.
 
         Args:
             data (torch.Tensor): input history data, shape [B, L, N, C]
@@ -21,8 +21,10 @@ class DCRNNRunner(TrafficRunner):
             torch.Tensor: reshaped data
         """
         # select feature using self.forward_features
-        if self.forward_features is not None:
+        if self.forward_features is not None and channel is None:
             data = data[:, :, :, self.forward_features]
+        if channel is not None:
+            data = data[:, :, :, channel]
         # reshape data [B, L, N, C] -> [L, B, N*C] (DCRNN required)
         B, L, N, C = data.shape
         data = data.reshape(B, L, N*C)      # [B, L, N*C]
@@ -30,7 +32,7 @@ class DCRNNRunner(TrafficRunner):
         return data
     
     def data_i_reshape(self, data: torch.Tensor) -> torch.Tensor:
-        """reshape data back to the BasicTS framework
+        """select target features and reshape data back to the BasicTS framework
 
         Args:
             data (torch.Tensor): prediction of the model with arbitrary shape.
@@ -63,7 +65,7 @@ class DCRNNRunner(TrafficRunner):
         
         history_data    = self.data_reshaper(history_data)
         if train:
-            future_data_    = self.data_reshaper(future_data, channel=[0])      # teacher forcing only use the first dimension
+            future_data_    = self.data_reshaper(future_data, channel=[0])      # teacher forcing only use the first dimension.
         else:
             future_data_    = None
 
