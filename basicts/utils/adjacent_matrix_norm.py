@@ -69,6 +69,8 @@ def symmetric_message_passing_adj(adj):
     Description:
     -----------
     Calculate the renormalized message passing adj in `GCN`.
+    A = A + I
+    return D^{-1/2} A D^{-1/2}
 
     Parameters:
     -----------

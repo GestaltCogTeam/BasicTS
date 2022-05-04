@@ -27,7 +27,7 @@ def load_adj(file_path, adj_type):
     if adj_type == "scalap":
         adj = [calculate_scaled_laplacian(adj_mx).astype(np.float32).todense()]
     elif adj_type == "normlap":
-        adj = [calculate_symmetric_normalized_laplacian(adj_mx).astype(np.float32).todense()]
+        adj = [ calculate_symmetric_normalized_laplacian(adj_mx).astype(np.float32).todense()]
     elif adj_type == "symnadj":
         adj = [symmetric_message_passing_adj(adj_mx).astype(np.float32).todense()]
     elif adj_type == "transition":

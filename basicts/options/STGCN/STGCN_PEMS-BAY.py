@@ -33,15 +33,21 @@ CFG.METRICS = {
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'STGCN'
 CFG.MODEL.ARCH  = STGCN
-adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "symnadj")
+adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "normlap")
+adj_mx    = torch.Tensor(adj_mx[0])
 CFG.MODEL.PARAM = {
-    "num_nodes" : 325, 
-    "num_features" : 2,
-    "num_timesteps_input" : 12,
-    "num_timesteps_output" : 12,
-    "A_hat" : adj_mx[0]
+    "Ks" : 3, 
+    "Kt" : 3,
+    "blocks" : [[1], [64, 16, 64], [64, 16, 64], [128, 128], [12]],
+    "T" : 12,
+    "n_vertex" : 325,
+    "act_func" : "glu",
+    "graph_conv_type" : "cheb_graph_conv",
+    "gso" : adj_mx,
+    "bias": True,
+    "droprate" : 0.5
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]            # traffic speed, time in day
+CFG.MODEL.FROWARD_FEATURES = [0]            # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
 
 # ================= optim ================= #

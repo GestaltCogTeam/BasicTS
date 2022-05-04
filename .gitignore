@@ -9,6 +9,7 @@ log/
 checkpoints/
 datasets/raw_data/*
 ret/*
+jupyter/
 demo*
 
 *.npz
@@ -24,3 +25,5 @@ core*
 
 gpu_task.py
 nohup.out
+.pynb_checkpoints/
+PEMS04.ipynb

@@ -1,1 +1,1 @@
-from basicts.archs.STGCN_arch.STGCN_arch import STGCN
+from basicts.archs.STGCN_arch.STGCN_arch import STGCNChebGraphConv as STGCN
