@@ -25,5 +25,3 @@ core*
 
 gpu_task.py
 nohup.out
-.pynb_checkpoints/
-PEMS04.ipynb
