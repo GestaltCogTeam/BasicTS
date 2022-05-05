@@ -29,7 +29,6 @@ If this repository helps your research or work, I hope you could give me a ⭐, 
 | Graph WaveNet | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | DCRNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | STGCN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| ASTGCN        | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
 | StemGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | MTGNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | GTS           | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
@@ -116,8 +115,6 @@ python basicts/run.py -opt basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py
 
 ## 7. TODO
 
-- [ ] : Add more model. Models that have official pytorch codes first.
-  - [ ] RNN-based: DCRNN, GTS, DGCRN
 - [ ] : Support models like ASTGCN, ASTGNN, which take multi-periodicities data as input.
 
 ## References
