@@ -187,7 +187,7 @@ class StemGNN(nn.Module):
             history_data (torch.Tensor): [B, L, N]
 
         Returns:
-            torch.Tensor: [B, L, N]
+            torch.Tensor: [B, L, N, 1]
         """
         x = history_data
         mul_L, attention = self.latent_correlation_layer(x)
