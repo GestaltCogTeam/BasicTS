@@ -39,8 +39,6 @@ If this repository helps your research or work, I hope you could give me a ⭐, 
 | D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |
 | Other Models  |         |         |         |        |        |        |                |
 
-If you need more features about BasicTS, e.g., more datasets or baselines, feel free to create an issue.
-
 Although we have tried our best to tune the hyperparameters in `basicts/options` for every model and every dataset, there is no guarantee that they are optimal.
 Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
