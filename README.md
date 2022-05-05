@@ -14,6 +14,20 @@ BasicTS (**Basic** **T**ime **S**eries)是一个受[BasicSR](https://github.com/
 BasicTS为用户提供 ***统一的、标准的*** pipeline（他是公平的，但可能不是最快的），来提供流行的基于深度学习的时间序列模型的 ***复现和公平对比*** ，以启发新的创新。
 BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](https://github.com/cnstark/easytorch) [2]开发。
 
+---
+
+\* If this repository helps your research or work, I hope you could give me a ⭐, and I will keep updating it~
+
+\* If you need more features about BasicTS (e.g. more datasets or methods) or have any questions/suggestions, please feel free to let me know~
+
+---
+
+\* 如果这个仓库对你的研究或工作有帮助，希望你能给我一个⭐，我会持续更新~
+
+\* 如果您需要更多有关 BasicTS 的功能（例如更多的数据集或方法），或有任何的问题/建议，请随时告诉我。
+
+---
+
 ## 1. Supported Models and Datasets
 
 ### 1.1 Short-term Time Series Forecasting
@@ -58,6 +72,7 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 `pip install -r requirements.txt`
 
 ## 3. Codebase Designs and Conventions
+
 🕐
 
 ## 4. Usage
