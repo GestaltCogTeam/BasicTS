@@ -23,13 +23,16 @@ CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "PEMS-BAY"
 CFG.DATASET_TYPE  = 'Traffic speed'
 CFG.GPU_NUM = 1
-CFG.SEED    = 1
-CFG.CUDNN_ENABLED = True
 CFG.METRICS = {
     "MAE": masked_mae,
     "RMSE": masked_rmse,
     "MAPE": masked_mape
 }
+
+# ================= environment ================= #
+CFG.ENV = EasyDict()
+CFG.ENV.SEED    = 1
+CFG.ENV.CUDNN_ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
