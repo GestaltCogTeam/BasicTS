@@ -1,6 +1,8 @@
+from abc import abstractmethod
 import os
 import time
 import setproctitle
+from typing import Tuple, Union
 import torch
 from torch import nn
 from torch.utils.data import DataLoader
@@ -53,7 +55,7 @@ class BaseRunner(Runner):
 
     @staticmethod
     def build_test_dataset(cfg: dict):
-        """It can be implement to build dataset for validation (not necessary).
+        """It can be implemented to a build dataset for validation (not necessary).
 
         Args:
             cfg (dict): config
@@ -170,7 +172,7 @@ class BaseRunner(Runner):
         self.model.eval()
 
         # test
-        self.test()
+        self.test(train_epoch=train_epoch)
 
         test_end_time = time.time()
         self.update_epoch_meter('test_time', test_start_time - test_end_time)
@@ -206,27 +208,14 @@ class BaseRunner(Runner):
         """
         pass
 
-    def test(self):
-        """It can be implement to define testing detail (not necessary).
+    def test(self, train_epoch: int = None):
+        """It can be implemented to define testing details (not necessary).
 
         Args:
-            iter_index (int): current iter.
-            data (torch.Tensor or tuple): Data provided by DataLoader
+            train_epoch (int, optional): current epoch if in training process.
         """
 
         raise NotImplementedError()
-
-    def train_data_loop(self, data_iter: tqdm, epoch: int):
-        """train data loop
-
-        Args:
-            data_iter (tqdm): data iterator
-            epoch (int): epoch number
-        """
-        for iter_index, data in enumerate(data_iter):
-            loss = self.train_iters(epoch, iter_index, data)
-            if loss is not None:
-                self.backward(loss)
 
     def train(self, cfg: dict):
         """Train model.
@@ -289,11 +278,54 @@ class BaseRunner(Runner):
 
         self.on_training_end()
 
-    def validate_data_loop(self):
+    def train_data_loop(self, data_iter: tqdm, epoch: int):
+        """train data loop
+
+        Args:
+            data_iter (tqdm): data iterator
+            epoch (int): epoch number
+        """
+        for iter_index, data in enumerate(data_iter):
+            loss = self.train_iters(data, epoch, iter_index)
+            if loss is not None:
+                self.backward(loss)
+
+    @abstractmethod
+    def train_iters(self, data: Union[torch.Tensor, Tuple], epoch: int, iter_index: int) -> torch.Tensor:
+        """It must be implement to define training detail.
+
+        If it returns `loss`, the function ```self.backward``` will be called.
+
+        Args:
+            data (torch.Tensor or tuple): Data provided by DataLoader
+            epoch (int): current epoch.
+            iter_index (int): current iter.
+
+        Returns:
+            loss (torch.Tensor)
+        """
+
+        pass
+
+    def validate_data_loop(self, train_epoch: int = None):
         """validate data loop
+
+        Args:
+            train_epoch (int, optional): current epoch if in training process, else None. Defaults to None.
         """
         for iter_index, data in enumerate(self.val_data_loader):
-            self.val_iters(iter_index, data)
+            self.val_iters(data, train_epoch=train_epoch, iter_index=iter_index)
+
+    def val_iters(self, data: Union[torch.Tensor, Tuple], train_epoch: int, iter_index: int):
+        """It can be implemented to define validating details (not necessary).
+
+        Args:
+            data (Union[torch.Tensor, Tuple]): Data provided by DataLoader
+            train_epoch (int): current epoch if in training process, else None. Defaults to None.
+            iter_index (int): current iter.
+        """
+
+        raise NotImplementedError()
 
     @torch.no_grad()
     @master_only
@@ -315,7 +347,7 @@ class BaseRunner(Runner):
         self.model.eval()
 
         # val loop
-        self.validate_data_loop()
+        self.validate_data_loop(train_epoch=train_epoch)
 
         val_end_time = time.time()
         self.update_epoch_meter('val_time', val_end_time - val_start_time)

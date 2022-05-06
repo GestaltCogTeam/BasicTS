@@ -1,5 +1,5 @@
 import math
-from typing import Optional
+from typing import Tuple, Union, Optional
 import torch
 from torch import nn
 import numpy as np
@@ -52,7 +52,7 @@ class TrafficRunner(BaseRunner):
             self.cl_epochs          = cfg.TRAIN.CL.get('CL_EPOCHS')
             self.prediction_length  = cfg.TRAIN.CL.get('PREDICTION_LENGTH')
 
-    def init_training(self, cfg):
+    def init_training(self, cfg: dict):
         """Initialize training.
 
         Including loss, training meters, etc.
@@ -155,49 +155,60 @@ class TrafficRunner(BaseRunner):
         print("test len: {0}".format(len(dataset)))
         return dataset
 
-    def curriculum_learning(self, epoch_num):
-        epoch_num -= 1
+    def curriculum_learning(self, epoch: int = None) -> int:
+        """calculate task level in curriculum learning.
+
+        Args:
+            epoch (int, optional): current epoch if in training process, else None. Defaults to None.
+
+        Returns:
+            int: task level
+        """
+        if epoch is None:
+            return self.prediction_length
+        epoch -= 1
         # generate curriculum length
-        if epoch_num < self.warm_up_epochs:
+        if epoch < self.warm_up_epochs:
             # still warm up
             cl_length = self.prediction_length
         else:
-            _ = (epoch_num - self.warm_up_epochs) // self.cl_epochs + 1
+            _ = (epoch - self.warm_up_epochs) // self.cl_epochs + 1
             cl_length = min(_, self.prediction_length)
         return cl_length
 
-    def forward(self, data: tuple, iter_num: int = None, epoch:int = None, train:bool = True, **kwargs) -> tuple:
+    def forward(self, data: tuple, epoch:int = None, iter_num: int = None, train:bool = True, **kwargs) -> tuple:
         """feed forward process for train, val, and test. Note that the outputs are NOT re-scaled.
 
         Args:
             data (tuple): data (future data, history data). [B, L, N, C] for each of them
-            iter_num (int, optional): iteration number. Defaults to None.
             epoch (int, optional): epoch number. Defaults to None.
+            iter_num (int, optional): iteration number. Defaults to None.
+            train (bool, optional): if in the training process. Defaults to True.
 
         Returns:
             tuple: (prediction, real_value). [B, L, N, C] for each of them.
         """
         raise NotImplementedError()
 
-    def train_iters(self, epoch, iter_index, data):
+    def train_iters(self, data: Union[torch.Tensor, Tuple], epoch: int, iter_index: int) -> torch.Tensor:
         """Training details.
 
         Args:
+            data (Union[torch.Tensor, Tuple]): Data provided by DataLoader
             epoch (int): current epoch.
             iter_index (int): current iter.
-            data (torch.Tensor or tuple): Data provided by DataLoader
 
         Returns:
             loss (torch.Tensor)
         """
         iter_num = (epoch-1) * self.itera_per_epoch + iter_index
-        prediction, real_value = self.forward(data=data, iter_num=iter_num, epoch=epoch, train=True)
+        prediction, real_value = self.forward(data=data, epoch=epoch, iter_num=iter_num, train=True)
         # re-scale data
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
         # loss
         if self.cl_param:
-            cl_length = self.curriculum_learning(epoch_num=epoch)
+            cl_length = self.curriculum_learning(epoch=epoch)
             loss = self.loss(prediction[:, :cl_length, :, :], real_value[:, :cl_length, :, :], null_val=self.null_val)
         else:
             loss = self.loss(prediction, real_value, null_val=self.null_val)
@@ -207,14 +218,15 @@ class TrafficRunner(BaseRunner):
             self.update_epoch_meter('train_'+metric_name, metric_item.item())
         return loss
 
-    def val_iters(self, iter_index, data):
+    def val_iters(self, data: Union[torch.Tensor, Tuple], train_epoch: int, iter_index: int):
         """Validation details.
 
         Args:
+            data (Union[torch.Tensor, Tuple]): Data provided by DataLoader
+            train_epoch (int): current epoch if in training process. Else None.
             iter_index (int): current iter.
-            data (torch.Tensor or tuple): Data provided by DataLoader
         """
-        prediction, real_value = self.forward(data=data, train=False)
+        prediction, real_value = self.forward(data=data, epoch=train_epoch, iter_index=iter_index, train=False)
         # re-scale data
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
@@ -227,14 +239,17 @@ class TrafficRunner(BaseRunner):
 
     @torch.no_grad()
     @master_only
-    def test(self):
+    def test(self, train_epoch: int = None):
         """test model.
+
+        Args:
+            train_epoch (int, optional): current epoch if in training process.
         """
         # test loop
         prediction = []
         real_value  = []
         for iter_index, data in enumerate(self.test_data_loader):
-            preds, testy = self.forward(data, train=False)
+            preds, testy = self.forward(data, epoch=train_epoch, iter_index=iter_index, train=False)
             prediction.append(preds)
             real_value.append(testy)
         prediction = torch.cat(prediction,dim=0)

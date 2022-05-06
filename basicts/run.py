@@ -85,9 +85,9 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STNorm/STNorm_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STNorm/STNorm_PEMS08.py', help='training config')
 
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/DGCRN/DGCRN_METR-LA.py', help='training config')
+    parser.add_argument('-opt', '--cfg', default='basicts/options/DGCRN/DGCRN_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DGCRN/DGCRN_PEMS-BAY.py', help='training config')
-    parser.add_argument('-opt', '--cfg', default='basicts/options/DGCRN/DGCRN_PEMS04.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/DGCRN/DGCRN_PEMS04.py', help='training config')
 
     parser.add_argument('--gpus', default=None, help='visible gpus')
     return parser.parse_args()
