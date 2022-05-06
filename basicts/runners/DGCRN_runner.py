@@ -52,8 +52,8 @@ class DGCRNRunner(TrafficRunner):
         future_data_    = self.select_input_features(future_data)
 
         # feed forward
-        prediction_data = self.model(history_data=history_data, future_data=future_data_, batch_seen=iter_num, epoch=epoch)   # B, L, N, C
-        assert list(prediction_data.shape)[:3] == [B, L, N], "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
+        prediction_data = self.model(history_data=history_data, future_data=future_data_, batch_seen=iter_num, task_level=self.curriculum_learning(epoch))   # B, L, N, C
+        assert list(prediction_data.shape)[:3] == [B, self.curriculum_learning(epoch), N], "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
         # post process
         prediction = self.select_target_features(prediction_data)
         real_value = self.select_target_features(future_data)
