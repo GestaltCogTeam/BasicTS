@@ -187,6 +187,9 @@ class DGCRN(nn.Module):
 
         outputs_final = outputs_final.view(batch_size, self.num_nodes, task_level, self.output_dim).transpose(1, 2)
 
+        ramdom_predict= torch.zeros(batch_size, self.seq_length - task_level, self.num_nodes, self.output_dim).to(outputs_final.device)
+        outputs_final = torch.cat([outputs_final, ramdom_predict], dim=1)
+        
         return outputs_final
 
     def initHidden(self, batch_size, hidden_size):
