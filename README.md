@@ -32,7 +32,7 @@ If this repository helps your research or work, I hope you could give me a ⭐, 
 | StemGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | MTGNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | GTS           | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
-| DGCRN         | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| DGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | GMAN          | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
 | AGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | STNorm        | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
