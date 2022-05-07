@@ -67,10 +67,16 @@ CFG.TRAIN.OPTIM.PARAM= {
     "lr":0.001,
     "weight_decay":0.0001
 }
+CFG.TRAIN.LR_SCHEDULER = EasyDict()
+CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
+CFG.TRAIN.LR_SCHEDULER.PARAM= {
+    "milestones":[100, 150],
+    "gamma":0.5
+}
 
 # ================= train ================= #
 CFG.TRAIN.CLIP          = 5
-CFG.TRAIN.NUM_EPOCHS    = 100
+CFG.TRAIN.NUM_EPOCHS    = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
