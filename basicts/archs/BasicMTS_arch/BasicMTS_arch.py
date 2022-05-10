@@ -17,7 +17,7 @@ class BasicMTS(nn.Module):
         self.output_len = model_args['output_len']
 
         self.if_T_i_D = True
-        self.if_D_i_W = False
+        self.if_D_i_W = True
 
         # networks
         self.encoder = EncoderNN(self.input_dim, self.input_len, self.embed_dim, hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*(int(self.if_D_i_W) + int(self.if_T_i_D)))
