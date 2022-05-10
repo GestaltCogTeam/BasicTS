@@ -40,11 +40,14 @@ class EncoderNN(nn.Module):
             hidden = self.embed_layer(input_data)       # B, D, N, 1
         # expand node embedding
         node_emb = node_emb.unsqueeze(0).expand(B, -1, -1).transpose(1, 2).unsqueeze(-1)  # B, D', N, 1
+        tem_emb  = []
         # temporal embeddings
-        tmp_emb1 = t_i_d_emb[:, -1, :, :].transpose(1, 2).unsqueeze(-1)                     # B, D', N, 1
-        tmp_emb2 = d_i_w_emb[:, -1, :, :].transpose(1, 2).unsqueeze(-1)                     # B, D', N, 1
+        if t_i_d_emb is not None:
+            tem_emb.append(t_i_d_emb[:, -1, :, :].transpose(1, 2).unsqueeze(-1))                     # B, D', N, 1
+        if d_i_w_emb is not None:
+            tem_emb.append(d_i_w_emb[:, -1, :, :].transpose(1, 2).unsqueeze(-1))                     # B, D', N, 1
         # concat node embedding
-        hidden = torch.cat([hidden, node_emb, tmp_emb1, tmp_emb2], dim=1)   # B, D + D' + D' + D', N, 1
+        hidden = torch.cat([hidden, node_emb] + tem_emb, dim=1)   # B, D + D' + D' + D', N, 1
         # TCN encoding
         hidden = self.mlp2(self.mlp1(hidden))
         return hidden

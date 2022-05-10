@@ -16,19 +16,24 @@ class BasicMTS(nn.Module):
         self.embed_dim  = model_args['embed_dim']
         self.output_len = model_args['output_len']
 
+        self.if_T_i_D = True
+        self.if_D_i_W = False
+
         # networks
-        self.encoder = EncoderNN(self.input_dim, self.input_len, self.embed_dim, hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*2)
+        self.encoder = EncoderNN(self.input_dim, self.input_len, self.embed_dim, hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*(int(self.if_D_i_W) + int(self.if_T_i_D)))
         # spatial encoding
         self.node_emb = nn.Parameter(torch.empty(self.num_nodes, self.node_dim))
         nn.init.xavier_uniform_(self.node_emb)
         # temporal encoding
-        self.T_i_D_emb  = nn.Parameter(torch.empty(288, self.temp_dim))
-        self.D_i_W_emb  = nn.Parameter(torch.empty(7, self.temp_dim))
-        nn.init.xavier_uniform_(self.T_i_D_emb)
-        nn.init.xavier_uniform_(self.D_i_W_emb)
+        if self.if_T_i_D:
+            self.T_i_D_emb  = nn.Parameter(torch.empty(288, self.temp_dim))
+            nn.init.xavier_uniform_(self.T_i_D_emb)
+        if self.if_D_i_W:
+            self.D_i_W_emb  = nn.Parameter(torch.empty(7, self.temp_dim))
+            nn.init.xavier_uniform_(self.D_i_W_emb)
 
         # regression layer
-        self.decoder = DecoderNN(hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*2, out_dim=self.output_len)
+        self.decoder = DecoderNN(hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*(int(self.if_D_i_W) + int(self.if_T_i_D)), out_dim=self.output_len)
 
     def forward(self, history_data: torch.Tensor, **kwargs) -> torch.Tensor:
         """feed forward.
@@ -45,9 +50,14 @@ class BasicMTS(nn.Module):
         t_i_d_data   = history_data[..., 1]
         d_i_w_data   = history_data[..., 2]
 
-        T_i_D = self.T_i_D_emb[(t_i_d_data * 288).type(torch.LongTensor)]    # [B, L, N, d]
-        D_i_W = self.D_i_W_emb[(d_i_w_data).type(torch.LongTensor)]          # [B, L, N, d]
-
+        if self.if_T_i_D:
+            T_i_D = self.T_i_D_emb[(t_i_d_data * 288).type(torch.LongTensor)]    # [B, L, N, d]
+        else:
+            T_i_D = None
+        if self.if_D_i_W:
+            D_i_W = self.D_i_W_emb[(d_i_w_data).type(torch.LongTensor)]          # [B, L, N, d]
+        else:
+            D_i_W = None
         # NN
         H = self.encoder(X, self.node_emb, T_i_D, D_i_W)
         Y = self.decoder(H)
