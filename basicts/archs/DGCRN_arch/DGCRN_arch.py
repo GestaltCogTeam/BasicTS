@@ -152,7 +152,7 @@ class DGCRN(nn.Module):
 
         outputs = None
         for i in range(self.seq_length):
-            Hidden_State, Cell_State = self.step(torch.squeeze(x[..., i]), Hidden_State, Cell_State, predefined_A, 'encoder', i)
+            Hidden_State, Cell_State = self.step(x[..., i].squeeze(-1), Hidden_State, Cell_State, predefined_A, 'encoder', i)
 
             if outputs is None:
                 outputs = Hidden_State.unsqueeze(1)
