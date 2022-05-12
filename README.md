@@ -89,16 +89,20 @@ Details of preprocessing can be found in `docs/DataPreparation_CN.md`~(Chinese).
 
 ### 4.2 Run a Time Series Forecasting Model
 
+We recommend running a time series model with the following command:
+
 ```bash
 cd /path/to/project
-python basicts/run.py -opt basicts/options/$METHOD_NAME/$METHOD_NAME_$DATASET_NAME.py
+easytrain -c basicts/options/$METHOD_NAME/$METHOD_NAME_$DATASET_NAME.py
 ```
 
 Replace the `$METHOD_NAME` and `$DATASET_NAME` with any supported method and dataset. For example,
 
 ```bash
-python basicts/run.py -opt basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py
+easytrain -c basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py
 ```
+
+If you need to debug, you could run the `basicts/run.py` file. 
 
 ### 4.3 Train a Custom Model
 
