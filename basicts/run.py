@@ -2,7 +2,7 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 from argparse import ArgumentParser
-from easytorch.easytorch import launch_training
+from easytorch import launch_training
 
 def parse_args():
     parser = ArgumentParser(description='Run time series forecasting model in BasicTS framework based on EasyTorch!')

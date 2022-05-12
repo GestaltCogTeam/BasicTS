@@ -6,7 +6,7 @@ class MLP_res(nn.Module):
         super().__init__()
         self.fc1 = nn.Conv2d(in_channels=input_dim,  out_channels=hidden_dim, kernel_size=(1,1), bias=True)
         self.fc2 = nn.Conv2d(in_channels=hidden_dim, out_channels=hidden_dim, kernel_size=(1,1), bias=True)
-        self.act = nn.SiLU()
+        self.act = nn.ReLU()
 
     def forward(self, input_data:torch.Tensor) -> torch.Tensor:
         """feed forward of MLP.

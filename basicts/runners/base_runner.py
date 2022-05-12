@@ -8,12 +8,12 @@ from torch import nn
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 from tqdm import tqdm
-from easytorch.easytorch import Runner
-from easytorch.easytorch.utils.dist import master_only
-from easytorch.easytorch.utils import get_local_rank, is_master, master_only
-from easytorch.easytorch.core.data_loader import build_data_loader
+from easytorch import Runner
+from easytorch.utils.dist import master_only
+from easytorch.utils import get_local_rank, is_master, master_only
+from easytorch.core.data_loader import build_data_loader
 from basicts.data.transforms import *
-from easytorch.easytorch.utils.timer import TimePredictor
+from easytorch.utils.timer import TimePredictor
 
 class BaseRunner(Runner):
     def __init__(self, cfg: dict):

@@ -6,7 +6,7 @@ import numpy as np
 from basicts.runners.base_runner import BaseRunner
 from basicts.utils.registry import SCALER_REGISTRY
 from basicts.utils.serialization import load_pkl
-from easytorch.easytorch.utils.dist import master_only
+from easytorch.utils.dist import master_only
 
 """
 Runner for traffic datasets~(short-term forecasting datasets).
