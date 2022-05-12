@@ -1,4 +1,5 @@
 import os
+from random import random
 from easydict import EasyDict
 import torch
 # architecture 
@@ -19,6 +20,7 @@ CFG.DESCRIPTION = 'BasicMTS model configuration'
 CFG.RUNNER  = BasicMTSRunner
 CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "PEMS08"
+CFG._  = random()
 CFG.DATASET_TYPE  = 'Traffic flow'
 CFG.GPU_NUM = 1
 CFG.METRICS = {

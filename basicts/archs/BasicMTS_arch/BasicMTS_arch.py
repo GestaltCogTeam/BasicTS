@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
-from basicts.archs.BasicMTS_arch.encoder import EncoderNN
-from basicts.archs.BasicMTS_arch.decoder import DecoderNN
+from basicts.archs.BasicMTS_arch.MLP import MLP_res
 
 class BasicMTS(nn.Module):
     def __init__(self, **model_args):
@@ -19,12 +18,10 @@ class BasicMTS(nn.Module):
         self.if_T_i_D = True
         self.if_D_i_W = True
 
-        # networks
-        self.encoder = EncoderNN(self.input_dim, self.input_len, self.embed_dim, hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*(int(self.if_D_i_W) + int(self.if_T_i_D)))
-        # spatial encoding
+        # spatial embeddings
         self.node_emb = nn.Parameter(torch.empty(self.num_nodes, self.node_dim))
         nn.init.xavier_uniform_(self.node_emb)
-        # temporal encoding
+        # temporal embeddings
         if self.if_T_i_D:
             self.T_i_D_emb  = nn.Parameter(torch.empty(288, self.temp_dim))
             nn.init.xavier_uniform_(self.T_i_D_emb)
@@ -32,8 +29,16 @@ class BasicMTS(nn.Module):
             self.D_i_W_emb  = nn.Parameter(torch.empty(7, self.temp_dim))
             nn.init.xavier_uniform_(self.D_i_W_emb)
 
-        # regression layer
-        self.decoder = DecoderNN(hidden_dim=self.embed_dim+self.node_dim+self.temp_dim*(int(self.if_D_i_W) + int(self.if_T_i_D)), out_dim=self.output_len)
+        # embedding layer 
+        self.time_series_emb_layer = nn.Conv2d(in_channels=self.input_dim * self.input_len, out_channels=self.embed_dim, kernel_size=(1, 1), bias=True)
+        
+        # encoding
+        num_layer = 3
+        self.hidden_dim = self.embed_dim+self.node_dim+self.temp_dim*(int(self.if_D_i_W) + int(self.if_T_i_D))
+        self.encoder = nn.Sequential(*[MLP_res(self.hidden_dim, self.hidden_dim) for _ in range(num_layer)])
+
+        # regression
+        self.regression_layer = nn.Conv2d(in_channels=self.hidden_dim, out_channels=self.output_len, kernel_size=(1,1), bias=True)
 
     def forward(self, history_data: torch.Tensor, **kwargs) -> torch.Tensor:
         """feed forward.
@@ -44,21 +49,42 @@ class BasicMTS(nn.Module):
         Returns:
             torch.Tensor: prediction wit shape [B, L, N, C]
         """
-        # normalization
-        pass
+        # prepare data
         X = history_data[..., range(self.input_dim)]
         t_i_d_data   = history_data[..., 1]
         d_i_w_data   = history_data[..., 2]
 
         if self.if_T_i_D:
-            T_i_D = self.T_i_D_emb[(t_i_d_data * 288).type(torch.LongTensor)]    # [B, L, N, d]
+            T_i_D_emb = self.T_i_D_emb[(t_i_d_data * 288).type(torch.LongTensor)]    # [B, L, N, d]
         else:
-            T_i_D = None
+            T_i_D_emb = None
         if self.if_D_i_W:
-            D_i_W = self.D_i_W_emb[(d_i_w_data).type(torch.LongTensor)]          # [B, L, N, d]
+            D_i_W_emb = self.D_i_W_emb[(d_i_w_data).type(torch.LongTensor)]          # [B, L, N, d]
         else:
-            D_i_W = None
-        # NN
-        H = self.encoder(X, self.node_emb, T_i_D, D_i_W)
-        Y = self.decoder(H)
-        return Y
+            D_i_W_emb = None
+
+        # time series embedding
+        B, L, N, _ = X.shape
+        X = X.transpose(1, 2).contiguous()     # B, N, L, 1
+        X = X.reshape(B, N, -1).transpose(1, 2).unsqueeze(-1)  # B, D, N, 1
+        time_series_emb = self.time_series_emb_layer(X)       # B, D, N, 1
+
+        # expand node embeddings
+        node_emb = self.node_emb.unsqueeze(0).expand(B, -1, -1).transpose(1, 2).unsqueeze(-1)  # B, D', N, 1
+        # temporal embeddings
+        tem_emb  = []
+        if T_i_D_emb is not None:
+            tem_emb.append(T_i_D_emb[:, -1, :, :].transpose(1, 2).unsqueeze(-1))                     # B, D', N, 1
+        if D_i_W_emb is not None:
+            tem_emb.append(D_i_W_emb[:, -1, :, :].transpose(1, 2).unsqueeze(-1))                     # B, D', N, 1
+        
+        # concate all embeddings
+        hidden = torch.cat([time_series_emb, node_emb] + tem_emb, dim=1)
+
+        # encoding
+        hidden = self.encoder(hidden)
+
+        # regression
+        prediction = self.regression_layer(hidden)
+
+        return prediction
