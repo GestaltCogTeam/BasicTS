@@ -52,10 +52,13 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
 - python 3.9
 - pytorch 1.9.1
+- easy-torch latest
+
+> ⚠️⚠️⚠️ Please use `pip install easy-torch`, instead of `pip install easytorch`, to install [EasyTorch](https://github.com/cnstark/easytorch). They are different package. ⚠️⚠️⚠️
 
 ### 2.2 Installing from Pip
 
-`pip install -r requirements.txt`
+🕐
 
 ## 3. Codebase Designs and Conventions
 
@@ -63,7 +66,7 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
 ## 4. Usage
 
-`git clone --recurse-submodules https://github.com/zezhishao/BasicTS.git`
+`git clone https://github.com/zezhishao/BasicTS.git`
 
 ### 4.1 Data Preparation and Preprocessing
 
