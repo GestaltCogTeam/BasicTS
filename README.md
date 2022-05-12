@@ -54,7 +54,7 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 - pytorch 1.9.1
 - easy-torch latest
 
-> ⚠️⚠️⚠️ Please use `pip install easy-torch`, instead of `pip install easytorch`, to install [EasyTorch](https://github.com/cnstark/easytorch). They are different package. ⚠️⚠️⚠️
+> ⚠️⚠️⚠️ Please use `pip install easy-torch`, instead of `pip install easytorch`, to install [EasyTorch](https://github.com/cnstark/easytorch). They are different two packages. ⚠️⚠️⚠️
 
 ### 2.2 Installing from Pip
 
