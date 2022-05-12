@@ -29,13 +29,6 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_PEMS08.py', help='training config')
 
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_METR-LA.py', help='training config')
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS-BAY.py', help='training config')
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS03.py', help='training config')
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS04.py', help='training config')
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS07.py', help='training config')
-    parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS08.py', help='training config')
-
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_PEMS-BAY.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_PEMS03.py', help='training config')
@@ -57,7 +50,7 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STGCN/STGCN_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STGCN/STGCN_PEMS08.py', help='training config')
 
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/D2STGNN/D2STGNN_METR-LA.py', help='training config')
+    parser.add_argument('-opt', '--cfg', default='basicts/options/D2STGNN/D2STGNN_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/D2STGNN/D2STGNN_PEMS-BAY.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/D2STGNN/D2STGNN_PEMS03.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/D2STGNN/D2STGNN_PEMS04.py', help='training config')
