@@ -58,7 +58,7 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
 ### 2.2 Installing from Pip
 
-🕐
+`pip install -r requirements.txt`
 
 ## 3. Codebase Designs and Conventions
 
