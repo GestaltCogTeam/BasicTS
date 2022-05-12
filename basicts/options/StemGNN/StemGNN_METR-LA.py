@@ -32,7 +32,8 @@ CFG.METRICS = {
 # ================= environment ================= #
 CFG.ENV = EasyDict()
 CFG.ENV.SEED    = 1
-CFG.ENV.CUDNN_ENABLED = True
+CFG.ENV.CUDNN = EasyDict()
+CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
