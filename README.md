@@ -93,13 +93,13 @@ We recommend running a time series model with the following command:
 
 ```bash
 cd /path/to/project
-easytrain -c basicts/options/$METHOD_NAME/$METHOD_NAME_$DATASET_NAME.py
+easytrain -c basicts/options/$METHOD_NAME/$METHOD_NAME_$DATASET_NAME.py --gpus '0'
 ```
 
 Replace the `$METHOD_NAME` and `$DATASET_NAME` with any supported method and dataset. For example,
 
 ```bash
-easytrain -c basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py
+easytrain -c basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py --gpus '0'
 ```
 
 If you need to debug, you could run the `basicts/run.py` file. 
@@ -121,6 +121,7 @@ If you need to debug, you could run the `basicts/run.py` file.
 ## 7. TODO
 
 - [ ] : Support models like ASTGCN, ASTGNN, which take multi-periodicities data as input.
+- [ ] : Add detailed docs about 4.2, e.g., the usage of gpu.
 
 ## References
 

@@ -20,14 +20,15 @@ class BasicMTS(nn.Module):
 
         # spatial embeddings
         self.node_emb = nn.Parameter(torch.empty(self.num_nodes, self.node_dim))
-        nn.init.xavier_normal_(self.node_emb)
+        nn.init.xavier_uniform_(self.node_emb)
+
         # temporal embeddings
         if self.if_T_i_D:
             self.T_i_D_emb  = nn.Parameter(torch.empty(288, self.temp_dim))
-            nn.init.xavier_normal_(self.T_i_D_emb)
+            nn.init.xavier_uniform_(self.T_i_D_emb)
         if self.if_D_i_W:
             self.D_i_W_emb  = nn.Parameter(torch.empty(7, self.temp_dim))
-            nn.init.xavier_normal_(self.D_i_W_emb)
+            nn.init.xavier_uniform_(self.D_i_W_emb)
 
         # embedding layer 
         self.time_series_emb_layer = nn.Conv2d(in_channels=self.input_dim * self.input_len, out_channels=self.embed_dim, kernel_size=(1, 1), bias=True)
