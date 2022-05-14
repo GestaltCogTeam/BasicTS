@@ -7,7 +7,7 @@ class DCRNNRunner(TrafficRunner):
 
     def setup_graph(self, data):
         try:
-            self.train_iters(0, 0, data)
+            self.train_iters(data, 0, 0)
         except:
             pass
 

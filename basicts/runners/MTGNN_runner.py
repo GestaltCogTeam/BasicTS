@@ -88,6 +88,6 @@ class MTGNNRunner(TrafficRunner):
                 idx  = torch.tensor(idx)
                 future_data, history_data = data
                 data = future_data[:, :, idx, :], history_data[:, :, idx, :], idx
-                loss = self.train_iters(epoch, iter_index, data)
+                loss = self.train_iters(data, epoch, iter_index)
                 if loss is not None:
                     self.backward(loss)

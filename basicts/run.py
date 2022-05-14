@@ -31,7 +31,7 @@ def parse_args():
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS-BAY.py', help='training config')
-    parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS03.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS03.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS08.py', help='training config')
@@ -64,7 +64,7 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/D2STGNN/D2STGNN_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/D2STGNN/D2STGNN_PEMS08.py', help='training config')
 
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/MTGNN/MTGNN_METR-LA.py', help='training config')
+    parser.add_argument('-opt', '--cfg', default='basicts/options/MTGNN/MTGNN_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/MTGNN/MTGNN_PEMS-BAY.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/MTGNN/MTGNN_PEMS03.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/MTGNN/MTGNN_PEMS04.py', help='training config')
