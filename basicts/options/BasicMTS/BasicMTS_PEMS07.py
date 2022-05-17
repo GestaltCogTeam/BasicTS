@@ -1,6 +1,5 @@
 import os
 from easydict import EasyDict
-import torch
 # architecture 
 from basicts.archs.BasicMTS_arch import BasicMTS
 # runner
@@ -10,7 +9,6 @@ from basicts.metrics.mae import masked_mae
 from basicts.metrics.mape import masked_mape
 from basicts.metrics.rmse import masked_rmse
 from basicts.losses.losses import masked_l1_loss
-from basicts.utils.serialization import load_adj
 
 CFG = EasyDict()
 
@@ -37,7 +35,6 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'BasicMTS'
 CFG.MODEL.ARCH  = BasicMTS
-adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
     "num_nodes" : 883, 
     'node_dim'  : 32,

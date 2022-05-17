@@ -1,6 +1,5 @@
 import os
 from easydict import EasyDict
-import torch
 # architecture 
 from basicts.archs.StemGNN_arch import StemGNN
 # runner
@@ -10,7 +9,6 @@ from basicts.metrics.mae import masked_mae
 from basicts.metrics.mape import masked_mape
 from basicts.metrics.rmse import masked_rmse
 from basicts.losses.losses import masked_l1_loss
-from basicts.utils.serialization import load_adj
 
 """Different from the official code, we use Adam as the optimizer and MAE as the loss function since they bring better performance."""
 
@@ -40,7 +38,6 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'StemGNN'
 CFG.MODEL.ARCH  = StemGNN
-adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
     "units":    170,
     "stack_cnt": 2,

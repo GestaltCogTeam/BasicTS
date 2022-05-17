@@ -38,11 +38,17 @@ CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'MTGNN'
 CFG.MODEL.ARCH  = MTGNN_arch
 _, adj_mx = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
+buildA_true = True
 num_nodes = 170
-adj_mx = torch.tensor(adj_mx)-torch.eye(num_nodes)
+if buildA_true: # self-learned adjacency matrix
+    adj_mx = None
+else:           # use predefined adjacency matrix
+    _, adj_mx = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
+    adj_mx = torch.tensor(adj_mx)-torch.eye(num_nodes)
+
 CFG.MODEL.PARAM = {
     "gcn_true"  : True, 
-    "buildA_true": True,
+    "buildA_true": buildA_true,
     "gcn_depth": 2,
     "num_nodes": num_nodes,
     "predefined_A":adj_mx,
