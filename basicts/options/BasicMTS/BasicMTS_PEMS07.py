@@ -37,12 +37,19 @@ CFG.MODEL.NAME  = 'BasicMTS'
 CFG.MODEL.ARCH  = BasicMTS
 CFG.MODEL.PARAM = {
     "num_nodes" : 883, 
-    'node_dim'  : 32,
-    'temp_dim'  : 32,
     'input_len' : 12,
     'input_dim' : 3,
     'embed_dim' : 32,
-    'output_len': 12
+    'output_len': 12,
+    'num_layer' : 3,
+
+    "if_node"   : True,
+    'node_dim'  : 32,
+    
+    "if_T_i_D"  : True,
+    "if_D_i_W"  :True,
+    'temp_dim_tid'  : 32,
+    'temp_dim_diw'  : 32,
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed

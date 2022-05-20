@@ -6,37 +6,38 @@ class BasicMTS(nn.Module):
     def __init__(self, **model_args):
         super().__init__()
         # attributes
-        print(model_args.keys())
         self.num_nodes  = model_args['num_nodes']
         self.node_dim   = model_args['node_dim']
-        self.temp_dim   = model_args['temp_dim']
         self.input_len  = model_args['input_len']
         self.input_dim  = model_args['input_dim']
         self.embed_dim  = model_args['embed_dim']
         self.output_len = model_args['output_len']
+        self.num_layer  = model_args['num_layer']
+        self.temp_dim_tid   = model_args['temp_dim_tid']
+        self.temp_dim_diw   = model_args['temp_dim_diw']
 
-        self.if_T_i_D = True
-        self.if_D_i_W = True
+        self.if_T_i_D = model_args['if_T_i_D']
+        self.if_D_i_W = model_args['if_D_i_W']
+        self.if_node  = model_args['if_node']
 
         # spatial embeddings
-        self.node_emb = nn.Parameter(torch.empty(self.num_nodes, self.node_dim))
-        nn.init.xavier_uniform_(self.node_emb)
-
+        if self.if_node:
+            self.node_emb = nn.Parameter(torch.empty(self.num_nodes, self.node_dim))
+            nn.init.xavier_uniform_(self.node_emb)
         # temporal embeddings
         if self.if_T_i_D:
-            self.T_i_D_emb  = nn.Parameter(torch.empty(288, self.temp_dim))
+            self.T_i_D_emb  = nn.Parameter(torch.empty(288, self.temp_dim_tid))
             nn.init.xavier_uniform_(self.T_i_D_emb)
         if self.if_D_i_W:
-            self.D_i_W_emb  = nn.Parameter(torch.empty(7, self.temp_dim))
+            self.D_i_W_emb  = nn.Parameter(torch.empty(7, self.temp_dim_diw))
             nn.init.xavier_uniform_(self.D_i_W_emb)
 
         # embedding layer 
         self.time_series_emb_layer = nn.Conv2d(in_channels=self.input_dim * self.input_len, out_channels=self.embed_dim, kernel_size=(1, 1), bias=True)
-        
+
         # encoding
-        num_layer = 3
-        self.hidden_dim = self.embed_dim+self.node_dim+self.temp_dim*(int(self.if_D_i_W) + int(self.if_T_i_D))
-        self.encoder = nn.Sequential(*[MLP_res(self.hidden_dim, self.hidden_dim) for _ in range(num_layer)])
+        self.hidden_dim = self.embed_dim+self.node_dim*int(self.if_node)+self.temp_dim_tid*int(self.if_D_i_W) + self.temp_dim_diw*int(self.if_T_i_D)
+        self.encoder = nn.Sequential(*[MLP_res(self.hidden_dim, self.hidden_dim) for _ in range(self.num_layer)])
 
         # regression
         self.regression_layer = nn.Conv2d(in_channels=self.hidden_dim, out_channels=self.output_len, kernel_size=(1,1), bias=True)
