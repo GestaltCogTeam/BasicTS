@@ -71,7 +71,6 @@ CFG.TRAIN.LR_SCHEDULER.PARAM= {
 }
 
 # ================= train ================= #
-CFG.TRAIN.CLIP       = 5
 CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
