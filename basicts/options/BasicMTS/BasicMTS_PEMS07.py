@@ -42,12 +42,10 @@ CFG.MODEL.PARAM = {
     'embed_dim' : 32,
     'output_len': 12,
     'num_layer' : 3,
-
     "if_node"   : True,
     'node_dim'  : 32,
-    
     "if_T_i_D"  : True,
-    "if_D_i_W"  :True,
+    "if_D_i_W"  : True,
     'temp_dim_tid'  : 32,
     'temp_dim_diw'  : 32,
 }
