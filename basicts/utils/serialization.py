@@ -42,3 +42,16 @@ def load_adj(file_path, adj_type):
         error = 0
         assert error, "adj type not defined"
     return adj, adj_mx
+
+def load_node2vec_emb(file_path):
+    # spatial embedding
+    with open(file_path, mode='r') as f:
+        lines = f.readlines()
+        temp = lines[0].split(' ')
+        num_vertex, dims = int(temp[0]), int(temp[1])
+        SE = torch.zeros((num_vertex, dims), dtype=torch.float32)
+        for line in lines[1:]:
+            temp = line.split(' ')
+            index = int(temp[0])
+            SE[index] = torch.tensor([float(ch) for ch in temp[1:]])
+    return SE

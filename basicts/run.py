@@ -31,7 +31,7 @@ def parse_args():
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS-BAY.py', help='training config')
-    parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS03.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS03.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/BasicMTS/BasicMTS_PEMS08.py', help='training config')
@@ -91,6 +91,8 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DGCRN/DGCRN_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DGCRN/DGCRN_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DGCRN/DGCRN_PEMS08.py', help='training config')
+
+    parser.add_argument('-opt', '--cfg', default='basicts/options/GMAN/GMAN_METR-LA.py', help='training config')
 
     parser.add_argument('--gpus', default='0', help='visible gpus')
     return parser.parse_args()

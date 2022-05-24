@@ -1,0 +1,1 @@
+from basicts.archs.GMAN_arch.GMAN_arch import GMAN_arch as GMAN
