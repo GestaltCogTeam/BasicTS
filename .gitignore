@@ -22,6 +22,7 @@ core*
 *.p
 *.pickle
 *.pyc
+*.txt
 
 gpu_task.py
 nohup.out
