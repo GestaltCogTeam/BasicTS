@@ -120,6 +120,10 @@ If you need to debug, you could run the `basicts/run.py` file.
 
 ## 7. TODO
 
+- [ ] : Add detailed documentation and a demo about data preprocessing.
+- [ ] : Add more multivariate time series datasets: Traffic, Electricity, Exchange-Rate, ETTh1, ETTh2, ETTm1, Weather, Solar-Energy.
+- [ ] : Different from the existing traffic datasets (PEMS0X, PEMS-BAY, METR-LA), these datasets have multiple usages in the existing datasets, and the baselines that need to be compared in different contexts are different. Therefore, it is necessary to add statistics for all datasets and describe their typical settings case by case.
+- [ ] : Add statistical information of these dataset, and descibe their typical settings.
 - [ ] : Support models like ASTGCN, ASTGNN, which take multi-periodicities data as input.
 - [ ] : Add detailed docs about 4.2, e.g., the usage of gpu.
 
