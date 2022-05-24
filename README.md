@@ -33,7 +33,7 @@ If this repository helps your research or work, I hope you could give me a ⭐, 
 | MTGNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | GTS           | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
 | DGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| GMAN          | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| GMAN          | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | AGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | STNorm        | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |
