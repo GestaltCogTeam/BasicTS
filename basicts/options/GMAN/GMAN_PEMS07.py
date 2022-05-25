@@ -17,8 +17,8 @@ CFG = EasyDict()
 CFG.DESCRIPTION = 'GMAN model configuration'
 CFG.RUNNER  = GMANRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
-CFG.DATASET_TYPE  = 'Traffic speed'
+CFG.DATASET_NAME  = "PEMS07"
+CFG.DATASET_TYPE  = 'Traffic flow'
 CFG.GPU_NUM = 1
 CFG.METRICS = {
     "MAE": masked_mae,
@@ -39,7 +39,7 @@ CFG.MODEL.ARCH  = GMAN
 spatial_embed   = load_node2vec_emb("datasets/" + CFG.DATASET_NAME + "/node2vec_emb.txt")
 CFG.MODEL.PARAM = {
     "SE": spatial_embed,
-    "L" : 5,
+    "L" : 1,
     "K" : 8,
     "d" : 8,
     "num_his" : 12,
@@ -76,7 +76,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 12
+CFG.TRAIN.DATA.BATCH_SIZE   = 8
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2

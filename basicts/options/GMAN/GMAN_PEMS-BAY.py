@@ -76,7 +76,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 32
+CFG.TRAIN.DATA.BATCH_SIZE   = 8
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2
@@ -90,7 +90,7 @@ CFG.VAL.DATA = EasyDict()
 ## read data
 CFG.VAL.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.VAL.DATA.BATCH_SIZE     = 64
+CFG.VAL.DATA.BATCH_SIZE     = 32
 CFG.VAL.DATA.PREFETCH       = False
 CFG.VAL.DATA.SHUFFLE        = False
 CFG.VAL.DATA.NUM_WORKERS    = 2
@@ -104,7 +104,7 @@ CFG.TEST.DATA = EasyDict()
 ## read data
 CFG.TEST.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TEST.DATA.BATCH_SIZE    = 64
+CFG.TEST.DATA.BATCH_SIZE    = 32
 CFG.TEST.DATA.PREFETCH      = False
 CFG.TEST.DATA.SHUFFLE       = False
 CFG.TEST.DATA.NUM_WORKERS   = 2
