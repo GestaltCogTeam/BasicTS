@@ -25,7 +25,7 @@ class TrafficRunner(BaseRunner):
             - initialize metrics: mae, mape, rmse
             - define model
             - build datasets & dataloader
-            - self.itera_per_epoch
+            - self.iter_per_epoch
             - train/val iteration, test process.
     Args:
         BaseRunner (easytorch.easytorch.runner): base runner
@@ -119,7 +119,7 @@ class TrafficRunner(BaseRunner):
         dataset = cfg['DATASET_CLS'](raw_file_path, index_file_path, mode='train')
         print("train len: {0}".format(len(dataset)))
         
-        self.itera_per_epoch = math.ceil(len(dataset) / batch_size)
+        self.iter_per_epoch = math.ceil(len(dataset) / batch_size)
         
         return dataset
 
@@ -201,7 +201,7 @@ class TrafficRunner(BaseRunner):
         Returns:
             loss (torch.Tensor)
         """
-        iter_num = (epoch-1) * self.itera_per_epoch + iter_index
+        iter_num = (epoch-1) * self.iter_per_epoch + iter_index
         prediction, real_value = self.forward(data=data, epoch=epoch, iter_num=iter_num, train=True)
         # re-scale data
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
@@ -226,7 +226,7 @@ class TrafficRunner(BaseRunner):
             train_epoch (int): current epoch if in training process. Else None.
             iter_index (int): current iter.
         """
-        prediction, real_value = self.forward(data=data, epoch=train_epoch, iter_index=iter_index, train=False)
+        prediction, real_value = self.forward(data=data, epoch=train_epoch, iter_num=None, train=False)
         # re-scale data
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
@@ -249,7 +249,7 @@ class TrafficRunner(BaseRunner):
         prediction = []
         real_value  = []
         for iter_index, data in enumerate(self.test_data_loader):
-            preds, testy = self.forward(data, epoch=train_epoch, iter_index=iter_index, train=False)
+            preds, testy = self.forward(data, epoch=train_epoch, iter_num=None, train=False)
             prediction.append(preds)
             real_value.append(testy)
         prediction = torch.cat(prediction,dim=0)
