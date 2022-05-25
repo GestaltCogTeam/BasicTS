@@ -9,7 +9,6 @@ import math
     Official Code (TensorFlow): https://github.com/zhengchuanpan/GMAN
 """
 
-
 class conv2d_(nn.Module):
     def __init__(self, input_dims, output_dims, kernel_size, stride=(1, 1),
                  padding='SAME', use_bias=True, activation=F.relu,
@@ -129,13 +128,13 @@ class spatialAttention(nn.Module):
         batch_size = X.shape[0]
         X = torch.cat((X, STE), dim=-1)
         # [batch_size, num_step, num_vertex, K * d]
-        query = self.FC_q(X)
+        query = self.FC_q(X)                        # [B, L, N, K*d]
         key = self.FC_k(X)
         value = self.FC_v(X)
         # [K * batch_size, num_step, num_vertex, d]
-        query = torch.cat(torch.split(query, self.K, dim=-1), dim=0)
-        key = torch.cat(torch.split(key, self.K, dim=-1), dim=0)
-        value = torch.cat(torch.split(value, self.K, dim=-1), dim=0)
+        query = torch.cat(torch.split(query, self.d, dim=-1), dim=0)            # see https://github.com/VincLee8188/GMAN-PyTorch/issues/3
+        key = torch.cat(torch.split(key, self.d, dim=-1), dim=0)
+        value = torch.cat(torch.split(value, self.d, dim=-1), dim=0)
         # [K * batch_size, num_step, num_vertex, num_vertex]
         attention = torch.matmul(query, key.transpose(2, 3))
         attention /= (self.d ** 0.5)

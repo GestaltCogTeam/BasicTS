@@ -65,7 +65,8 @@ CFG.TRAIN.LR_SCHEDULER.PARAM= {
 }
 
 # ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.CLIP       = 5
+CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
@@ -76,7 +77,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 8
+CFG.TRAIN.DATA.BATCH_SIZE   = 4
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2

@@ -60,11 +60,12 @@ CFG.TRAIN.OPTIM.PARAM= {
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[1, 50, 80],
+    "milestones":[1, 20, 40, 60, 80],
     "gamma":0.5
 }
 
 # ================= train ================= #
+CFG.TRAIN.CLIP       = 5
 CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
@@ -76,7 +77,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 8
+CFG.TRAIN.DATA.BATCH_SIZE   = 16
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2
