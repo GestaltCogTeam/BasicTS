@@ -307,7 +307,7 @@ class transformAttention(nn.Module):
         return X
 
 
-class GMAN_arch(nn.Module):
+class GMAN(nn.Module):
     '''
     GMAN
         X:       [batch_size, num_his, num_vertx]
@@ -323,7 +323,7 @@ class GMAN_arch(nn.Module):
     '''
 
     def __init__(self, SE, L, K, d, num_his, bn_decay):
-        super(GMAN_arch, self).__init__()
+        super(GMAN, self).__init__()
         D = K * d
         self.num_his = num_his
         self.SE = nn.Parameter(SE)
