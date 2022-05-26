@@ -57,7 +57,7 @@ class MTGNNRunner(TrafficRunner):
 
         history_data    = self.to_running_device(history_data)      # B, L, N, C
         future_data     = self.to_running_device(future_data)       # B, L, N, C
-        B, L, N, C      = history_data.shape
+        B, L, N, C      = future_data.shape
 
         history_data    = self.select_input_features(history_data)
         
