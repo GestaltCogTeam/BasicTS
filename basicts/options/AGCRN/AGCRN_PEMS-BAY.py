@@ -38,7 +38,7 @@ CFG.MODEL.ARCH  = AGCRN
 CFG.MODEL.PARAM = {
     "num_nodes" : 325, 
     "input_dim" : 2,
-    "rnn_units": 64,
+    "rnn_units" : 64,
     "output_dim": 1,
     "horizon"   : 12,
     "num_layers": 2,
