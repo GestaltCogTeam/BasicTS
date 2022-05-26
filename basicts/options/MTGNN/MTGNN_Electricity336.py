@@ -60,7 +60,7 @@ CFG.MODEL.PARAM = {
     "residual_channels":32,
     "skip_channels":64,
     "end_channels":128,
-    "seq_length":12,
+    "seq_length":168,
     "in_dim":2,
     "out_dim":12,
     "layers":3,
@@ -99,7 +99,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 32
+CFG.TRAIN.DATA.BATCH_SIZE   = 16
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2

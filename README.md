@@ -119,7 +119,7 @@ If you need to debug, you could run the `basicts/run.py` file.
 ![Main results.](results/result.png)
 
 ## 7. TODO
-
+- [ ] : revise the data preprocessing of PEMS07, which only contains weekdays.
 - [ ] : Add detailed documentation and a demo about data preprocessing.
 - [ ] : Add more multivariate time series datasets: Traffic, Electricity, Exchange-Rate, ETTh1, ETTh2, ETTm1, Weather, Solar-Energy.
 - [ ] : Different from the existing traffic datasets (PEMS0X, PEMS-BAY, METR-LA), these datasets have multiple usages in the existing datasets, and the baselines that need to be compared in different contexts are different. Therefore, it is necessary to add statistics for all datasets and describe their typical settings case by case.

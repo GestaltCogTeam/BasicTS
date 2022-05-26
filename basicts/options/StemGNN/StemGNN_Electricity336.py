@@ -41,7 +41,7 @@ CFG.MODEL.ARCH  = StemGNN
 CFG.MODEL.PARAM = {
     "units":    336,
     "stack_cnt": 2,
-    "time_step": 12,
+    "time_step": 168,
     "multi_layer": 5,
     "horizon": 12,
     "dropout_rate": 0.5,
@@ -78,7 +78,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 64
+CFG.TRAIN.DATA.BATCH_SIZE   = 16
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2

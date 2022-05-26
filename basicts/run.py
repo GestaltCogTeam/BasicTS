@@ -6,7 +6,7 @@ from easytorch import launch_training
 
 def parse_args():
     parser = ArgumentParser(description='Run time series forecasting model in BasicTS framework based on EasyTorch!')
-    parser.add_argument('-opt', '--cfg', required=True, help='training config')
+    # parser.add_argument('-opt', '--cfg', required=True, help='training config')
     
     # parser.add_argument('-opt', '--cfg', default='basicts/options/HI/HI_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/HI/HI_PEMS-BAY.py', help='training config')
@@ -43,6 +43,7 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_PEMS08.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_Electricity336.py', help='training config')
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_PEMS-BAY.py', help='training config')
@@ -79,6 +80,7 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/AGCRN/AGCRN_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/AGCRN/AGCRN_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/AGCRN/AGCRN_PEMS08.py', help='training config')
+    parser.add_argument('-opt', '--cfg', default='basicts/options/AGCRN/AGCRN_Electricity336.py', help='training config')
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STNorm/STNorm_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STNorm/STNorm_PEMS-BAY.py', help='training config')

@@ -37,7 +37,7 @@ CFG.MODEL.NAME  = 'BasicMTS'
 CFG.MODEL.ARCH  = BasicMTS
 CFG.MODEL.PARAM = {
     "num_nodes" : 336, 
-    'input_len' : 12,
+    'input_len' : 168,
     'input_dim' : 3,
     'embed_dim' : 32,
     'output_len': 12,

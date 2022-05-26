@@ -38,7 +38,7 @@ CFG.MODEL.ARCH  = AGCRN
 CFG.MODEL.PARAM = {
     "num_nodes" : 336, 
     "input_dim" : 1,
-    "rnn_units" : 64,
+    "rnn_units" : 32,
     "output_dim": 1,
     "horizon"   : 12,
     "num_layers": 2,
@@ -77,7 +77,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 64
+CFG.TRAIN.DATA.BATCH_SIZE   = 12
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2
