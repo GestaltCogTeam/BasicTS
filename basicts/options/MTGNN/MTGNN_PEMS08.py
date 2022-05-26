@@ -37,7 +37,6 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'MTGNN'
 CFG.MODEL.ARCH  = MTGNN_arch
-_, adj_mx = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 buildA_true = True
 num_nodes = 170
 if buildA_true: # self-learned adjacency matrix
