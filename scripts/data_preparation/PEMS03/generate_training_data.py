@@ -8,6 +8,8 @@ from generate_adj_mx import generate_adj_PEMS03
 
 """
 PEMS03 dataset (traffic flow dataset) default settings:
+    - sampling frequency:
+        5min
     - normalization:
         standard norm
     - dataset division: 
@@ -72,7 +74,7 @@ def generate_data(args):
     output_dir = args.output_dir
 
     # read data
-    data = np.load(args.traffic_df_file_name)['data']
+    data = np.load(args.data_file_path)['data']
     data = data[..., C]
     print("Data shape: {0}".format(data.shape))
 
@@ -100,13 +102,13 @@ def generate_data(args):
     feature_list = [data_norm]
     if add_time_in_day:
         # numerical time_in_day
-        time_ind    = [i%288 / 288 for i in range(data_norm.shape[0])]
+        time_ind    = [i%args.steps_per_day / args.steps_per_day for i in range(data_norm.shape[0])]
         time_ind    = np.array(time_ind)
         time_in_day = np.tile(time_ind, [1, N, 1]).transpose((2, 1, 0))
         feature_list.append(time_in_day)
     if add_day_in_week:
         # numerical day_in_week
-        day_in_week = [(i // 288)%7 for i in range(data_norm.shape[0])]
+        day_in_week = [(i // args.steps_per_day)%7 for i in range(data_norm.shape[0])]
         day_in_week = np.array(day_in_week)
         day_in_week = np.tile(day_in_week, [1, N, 1]).transpose((2, 1, 0))
         feature_list.append(day_in_week)
@@ -124,11 +126,11 @@ def generate_data(args):
     data['raw_data'] = raw_data
     pickle.dump(data, open(output_dir + "/data.pkl", "wb"))
     # copy adj
-    if os.path.exists(args.graph_file):
-        shutil.copyfile(args.graph_file, output_dir + '/adj_mx.pkl')      # copy models
+    if os.path.exists(args.graph_file_path):
+        shutil.copyfile(args.graph_file_path, output_dir + '/adj_mx.pkl')      # copy models
     else:
         generate_adj_PEMS03()
-        shutil.copyfile(args.graph_file, output_dir + '/adj_mx.pkl')      # copy models
+        shutil.copyfile(args.graph_file_path, output_dir + '/adj_mx.pkl')      # copy models
 
 if __name__ == "__main__":
     window_size     = 12                    # sliding window size for generating history sequence and target sequence
@@ -136,18 +138,20 @@ if __name__ == "__main__":
     train_ratio     = 0.6
     valid_ratio     = 0.2
     C               = [0]                   # selected channels
+    steps_per_day   = 288                   # 5min
 
     name            = "PEMS03"
     dow             = True                  # if add day_of_week feature
     output_dir      = 'datasets/' + name
-    data_file       = 'datasets/raw_data/{0}/{1}.npz'.format(name, name)
-    graph_file      = 'datasets/raw_data/{0}/adj_{1}.pkl'.format(name, name)
+    data_file_path  = 'datasets/raw_data/{0}/{1}.npz'.format(name, name)
+    graph_file_path = 'datasets/raw_data/{0}/adj_{1}.pkl'.format(name, name)
     
     parser  = argparse.ArgumentParser()
     parser.add_argument("--output_dir", type=str, default=output_dir, help="Output directory.")
-    parser.add_argument("--traffic_df_file_name", type=str, default=data_file, help="Raw traffic readings.",)
-    parser.add_argument("--graph_file", type=str, default=graph_file, help="Raw traffic readings.",)
-    parser.add_argument("--seq_len_short", type=int, default=window_size, help="Sequence Length.",)
+    parser.add_argument("--data_file_path", type=str, default=data_file_path, help="Raw traffic readings.")
+    parser.add_argument("--graph_file_path", type=str, default=graph_file_path, help="Raw traffic readings.")
+    parser.add_argument("--seq_len_short", type=int, default=window_size, help="Sequence Length.")
+    parser.add_argument("--steps_per_day", type=int, default=steps_per_day, help="Sequence Length.")
     parser.add_argument("--dow", type=bool, default=dow, help='Add feature day_of_week.')
     parser.add_argument("--C", type=list, default=C, help='Selected channels.')
     parser.add_argument("--train_ratio", type=float, default=train_ratio, help='Train ratio')

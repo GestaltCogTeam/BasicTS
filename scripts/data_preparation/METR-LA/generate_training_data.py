@@ -69,7 +69,7 @@ def generate_data(args):
     output_dir      = args.output_dir
 
     # read data
-    df   = pd.read_hdf(args.traffic_df_file_name)
+    df   = pd.read_hdf(args.data_file_path)
     data = np.expand_dims(df.values, axis=-1)
 
     data = data[..., C]
@@ -123,7 +123,7 @@ def generate_data(args):
     data['raw_data'] = raw_data
     pickle.dump(data, open(output_dir + "/data.pkl", "wb"))
     # copy adj
-    shutil.copyfile(args.graph_file, output_dir + '/adj_mx.pkl')      # copy models
+    shutil.copyfile(args.graph_file_path, output_dir + '/adj_mx.pkl')      # copy models
 
 if __name__ == "__main__":
     window_size     = 12                    # sliding window size for generating history sequence and target sequence
@@ -134,13 +134,13 @@ if __name__ == "__main__":
     name            = "METR-LA"
     dow             = True                  # if add day_of_week feature
     output_dir      = 'datasets/' + name
-    data_file       = 'datasets/raw_data/{0}/{1}.h5'.format(name, name)
-    graph_file      = 'datasets/raw_data/{0}/adj_{1}.pkl'.format(name, name)
+    data_file_path  = 'datasets/raw_data/{0}/{1}.h5'.format(name, name)
+    graph_file_path = 'datasets/raw_data/{0}/adj_{1}.pkl'.format(name, name)
     
     parser  = argparse.ArgumentParser()
     parser.add_argument("--output_dir", type=str, default=output_dir, help="Output directory.")
-    parser.add_argument("--traffic_df_file_name", type=str, default=data_file, help="Raw traffic readings.",)
-    parser.add_argument("--graph_file", type=str, default=graph_file, help="Raw traffic readings.",)
+    parser.add_argument("--data_file_path", type=str, default=data_file_path, help="Raw traffic readings.",)
+    parser.add_argument("--graph_file_path", type=str, default=graph_file_path, help="Raw traffic readings.",)
     parser.add_argument("--seq_len_short", type=int, default=window_size, help="Sequence Length.",)
     parser.add_argument("--dow", type=bool, default=dow, help='Add feature day_of_week.')
     parser.add_argument("--C", type=list, default=C, help='Selected channels.')
