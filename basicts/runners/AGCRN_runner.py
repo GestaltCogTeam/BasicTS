@@ -30,6 +30,7 @@ class AGCRNRunner(TrafficRunner):
         # select feature using self.target_features
         data = data[:, :, :, self.target_features]
         return data
+
     def forward(self, data: tuple, epoch:int = None, iter_num: int = None, train:bool = True, **kwargs) -> tuple:
         """feed forward process for train, val, and test. Note that the outputs are NOT re-scaled.
 
