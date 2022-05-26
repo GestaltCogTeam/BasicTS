@@ -7,6 +7,7 @@ import math
     Paper: GMAN: A Graph Multi-Attention Network for Traffic Prediction
     Ref Code: https://github.com/VincLee8188/GMAN-PyTorch/blob/master/model/model_.py
     Official Code (TensorFlow): https://github.com/zhengchuanpan/GMAN
+    TODO: Compared to the official tensorflow version code, this pytorch implementation can achieve similar MAE performance. But somehow, RMSE and MAPE seem to be abnormally high.
 """
 
 class conv2d_(nn.Module):
@@ -22,11 +23,6 @@ class conv2d_(nn.Module):
         self.conv = nn.Conv2d(input_dims, output_dims, kernel_size, stride=stride,
                               padding=0, bias=use_bias)
         self.batch_norm = nn.BatchNorm2d(output_dims, momentum=bn_decay)
-        torch.nn.init.xavier_uniform_(self.conv.weight)
-
-        if use_bias:
-            torch.nn.init.zeros_(self.conv.bias)
-
 
     def forward(self, x):
         x = x.permute(0, 3, 2, 1)
