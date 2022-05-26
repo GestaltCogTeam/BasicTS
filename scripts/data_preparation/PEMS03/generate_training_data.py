@@ -68,7 +68,8 @@ def generate_data(args):
         args (Namespace): args for processing data.
     """
     C = args.C
-    seq_len_short = args.seq_len_short
+    future_seq_len  = args.future_seq_len
+    history_seq_len = args.history_seq_len
     add_time_in_day = True
     add_day_in_week = args.dow
     output_dir = args.output_dir
@@ -79,17 +80,17 @@ def generate_data(args):
     print("Data shape: {0}".format(data.shape))
 
     L, N, F = data.shape
-    num_samples_short = L - 2*seq_len_short + 1
-    train_num_short = round(num_samples_short * train_ratio)
-    valid_num_short = round(num_samples_short * valid_ratio)
-    test_num_short  = num_samples_short - train_num_short - valid_num_short
+    num_samples     = L - (history_seq_len + future_seq_len) + 1
+    train_num_short = round(num_samples * train_ratio)
+    valid_num_short = round(num_samples * valid_ratio)
+    test_num_short  = num_samples - train_num_short - valid_num_short
     print("train_num_short:{0}".format(train_num_short))
     print("valid_num_short:{0}".format(valid_num_short))
     print("test_num_short:{0}".format(test_num_short))
 
     index_list      = []
-    for i in range(seq_len_short, num_samples_short + seq_len_short):
-        index = (i-seq_len_short, i, i+seq_len_short)
+    for i in range(history_seq_len, num_samples + history_seq_len):
+        index = (i-history_seq_len, i, i+future_seq_len)
         index_list.append(index)
     train_index = index_list[:train_num_short]
     valid_index = index_list[train_num_short: train_num_short + valid_num_short]
@@ -133,8 +134,9 @@ def generate_data(args):
         shutil.copyfile(args.graph_file_path, output_dir + '/adj_mx.pkl')      # copy models
 
 if __name__ == "__main__":
-    window_size     = 12                    # sliding window size for generating history sequence and target sequence
-    # seq_len_short   = 12
+    history_seq_len = 12                    # sliding window size for generating history sequence and target sequence
+    future_seq_len  = 12
+    
     train_ratio     = 0.6
     valid_ratio     = 0.2
     C               = [0]                   # selected channels
@@ -150,7 +152,8 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", type=str, default=output_dir, help="Output directory.")
     parser.add_argument("--data_file_path", type=str, default=data_file_path, help="Raw traffic readings.")
     parser.add_argument("--graph_file_path", type=str, default=graph_file_path, help="Raw traffic readings.")
-    parser.add_argument("--seq_len_short", type=int, default=window_size, help="Sequence Length.")
+    parser.add_argument("--history_seq_len", type=int, default=history_seq_len, help="Sequence Length.")
+    parser.add_argument("--future_seq_len", type=int, default=future_seq_len, help="Sequence Length.")
     parser.add_argument("--steps_per_day", type=int, default=steps_per_day, help="Sequence Length.")
     parser.add_argument("--dow", type=bool, default=dow, help='Add feature day_of_week.')
     parser.add_argument("--C", type=list, default=C, help='Selected channels.')
