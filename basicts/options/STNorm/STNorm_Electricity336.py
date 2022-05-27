@@ -42,9 +42,9 @@ CFG.MODEL.PARAM = {
     "in_dim"    : 2,
     "out_dim"   : 12,
     "channels"  : 32,
-    "kernel_size": 2,
-    "blocks"    : 4,
-    "layers"    : 2,
+    "kernel_size": 3,
+    "blocks"    : 8,
+    "layers"    : 4,
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1]            # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
@@ -78,7 +78,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 8
+CFG.TRAIN.DATA.BATCH_SIZE   = 4
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2

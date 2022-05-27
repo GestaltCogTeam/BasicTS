@@ -21,7 +21,7 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/Stat/Stat_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/Stat/Stat_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/Stat/Stat_PEMS08.py', help='training config')
-    parser.add_argument('-opt', '--cfg', default='basicts/options/Stat/Stat_Electricity336.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/Stat/Stat_Electricity336.py', help='training config')
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/DCRNN/DCRNN_PEMS-BAY.py', help='training config')
@@ -82,6 +82,14 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/AGCRN/AGCRN_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/AGCRN/AGCRN_PEMS08.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/AGCRN/AGCRN_Electricity336.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/AGCRN/AGCRN_PEMS07.py', help='training config')
+
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_METR-LA.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_PEMS-BAY.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_PEMS03.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_PEMS04.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_PEMS07.py', help='training config')
+    parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_Electricity336.py', help='training config')
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STNorm/STNorm_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STNorm/STNorm_PEMS-BAY.py', help='training config')

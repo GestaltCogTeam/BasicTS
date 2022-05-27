@@ -17,7 +17,7 @@ CFG.DESCRIPTION = 'AGCRN model configuration'
 CFG.RUNNER  = AGCRNRunner
 CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "Electricity336"
-CFG.DATASET_TYPE  = 'Traffic flow'
+CFG.DATASET_TYPE  = 'Electricity consumption'
 CFG.GPU_NUM = 1
 CFG.METRICS = {
     "MAE": masked_mae,
