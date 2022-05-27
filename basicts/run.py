@@ -44,7 +44,7 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_PEMS07.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_PEMS08.py', help='training config')
-    # parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_Electricity336.py', help='training config')
+    parser.add_argument('-opt', '--cfg', default='basicts/options/StemGNN/StemGNN_Electricity336.py', help='training config')
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/GraphWaveNet/GraphWaveNet_PEMS-BAY.py', help='training config')
@@ -89,7 +89,7 @@ def parse_args():
     # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_PEMS03.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_PEMS04.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_PEMS07.py', help='training config')
-    parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_Electricity336.py', help='training config')
+    # parser.add_argument('-opt', '--cfg', default='basicts/options/LSTM/LSTM_Electricity336.py', help='training config')
 
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STNorm/STNorm_METR-LA.py', help='training config')
     # parser.add_argument('-opt', '--cfg', default='basicts/options/STNorm/STNorm_PEMS-BAY.py', help='training config')

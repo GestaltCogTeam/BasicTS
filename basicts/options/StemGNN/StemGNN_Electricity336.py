@@ -42,7 +42,7 @@ CFG.MODEL.PARAM = {
     "units":    336,
     "stack_cnt": 2,
     "time_step": 168,
-    "multi_layer": 5,
+    "multi_layer": 2,
     "horizon": 12,
     "dropout_rate": 0.5,
     "leaky_rate": 0.2
