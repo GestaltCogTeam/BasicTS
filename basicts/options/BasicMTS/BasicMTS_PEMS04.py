@@ -13,7 +13,7 @@ from basicts.losses.losses import masked_l1_loss
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = 'BasicMTS model configuration'
+CFG.DESCRIPTION = 'BasicMTS model configuration without DiW embedding'
 CFG.RUNNER  = BasicMTSRunner
 CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "PEMS04"

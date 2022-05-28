@@ -71,8 +71,10 @@ class BasicMTS(nn.Module):
         X = X.view(B, N, -1).transpose(1, 2).unsqueeze(-1)      # B, D, N, 1
         time_series_emb = self.time_series_emb_layer(X)         # B, D, N, 1
 
-        # expand node embeddings
-        node_emb = self.node_emb.unsqueeze(0).expand(B, -1, -1).transpose(1, 2).unsqueeze(-1)  # B, D, N, 1
+        node_emb = []
+        if self.if_node:
+            # expand node embeddings
+            node_emb.append(self.node_emb.unsqueeze(0).expand(B, -1, -1).transpose(1, 2).unsqueeze(-1))  # B, D, N, 1
         # temporal embeddings
         tem_emb  = []
         if T_i_D_emb is not None:
@@ -81,7 +83,7 @@ class BasicMTS(nn.Module):
             tem_emb.append(D_i_W_emb.transpose(1, 2).unsqueeze(-1))                     # B, D, N, 1
         
         # concate all embeddings
-        hidden = torch.cat([time_series_emb, node_emb] + tem_emb, dim=1)
+        hidden = torch.cat([time_series_emb] + node_emb + tem_emb, dim=1)
 
         # encoding
         hidden = self.encoder(hidden)
