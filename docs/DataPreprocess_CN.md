@@ -2,54 +2,48 @@
 
 [TOC]
 
-本文档以PEMS04为例，介绍BasicTS的数据预处理过程。包括：原始数据、预处理过程、预处理后数据的格式。
+本文档以PEMS04为例，介绍BasicTS的数据预处理过程。包括：原始数据格式、预处理过程、预处理后数据格式。
 
-PEMS04数据集的预处理代码位于`scripts/data_preparation/PEMS04/generate_training_data.py`.
+PEMS04数据集的预处理代码位于`scripts/data_preparation/PEMS04/generate_training_data.py`。
 
 您可以通过借鉴PEMS04数据集的预处理，添加您自己的数据集。
-
-
 
 ## 1 原始数据
 
 PEMS04数据集来自于交通系统中，共包含来自307个交通传感器的数据。
 
-> 本仓库的数据集通常都是“多变量时间序列”数据集。
-
 原始数据位于`datasets/raw_data/PEMS04/PEMS04.npz`，它是一个`[16992, 307, 3]`大小的numpy数组。
 
-其中，16992代表时间序列有16992个时间片，307代表总共有307条时间序列，3代表传感器每次采样三种特征。
+其中，16992代表时间序列有16992个时间片，307代表总共有来自307个传感器的307条时间序列，3代表传感器每次采样三种特征。
 
 ## 2 预处理过程
 
-时间序列的训练样本由一个长度为P+F的滑窗在原始时间序列上滑动得到。
+时间序列的训练样本通常由一个长度为P+F的滑窗在原始时间序列上滑动得到。
 其中，前P个时刻作为历史数据，后F个时刻作为未来数据。
 
-> 后续会支持不连续采样的数据处理
+### 2.1 预处理参数
 
-### 2.1 预处理参数：
+- `output_dir`: 预处理后文件存储位置。
+- `data_file_path`： 原生数据位置。
+- `graph_file_path`： 图结构数据位置（图结构是非必须的，假如您的数据集没有自带图结构或者您不知道如何构造图结构，可以忽略这一个参数）。
+- `history_seq_len`： 历史数据长度，即P的大小。
+- `future_seq_len`： 未来数据长度，即F的大小。
+- `steps_per_day`： 每天时间片的数量，和采样频率有关。例如每5分钟采样一次，那么该值为288。
+- `dow`： 是否添加day in week特征。
+- `C`： 选择要使用的特征维度。例如在PEMS04中，我们只需要使用传感器采集的3中特征数据值的第一个维度，所以`C=[0]`。
+- `train_ratio`：训练集占总样本量的比例。
+- `valid_ratio`：验证集占总样本量的比例。
 
-- output_dir: 预处理后文件存储位置
-- data_file_path： 原生数据位置
-- graph_file_path： 图结构数据位置（图结构是非必须的，假如您的数据集没有自带图结构或者您不知道如何为他构造图结构，可以忽略这一个参数）
-- history_seq_len： 历史数据长度，即P的大小。
-- future_seq_len： 未来数据长度，即F的大小。
-- steps_per_day： 每天时间片的数量，和采样频率有关。例如每5分钟采样一次，那么该值为288.
-- dow： 是否添加day in week特征。
-- C： 选择要使用的特征维度。例如在PEMS04中，我们只需要使用传感器采集的3中特征数据值的第一个维度，所以`C=[0]`。
-- train_ratio： 训练集的比例
-- valid_ratio：验证集的比例
+### 2.2 主要的预处理过程
 
-### 2.2 主要的预处理过程：
-
-1. 读取原始数据：
+1. 读取原始数据
 
 ```python
 import numpy as np
 data = np.load(args.data_file_path)['data']     # 大小: [16992, 307, 3]
 ```
 
-2. 根据原始时间序列的长度和`history_seq_len`和`future_seq_len`的大小，计算总样本的数量，并进一步计算训练、验证、测试样本的数量。
+2. 根据原始时间序列的长度和`history_seq_len`和`future_seq_len`的大小，计算总样本的数量，并进一步计算训练、验证、测试样本的数量
 
 ```python
 num_samples = L - (history_seq_len + future_seq_len) + 1    # 总样本数量
@@ -58,7 +52,7 @@ valid_num_short = round(num_samples * valid_ratio)          # 验证样本数量
 test_num_short  = num_samples - train_num_short - valid_num_short   # 测试样本数量
 ```
 
-3. 产生样本的index list：
+3. 产生样本的index list
 
 对于给定的时刻`t`，它的index是：[t-history_seq_len, t, t+future_seq_len]
 
@@ -149,11 +143,11 @@ else:
 
 ### 3.1 data.pkl
 
-预处理后的数据，`data['processed_data']`保存着预处理后的数据（数组）。
+字典类型。`data['processed_data']`保存着预处理后的数据（数组）。
 
 ### 3.2 index.pkl
 
-产生的训练、验证、测试的index list。
+字典类型。产生的训练、验证、测试的index list。
 
 ```python
 index['train']          # train dataset的index list
