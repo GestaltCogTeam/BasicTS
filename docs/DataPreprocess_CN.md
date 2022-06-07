@@ -54,7 +54,7 @@ test_num_short  = num_samples - train_num_short - valid_num_short   # 测试样�
 
 3. 产生样本的index list
 
-对于给定的时刻`t`，它的index是：[t-history_seq_len, t, t+future_seq_len]
+对于给定的时刻`t`，它的index是：`[t-history_seq_len, t, t+future_seq_len]`
 
 ```python
 index_list      = []
@@ -139,7 +139,7 @@ else:
 
 预处理后的数据会被保存在`datasets/PEMS04/`中。
 
-一下所有文件都可以使用`utils/serialization.py`中的`load_pkl`函数读取。
+以下所有文件都可以使用`utils/serialization.py`中的`load_pkl`函数读取。
 
 ### 3.1 data.pkl
 
