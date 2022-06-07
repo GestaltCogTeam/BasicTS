@@ -86,8 +86,8 @@ def generate_data(args):
     print("test_num_short:{0}".format(test_num_short))
 
     index_list = []
-    for i in range(history_seq_len, num_samples + history_seq_len):
-        index = (i-history_seq_len, i, i+future_seq_len)
+    for t in range(history_seq_len, num_samples + history_seq_len):
+        index = (t-history_seq_len, t, t+future_seq_len)
         index_list.append(index)
 
     train_index = index_list[:train_num_short]
@@ -111,7 +111,7 @@ def generate_data(args):
         dow_tiled = np.tile(dow, [1, N, 1]).transpose((2, 1, 0))
         feature_list.append(dow_tiled)
 
-    raw_data = np.concatenate(feature_list, axis=-1)
+    processed_data = np.concatenate(feature_list, axis=-1)
 
     # dump data
     index = {}
@@ -121,7 +121,7 @@ def generate_data(args):
     pickle.dump(index, open(output_dir + "/index.pkl", "wb"))
 
     data = {}
-    data['raw_data'] = raw_data
+    data['processed_data'] = processed_data
     pickle.dump(data, open(output_dir + "/data.pkl", "wb"))
     # copy adj
     shutil.copyfile(args.graph_file_path, output_dir + '/adj_mx.pkl')      # copy models

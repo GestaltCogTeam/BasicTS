@@ -110,7 +110,7 @@ If you need to debug, you could run the `basicts/run.py` file.
 
 ## 5. Detailed Docs
 
-- data preparation: [data_preparation_CN.md](docs/DataPreparation_CN.md)
+- data preparation: [data_preparation_CN.md](docs/DataFormat_CN.md)
 
 🕐
 
@@ -119,6 +119,7 @@ If you need to debug, you could run the `basicts/run.py` file.
 ![Main results.](results/result.png)
 
 ## 7. TODO
+
 - [ ] : revise the data preprocessing of PEMS07, which only contains weekdays.
 - [ ] : Add detailed documentation and a demo about data preprocessing.
 - [ ] : Add more multivariate time series datasets: Traffic, Electricity, Exchange-Rate, ETTh1, ETTh2, ETTm1, Weather, Solar-Energy.

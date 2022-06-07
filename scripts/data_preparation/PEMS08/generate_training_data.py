@@ -87,8 +87,8 @@ def generate_data(args):
     print("test_num_short:{0}".format(test_num_short))
 
     index_list      = []
-    for i in range(history_seq_len, num_samples + history_seq_len):
-        index = (i-history_seq_len, i, i+future_seq_len)
+    for t in range(history_seq_len, num_samples + history_seq_len):
+        index = (t-history_seq_len, t, t+future_seq_len)
         index_list.append(index)
     train_index = index_list[:train_num_short]
     valid_index = index_list[train_num_short: train_num_short + valid_num_short]
@@ -112,7 +112,7 @@ def generate_data(args):
         day_in_week = np.tile(day_in_week, [1, N, 1]).transpose((2, 1, 0))
         feature_list.append(day_in_week)
     
-    raw_data = np.concatenate(feature_list, axis=-1)
+    processed_data = np.concatenate(feature_list, axis=-1)
 
     # dump data
     index = {}
@@ -122,7 +122,7 @@ def generate_data(args):
     pickle.dump(index, open(output_dir + "/index.pkl", "wb"))
 
     data = {}
-    data['raw_data'] = raw_data
+    data['processed_data'] = processed_data
     pickle.dump(data, open(output_dir + "/data.pkl", "wb"))
     # copy adj
     if os.path.exists(args.graph_file_path):

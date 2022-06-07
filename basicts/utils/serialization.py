@@ -1,7 +1,12 @@
 import pickle
 from basicts.utils.adjacent_matrix_norm import *
 
-def load_pkl(pickle_file):
+def load_pkl(pickle_file: str):
+    """load pickle data.
+
+    Args:
+        pickle_file (str): file path
+    """
     try:
         with open(pickle_file, 'rb') as f:
             pickle_data     = pickle.load(f)
