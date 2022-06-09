@@ -52,8 +52,8 @@ CFG.MODEL.PARAM = {
     "bias": True,
     "droprate" : 0.5
 }
-CFG.MODEL.FROWARD_FEATURES = [0]            # traffic speed, time in day
-CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
+CFG.MODEL.FROWARD_FEATURES = [0]            
+CFG.MODEL.TARGET_FEATURES  = [0]                
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()

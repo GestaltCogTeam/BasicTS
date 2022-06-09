@@ -45,8 +45,8 @@ CFG.MODEL.PARAM = {
     "num_his" : 12,
     "bn_decay": 0.1
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            # traffic speed, time in day
-CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
+CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            
+CFG.MODEL.TARGET_FEATURES  = [0]                
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()

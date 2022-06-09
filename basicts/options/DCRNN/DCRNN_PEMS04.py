@@ -24,7 +24,7 @@ CFG.DESCRIPTION = 'DCRNN model configuration'
 CFG.RUNNER  = DCRNNRunner
 CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "PEMS04"
-CFG.DATASET_TYPE  = 'Traffic speed'
+CFG.DATASET_TYPE  = 'Traffic flow'
 CFG._       = _
 CFG.GPU_NUM = 1
 CFG.METRICS = {
@@ -57,8 +57,8 @@ CFG.MODEL.PARAM = {
     "adj_mx"            : [torch.tensor(i).cuda() for i in adj_mx],
     "use_curriculum_learning": True
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]            # traffic speed, time in day
-CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
+CFG.MODEL.FROWARD_FEATURES = [0, 1]            
+CFG.MODEL.TARGET_FEATURES  = [0]                
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()

@@ -17,7 +17,7 @@ CFG.DESCRIPTION = 'Stat model configuration'
 CFG.RUNNER  = StatRunner
 CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "PEMS08"
-CFG.DATASET_TYPE  = 'Traffic speed'
+CFG.DATASET_TYPE  = 'Traffic flow'
 CFG.GPU_NUM = 1
 CFG.METRICS = {
     "MAE": masked_mae,
@@ -41,8 +41,8 @@ CFG.MODEL.PARAM = {
     'output_length': 12,
     'num_time_series': 170
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]            # traffic speed, time in day
-CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
+CFG.MODEL.FROWARD_FEATURES = [0, 1]            
+CFG.MODEL.TARGET_FEATURES  = [0]                
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()

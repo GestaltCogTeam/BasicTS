@@ -47,8 +47,8 @@ CFG.MODEL.PARAM = {
     "dropout_rate": 0.5,
     "leaky_rate": 0.2
 }
-CFG.MODEL.FROWARD_FEATURES = [0]            # traffic speed, time in day
-CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
+CFG.MODEL.FROWARD_FEATURES = [0]            
+CFG.MODEL.TARGET_FEATURES  = [0]                
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()

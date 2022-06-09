@@ -53,8 +53,8 @@ CFG.MODEL.PARAM = {
     "node_hidden"   : 10,
     "time_emb_dim"  : 10,
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            # traffic speed, time in day
-CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
+CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]            
+CFG.MODEL.TARGET_FEATURES  = [0]                
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()

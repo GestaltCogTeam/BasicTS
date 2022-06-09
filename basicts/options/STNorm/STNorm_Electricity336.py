@@ -46,8 +46,8 @@ CFG.MODEL.PARAM = {
     "blocks"    : 8,
     "layers"    : 4,
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]            # traffic speed, time in day
-CFG.MODEL.TARGET_FEATURES  = [0]                # traffic speed
+CFG.MODEL.FROWARD_FEATURES = [0, 1]            
+CFG.MODEL.TARGET_FEATURES  = [0]                
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()
