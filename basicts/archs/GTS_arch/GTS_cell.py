@@ -79,10 +79,10 @@ class DCGRUCell(torch.nn.Module):
 
         # tf.Print(adj_mx, [adj_mx], message="This is adj: ")
 
-        adj_mx = adj_mx + torch.eye(int(adj_mx.shape[0]))
+        adj_mx = adj_mx + torch.eye(int(adj_mx.shape[0])).to(adj_mx.device)
         d = torch.sum(adj_mx, 1)
         d_inv = 1. / d
-        d_inv = torch.where(torch.isinf(d_inv), torch.zeros(d_inv.shape), d_inv)
+        d_inv = torch.where(torch.isinf(d_inv), torch.zeros(d_inv.shape).to(d_inv.device), d_inv)
         d_mat_inv = torch.diag(d_inv)
         random_walk_mx = torch.mm(d_mat_inv, adj_mx)
         return random_walk_mx
@@ -170,10 +170,10 @@ class DCGRUCell(torch.nn.Module):
         x = x.permute(3, 1, 2, 0)  # (batch_size, num_nodes, input_size, order)
         x = torch.reshape(x, shape=[batch_size * self._num_nodes, input_size * num_matrices])
 
-        weights = self._gconv_params.get_weights((input_size * num_matrices, output_size))
+        weights = self._gconv_params.get_weights((input_size * num_matrices, output_size)).to(x.device)
         x = torch.matmul(x, weights)  # (batch_size * self._num_nodes, output_size)
 
-        biases = self._gconv_params.get_biases(output_size, bias_start)
+        biases = self._gconv_params.get_biases(output_size, bias_start).to(x.device)
         x += biases
         # Reshape res back to 2D: (batch_size, num_node, state_dim) -> (batch_size, num_node * state_dim)
         return torch.reshape(x, [batch_size, self._num_nodes * output_size])

@@ -25,7 +25,7 @@ CFG.DATASET_CLS   = BaseDataset
 CFG.DATASET_NAME  = "METR-LA"
 CFG.DATASET_TYPE  = 'Traffic speed'
 CFG._       = _
-CFG.GPU_NUM = 0
+CFG.GPU_NUM = 1
 CFG.METRICS = {
     "MAE": masked_mae,
     "RMSE": masked_rmse,
@@ -83,7 +83,7 @@ CFG.TRAIN.LR_SCHEDULER.PARAM= {
 }
 
 # ================= train ================= #
-# CFG.TRAIN.CLIP          = 5
+CFG.TRAIN.CLIP          = 1
 CFG.TRAIN.NUM_EPOCHS    = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
@@ -96,7 +96,7 @@ CFG.TRAIN.NULL_VAL      = 0.0
 ## read data
 CFG.TRAIN.DATA.DIR      = 'datasets/' + CFG.DATASET_NAME
 ## dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE   = 64
+CFG.TRAIN.DATA.BATCH_SIZE   = 1
 CFG.TRAIN.DATA.PREFETCH     = False
 CFG.TRAIN.DATA.SHUFFLE      = True
 CFG.TRAIN.DATA.NUM_WORKERS  = 2

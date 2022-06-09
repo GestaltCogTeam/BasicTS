@@ -103,7 +103,7 @@ class GTSRunner(TrafficRunner):
         else:
             loss = self.loss(prediction, real_value, null_val=self.null_val)
         # graph structure loss
-        prior_label = prior_adj.view(prior_adj.shape[0] * prior_adj.shape[1])
+        prior_label = prior_adj.view(prior_adj.shape[0] * prior_adj.shape[1]).to(pred_adj.device)
         pred_label  = pred_adj.view(pred_adj.shape[0] * pred_adj.shape[1])
         graph_loss_function  = torch.nn.BCELoss()
         loss_g      = graph_loss_function(pred_label, prior_label)

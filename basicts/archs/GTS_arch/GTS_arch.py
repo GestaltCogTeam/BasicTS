@@ -24,12 +24,12 @@ def cosine_similarity_torch(x1, x2=None, eps=1e-8):
     w2 = w1 if x2 is x1 else x2.norm(p=2, dim=1, keepdim=True)
     return torch.mm(x1, x2.t()) / (w1 * w2.t()).clamp(min=eps)
 
-def sample_gumbel(shape, eps=1e-20):
-    U = torch.rand(shape)
+def sample_gumbel(shape, eps=1e-20, device=None):
+    U = torch.rand(shape).to(device)
     return -torch.autograd.Variable(torch.log(-torch.log(U + eps) + eps))
 
 def gumbel_softmax_sample(logits, temperature, eps=1e-10):
-    sample = sample_gumbel(logits.size(), eps=eps)
+    sample = sample_gumbel(logits.size(), eps=eps, device=logits.device)
     y = logits + sample
     return F.softmax(y / temperature, dim=-1)
 
@@ -48,7 +48,7 @@ def gumbel_softmax(logits, temperature, hard=False, eps=1e-10):
     if hard:
         shape = logits.size()
         _, k = y_soft.data.max(-1)
-        y_hard = torch.zeros(*shape)
+        y_hard = torch.zeros(*shape).to(logits.device)
         y_hard = y_hard.zero_().scatter_(-1, k.view(shape[:-1] + (1,)), 1.0)
         y = torch.autograd.Variable(y_hard - y_soft.data) + y_soft
     else:
@@ -84,7 +84,7 @@ class EncoderModel(nn.Module, Seq2SeqAttrs):
         """
         batch_size, _ = inputs.size()
         if hidden_state is None:
-            hidden_state = torch.zeros((self.num_rnn_layers, batch_size, self.hidden_state_size))
+            hidden_state = torch.zeros((self.num_rnn_layers, batch_size, self.hidden_state_size)).to(inputs.device)
         hidden_states = []
         output = inputs
         for layer_num, dcgru_layer in enumerate(self.dcgru_layers):
@@ -213,7 +213,7 @@ class GTS(nn.Module, Seq2SeqAttrs):
         :return: output: (self.horizon, batch_size, self.num_nodes * self.output_dim)
         """
         batch_size = encoder_hidden_state.size(1)
-        go_symbol = torch.zeros((batch_size, self.num_nodes * self.decoder_model.output_dim))
+        go_symbol = torch.zeros((batch_size, self.num_nodes * self.decoder_model.output_dim)).to(encoder_hidden_state.device)
         decoder_hidden_state = encoder_hidden_state
         decoder_input = go_symbol
 
@@ -240,7 +240,7 @@ class GTS(nn.Module, Seq2SeqAttrs):
         inputs = history_data
         labels = future_data
 
-        x = self.node_feats.transpose(1, 0).view(self.num_nodes, 1, -1)
+        x = self.node_feats.transpose(1, 0).view(self.num_nodes, 1, -1).to(history_data.device)
         x = self.conv1(x)
         x = F.relu(x)
         x = self.bn1(x)
@@ -253,15 +253,15 @@ class GTS(nn.Module, Seq2SeqAttrs):
         x = F.relu(x)
         x = self.bn3(x)
 
-        receivers = torch.matmul(self.rel_rec, x)
-        senders = torch.matmul(self.rel_send, x)
+        receivers = torch.matmul(self.rel_rec.to(x.device), x)
+        senders = torch.matmul(self.rel_send.to(x.device), x)
         x = torch.cat([senders, receivers], dim=1)
         x = torch.relu(self.fc_out(x))
         x = self.fc_cat(x)
 
         adj = gumbel_softmax(x, temperature=self.temp, hard=True)
         adj = adj[:, 0].clone().reshape(self.num_nodes, -1)
-        mask = torch.eye(self.num_nodes, self.num_nodes).bool()
+        mask = torch.eye(self.num_nodes, self.num_nodes).bool().to(adj.device)
         adj.masked_fill_(mask, 0)
 
         encoder_hidden_state = self.encoder(inputs, adj)
