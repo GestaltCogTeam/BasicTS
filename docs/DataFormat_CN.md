@@ -24,9 +24,9 @@
     - 其他
 
 - `data.pkl`: dict of list
-  - keys: raw_data, other
+  - keys: processed_data, other
   - values: 归一化后并且添加好特征后的“原始”时间序列序列或者其他辅助时间序列
-    - raw_data: np.array, L x N x C. L: 时间序列总长度, N: 多变量时间序列数量, C: 特征数量
+    - processed_data: np.array, L x N x C. L: 时间序列总长度, N: 多变量时间序列数量, C: 特征数量
     - other
 
 - `scaler.pkl`: dict of list

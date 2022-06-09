@@ -12,8 +12,8 @@ class BaseDataset(Dataset):
         assert mode in ['train', 'valid', 'test'], "error mode"
         # read raw data (normalized)
         data  = load_pkl(raw_file_path)
-        raw_data = data['raw_data']
-        self.data = torch.from_numpy(raw_data).float()               # L, N, C
+        processed_data = data['processed_data']
+        self.data = torch.from_numpy(processed_data).float()               # L, N, C
         # read index
         self.index = load_pkl(index_file_path)[mode]
 

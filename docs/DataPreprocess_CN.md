@@ -106,7 +106,7 @@ if add_day_in_week:
     day_in_week = np.array(day_in_week)
     day_in_week = np.tile(day_in_week, [1, N, 1]).transpose((2, 1, 0))
     feature_list.append(day_in_week)
-raw_data = np.concatenate(feature_list, axis=-1)        # 添加完external特征后的数据
+processed_data = np.concatenate(feature_list, axis=-1)        # 添加完external特征后的数据
 ```
 
 6. 保存预处理后的数据
@@ -121,7 +121,7 @@ pickle.dump(index, open(output_dir + "/index.pkl", "wb"))
 
 # 保存预处理后的data
 data = {}
-data['raw_data'] = raw_data
+data['processed_data'] = processed_data
 pickle.dump(data, open(output_dir + "/data.pkl", "wb"))
 
 # 保存图结构
