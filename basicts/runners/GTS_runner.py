@@ -2,6 +2,13 @@ from typing import Tuple, Union
 import torch
 from basicts.runners.base_traffic_runner import TrafficRunner
 from basicts.utils.registry import SCALER_REGISTRY
+from easytorch.utils.dist import master_only
+
+"""
+    TODO: 
+    模块化train_iters, val_iters, and test_iters中的过程。
+    否则就会像GTS一样, 一旦模型有一点特殊 (例如多一个返回和不同的loss), 就必须重写整个train_iters, val_iters, and test_iters。
+"""
 
 class GTSRunner(TrafficRunner):
     def __init__(self, cfg: dict):
@@ -113,3 +120,70 @@ class GTSRunner(TrafficRunner):
             metric_item = metric_func(prediction, real_value, null_val=self.null_val)
             self.update_epoch_meter('train_'+metric_name, metric_item.item())
         return loss
+
+    def val_iters(self, data: Union[torch.Tensor, Tuple], train_epoch: int, iter_index: int):
+        """Validation details.
+
+        Args:
+            data (Union[torch.Tensor, Tuple]): Data provided by DataLoader
+            train_epoch (int): current epoch if in training process. Else None.
+            iter_index (int): current iter.
+        """
+        prediction, real_value, pred_adj, prior_adj = self.forward(data=data, epoch=train_epoch, iter_num=None, train=False)
+        # re-scale data
+        prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
+        real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
+        # loss
+        loss  = self.loss(prediction, real_value, null_val=self.null_val)
+        # graph structure loss
+        prior_label = prior_adj.view(prior_adj.shape[0] * prior_adj.shape[1]).to(pred_adj.device)
+        pred_label  = pred_adj.view(pred_adj.shape[0] * pred_adj.shape[1])
+        graph_loss_function  = torch.nn.BCELoss()
+        loss_g      = graph_loss_function(pred_label, prior_label)
+        loss = loss + loss_g
+
+        # metrics
+        for metric_name, metric_func in self.metrics.items():
+            metric_item = metric_func(prediction, real_value, null_val=self.null_val)
+            self.update_epoch_meter('val_'+metric_name, metric_item.item())
+        return loss
+
+    @torch.no_grad()
+    @master_only
+    def test(self, train_epoch: int = None):
+        """test model.
+
+        Args:
+            train_epoch (int, optional): current epoch if in training process.
+        """
+        # test loop
+        prediction = []
+        real_value  = []
+        for iter_index, data in enumerate(self.test_data_loader):
+            preds, testy, pred_adj, prior_adj = self.forward(data=data, epoch=train_epoch, iter_num=None, train=False)
+            prediction.append(preds)
+            real_value.append(testy)
+        prediction = torch.cat(prediction,dim=0)
+        real_value = torch.cat(real_value, dim=0)
+        # re-scale data
+        prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
+        real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
+        # summarize the results.
+        ## test performance of different horizon
+        for i in range(12):
+            # For horizon i, only calculate the metrics **at that time** slice here.
+            pred    = prediction[:,i,:,:]
+            real    = real_value[:,i,:,:]
+            # metrics
+            metric_results = {}
+            for metric_name, metric_func in self.metrics.items():
+                metric_item = metric_func(pred, real, null_val=self.null_val)
+                metric_results[metric_name] = metric_item.item()
+            log     = 'Evaluate best model on test data for horizon {:d}, Test MAE: {:.4f}, Test RMSE: {:.4f}, Test MAPE: {:.4f}'
+            log     = log.format(i+1, metric_results['MAE'], metric_results['RMSE'], metric_results['MAPE'])
+            self.logger.info(log)
+        ## test performance overall
+        for metric_name, metric_func in self.metrics.items():
+            metric_item = metric_func(prediction, real_value, null_val=self.null_val)
+            self.update_epoch_meter('test_'+metric_name, metric_item.item())
+            metric_results[metric_name] = metric_item.item()

@@ -22,8 +22,8 @@ if not resume:
 CFG.DESCRIPTION = 'GTS model configuration'
 CFG.RUNNER  = GTSRunner
 CFG.DATASET_CLS   = BaseDataset
-CFG.DATASET_NAME  = "METR-LA"
-CFG.DATASET_TYPE  = 'Traffic speed'
+CFG.DATASET_NAME  = "PEMS03"
+CFG.DATASET_TYPE  = 'Traffic flow'
 CFG._       = _
 CFG.GPU_NUM = 1
 CFG.METRICS = {
@@ -52,16 +52,16 @@ CFG.MODEL.PARAM = {
     "input_dim"         : 2,
     "l1_decay"          : 0,
     "max_diffusion_step": 3,
-    "num_nodes"         : 207,
+    "num_nodes"         : 358,
     "num_rnn_layers"    : 1,
     "output_dim"        : 1,
     "rnn_units"         : 64,
     "seq_len"           : 12,
     "use_curriculum_learning": True,
-    "dim_fc"            : 383664,
+    "dim_fc"            : 251456,
     "node_feats"        : node_feats,
     "temp"              : 0.5,
-    "k"                 : 10
+    "k"                 : 30
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1]            
 CFG.MODEL.TARGET_FEATURES  = [0]                
@@ -72,13 +72,13 @@ CFG.TRAIN.LOSS = masked_l1_loss
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
-    "lr":0.005,
+    "lr":0.001,
     "eps":1e-3
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM= {
-    "milestones":[20, 40],
+    "milestones":[20, 30],
     "gamma":0.1
 }
 

@@ -31,7 +31,7 @@ If this repository helps your research or work, I hope you could give me a ⭐, 
 | STGCN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | StemGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | MTGNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| GTS           | 🕐      | 🕐       | 🕐      | 🕐     | 🕐      | 🕐     |                |
+| GTS           | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | DGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | GMAN          | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | AGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
