@@ -144,7 +144,7 @@ class DCRNN(nn.Module, Seq2SeqAttrs):
         return outputs
 
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor = None, batch_seen: int = None, **kwargs) -> torch.Tensor:
-        """_summary_
+        """feedforward function of DCRNN.
 
         Args:
             history_data (torch.Tensor): history data with shape [L, B, N*C]

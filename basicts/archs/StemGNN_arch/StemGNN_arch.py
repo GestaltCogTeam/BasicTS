@@ -181,7 +181,7 @@ class StemGNN(nn.Module):
         return torch.matmul(eigenvectors, input)
 
     def forward(self, history_data, **kwargs):
-        """feed forward of StemGNN
+        """feedforward function of StemGNN.
 
         Args:
             history_data (torch.Tensor): [B, L, N]

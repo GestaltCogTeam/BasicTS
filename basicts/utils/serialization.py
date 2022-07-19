@@ -1,3 +1,4 @@
+import torch
 import pickle
 from basicts.utils.adjacent_matrix_norm import *
 
@@ -19,10 +20,21 @@ def load_pkl(pickle_file: str):
     return pickle_data
 
 def dump_pkl(obj, file_path):
+    """dumplicate pickle data."""
     with open(file_path, 'wb') as f:
         pickle.dump(obj, f)
 
-def load_adj(file_path, adj_type):
+def load_adj(file_path: str, adj_type: str):
+    """load adjacency matrix.
+
+    Args:
+        file_path (str): file path
+        adj_type (str): adjacency matrix type
+
+    Returns:
+        list of numpy.matrix: list of preproceesed adjacency matrices
+        np.ndarray: raw adjacency matrix
+    """
     try:
         # METR and PEMS_BAY
         sensor_ids, sensor_id_to_ind, adj_mx = load_pkl(file_path)
@@ -48,7 +60,15 @@ def load_adj(file_path, adj_type):
         assert error, "adj type not defined"
     return adj, adj_mx
 
-def load_node2vec_emb(file_path):
+def load_node2vec_emb(file_path: str) -> torch.Tensor:
+    """load node2vec embedding
+
+    Args:
+        file_path (str): file path
+
+    Returns:
+        torch.Tensor: node2vec embedding
+    """
     # spatial embedding
     with open(file_path, mode='r') as f:
         lines = f.readlines()

@@ -1,8 +1,18 @@
-import numpy as np
 import torch
+import numpy as np
 
 # ============== MAE ================= #
-def masked_mae(preds, labels, null_val=np.nan):
+def masked_mae(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+    """masked mean absolute error.
+
+    Args:
+        preds (torch.Tensor): predicted values
+        labels (torch.Tensor): labels
+        null_val (float, optional): null value. Defaults to np.nan.
+
+    Returns:
+        torch.Tensor: masked mean absolute error
+    """
     if np.isnan(null_val):
         mask = ~torch.isnan(labels)
     else:

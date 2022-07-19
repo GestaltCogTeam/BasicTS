@@ -45,7 +45,7 @@ class STGCNChebGraphConv(nn.Module):
         self.output = layers.OutputBlock(Ko, blocks[-3][-1], blocks[-2], blocks[-1][0], n_vertex, act_func, bias, droprate)
 
     def forward(self, history_data:torch.Tensor) -> torch.Tensor:
-        """feed forward of STGCN.
+        """feedforward function of STGCN.
 
         Args:
             history_data (torch.Tensor): historical data with shape [B, L, N, C]

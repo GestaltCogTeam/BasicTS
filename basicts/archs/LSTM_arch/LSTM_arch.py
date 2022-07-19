@@ -16,7 +16,7 @@ class FCLSTM(nn.Module):
         self.end_fc = nn.Linear(self.num_layers*self.hidden_dim, self.horizon*self.output_dim)
 
     def forward(self, history_data: torch.Tensor) -> torch.Tensor:
-        """feed forward process of AGCRN
+        """feedforward function of LSTM.
 
         Args:
             source (torch.Tensor): inputs with shape [B, L, N, C]

@@ -52,7 +52,7 @@ def parse_args():
     # parser.add_argument('-c', '--cfg', default='basicts/options/STGCN/STGCN_PEMS07.py', help='training config')
     # parser.add_argument('-c', '--cfg', default='basicts/options/STGCN/STGCN_PEMS08.py', help='training config')
 
-    # parser.add_argument('-c', '--cfg', default='basicts/options/D2STGNN/D2STGNN_METR-LA.py', help='training config')
+    parser.add_argument('-c', '--cfg', default='basicts/options/D2STGNN/D2STGNN_METR-LA.py', help='training config')
     # parser.add_argument('-c', '--cfg', default='basicts/options/D2STGNN/D2STGNN_PEMS-BAY.py', help='training config')
     # parser.add_argument('-c', '--cfg', default='basicts/options/D2STGNN/D2STGNN_PEMS03.py', help='training config')
     # parser.add_argument('-c', '--cfg', default='basicts/options/D2STGNN/D2STGNN_PEMS04.py', help='training config')
@@ -107,7 +107,7 @@ def parse_args():
 
     # parser.add_argument('-c', '--cfg', default='basicts/options/GTS/GTS_METR-LA.py', help='training config')
     # parser.add_argument('-c', '--cfg', default='basicts/options/GTS/GTS_PEMS-BAY.py', help='training config')
-    parser.add_argument('-c', '--cfg', default='basicts/options/GTS/GTS_PEMS03.py', help='training config')
+    # parser.add_argument('-c', '--cfg', default='basicts/options/GTS/GTS_PEMS03.py', help='training config')
     # parser.add_argument('-c', '--cfg', default='basicts/options/GTS/GTS_PEMS04.py', help='training config')
     # parser.add_argument('-c', '--cfg', default='basicts/options/GTS/GTS_PEMS07.py', help='training config')
     # parser.add_argument('-c', '--cfg', default='basicts/options/GTS/GTS_PEMS08.py', help='training config')

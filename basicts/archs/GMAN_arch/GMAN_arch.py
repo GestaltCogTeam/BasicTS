@@ -337,7 +337,7 @@ class GMAN(nn.Module):
                        bn_decay=bn_decay)
 
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor) -> torch.Tensor:
-        """feed forward of GMAN.
+        """feedforward function of GMAN.
 
         Args:
             X (torch.Tensor): Historical data with shape [B, L, N, C]. X[..., 1:3] is the 'time in day' and 'day in week' feature.

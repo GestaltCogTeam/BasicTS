@@ -127,6 +127,8 @@ If you need to debug, you could run the `basicts/run.py` file.
 - [ ] : Add statistical information of these dataset, and descibe their typical settings.
 - [ ] : Support models like ASTGCN, ASTGNN, which take multi-periodicities data as input.
 - [ ] : Add detailed docs about 4.2, e.g., the usage of gpu.
+- [ ] : Update D2STGNN arch.
+- [ ] : 模块化train_iters, val_iters, and test_iters中的过程。否则就会像GTS一样, 一旦模型有一点特殊 (例如多一个返回和不同的loss), 就必须重写整个train_iters, val_iters, and test_iters。
 
 ## References
 

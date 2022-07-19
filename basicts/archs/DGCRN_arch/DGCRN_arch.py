@@ -126,7 +126,7 @@ class DGCRN(nn.Module):
         return Hidden_State.view(-1, self.hidden_size), Cell_State.view(-1, self.hidden_size)
 
     def forward(self, history_data:torch.Tensor, future_data:torch.Tensor=None, batch_seen:int=None, task_level:int=12, **kwargs) -> torch.Tensor:
-        """feed forward of DGCRN.
+        """feedforward function of DGCRN.
 
         Args:
             history_data (torch.Tensor): historical data with shape [B, L, N, C].

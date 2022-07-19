@@ -3,6 +3,7 @@ import torch
 
 def clock(func):
     def clocked(*args, **kw):
+        """decorator for clock"""
         t0 = time.perf_counter()
         result = func(*args, **kw)
         elapsed = time.perf_counter() - t0
@@ -11,7 +12,20 @@ def clock(func):
         return result
     return clocked
 
-def check_nan_inf(tensor, raise_ex=True):
+def check_nan_inf(tensor: torch.Tensor, raise_ex: bool = True):
+    """check nan and in in tensor
+
+    Args:
+        tensor (torch.Tensor): Tensor
+        raise_ex (bool, optional): If raise exceptions. Defaults to True.
+
+    Raises:
+        Exception: If raise_ex is True and there are nans or infs in tensor, then raise Exception.
+
+    Returns:
+        dict: {'nan': bool, 'inf': bool}
+        torch.Tensor: Tensor
+    """
     # nan
     nan = torch.any(torch.isnan(tensor))
     # inf
@@ -21,7 +35,15 @@ def check_nan_inf(tensor, raise_ex=True):
         raise Exception({"nan":nan, "inf":inf})
     return {"nan":nan, "inf":inf}, nan or inf
 
-def remove_nan_inf(tensor):
+def remove_nan_inf(tensor: torch.Tensor):
+    """remove nan and inf in tensor
+
+    Args:
+        tensor (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     tensor = torch.where(torch.isnan(tensor), torch.zeros_like(tensor), tensor)
     tensor = torch.where(torch.isinf(tensor), torch.zeros_like(tensor), tensor)
     return tensor

@@ -141,7 +141,7 @@ class GraphWaveNet(nn.Module):
         self.receptive_field = receptive_field
 
     def forward(self, history_data: torch.Tensor, **kwargs) -> torch.Tensor:
-        """feedforward function of Graph WaveNet
+        """feedforward function of Graph WaveNet.
 
         Args:
             history_data (torch.Tensor): shape [B, L, N, C]

@@ -1,8 +1,18 @@
-import numpy as np
 import torch
+import numpy as np
 
 # ============== MAPE ================== #
-def masked_mape(preds, labels, null_val=np.nan):
+def masked_mape(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+    """masked mean absolute percentage error.
+
+    Args:
+        preds (torch.Tensor): predicted values
+        labels (torch.Tensor): labels
+        null_val (float, optional): null value. Defaults to np.nan.
+
+    Returns:
+        torch.Tensor: masked mean absolute percentage error
+    """
     # fix very small values of labels, which should be 0. Otherwise, nan detector will fail.
     labels = torch.where(labels<1e-2, torch.zeros_like(labels), labels)
     if np.isnan(null_val):

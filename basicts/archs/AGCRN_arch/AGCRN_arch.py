@@ -82,7 +82,7 @@ class AGCRN(nn.Module):
         # print('*****************Finish Parameter****************')
 
     def forward(self, history_data: torch.Tensor) -> torch.Tensor:
-        """feed forward process of AGCRN
+        """feedforward function of AGCRN.
 
         Args:
             source (torch.Tensor): inputs with shape [B, L, N, C]

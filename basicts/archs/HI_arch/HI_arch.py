@@ -26,7 +26,7 @@ class HINetwork(nn.Module):
         self.fake_param      = nn.Linear(1, 1)
 
     def forward(self, history_data: torch.Tensor, **kwargs) -> torch.Tensor:
-        """feed forward function.
+        """feedforward function of HI.
 
         Args:
             history_data (torch.Tensor): shape = [B, L_in, N, C]

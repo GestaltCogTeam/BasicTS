@@ -24,6 +24,7 @@ class BaseRunner(Runner):
                 - support setup_graph for the models acting like tensorflow
                 - support find unused parameters when using DDP
                 - move train/validate data loop outside the `train`/`validate` function
+        
         Args:
             cfg (dict): all in one configurations
         """
@@ -35,9 +36,6 @@ class BaseRunner(Runner):
         # declare data loader
         self.train_data_loader = None
         self.val_data_loader = None
-
-        # gradient clip
-        self.clip    = cfg['TRAIN'].get('CLIP', None)
 
         # set proctitle
         proctitle_name = "{0}({1})".format(cfg['MODEL'].get("NAME", " "), cfg.get("DATASET_NAME", " "))
@@ -138,20 +136,7 @@ class BaseRunner(Runner):
             self.save_model(epoch)
         # reset meters
         self.reset_epoch_meters()
-    
-    def backward(self, loss: torch.Tensor):
-        """Backward and update params.
 
-        Args:
-            loss (torch.Tensor): loss
-        """
-
-        self.optim.zero_grad()
-        loss.backward()
-        if self.clip is not None:
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip)
-        self.optim.step()
-    
     @torch.no_grad()
     @master_only
     def test_main(self, cfg: dict = None, train_epoch: int = None):

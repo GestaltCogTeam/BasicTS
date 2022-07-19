@@ -77,7 +77,7 @@ class MTGNN_arch(nn.Module):
 
 
     def forward(self, history_data: torch.Tensor, idx: int = None, **kwargs) -> torch.Tensor:
-        """feed forward of MTGNN
+        """feedforward function of MTGNN.
 
         Args:
             history_data (torch.Tensor): history data with shape [B, L, N, C]

@@ -116,7 +116,7 @@ class STNorm(nn.Module):
         self.receptive_field = receptive_field
 
     def forward(self, history_data, **kwargs):
-        """feedforward function of Graph WaveNet
+        """feedforward function of STNorm.
 
         Args:
             history_data (torch.Tensor): shape [B, C, N, L]

@@ -65,7 +65,9 @@ CFG.TRAIN.OPTIM.PARAM= {
 # }
 
 # ================= train ================= #
-# CFG.TRAIN.CLIP       = 5
+# CFG.TRAIN.CLIP_GRAD_PARAM = {
+#     'max_norm': 5.0
+# }
 CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',

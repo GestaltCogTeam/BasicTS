@@ -1,8 +1,18 @@
-import numpy as np
 import torch
+import numpy as np
 
 # ============== RMSE ================= #
-def masked_mse(preds, labels, null_val=np.nan):
+def masked_mse(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+    """masked mean squared error.
+
+    Args:
+        preds (torch.Tensor): predicted values
+        labels (torch.Tensor): labels
+        null_val (float, optional): null value. Defaults to np.nan.
+
+    Returns:
+        torch.Tensor: masked mean squared error
+    """
     if np.isnan(null_val):
         mask = ~torch.isnan(labels)
     else:
@@ -15,5 +25,15 @@ def masked_mse(preds, labels, null_val=np.nan):
     loss = torch.where(torch.isnan(loss), torch.zeros_like(loss), loss)
     return torch.mean(loss)
 
-def masked_rmse(preds, labels, null_val=np.nan):
+def masked_rmse(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+    """root mean squared error.
+
+    Args:
+        preds (torch.Tensor): predicted values
+        labels (torch.Tensor): labels
+        null_val (float, optional): null value . Defaults to np.nan.
+
+    Returns:
+        torch.Tensor: root mean squared error
+    """
     return torch.sqrt(masked_mse(preds=preds, labels=labels, null_val=null_val))
