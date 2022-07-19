@@ -1,9 +1,9 @@
 import torch.nn as nn
-from basicts.archs.D2STGNN_arch.SpatialBlock.forecast import Forecast
+from basicts.archs.D2STGNN_arch.DiffusionBlock.forecast import Forecast
 from basicts.archs.D2STGNN_arch.Decouple.residual_decomp import ResidualDecomp
-from basicts.archs.D2STGNN_arch.SpatialBlock.ST_conv import STLocalizedConv
+from basicts.archs.D2STGNN_arch.DiffusionBlock.dif_model import STLocalizedConv
 
-class SpaBlock(nn.Module):
+class DifBlock(nn.Module):
     def __init__(self, hidden_dim, fk_dim=256, use_pre=None, dy_graph=None, sta_graph=None, **model_args):
         super().__init__()
         self.pre_defined_graph  = model_args['adjs']

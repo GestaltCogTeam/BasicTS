@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-class SpatialGate(nn.Module):
+class EstimationGate(nn.Module):
     r"""
     The spatial gate module.
     """

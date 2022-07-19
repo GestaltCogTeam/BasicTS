@@ -2,8 +2,8 @@ import math
 import torch
 import torch.nn as nn
 from basicts.archs.D2STGNN_arch.Decouple.residual_decomp import ResidualDecomp
-from basicts.archs.D2STGNN_arch.TemporalBlock.tem_model import RNNLayer, TransformerLayer
-from basicts.archs.D2STGNN_arch.TemporalBlock.forecast import Forecast
+from basicts.archs.D2STGNN_arch.InherentBlock.inh_model import RNNLayer, TransformerLayer
+from basicts.archs.D2STGNN_arch.InherentBlock.forecast import Forecast
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, dropout=None, max_len: int = 5000):
@@ -20,7 +20,8 @@ class PositionalEncoding(nn.Module):
         X = X + self.pe[:X.size(0)]
         X = self.dropout(X)
         return X
-class TemBlock(nn.Module):
+
+class InhBlock(nn.Module):
     def __init__(self, hidden_dim, num_heads=4, bias=True, fk_dim=256, first=None, **model_args):
         super().__init__()
         self.num_feat   = hidden_dim

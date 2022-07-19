@@ -26,5 +26,5 @@ class Forecast(nn.Module):
                 _1  = torch.cat(_1, dim=1)
             predict.append(st_l_conv(_1, dynamic_graph, static_graph))
         predict = torch.cat(predict, dim=1)
-        predict = self.forecast_fc(predict)     # TODO: test remove it 
+        predict = self.forecast_fc(predict)
         return predict

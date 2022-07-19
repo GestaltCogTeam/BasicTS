@@ -7,7 +7,7 @@ class Mask(nn.Module):
         self.mask   = model_args['adjs']
     
     def _mask(self, index, adj):
-        mask = self.mask[index] + torch.ones_like(self.mask[index]) * 1e-7      # TODO: 测试删掉无穷小
+        mask = self.mask[index] + torch.ones_like(self.mask[index]) * 1e-7
         return mask.to(adj.device) * adj
 
     def forward(self, adj):

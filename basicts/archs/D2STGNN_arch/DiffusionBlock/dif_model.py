@@ -16,7 +16,7 @@ class STLocalizedConv(nn.Module):
         self.use_static__hidden_graph   = sta_graph
 
         self.support_len    = len(self.pre_defined_graph) + int(dy_graph) + int(sta_graph)
-        self.num_matric     = (int(use_pre) * len(self.pre_defined_graph) +  len(self.pre_defined_graph) * int(dy_graph) + int(sta_graph)) * self.k_s + 1        # TODO: 3是指Multi-Modalities Graph的数量，这些需要reformat代码
+        self.num_matric     = (int(use_pre) * len(self.pre_defined_graph) +  len(self.pre_defined_graph) * int(dy_graph) + int(sta_graph)) * self.k_s + 1
         self.dropout        = nn.Dropout(model_args['dropout'])
         self.pre_defined_graph  = self.get_graph(self.pre_defined_graph)
 
@@ -81,7 +81,7 @@ class STLocalizedConv(nn.Module):
         out = self.fc_list_updt(X)                                                      # batch_size, seq_len, num_nodes, kernel_size * hidden_dim
         out = self.activation(out)
         out = out.view(batch_size, seq_len, num_nodes, kernel_size, num_feat)
-        X_0         = torch.mean(out, dim=-2)   # TODO: test last
+        X_0         = torch.mean(out, dim=-2)
         X_k         = out.transpose(-3, -2).reshape(batch_size, seq_len, kernel_size*num_nodes, num_feat)   # batch_size, seq_len, kernel_size x num_nodes, hidden_dim
         hidden      = self.gconv(support, X_k, X_0)                                     # Nx3N 3NxD -> NxD: batch_size, seq_len, num_nodes, hidden_dim
         return hidden

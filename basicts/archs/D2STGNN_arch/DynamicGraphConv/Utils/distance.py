@@ -7,7 +7,7 @@ class DistanceFunction(nn.Module):
     def __init__(self, **model_args):
         super().__init__()
         # attributes
-        self.hidden_dim = model_args['num_hidden']              # hidden dimension of 
+        self.hidden_dim = model_args['num_hidden']
         self.node_dim   = model_args['node_hidden']
         self.time_slot_emb_dim  = self.hidden_dim
         self.input_seq_len      = model_args['seq_length']
@@ -20,7 +20,7 @@ class DistanceFunction(nn.Module):
         self.time_slot_embedding = nn.Linear(model_args['time_emb_dim'], self.time_slot_emb_dim)
         # Distance Score
         self.all_feat_dim = self.ts_feat_dim + self.node_dim + model_args['time_emb_dim']*2
-        self.WQ = nn.Linear(self.all_feat_dim, self.hidden_dim, bias=False) # TODO more output dimension
+        self.WQ = nn.Linear(self.all_feat_dim, self.hidden_dim, bias=False)
         self.WK = nn.Linear(self.all_feat_dim, self.hidden_dim, bias=False)
         self.bn = nn.BatchNorm1d(self.hidden_dim*2)
 
