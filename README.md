@@ -120,6 +120,7 @@ If you need to debug, you could run the `basicts/run.py` file.
 
 ## 7. TODO
 
+- [ ] : add the result of STID.
 - [ ] : revise the data preprocessing of PEMS07, which only contains weekdays.
 - [ ] : Add detailed documentation and a demo about data preprocessing.
 - [ ] : Add more multivariate time series datasets: Traffic, Electricity, Exchange-Rate, ETTh1, ETTh2, ETTm1, Weather, Solar-Energy.
