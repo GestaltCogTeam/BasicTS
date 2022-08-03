@@ -22,7 +22,6 @@ class BaseRunner(Runner):
                 - support test loader and test process
                 - support gradient clip
                 - support setup_graph for the models acting like tensorflow
-                - support find unused parameters when using DDP
                 - move train/validate data loop outside the `train`/`validate` function
         
         Args:
@@ -79,27 +78,6 @@ class BaseRunner(Runner):
         dataset = self.build_test_dataset(cfg)
         return build_data_loader(dataset, cfg['TEST']['DATA'])
 
-    def build_model(self, cfg: dict) -> nn.Module:
-        """Build model.
-
-        Initialize model by calling ```self.define_model```,
-        Moves model to the GPU.
-
-        If DDP is initialized, initialize the DDP wrapper.
-
-        Args:
-            cfg (dict): config
-
-        Returns:
-            model (nn.Module)
-        """
-
-        model = self.define_model(cfg)
-        model = self.to_running_device(model)
-        if torch.distributed.is_initialized():
-            model = DDP(model, device_ids=[get_local_rank()], find_unused_parameters=cfg.get("FIND_UNUSED_PARAMETERS", False))
-        return model
-    
     def setup_graph(self, data):
         pass
 
