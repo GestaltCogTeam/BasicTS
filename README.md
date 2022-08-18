@@ -36,7 +36,8 @@ If this repository helps your research or work, I hope you could give me a ⭐, 
 | GMAN          | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | AGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | STNorm        | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |
+| STID          | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | Other Models  |         |         |         |        |        |        |                |
 
 Although we have tried our best to tune the hyperparameters in `basicts/options` for every model and every dataset, there is no guarantee that they are optimal.
