@@ -1,10 +1,10 @@
 import torch
 import numpy as np
 from tqdm import tqdm
-from basicts.runners.base_traffic_runner import TrafficRunner
+from basicts.runners.short_mts_runner import MTSRunner
 from basicts.utils.registry import SCALER_REGISTRY
 
-class MTGNNRunner(TrafficRunner):
+class MTGNNRunner(MTSRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
         self.step_size = cfg.TRAIN.CUSTOM.STEP_SIZE

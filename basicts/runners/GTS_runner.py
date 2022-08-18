@@ -1,6 +1,6 @@
 from typing import Tuple, Union
 import torch
-from basicts.runners.base_traffic_runner import TrafficRunner
+from basicts.runners.short_mts_runner import MTSRunner
 from basicts.utils.registry import SCALER_REGISTRY
 from easytorch.utils.dist import master_only
 
@@ -10,7 +10,7 @@ from easytorch.utils.dist import master_only
     否则就会像GTS一样, 一旦模型有一点特殊 (例如多一个返回和不同的loss), 就必须重写整个train_iters, val_iters, and test_iters。
 """
 
-class GTSRunner(TrafficRunner):
+class GTSRunner(MTSRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
 
