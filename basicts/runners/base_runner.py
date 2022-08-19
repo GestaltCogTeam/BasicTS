@@ -119,10 +119,20 @@ class BaseRunner(Runner):
             epoch (int): current epoch.
         """
 
-        super().on_epoch_end(epoch)
+        # print train meters
+        self.print_epoch_meters('train')
+        # tensorboard plt meters
+        self.plt_epoch_meters('train', epoch)
+        # validate
+        if self.val_data_loader is not None and epoch % self.val_interval == 0:
+            self.validate(train_epoch=epoch)
         # test
         if self.test_data_loader is not None and epoch % self.test_interval == 0:
             self.test_process(train_epoch=epoch)
+        # save model
+        self.save_model(epoch)
+        # reset meters
+        self.reset_epoch_meters()
 
     @torch.no_grad()
     @master_only
