@@ -1,15 +1,16 @@
 import torch
 import numpy as np
-from tqdm import tqdm
-from basicts.runners.base_traffic_runner import TrafficRunner
+from typing import Tuple, Union
+from basicts.runners.short_mts_runner import MTSRunner
 from basicts.utils.registry import SCALER_REGISTRY
 
-class MTGNNRunner(TrafficRunner):
+class MTGNNRunner(MTSRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
         self.step_size = cfg.TRAIN.CUSTOM.STEP_SIZE
         self.num_nodes = cfg.TRAIN.CUSTOM.NUM_NODES
         self.num_split = cfg.TRAIN.CUSTOM.NUM_SPLIT
+        self.perm      = None
 
     def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
         """select input features.
@@ -68,26 +69,30 @@ class MTGNNRunner(TrafficRunner):
         real_value = self.select_target_features(future_data)
         return prediction, real_value
 
-    def train_data_loop(self, data_iter: tqdm, epoch: int):
-        """train data loop
+    def train_iters(self, epoch: int, iter_index: int, data: Union[torch.Tensor, Tuple]) -> torch.Tensor:
+        """It must be implement to define training detail.
+
+        If it returns `loss`, the function ```self.backward``` will be called.
 
         Args:
-            data_iter (tqdm.std.tqdm): data iterator
-            epoch (int): epoch number
+            epoch (int): current epoch.
+            iter_index (int): current iter.
+            data (torch.Tensor or tuple): Data provided by DataLoader
+
+        Returns:
+            loss (torch.Tensor)
         """
-        for iter_index, data in enumerate(data_iter):
-            if iter_index%self.step_size==0:
-                perm = np.random.permutation(range(self.num_nodes))
-            num_sub = int(self.num_nodes/self.num_split)
-            for j in range(self.num_split):
-                if j != self.num_split-1:
-                    idx = perm[j * num_sub:(j + 1) * num_sub]
-                    raise
-                else:
-                    idx = perm[j * num_sub:]
-                idx  = torch.tensor(idx)
-                future_data, history_data = data
-                data = future_data[:, :, idx, :], history_data[:, :, idx, :], idx
-                loss = self.train_iters(data, epoch, iter_index)
-                if loss is not None:
-                    self.backward(loss)
+        if iter_index%self.step_size==0:
+            self.perm = np.random.permutation(range(self.num_nodes))
+        num_sub = int(self.num_nodes/self.num_split)
+        for j in range(self.num_split):
+            if j != self.num_split-1:
+                idx = self.perm[j * num_sub:(j + 1) * num_sub]
+                raise
+            else:
+                idx = self.perm[j * num_sub:]
+            idx  = torch.tensor(idx)
+            future_data, history_data = data
+            data = future_data[:, :, idx, :], history_data[:, :, idx, :], idx
+            loss = super().train_iters(epoch, iter_index, data)
+            self.backward(loss)

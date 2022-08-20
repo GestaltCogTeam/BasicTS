@@ -5,15 +5,12 @@
 
 ## 0. What is BasicTS
 
-BasicTS (**Basic** **T**ime **S**eries) is an open-source PyTorch-based time series benchmark and toolbox motivated by [BasicSR](https://github.com/xinntao/BasicSR) [1].
+BasicTS (**Basic** **T**ime **S**eries) is an open-source PyTorch-based benchmark and toolbox **for time series** .
 At present, it only focuses on time series forecasting, and may add time series classification, anomaly detection, etc., in the future.
-BasicTS provides users with a ***unified, standard pipeline***  (fair, but probably not the fastest), which provides ***reproduction and fair comparision*** of popular deep learning-based time series models to inspire new innovations.
-BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch) [2], an easy-to-use and powerful open source neural network training framework.
 
-BasicTS (**Basic** **T**ime **S**eries)是一个受[BasicSR](https://github.com/xinntao/BasicSR) [1]启发的基于PyTorch的开源时间序列Benchmark和工具箱。
-目前仅专注于时间序列预测，后续可能会添加时间序列分类、异常检测等内容。
-BasicTS为用户提供 ***统一的、标准的*** pipeline（他是公平的，但可能不是最快的），来提供流行的基于深度学习的时间序列模型的 ***复现和公平对比*** ，以启发新的创新。
-BasicTS基于一个易用、强大的开源神经网络训练框架[EasyTorch](https://github.com/cnstark/easytorch) [2]开发。
+BasicTS provides users with a ***unified, standard pipeline***, which provides ***reproduction and fair comparision*** of popular deep learning-based time series models to inspire new innovations.
+
+BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch) [2], an easy-to-use and powerful open source neural network training framework.
 
 If this repository helps your research or work, I hope you could give me a ⭐, and I will keep updating it. If you need more features about BasicTS (e.g. more datasets or methods) or have any questions/suggestions, please feel free to let me know~
 
@@ -36,7 +33,8 @@ If this repository helps your research or work, I hope you could give me a ⭐, 
 | GMAN          | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | AGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | STNorm        | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |
+| STID          | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
+| D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
 | Other Models  |         |         |         |        |        |        |                |
 
 Although we have tried our best to tune the hyperparameters in `basicts/options` for every model and every dataset, there is no guarantee that they are optimal.
@@ -48,17 +46,11 @@ Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
 
 ## 2. Installing Dependencies
 
-### 2.1 Main Dependencies
+We recommend that you install all dependencies by:
 
-- python 3.9
-- pytorch 1.9.1
-- easy-torch latest
-
-> ⚠️⚠️⚠️ Please use `pip install easy-torch`, instead of `pip install easytorch`, to install [EasyTorch](https://github.com/cnstark/easytorch). They are different two packages. ⚠️⚠️⚠️
-
-### 2.2 Installing from Pip
-
-`pip install -r requirements.txt`
+```shell
+pip install -r requirements.txt
+```
 
 ## 3. Codebase Designs and Conventions
 
@@ -133,5 +125,4 @@ If you need to debug, you could run the `basicts/run.py` file.
 
 ## References
 
-[1] Xintao Wang, Ke Yu, Kelvin C.K. Chan, Chao Dong and Chen Change Loy. BasicSR: Open Source Image and Video Restoration Toolbox. <https://github.com/xinntao/BasicSR>, 2018.\
-[2] Yuhao Wang. EasyTorch. <https://github.com/cnstark/easytorch>, 2020.
+[1] Yuhao Wang. EasyTorch. <https://github.com/cnstark/easytorch>, 2020.

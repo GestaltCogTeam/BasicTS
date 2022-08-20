@@ -8,33 +8,22 @@ from basicts.utils.registry import SCALER_REGISTRY
 from basicts.utils.serialization import load_pkl
 from easytorch.utils.dist import master_only
 
-"""
-Runner for traffic datasets~(short-term forecasting datasets).
-- support curriculum learning.
-- metrics:
-    - MAE
-    - RMSE
-    - MAPE
-- evluate at horizon 3, 6, 12, and overall.
-- users must have to implement the `forward` function. 
-"""
-
-class TrafficRunner(BaseRunner):
-    """runner for traffic datasets: metr-la, pems-bay, pems03, pems04, pems07, pems08.
-        details:
-            - initialize metrics: mae, mape, rmse
-            - define model
-            - build datasets & dataloader
-            - self.iter_per_epoch
-            - train/val iteration, test process.
+class MTSRunner(BaseRunner):
+    """Runner for short term multivariate time series forecasting datasets. Typically, models predict the future 12 time steps based on historical time series.
+    Features:
+        - Evaluate at horizon 3, 6, 12, and overall.
+        - Metrics: MAE, RMSE, MAPE.
+        - Support curriculum learning.
+        - Users only need to implement the `forward` function.
+    
     Args:
         BaseRunner (easytorch.easytorch.runner): base runner
     """
+
     def __init__(self, cfg: dict):
         super().__init__(cfg)
-
         self.dataset_name = cfg['DATASET_NAME']
-        self.null_val = cfg['TRAIN'].get('NULL_VAL', np.nan)        # different datasets have different null_values. For example, 0.0 in traffic speed dataset, nan in traffic flow dataset.
+        self.null_val = cfg['TRAIN'].get('NULL_VAL', 0)        # different datasets have different null_values, e.g., 0.0 or np.nan.
         self.dataset_type = cfg['DATASET_TYPE']
         self.forward_features = cfg['MODEL'].get('FROWARD_FEATURES', None)
         self.target_features = cfg['MODEL'].get('TARGET_FEATURES', None)
@@ -60,6 +49,7 @@ class TrafficRunner(BaseRunner):
         Args:
             cfg (dict): config
         """
+        
         super().init_training(cfg)
         for key, value in self.metrics.items():
             self.register_epoch_meter("train_"+key, 'train', '{:.4f}')
@@ -72,6 +62,7 @@ class TrafficRunner(BaseRunner):
         Args:
             cfg (dict): config
         """
+
         super().init_validation(cfg)
         for key, value in self.metrics.items():
             self.register_epoch_meter("val_"+key, 'val', '{:.4f}')
@@ -102,6 +93,7 @@ class TrafficRunner(BaseRunner):
         Returns:
             model (nn.Module)
         """
+
         return cfg['MODEL']['ARCH'](**cfg.MODEL.PARAM)
 
     def build_train_dataset(self, cfg: dict):
@@ -113,6 +105,7 @@ class TrafficRunner(BaseRunner):
         Returns:
             train dataset (Dataset)
         """
+
         raw_file_path = cfg["TRAIN"]["DATA"]["DIR"] + "/data.pkl"
         index_file_path = cfg["TRAIN"]["DATA"]["DIR"] + "/index.pkl"
         batch_size = cfg['TRAIN']['DATA']['BATCH_SIZE']
@@ -133,6 +126,7 @@ class TrafficRunner(BaseRunner):
         Returns:
             train dataset (Dataset)
         """
+
         raw_file_path = cfg["VAL"]["DATA"]["DIR"] + "/data.pkl"
         index_file_path = cfg["VAL"]["DATA"]["DIR"] + "/index.pkl"
         dataset = cfg['DATASET_CLS'](raw_file_path, index_file_path, mode='valid')
@@ -149,6 +143,7 @@ class TrafficRunner(BaseRunner):
         Returns:
             train dataset (Dataset)
         """
+
         raw_file_path = cfg["TEST"]["DATA"]["DIR"] + "/data.pkl"
         index_file_path = cfg["TEST"]["DATA"]["DIR"] + "/index.pkl"
         dataset = cfg['DATASET_CLS'](raw_file_path, index_file_path, mode='test')
@@ -164,6 +159,7 @@ class TrafficRunner(BaseRunner):
         Returns:
             int: task level
         """
+
         if epoch is None:
             return self.prediction_length
         epoch -= 1
@@ -190,7 +186,7 @@ class TrafficRunner(BaseRunner):
         """
         raise NotImplementedError()
 
-    def train_iters(self, data: Union[torch.Tensor, Tuple], epoch: int, iter_index: int) -> torch.Tensor:
+    def train_iters(self, epoch: int, iter_index: int, data: Union[torch.Tensor, Tuple]) -> torch.Tensor:
         """Training details.
 
         Args:
@@ -201,6 +197,7 @@ class TrafficRunner(BaseRunner):
         Returns:
             loss (torch.Tensor)
         """
+
         iter_num = (epoch-1) * self.iter_per_epoch + iter_index
         prediction, real_value = self.forward(data=data, epoch=epoch, iter_num=iter_num, train=True)
         # re-scale data
@@ -218,7 +215,7 @@ class TrafficRunner(BaseRunner):
             self.update_epoch_meter('train_'+metric_name, metric_item.item())
         return loss
 
-    def val_iters(self, data: Union[torch.Tensor, Tuple], train_epoch: int, iter_index: int):
+    def val_iters(self, iter_index: int, data: Union[torch.Tensor, Tuple]):
         """Validation details.
 
         Args:
@@ -226,7 +223,8 @@ class TrafficRunner(BaseRunner):
             train_epoch (int): current epoch if in training process. Else None.
             iter_index (int): current iter.
         """
-        prediction, real_value = self.forward(data=data, epoch=train_epoch, iter_num=None, train=False)
+
+        prediction, real_value = self.forward(data=data, epoch=None, iter_num=None, train=False)
         # re-scale data
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])
@@ -240,11 +238,12 @@ class TrafficRunner(BaseRunner):
     @torch.no_grad()
     @master_only
     def test(self, train_epoch: int = None):
-        """test model.
+        """Evaluate the model.
 
         Args:
             train_epoch (int, optional): current epoch if in training process.
         """
+
         # test loop
         prediction = []
         real_value  = []
@@ -284,5 +283,6 @@ class TrafficRunner(BaseRunner):
         Args:
             train_epoch (Optional[int]): current epoch if in training process.
         """
+
         if train_epoch is not None:
             self.save_best_model(train_epoch, 'val_MAE', greater_best=False)

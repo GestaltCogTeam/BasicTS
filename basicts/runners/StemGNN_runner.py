@@ -1,8 +1,8 @@
 import torch
 from tqdm import tqdm
-from basicts.runners.base_traffic_runner import TrafficRunner
+from basicts.runners.short_mts_runner import MTSRunner
 
-class StemGNNRunner(TrafficRunner):
+class StemGNNRunner(MTSRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
 

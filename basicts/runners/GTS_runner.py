@@ -1,6 +1,6 @@
 from typing import Tuple, Union
 import torch
-from basicts.runners.base_traffic_runner import TrafficRunner
+from basicts.runners.short_mts_runner import MTSRunner
 from basicts.utils.registry import SCALER_REGISTRY
 from easytorch.utils.dist import master_only
 
@@ -10,7 +10,7 @@ from easytorch.utils.dist import master_only
     否则就会像GTS一样, 一旦模型有一点特殊 (例如多一个返回和不同的loss), 就必须重写整个train_iters, val_iters, and test_iters。
 """
 
-class GTSRunner(TrafficRunner):
+class GTSRunner(MTSRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
 
@@ -26,6 +26,7 @@ class GTSRunner(TrafficRunner):
         Args:
             data (torch.Tensor): input history data, shape [B, L, N, C]
             channel (list): self-defined selected channels
+        
         Returns:
             torch.Tensor: reshaped data
         """
@@ -87,7 +88,7 @@ class GTSRunner(TrafficRunner):
         real_value = self.data_i_reshape(future_data)
         return prediction, real_value, pred_adj, prior_adj
 
-    def train_iters(self, data: Union[torch.Tensor, Tuple], epoch: int, iter_index: int) -> torch.Tensor:
+    def train_iters(self, epoch: int, iter_index: int, data: Union[torch.Tensor, Tuple]) -> torch.Tensor:
         """Training details.
 
         Args:
@@ -121,7 +122,7 @@ class GTSRunner(TrafficRunner):
             self.update_epoch_meter('train_'+metric_name, metric_item.item())
         return loss
 
-    def val_iters(self, data: Union[torch.Tensor, Tuple], train_epoch: int, iter_index: int):
+    def val_iters(self, iter_index: int, data: Union[torch.Tensor, Tuple]):
         """Validation details.
 
         Args:
@@ -129,7 +130,7 @@ class GTSRunner(TrafficRunner):
             train_epoch (int): current epoch if in training process. Else None.
             iter_index (int): current iter.
         """
-        prediction, real_value, pred_adj, prior_adj = self.forward(data=data, epoch=train_epoch, iter_num=None, train=False)
+        prediction, real_value, pred_adj, prior_adj = self.forward(data=data, epoch=None, iter_num=None, train=False)
         # re-scale data
         prediction = SCALER_REGISTRY.get(self.scaler['func'])(prediction, **self.scaler['args'])
         real_value = SCALER_REGISTRY.get(self.scaler['func'])(real_value, **self.scaler['args'])

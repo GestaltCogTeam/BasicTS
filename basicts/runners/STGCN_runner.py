@@ -1,7 +1,7 @@
 import torch
-from basicts.runners.base_traffic_runner import TrafficRunner
+from basicts.runners.short_mts_runner import MTSRunner
 
-class STGCNRunner(TrafficRunner):
+class STGCNRunner(MTSRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
 
