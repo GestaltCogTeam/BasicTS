@@ -6,7 +6,10 @@
 import torch
 import torch.nn as nn
 import copy
+from basicts.archs.registry import ARCH_REGISTRY
 
+
+@ARCH_REGISTRY.register()
 class SimpleMovingAverage(nn.Module):
     def __init__(self, q: int, input_length: int, output_length: int):
         """simple moving average as prediction
@@ -49,6 +52,8 @@ class SimpleMovingAverage(nn.Module):
         prediction = data_full[:, -self.output_length:, :, :]
         return prediction
 
+
+@ARCH_REGISTRY.register()
 class AutoRegressive(nn.Module):
     def __init__(self, p: int, input_length: int, output_length: int):
         """Auto Regressive (AR) model
@@ -90,6 +95,8 @@ class AutoRegressive(nn.Module):
         prediction = data_full[:, -self.output_length:, :, :]
         return prediction
 
+
+@ARCH_REGISTRY.register()
 class VectorAutoRegression(nn.Module):
     def __init__(self, p: int, input_length: int, output_length: int, num_time_series: int):
         """vector auto regressive model for multivariate time series forecasting
@@ -133,6 +140,8 @@ class VectorAutoRegression(nn.Module):
         prediction = data_full[:, -self.output_length:, :, :]
         return prediction
 
+
+@ARCH_REGISTRY.register()
 class ARIMA(nn.Module):
     def __init__(self):
         super(ARIMA, self).__init__()

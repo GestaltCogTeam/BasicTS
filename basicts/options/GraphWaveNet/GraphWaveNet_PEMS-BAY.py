@@ -1,8 +1,6 @@
 import os
 from easydict import EasyDict
 import torch
-# architecture 
-from basicts.archs.GraphWaveNet_arch import GraphWaveNet
 # runner
 from basicts.runners.GraphWaveNet_runner import GraphWaveNetRunner
 from basicts.data.base_dataset import BaseDataset
@@ -35,8 +33,7 @@ CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
-CFG.MODEL.NAME  = 'Graph WaveNet'
-CFG.MODEL.ARCH  = GraphWaveNet
+CFG.MODEL.NAME  = 'GraphWaveNet'
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
     "num_nodes" : 325, 

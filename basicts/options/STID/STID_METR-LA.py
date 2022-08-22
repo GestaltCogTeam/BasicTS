@@ -1,7 +1,5 @@
 import os
 from easydict import EasyDict
-# architecture 
-from basicts.archs.STID_arch import STID
 # runner
 from basicts.runners.STID_runner import STIDRunner
 from basicts.data.base_dataset import BaseDataset
@@ -34,7 +32,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'STID'
-CFG.MODEL.ARCH  = STID
 CFG.MODEL.PARAM = {
     "num_nodes" : 207, 
     'input_len' : 12,

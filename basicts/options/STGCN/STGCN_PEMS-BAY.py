@@ -1,8 +1,6 @@
 import os
 from easydict import EasyDict
 import torch
-# architecture 
-from basicts.archs.STGCN_arch import STGCN
 # runner
 from basicts.runners.STGCN_runner import STGCNRunner
 from basicts.data.base_dataset import BaseDataset
@@ -37,7 +35,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'STGCN'
-CFG.MODEL.ARCH  = STGCN
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "normlap")
 adj_mx    = torch.Tensor(adj_mx[0])
 CFG.MODEL.PARAM = {

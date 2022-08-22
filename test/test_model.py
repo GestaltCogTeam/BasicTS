@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 
 from basicts.archs.Stat_arch import SimpleMovingAverage, AutoRegressive, VectorAutoRegression
-from basicts.archs.MTGNN_arch import MTGNN_arch
+from basicts.archs.MTGNN_arch import MTGNN
 sma  = SimpleMovingAverage(12, 12, 12)
 data = torch.randn(64, 12, 207, 3)
 pred = sma(data)

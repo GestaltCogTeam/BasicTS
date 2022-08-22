@@ -1,7 +1,5 @@
 import os
 from easydict import EasyDict
-# architecture 
-from basicts.archs.StemGNN_arch import StemGNN
 # runner
 from basicts.runners.StemGNN_runner import StemGNNRunner
 from basicts.data.base_dataset import BaseDataset
@@ -36,7 +34,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'StemGNN'
-CFG.MODEL.ARCH  = StemGNN
 CFG.MODEL.PARAM = {
     "units":    307,
     "stack_cnt": 2,

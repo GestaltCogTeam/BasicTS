@@ -1,7 +1,5 @@
 import os
 from easydict import EasyDict
-# architecture 
-from basicts.archs.GMAN_arch import GMAN
 # runner
 from basicts.runners.GMAN_runner import GMANRunner
 from basicts.data.base_dataset import BaseDataset
@@ -35,7 +33,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'GMAN'
-CFG.MODEL.ARCH  = GMAN
 spatial_embed   = load_node2vec_emb("datasets/" + CFG.DATASET_NAME + "/node2vec_emb.txt")
 CFG.MODEL.PARAM = {
     "SE": spatial_embed,
