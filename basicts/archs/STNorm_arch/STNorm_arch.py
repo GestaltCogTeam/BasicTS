@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.nn import Parameter
 import sys
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: ST-Norm: Spatial and Temporal Normalization for Multi-variate Time Series Forecasting
@@ -51,6 +52,8 @@ class TNorm(nn.Module):
         out = x_norm * self.gamma + self.beta
         return out
 
+
+@ARCH_REGISTRY.register()
 class STNorm(nn.Module):
     def __init__(self, num_nodes, tnorm_bool, snorm_bool, in_dim,out_dim, channels,kernel_size,blocks,layers):
         super(STNorm, self).__init__()

@@ -1,7 +1,5 @@
 import os
 from easydict import EasyDict
-# architecture 
-from basicts.archs.LSTM_arch import LSTM
 # runner
 from basicts.runners.LSTM_runner import LSTMRunner
 from basicts.data.base_dataset import BaseDataset
@@ -34,7 +32,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'LSTM'
-CFG.MODEL.ARCH  = LSTM
 CFG.MODEL.PARAM = {
     "input_dim" : 2,
     "rnn_units" : 64,

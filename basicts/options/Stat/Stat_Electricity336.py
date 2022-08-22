@@ -1,7 +1,5 @@
 import os
 from easydict import EasyDict
-# architecture 
-from basicts.archs.Stat_arch import AutoRegressive, VectorAutoRegression
 # runner
 from basicts.runners.Stat_runner import StatRunner
 from basicts.data.base_dataset import BaseDataset
@@ -33,8 +31,7 @@ CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
-CFG.MODEL.NAME  = 'Stat Model'
-CFG.MODEL.ARCH  = VectorAutoRegression
+CFG.MODEL.NAME  = 'VectorAutoRegression'
 CFG.MODEL.PARAM = {
     'p': 168,
     'input_length': 168,

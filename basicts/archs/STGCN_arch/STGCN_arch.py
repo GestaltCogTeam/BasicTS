@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from basicts.archs.STGCN_arch import STGCN_layers as layers
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Spatio-Temporal Graph Convolutional Networks: A Deep Learning Framework for Trafﬁc Forecasting
@@ -11,6 +12,8 @@ from basicts.archs.STGCN_arch import STGCN_layers as layers
         https://github.com/hazdzz/STGCN/issues/9
 """
 
+
+@ARCH_REGISTRY.register()
 class STGCNChebGraphConv(nn.Module):
     # STGCNChebGraphConv contains 'TGTND TGTND TNFF' structure
     # ChebGraphConv is the graph convolution from ChebyNet.

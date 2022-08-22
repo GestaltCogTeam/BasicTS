@@ -1,4 +1,6 @@
-from basicts.utils.registry import SCALER_REGISTRY
+from easytorch.utils.registry import Registry
+
+SCALER_REGISTRY = Registry('Scaler')
 
 """
 data normalization and re-normalization

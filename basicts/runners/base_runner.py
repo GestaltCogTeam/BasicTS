@@ -1,7 +1,10 @@
 import time
+from typing import Dict
+
 import setproctitle
 
 import torch
+from torch import nn
 from torch.utils.data import DataLoader
 
 from easytorch import Runner
@@ -9,6 +12,8 @@ from easytorch.utils.dist import master_only
 from easytorch.utils import master_only
 from easytorch.core.data_loader import build_data_loader
 from basicts.data.transforms import *
+from basicts.archs import ARCH_REGISTRY
+
 
 class BaseRunner(Runner):
     def __init__(self, cfg: dict):
@@ -32,6 +37,10 @@ class BaseRunner(Runner):
         # set proctitle
         proctitle_name = "{0}({1})".format(cfg['MODEL'].get("NAME", " "), cfg.get("DATASET_NAME", " "))
         setproctitle.setproctitle("{0}@BasicTS".format(proctitle_name))
+
+    @staticmethod
+    def define_model(cfg: Dict) -> nn.Module:
+        return ARCH_REGISTRY.build(cfg['MODEL']['NAME'], cfg['MODEL'].get('PARAM', {}))
 
     def build_train_data_loader(self, cfg: dict) -> DataLoader:
         """Support 'setup_graph' for the models acting like tensorflow.

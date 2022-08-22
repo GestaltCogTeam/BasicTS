@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from typing import Tuple, Union
 from basicts.runners.short_mts_runner import MTSRunner
-from basicts.utils.registry import SCALER_REGISTRY
+
 
 class MTGNNRunner(MTSRunner):
     def __init__(self, cfg: dict):

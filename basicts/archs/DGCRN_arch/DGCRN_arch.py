@@ -4,8 +4,11 @@ import torch.nn as nn
 from torch.autograd import Variable
 import numpy as np
 from basicts.archs.DGCRN_arch.DGCRN_layer import *
+from basicts.archs.registry import ARCH_REGISTRY
 import sys
 
+
+@ARCH_REGISTRY.register()
 class DGCRN(nn.Module):
     def __init__(self, gcn_depth, num_nodes, predefined_A=None, dropout=0.3, subgraph_size=20, node_dim=40, middle_dim=2, seq_length=12, in_dim=2, list_weight=[0.05, 0.95, 0.95], tanhalpha=3, cl_decay_steps=4000, rnn_size=64, hyperGNN_dim=16):
         super(DGCRN, self).__init__()

@@ -1,7 +1,10 @@
 import torch
 import torch.nn as nn
 from basicts.archs.STID_arch.MLP import MLP_res
+from basicts.archs.registry import ARCH_REGISTRY
 
+
+@ARCH_REGISTRY.register()
 class STID(nn.Module):
     def __init__(self, **model_args):
         super().__init__()

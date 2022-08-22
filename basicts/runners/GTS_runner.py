@@ -1,7 +1,7 @@
 from typing import Tuple, Union
 import torch
 from basicts.runners.short_mts_runner import MTSRunner
-from basicts.utils.registry import SCALER_REGISTRY
+from basicts.data.transforms import SCALER_REGISTRY
 from easytorch.utils.dist import master_only
 
 """

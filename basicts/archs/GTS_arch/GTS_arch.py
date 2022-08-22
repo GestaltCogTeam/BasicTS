@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from basicts.archs.GTS_arch.GTS_cell import DCGRUCell
+from basicts.archs.registry import ARCH_REGISTRY
 import numpy as np
 
 """
@@ -125,6 +126,7 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
         return output, torch.stack(hidden_states)
 
 
+@ARCH_REGISTRY.register()
 class GTS(nn.Module, Seq2SeqAttrs):
     def __init__(self, **model_kwargs):
         """init GTS

@@ -1,8 +1,6 @@
 import os
 from easydict import EasyDict
 import torch
-# architecture 
-from basicts.archs.DCRNN_arch import DCRNN
 # runner
 from basicts.runners.DCRNN_runner import DCRNNRunner
 from basicts.data.base_dataset import BaseDataset
@@ -42,7 +40,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'DCRNN'
-CFG.MODEL.ARCH  = DCRNN
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
     "cl_decay_steps"    : 2000,

@@ -1,7 +1,5 @@
 import os
 from easydict import EasyDict
-# architecture 
-from basicts.archs.HI_arch import HINetwork
 # runner
 from basicts.runners.HI_runner import HIRunner
 from basicts.data.base_dataset import BaseDataset
@@ -34,7 +32,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'HINetwork'
-CFG.MODEL.ARCH  = HINetwork
 CFG.MODEL.PARAM = {
     'input_length': 12,
     'output_length': 12,

@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 from basicts.archs.DCRNN_arch.DCRNN_cell import DCGRUCell
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting
@@ -92,6 +93,7 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
         return output, torch.stack(hidden_states)
 
 
+@ARCH_REGISTRY.register()
 class DCRNN(nn.Module, Seq2SeqAttrs):
     def __init__(self, adj_mx, **model_kwargs):
         super().__init__()

@@ -2,7 +2,7 @@ absl-py==1.0.0
 cachetools==5.0.0
 certifi==2021.10.8
 charset-normalizer==2.0.12
-easy-torch==1.2.9
+easy-torch==1.2.10
 easydict==1.9
 google-auth==2.6.6
 google-auth-oauthlib==0.4.6

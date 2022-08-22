@@ -1,1 +1,1 @@
-from basicts.archs.MTGNN_arch.MTGNN_arch import MTGNN_arch
+from basicts.archs.MTGNN_arch.MTGNN_arch import MTGNN

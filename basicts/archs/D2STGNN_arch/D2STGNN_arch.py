@@ -10,6 +10,8 @@ from basicts.archs.D2STGNN_arch.DiffusionBlock import DifBlock
 from basicts.archs.D2STGNN_arch.InherentBlock import InhBlock
 from basicts.archs.D2STGNN_arch.DynamicGraphConv.DyGraphCons import DynamicGraphConstructor
 from basicts.archs.D2STGNN_arch.Decouple.estimation_gate import EstimationGate
+from basicts.archs.registry import ARCH_REGISTRY
+
 
 class DecoupleLayer(nn.Module):
     def __init__(self, hidden_dim, fk_dim=256, first=False, **model_args):
@@ -40,6 +42,7 @@ class DecoupleLayer(nn.Module):
         inh_backcast_seq_res, inh_forecast_hidden = self.inh_layer(dif_backcast_seq_res)         
         return inh_backcast_seq_res, dif_forecast_hidden, inh_forecast_hidden
 
+@ARCH_REGISTRY.register()
 class D2STGNN(nn.Module):
     def __init__(self, **model_args):
         super().__init__()

@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 import sys
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Graph WaveNet for Deep Spatial-Temporal Graph Modeling
@@ -50,6 +51,7 @@ class gcn(nn.Module):
         return h
 
 
+@ARCH_REGISTRY.register()
 class GraphWaveNet(nn.Module):
     def __init__(self, num_nodes, dropout=0.3, supports=None, gcn_bool=True, addaptadj=True, aptinit=None, in_dim=2,out_dim=12,residual_channels=32,dilation_channels=32,skip_channels=256,end_channels=512,kernel_size=2,blocks=4,layers=2):
         super(GraphWaveNet, self).__init__()

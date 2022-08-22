@@ -1,7 +1,5 @@
 import os
 from easydict import EasyDict
-# architecture 
-from basicts.archs.STNorm_arch import STNorm
 # runner
 from basicts.runners.STNorm_runner import STNormRunner
 from basicts.data.base_dataset import BaseDataset
@@ -34,7 +32,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'STNorm'
-CFG.MODEL.ARCH  = STNorm
 CFG.MODEL.PARAM = {
     "num_nodes" : 207, 
     "tnorm_bool": True,

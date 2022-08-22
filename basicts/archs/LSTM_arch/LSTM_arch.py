@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
+from basicts.archs.registry import ARCH_REGISTRY
 
+
+@ARCH_REGISTRY.register()
 class FCLSTM(nn.Module):
     def __init__(self, input_dim, rnn_units, output_dim, horizon, num_layers, dropout=0.1):
         super(FCLSTM, self).__init__()

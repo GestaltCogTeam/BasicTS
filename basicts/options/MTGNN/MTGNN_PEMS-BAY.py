@@ -1,8 +1,6 @@
 import os
 from easydict import EasyDict
 import torch
-# architecture 
-from basicts.archs.MTGNN_arch import MTGNN_arch
 # runner
 from basicts.runners.MTGNN_runner import MTGNNRunner
 from basicts.data.base_dataset import BaseDataset
@@ -36,7 +34,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'MTGNN'
-CFG.MODEL.ARCH  = MTGNN_arch
 buildA_true = True
 num_nodes = 325
 if buildA_true: # self-learned adjacency matrix

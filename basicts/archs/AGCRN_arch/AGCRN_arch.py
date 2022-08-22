@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 from basicts.archs.AGCRN_arch.AGCRNCell import AGCRNCell
+from basicts.archs.registry import ARCH_REGISTRY
+
 
 """
     Paper: Adaptive Graph Convolutional Recurrent Network for Trafﬁc Forecasting
@@ -45,6 +47,8 @@ class AVWDCRNN(nn.Module):
             init_states.append(self.dcrnn_cells[i].init_hidden_state(batch_size))
         return torch.stack(init_states, dim=0)      #(num_layers, B, N, hidden_dim)
 
+
+@ARCH_REGISTRY.register()
 class AGCRN(nn.Module):
     def __init__(self, num_nodes, input_dim, rnn_units, output_dim, horizon, num_layers, default_graph, embed_dim, cheb_k):
         super(AGCRN, self).__init__()

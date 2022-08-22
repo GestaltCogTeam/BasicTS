@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Historical Inertia: A Neglected but Powerful Baseline for Long Sequence Time-series Forecasting

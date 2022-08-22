@@ -1,13 +1,15 @@
 from basicts.archs.MTGNN_arch.MTGNN_layers import *
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Connecting the Dots: Multivariate Time Series Forecasting with Graph Neural Networks
     Ref Official Code: https://github.com/nnzhan/MTGNN
 """
 
-class MTGNN_arch(nn.Module):
+@ARCH_REGISTRY.register()
+class MTGNN(nn.Module):
     def __init__(self, gcn_true, buildA_true, gcn_depth, num_nodes, predefined_A=None, static_feat=None, dropout=0.3, subgraph_size=20, node_dim=40, dilation_exponential=1, conv_channels=32, residual_channels=32, skip_channels=64, end_channels=128, seq_length=12, in_dim=2, out_dim=12, layers=3, propalpha=0.05, tanhalpha=3, layer_norm_affline=True):
-        super(MTGNN_arch, self).__init__()
+        super(MTGNN, self).__init__()
         self.gcn_true = gcn_true
         self.buildA_true = buildA_true
         self.num_nodes = num_nodes

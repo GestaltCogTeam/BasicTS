@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Spectral Temporal Graph Neural Network for Multivariate Time-series Forecasting
@@ -93,6 +94,7 @@ class StockBlockLayer(nn.Module):
         return forecast, backcast_source
 
 
+@ARCH_REGISTRY.register()
 class StemGNN(nn.Module):
     def __init__(self, units, stack_cnt, time_step, multi_layer, horizon, dropout_rate=0.5, leaky_rate=0.2, **kwargs):
         super(StemGNN, self).__init__()

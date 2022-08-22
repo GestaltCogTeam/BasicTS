@@ -1,8 +1,6 @@
 import os
 from easydict import EasyDict
 import torch
-# architecture 
-from basicts.archs.D2STGNN_arch import D2STGNN
 # runner
 from basicts.runners.D2STGNN_runner import D2STGNNRunner
 from basicts.data.base_dataset import BaseDataset
@@ -36,7 +34,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'D2STGNN'
-CFG.MODEL.ARCH  = D2STGNN
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
     "num_feat"  : 1,
