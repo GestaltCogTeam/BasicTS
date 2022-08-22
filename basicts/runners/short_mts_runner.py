@@ -80,22 +80,6 @@ class MTSRunner(BaseRunner):
         for key, value in self.metrics.items():
             self.register_epoch_meter("test_"+key, 'test', '{:.4f}')
 
-    @staticmethod
-    def define_model(cfg: dict) -> nn.Module:
-        """Define model.
-
-        If you have multiple models, insert the name and class into the dict below,
-        and select it through ```config```.
-
-        Args:
-            cfg (dict): config
-
-        Returns:
-            model (nn.Module)
-        """
-
-        return cfg['MODEL']['ARCH'](**cfg.MODEL.PARAM)
-
     def build_train_dataset(self, cfg: dict):
         """Build MNIST train dataset
 

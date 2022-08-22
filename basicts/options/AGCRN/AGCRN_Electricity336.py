@@ -1,7 +1,5 @@
 import os
 from easydict import EasyDict
-# architecture 
-from basicts.archs.AGCRN_arch import AGCRN
 # runner
 from basicts.runners.AGCRN_runner import AGCRNRunner
 from basicts.data.base_dataset import BaseDataset
@@ -34,7 +32,6 @@ CFG.ENV.CUDNN.ENABLED = True
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME  = 'AGCRN'
-CFG.MODEL.ARCH  = AGCRN
 CFG.MODEL.PARAM = {
     "num_nodes" : 336, 
     "input_dim" : 1,
