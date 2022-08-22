@@ -4,7 +4,7 @@ import torch
 from torch import nn
 import numpy as np
 from basicts.runners.base_runner import BaseRunner
-from basicts.utils.registry import SCALER_REGISTRY
+from basicts.data.transforms import SCALER_REGISTRY
 from basicts.utils.serialization import load_pkl
 from easytorch.utils.dist import master_only
 
