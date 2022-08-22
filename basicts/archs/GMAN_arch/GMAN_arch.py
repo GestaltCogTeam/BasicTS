@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: GMAN: A Graph Multi-Attention Network for Traffic Prediction

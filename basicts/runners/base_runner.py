@@ -12,7 +12,7 @@ from easytorch.utils.dist import master_only
 from easytorch.utils import master_only
 from easytorch.core.data_loader import build_data_loader
 from basicts.data.transforms import *
-from basicts.archs import build_arch
+from basicts.archs import ARCH_REGISTRY
 
 
 class BaseRunner(Runner):
@@ -40,7 +40,7 @@ class BaseRunner(Runner):
 
     @staticmethod
     def define_model(cfg: Dict) -> nn.Module:
-        return build_arch(cfg['MODEL']['NAME'], cfg['MODEL'].get('PARAM', {}))
+        return ARCH_REGISTRY.build(cfg['MODEL']['NAME'], cfg['MODEL'].get('PARAM', {}))
 
     def build_train_data_loader(self, cfg: dict) -> DataLoader:
         """Support 'setup_graph' for the models acting like tensorflow.

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from basicts.archs.STGCN_arch import STGCN_layers as layers
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Spatio-Temporal Graph Convolutional Networks: A Deep Learning Framework for Trafﬁc Forecasting

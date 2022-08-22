@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import numpy as np
 from basicts.archs.DGCRN_arch.DGCRN_layer import *
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 import sys
 
 

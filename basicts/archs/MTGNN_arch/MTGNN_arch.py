@@ -1,5 +1,5 @@
 from basicts.archs.MTGNN_arch.MTGNN_layers import *
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Connecting the Dots: Multivariate Time Series Forecasting with Graph Neural Networks

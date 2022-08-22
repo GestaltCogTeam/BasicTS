@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from torch.nn import Parameter
 import sys
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: ST-Norm: Spatial and Temporal Normalization for Multi-variate Time Series Forecasting

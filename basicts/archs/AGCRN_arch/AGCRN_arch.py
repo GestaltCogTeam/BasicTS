@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from basicts.archs.AGCRN_arch.AGCRNCell import AGCRNCell
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 
 
 """

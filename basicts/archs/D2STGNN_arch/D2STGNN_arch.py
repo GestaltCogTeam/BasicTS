@@ -10,7 +10,7 @@ from basicts.archs.D2STGNN_arch.DiffusionBlock import DifBlock
 from basicts.archs.D2STGNN_arch.InherentBlock import InhBlock
 from basicts.archs.D2STGNN_arch.DynamicGraphConv.DyGraphCons import DynamicGraphConstructor
 from basicts.archs.D2STGNN_arch.Decouple.estimation_gate import EstimationGate
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 
 
 class DecoupleLayer(nn.Module):

@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 from basicts.archs.DCRNN_arch.DCRNN_cell import DCGRUCell
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 
 """
     Paper: Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting

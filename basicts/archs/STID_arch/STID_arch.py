@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from basicts.archs.STID_arch.MLP import MLP_res
-from basicts.archs.builder import ARCH_REGISTRY
+from basicts.archs.registry import ARCH_REGISTRY
 
 
 @ARCH_REGISTRY.register()
