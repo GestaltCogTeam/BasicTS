@@ -1,13 +1,12 @@
-#!/usr/bin/env python
-# -*- encoding: utf-8 -*-
-import scipy.sparse as sp
 import numpy as np
+import scipy.sparse as sp
 from scipy.sparse import linalg
 
+
 def calculate_symmetric_normalized_laplacian(adj: np.ndarray) -> np.matrix:
-    """Calculate yymmetric normalized laplacian. 
+    """Calculate yymmetric normalized laplacian.
     Assuming unnormalized laplacian matrix is `L = D - A`,
-    then symmetric normalized laplacian matrix is: 
+    then symmetric normalized laplacian matrix is:
     `L^{Sym} =  D^-1/2 L D^-1/2 =  D^-1/2 (D-A) D^-1/2 = I - D^-1/2 A D^-1/2`
     For node `i` and `j` where `i!=j`, L^{sym}_{ij} <=0.
 
@@ -17,13 +16,17 @@ def calculate_symmetric_normalized_laplacian(adj: np.ndarray) -> np.matrix:
     Returns:
         np.matrix: Symmetric normalized laplacian L^{Sym}
     """
-    adj                                 = sp.coo_matrix(adj)
-    D                                   = np.array(adj.sum(1))
-    D_inv_sqrt = np.power(D, -0.5).flatten()    # diagonals of D^{-1/2}
-    D_inv_sqrt[np.isinf(D_inv_sqrt)]    = 0.
-    matrix_D_inv_sqrt                   = sp.diags(D_inv_sqrt)   # D^{-1/2}
-    symmetric_normalized_laplacian      = sp.eye(adj.shape[0]) - matrix_D_inv_sqrt.dot(adj).dot(matrix_D_inv_sqrt).tocoo() 
+
+    adj = sp.coo_matrix(adj)
+    degree = np.array(adj.sum(1))
+    # diagonals of D^{-1/2}
+    degree_inv_sqrt = np.power(degree, -0.5).flatten()
+    degree_inv_sqrt[np.isinf(degree_inv_sqrt)] = 0.
+    matrix_degree_inv_sqrt = sp.diags(degree_inv_sqrt)   # D^{-1/2}
+    symmetric_normalized_laplacian = sp.eye(
+        adj.shape[0]) - matrix_degree_inv_sqrt.dot(adj).dot(matrix_degree_inv_sqrt).tocoo()
     return symmetric_normalized_laplacian
+
 
 def calculate_scaled_laplacian(adj: np.ndarray, lambda_max: int = 2, undirected: bool = True) -> np.matrix:
     """Re-scaled the eigenvalue to [-1, 1] by scaled the normalized laplacian matrix for chebyshev pol.
@@ -39,20 +42,23 @@ def calculate_scaled_laplacian(adj: np.ndarray, lambda_max: int = 2, undirected:
     Returns:
         np.matrix: The rescaled laplacian matrix.
     """
+
     if undirected:
         adj = np.maximum.reduce([adj, adj.T])
-    L       = calculate_symmetric_normalized_laplacian(adj)
+    laplacian_matrix = calculate_symmetric_normalized_laplacian(adj)
     if lambda_max is None:  # manually cal the max lambda
-        lambda_max, _ = linalg.eigsh(L, 1, which='LM')
+        lambda_max, _ = linalg.eigsh(laplacian_matrix, 1, which='LM')
         lambda_max = lambda_max[0]
-    L       = sp.csr_matrix(L)
-    M, _    = L.shape
-    I       = sp.identity(M, format='csr', dtype=L.dtype)
-    L_res   = (2 / lambda_max * L) - I
-    return L_res
+    laplacian_matrix = sp.csr_matrix(laplacian_matrix)
+    num_nodes, _ = laplacian_matrix.shape
+    identity_matrix = sp.identity(
+        num_nodes, format='csr', dtype=laplacian_matrix.dtype)
+    laplacian_res = (2 / lambda_max * laplacian_matrix) - identity_matrix
+    return laplacian_res
 
-def symmetric_message_passing_adj(adj: np.ndarray) -> np.matrix:
-    """ Calculate the renormalized message passing adj in `GCN`.
+
+def calculate_symmetric_message_passing_adj(adj: np.ndarray) -> np.matrix:
+    """Calculate the renormalized message passing adj in `GCN`.
     A = A + I
     return D^{-1/2} A D^{-1/2}
 
@@ -64,17 +70,19 @@ def symmetric_message_passing_adj(adj: np.ndarray) -> np.matrix:
     """
 
     # add self loop
-    adj         = adj + np.diag(np.ones(adj.shape[0], dtype=np.float32))
+    adj = adj + np.diag(np.ones(adj.shape[0], dtype=np.float32))
     # print("calculating the renormalized message passing adj, please ensure that self-loop has added to adj.")
-    adj         = sp.coo_matrix(adj)
-    rowsum      = np.array(adj.sum(1))
-    d_inv_sqrt  = np.power(rowsum, -0.5).flatten()
+    adj = sp.coo_matrix(adj)
+    row_sum = np.array(adj.sum(1))
+    d_inv_sqrt = np.power(row_sum, -0.5).flatten()
     d_inv_sqrt[np.isinf(d_inv_sqrt)] = 0.
-    d_mat_inv_sqrt  = sp.diags(d_inv_sqrt)
-    mp_adj          = d_mat_inv_sqrt.dot(adj).transpose().dot(d_mat_inv_sqrt).astype(np.float32)
+    d_mat_inv_sqrt = sp.diags(d_inv_sqrt)
+    mp_adj = d_mat_inv_sqrt.dot(adj).transpose().dot(
+        d_mat_inv_sqrt).astype(np.float32)
     return mp_adj
 
-def transition_matrix(adj: np.ndarray) -> np.matrix:
+
+def calculate_transition_matrix(adj: np.ndarray) -> np.matrix:
     """Calculate the transition matrix `P` proposed in DCRNN and Graph WaveNet.
     P = D^{-1}A = A/rowsum(A)
 
@@ -84,11 +92,11 @@ def transition_matrix(adj: np.ndarray) -> np.matrix:
     Returns:
         np.matrix: Transition matrix P
     """
+
     adj = sp.coo_matrix(adj)
-    rowsum = np.array(adj.sum(1)).flatten()
-    d_inv = np.power(rowsum, -1).flatten()
+    row_sum = np.array(adj.sum(1)).flatten()
+    d_inv = np.power(row_sum, -1).flatten()
     d_inv[np.isinf(d_inv)] = 0.
-    d_mat= sp.diags(d_inv)
-    # P = d_mat.dot(adj)
-    P = d_mat.dot(adj).astype(np.float32).todense()
-    return P
+    d_mat = sp.diags(d_inv)
+    prob_matrix = d_mat.dot(adj).astype(np.float32).todense()
+    return prob_matrix

@@ -1,1 +1,0 @@
-from basicts.archs.MTGNN_arch.MTGNN_arch import MTGNN
