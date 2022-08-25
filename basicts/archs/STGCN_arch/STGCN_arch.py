@@ -14,7 +14,7 @@ from basicts.archs.registry import ARCH_REGISTRY
 
 
 @ARCH_REGISTRY.register()
-class STGCNChebGraphConv(nn.Module):
+class STGCN(nn.Module):
     # STGCNChebGraphConv contains 'TGTND TGTND TNFF' structure
     # ChebGraphConv is the graph convolution from ChebyNet.
     # Using the Chebyshev polynomials of the first kind as a graph filter.
@@ -37,7 +37,7 @@ class STGCNChebGraphConv(nn.Module):
     # F: Fully-Connected Layer
 
     def __init__(self, Kt, Ks, blocks, T, n_vertex, act_func, graph_conv_type, gso, bias, droprate):
-        super(STGCNChebGraphConv, self).__init__()
+        super(STGCN, self).__init__()
         modules = []
         for l in range(len(blocks) - 3):
             modules.append(layers.STConvBlock(Kt, Ks, n_vertex, blocks[l][-1], blocks[l+1], act_func, graph_conv_type, gso, bias, droprate))
