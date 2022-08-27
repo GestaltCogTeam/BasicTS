@@ -8,7 +8,7 @@ class DCRNNRunner(MTSRunner):
     def setup_graph(self, data):
         try:
             self.train_iters(data, 0, 0)
-        except:
+        except AttributeError:
             pass
 
     def data_reshaper(self, data: torch.Tensor, channel=None) -> torch.Tensor:
