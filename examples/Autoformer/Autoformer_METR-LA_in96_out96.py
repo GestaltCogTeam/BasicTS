@@ -113,6 +113,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
+CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96]
 CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
