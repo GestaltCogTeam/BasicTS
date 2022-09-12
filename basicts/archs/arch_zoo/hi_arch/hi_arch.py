@@ -31,7 +31,7 @@ class HINetwork(nn.Module):
         self.fake_param      = nn.Linear(1, 1)
 
     def forward(self, history_data: torch.Tensor, **kwargs) -> torch.Tensor:
-        """Feedforward function of HI.
+        """Forward function of HI.
 
         Args:
             history_data (torch.Tensor): shape = [B, L_in, N, C]
@@ -44,7 +44,10 @@ class HINetwork(nn.Module):
         assert self.input_length == L_in, 'error input length'
         if self.channel is not None:
             history_data = history_data[..., self.channel]
+        # historical inertia 
         prediction = history_data[:, -self.output_length:, :, :]
+        # last point
+        # prediction = history_data[:, [-1], :, :].expand(-1, self.output_length, -1, -1)
         if self.reverse:
             prediction = prediction.flip(dims=[1])
         return prediction

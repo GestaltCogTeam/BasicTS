@@ -18,8 +18,8 @@ CFG.RUNNER = HIRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "METR-LA"
 CFG.DATASET_TYPE = "Traffic speed"
-CFG.DATASET_INPUT_LEN = 12
-CFG.DATASET_OUTPUT_LEN = 12
+CFG.DATASET_INPUT_LEN = 96
+CFG.DATASET_OUTPUT_LEN = 96
 CFG.GPU_NUM = 1
 
 # ================= environment ================= #
@@ -33,8 +33,8 @@ CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "HINetwork"
 CFG.MODEL.ARCH = HINetwork
 CFG.MODEL.PARAM = {
-    "input_length": 12,
-    "output_length": 12
+    "input_length": CFG.DATASET_INPUT_LEN,
+    "output_length": CFG.DATASET_OUTPUT_LEN
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
@@ -59,7 +59,7 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 CFG.TRAIN.CLIP_GRAD_PARAM = {
     "max_norm": 5.0
 }
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 1
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
@@ -92,6 +92,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
+CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96]
 CFG.TEST.INTERVAL = 1
 # validating data
 CFG.TEST.DATA = EasyDict()
