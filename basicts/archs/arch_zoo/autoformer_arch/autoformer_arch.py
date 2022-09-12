@@ -103,7 +103,7 @@ class Autoformer(nn.Module):
         Args:
             history_data (Tensor): Input data with shape: [B, L1, N, C]
             future_data (Tensor): Future data with shape: [B, L2, N, C]
-        
+
         Returns:
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
