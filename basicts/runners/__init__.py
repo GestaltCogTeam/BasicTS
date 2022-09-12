@@ -13,10 +13,12 @@ from .runner_zoo.gts_runner import GTSRunner
 from .runner_zoo.dgcrn_runner import DGCRNRunner
 from .runner_zoo.linear_runner import LinearRunner
 from .runner_zoo.autoformer_runner import AutoformerRunner
+from .runner_zoo.hi_runner import HIRunner
 
 __all__ = ["BaseTimeSeriesForecastingRunner",
            "SimpleTimeSeriesForecastingRunner", "STIDRunner",
            "GraphWaveNetRunner", "DCRNNRunner", "D2STGNNRunner",
            "STGCNRunner", "MTGNNRunner", "STNormRunner",
            "AGCRNRunner", "StemGNNRunner", "GTSRunner",
-           "DGCRNRunner", "LinearRunner", "AutoformerRunner"]
+           "DGCRNRunner", "LinearRunner", "AutoformerRunner",
+           "HIRunner"]
