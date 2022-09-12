@@ -36,7 +36,7 @@ class STGCNChebGraphConv(nn.Module):
     # F: Fully-Connected Layer
 
     def __init__(self, Kt, Ks, blocks, T, n_vertex, act_func, graph_conv_type, gso, bias, droprate):
-        super(STGCN, self).__init__()
+        super(STGCNChebGraphConv, self).__init__()
         modules = []
         for l in range(len(blocks) - 3):
             modules.append(STConvBlock(
