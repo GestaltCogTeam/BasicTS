@@ -1,28 +1,44 @@
-import torch
 import pickle
-from basicts.utils.adjacent_matrix_norm import *
 
-def load_pkl(pickle_file: str):
-    """load pickle data.
+import torch
+import numpy as np
+
+from .adjacent_matrix_norm import calculate_scaled_laplacian, calculate_symmetric_normalized_laplacian, calculate_symmetric_message_passing_adj, calculate_transition_matrix
+
+
+def load_pkl(pickle_file: str) -> object:
+    """Load pickle data.
 
     Args:
         pickle_file (str): file path
+
+    Returns:
+        object: loaded objected
     """
+
     try:
-        with open(pickle_file, 'rb') as f:
-            pickle_data     = pickle.load(f)
-    except UnicodeDecodeError as e:
-        with open(pickle_file, 'rb') as f:
-            pickle_data     = pickle.load(f, encoding='latin1')
+        with open(pickle_file, "rb") as f:
+            pickle_data = pickle.load(f)
+    except UnicodeDecodeError:
+        with open(pickle_file, "rb") as f:
+            pickle_data = pickle.load(f, encoding="latin1")
     except Exception as e:
-        print('Unable to load data ', pickle_file, ':', e)
+        print("Unable to load data ", pickle_file, ":", e)
         raise
     return pickle_data
 
-def dump_pkl(obj, file_path):
-    """dumplicate pickle data."""
-    with open(file_path, 'wb') as f:
+
+def dump_pkl(obj: object, file_path: str):
+    """Dumplicate pickle data.
+
+    Args:
+        obj (object): object
+        file_path (str): file path
+    """
+
+    with open(file_path, "wb") as f:
         pickle.dump(obj, f)
+
 
 def load_adj(file_path: str, adj_type: str):
     """load adjacency matrix.
@@ -35,30 +51,34 @@ def load_adj(file_path: str, adj_type: str):
         list of numpy.matrix: list of preproceesed adjacency matrices
         np.ndarray: raw adjacency matrix
     """
+
     try:
         # METR and PEMS_BAY
-        sensor_ids, sensor_id_to_ind, adj_mx = load_pkl(file_path)
-    except:
+        _, _, adj_mx = load_pkl(file_path)
+    except ValueError:
         # PEMS04
         adj_mx = load_pkl(file_path)
     if adj_type == "scalap":
         adj = [calculate_scaled_laplacian(adj_mx).astype(np.float32).todense()]
     elif adj_type == "normlap":
-        adj = [ calculate_symmetric_normalized_laplacian(adj_mx).astype(np.float32).todense()]
+        adj = [calculate_symmetric_normalized_laplacian(
+            adj_mx).astype(np.float32).todense()]
     elif adj_type == "symnadj":
-        adj = [symmetric_message_passing_adj(adj_mx).astype(np.float32).todense()]
+        adj = [calculate_symmetric_message_passing_adj(
+            adj_mx).astype(np.float32).todense()]
     elif adj_type == "transition":
-        adj = [transition_matrix(adj_mx).T]
+        adj = [calculate_transition_matrix(adj_mx).T]
     elif adj_type == "doubletransition":
-        adj = [transition_matrix(adj_mx).T, transition_matrix(adj_mx.T).T]
+        adj = [calculate_transition_matrix(adj_mx).T, calculate_transition_matrix(adj_mx.T).T]
     elif adj_type == "identity":
         adj = [np.diag(np.ones(adj_mx.shape[0])).astype(np.float32).todense()]
-    elif adj_type == 'original':
+    elif adj_type == "original":
         adj = adj_mx
     else:
         error = 0
         assert error, "adj type not defined"
     return adj, adj_mx
+
 
 def load_node2vec_emb(file_path: str) -> torch.Tensor:
     """load node2vec embedding
@@ -69,14 +89,15 @@ def load_node2vec_emb(file_path: str) -> torch.Tensor:
     Returns:
         torch.Tensor: node2vec embedding
     """
+
     # spatial embedding
-    with open(file_path, mode='r') as f:
+    with open(file_path, mode="r") as f:
         lines = f.readlines()
-        temp = lines[0].split(' ')
+        temp = lines[0].split(" ")
         num_vertex, dims = int(temp[0]), int(temp[1])
-        SE = torch.zeros((num_vertex, dims), dtype=torch.float32)
+        spatial_embeddings = torch.zeros((num_vertex, dims), dtype=torch.float32)
         for line in lines[1:]:
-            temp = line.split(' ')
+            temp = line.split(" ")
             index = int(temp[0])
-            SE[index] = torch.tensor([float(ch) for ch in temp[1:]])
-    return SE
+            spatial_embeddings[index] = torch.Tensor([float(ch) for ch in temp[1:]])
+    return spatial_embeddings

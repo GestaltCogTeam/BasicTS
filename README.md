@@ -1,128 +1,155 @@
-# BasicTS
+# <div align="center"> BasicTS: A Time Series Benchmark and Toolkit </div>
+
+<div align="center">
 
 [![EasyTorch](https://img.shields.io/badge/Developing%20with-EasyTorch-2077ff.svg)](https://github.com/cnstark/easytorch)
 [![LICENSE](https://img.shields.io/github/license/zezhishao/BasicTS.svg)](https://github.com/zezhishao/BasicTS/blob/master/LICENSE)
+[![PyTorch](https://img.shields.io/badge/PyTorch-1.10.0-orange)](https://pytorch.org/)
+[![python lint](https://github.com/zezhishao/BasicTS/actions/workflows/pylint.yml/badge.svg)](https://github.com/zezhishao/BasicTS/blob/master/.github/workflows/pylint.yml)
 
-## 0. What is BasicTS
+</div>
 
-BasicTS (**Basic** **T**ime **S**eries) is an open-source PyTorch-based benchmark and toolbox **for time series** .
-At present, it only focuses on time series forecasting, and may add time series classification, anomaly detection, etc., in the future.
+BasicTS (**Basic** **T**ime **S**eries) is a PyTorch-based benchmark and toolbox for **time series forecasting** (TSF).
 
-BasicTS provides users with a ***unified, standard pipeline***, which provides ***reproduction and fair comparision*** of popular deep learning-based time series models to inspire new innovations.
+On the one hand, BasicTS utilizes a ***unified and standard pipeline*** to give a fair and exhaustive reproduction and comparison of popular deep learning-based TSF models based on rich datasets. BasicTS now has a wealth of methods built-in and provides the results of their comparison.
 
-BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch) [2], an easy-to-use and powerful open source neural network training framework.
+On the other hand, BasicTS provides users with ***easy-to-use and extensible interfaces*** to facilitate the quick design and evaluation of new models. At a minimum, users only need to define the model architecture, and all other details can be configured in a configuration file.
 
-If this repository helps your research or work, I hope you could give me a ⭐, and I will keep updating it. If you need more features about BasicTS (e.g. more datasets or methods) or have any questions/suggestions, please feel free to let me know~
+## ✨ Highlighted Features
 
-## 1. Supported Models and Datasets
+BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch)[1], an easy-to-use and powerful open-source neural network training framework.
+Thanks to EasyTorch, BasicTS has the following highlighted features:
 
-### 1.1 Short-term Time Series Forecasting
+### 😼 Fair Performance Review
 
-| Model\Dataset | METR-LA | PEMS-BAY | PEMS04 | PEMS08 | PEMS03 | PEMS07 | Other Datasets |
-|:-------------:|:-------:|:--------:|:------:|:------:|:------:|:------:|:--------------:|
-| AR            | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| VAR           | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| HI            | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| Graph WaveNet | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| DCRNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| STGCN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| StemGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| MTGNN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| GTS           | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| DGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| GMAN          | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| AGCRN         | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| STNorm        | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| STID          | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| D2STGNN       | ✅      | ✅       | ✅      | ✅     | ✅      | ✅     |                |
-| Other Models  |         |         |         |        |        |        |                |
+- 🛡**Rich Datasets**. BasicTS supports rich datasets to perform an exhaustive evaluation of a given model based on a unified pipeline. More datasets will be added in the future.
 
-Although we have tried our best to tune the hyperparameters in `basicts/options` for every model and every dataset, there is no guarantee that they are optimal.
-Thus, any PRs for better hyper-parameters are welcomed to make BasicTS fairer.
+- ⚔️**Rich Baselines**. BasicTS has a wealth of built-in methods, such as Spatial-Temporal Graph Neural Network-based (STGNN) methods and Transformer-based methods (under construction👷).
 
-### 1.2 Long-term Time Series Forecasting
+### 👨‍💻 Developing with BasicTS
 
-🕐
+- 🔧**Everything Based on Config**. Users can control all the details of the pipeline through a config file, such as the hyperparameter of dataloaders, optimization, and other tricks (*e.g.*, curriculum learning). 
 
-## 2. Installing Dependencies
+- 💻**Minimum Code**. Users only need to implement key codes such as model architecture and data pre/post-processing to build their own deep learning projects.
 
-We recommend that you install all dependencies by:
+- 📃**Save Training Log**. Support `logging` log system and `Tensorboard`, and encapsulate it as a unified interface, users can save customized training logs by calling simple interfaces.
 
-```shell
+- 🔦**Support All Devices**. BasicTS supports CPU, GPU and GPU distributed training (both single node multiple GPUs and multiple nodes) thanks to using EasyTorch as the backend. Users can use it by setting parameters without modifying any code.
+
+## 💿 Dependencies
+
+### OS
+
+We recommend using BasicTS on Linux systems (*e.g.* Ubuntu and CentOS). 
+Other systems (*e.g.*, Windows and macOS) have not been tested.
+
+### Python
+
+Python >= 3.6 (recommended >= 3.9).
+
+[Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/) are recommended to create a virtual python environment.
+
+### Installing
+
+```bash
 pip install -r requirements.txt
 ```
 
-## 3. Codebase Designs and Conventions
+### Warning
 
-🕐
+BasicTS is built on PyTorch 1.9.1 or 1.10.0, while other versions have not been tested.
 
-## 4. Usage
 
-`git clone https://github.com/zezhishao/BasicTS.git`
+## 🎯 Getting Started of Developing with BasicTS
 
-### 4.1 Data Preparation and Preprocessing
+### Preparing Data
 
-#### 4.1.1 Data Preparation
+- **Clone BasicTS**
 
-You can download the raw datasets at [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp) or [Baidu Yun](https://pan.baidu.com/s/18qonT9l1_NbvyAgpD4381g)(password: 0lrk), and unzip them to `datasets/raw_data/`.
+    ```bash
+    cd /path/to/your/project
+    git clone https://github.com/zezhishao/BasicTS.git
+    ```
 
-#### 4.1.2 Data Preprocessing
+- **Download Raw Data**
+
+    You can download all the raw datasets at [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp) or [Baidu Yun](https://pan.baidu.com/s/18qonT9l1_NbvyAgpD4381g)(password: 0lrk), and unzip them to `datasets/raw_data/`.
+
+- **Pre-process Data**
+
+    ```bash
+    cd /path/to/your/project
+    python scripts/data_preparation/${DATASET_NAME}/generate_training_data.py
+    ```
+
+    Replace `${DATASET_NAME}` with one of `METR-LA`, `PEMS-BAY`, `PEMS03`, `PEMS04`, `PEMS07`, `PEMS08`, or any other supported dataset. The processed data will be placed in `datasets/${DATASET_NAME}`.
+
+    Or you can pre-process all datasets by.
+
+    ```bash
+    cd /path/to/your/project
+    bash scripts/data_preparation/all.sh
+    ```
+
+### 3 Steps to Evaluate Your Model
+
+- **Define Your Model Architecture**
+
+    The `forward` function needs to follow the conventions of BasicTS. You can find an example of the Multi-Layer Perceptron (`MLP`) model in [examples/MLP/mlp_arch.py](examples/MLP/mlp_arch.py)
+
+- **Define Your Runner for Your Model** (Optional)
+
+    BasicTS provides a unified and standard pipeline in `basicts.runner.BaseTimeSeriesForecastingRunner`.
+    Nevertheless, you still need to define the specific forward process (the `forward` function in the **runner**).
+    Fortunately, BasicTS also provides such an implementation in `basicts.runner.SimpleTimeSeriesForecastingRunner`, which can cover most of the situations.
+    [The runner](examples/MLP/mlp_runner.py) for the `MLP` model can also use this built-in runner.
+    You can also find more runners in `basicts.runners.runner_zoo` to learn more about the runner design.
+
+- **Configure your Configuration File**
+
+    You can configure all the details of the pipeline and hyperparameters in a configuration file, *i.e.*, **everything is based on config**.
+    The configuration file is a `.py` file, in which you can import your model and runner and set all the options. BasicTS uses `EasyDict` to serve as a parameter container, which is extensible and flexible to use.
+    An example of the configuration file for the `MLP` model on the `METR-LA` dataset can be found in [examples/MLP/MLP_METR-LA.py](examples/MLP/MLP_METR-LA.py)
+
+### Run It!
+
+An example of a start script can be found in [examples/run.py](examples/run.py).
+You can run your model by the following command:
 
 ```bash
-cd /path/to/project
-python scripts/data_preparation/$DATASET_NAME/generate_training_data.py
+python examples/run.py -c /path/to/your/config/file.py --gpus '0'
 ```
 
-Replace `$DATASET_NAME` with one of `METR-LA`, `PEMS-BAY`, `PEMS03`, `PEMS04`, `PEMS07`, `PEMS08`, or any other supported dataset.
+## 📌 Examples
 
-The processed data will be placed in `datasets/$DATASET_NAME`.
+### Reproducing Built-in Models
 
-Details of preprocessing can be found in `docs/DataPreparation_CN.md`~(Chinese).
-
-### 4.2 Run a Time Series Forecasting Model
-
-We recommend running a time series model with the following command:
+BasicTS provides a wealth of built-in models. You can find all the built-in models and their corresponding runners in [`basicts/archs/arch_zoo`](basicts/archs/arch_zoo/) and [`basicts/runners/runner_zoo`](basicts/runners/runner_zoo/), respectively. You can reproduce these models by running the following command:
 
 ```bash
-cd /path/to/project
-easytrain -c basicts/options/$METHOD_NAME/$METHOD_NAME_$DATASET_NAME.py --gpus '0'
+python examples/run.py -c examples/${MODEL_NAME}/${MODEL_NAME}_${DATASET_NAME}.py --gpus '0'
 ```
 
-Replace the `$METHOD_NAME` and `$DATASET_NAME` with any supported method and dataset. For example,
+Replace `${DATASET_NAME}` and `${MODEL_NAME}` with any supported models and datasets. For example, you can run Graph WaveNet[2] on METR-LA dataset by:
 
 ```bash
-easytrain -c basicts/options/GraphWaveNet/GraphWaveNet_METR-LA.py --gpus '0'
+python examples/run.py -c examples/GWNet/GWNet_METR-LA.py --gpus '0'
 ```
 
-If you need to debug, you could run the `basicts/run.py` file. 
+### Customized Your Own Model
 
-### 4.3 Train a Custom Model
+- [Multi-Layer Perceptron (MLP)](examples/MLP)
+- More...
 
-🕐
+## 📉 Main Results
 
-## 5. Detailed Docs
+![Main results.](results/results.png)
 
-- data preparation: [data_preparation_CN.md](docs/DataFormat_CN.md)
+## 🔗 Acknowledgement
 
-🕐
+BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch)[1], an easy-to-use and powerful open-source neural network training framework.
 
-## 6. Main Results
+## 📜 References
 
-![Main results.](results/result.png)
-
-## 7. TODO
-
-- [ ] : add the result of STID.
-- [ ] : revise the data preprocessing of PEMS07, which only contains weekdays.
-- [ ] : Add detailed documentation and a demo about data preprocessing.
-- [ ] : Add more multivariate time series datasets: Traffic, Electricity, Exchange-Rate, ETTh1, ETTh2, ETTm1, Weather, Solar-Energy.
-- [ ] : Different from the existing traffic datasets (PEMS0X, PEMS-BAY, METR-LA), these datasets have multiple usages in the existing datasets, and the baselines that need to be compared in different contexts are different. Therefore, it is necessary to add statistics for all datasets and describe their typical settings case by case.
-- [ ] : Add statistical information of these dataset, and descibe their typical settings.
-- [ ] : Support models like ASTGCN, ASTGNN, which take multi-periodicities data as input.
-- [ ] : Add detailed docs about 4.2, e.g., the usage of gpu.
-- [ ] : Update D2STGNN arch.
-- [ ] : 模块化train_iters, val_iters, and test_iters中的过程。否则就会像GTS一样, 一旦模型有一点特殊 (例如多一个返回和不同的loss), 就必须重写整个train_iters, val_iters, and test_iters。
-
-## References
-
-[1] Yuhao Wang. EasyTorch. <https://github.com/cnstark/easytorch>, 2020.
+- [1] Yuhao Wang. EasyTorch. <https://github.com/cnstark/easytorch>, 2020.
+- [2] Wu Z, Pan S, Long G, et al. Graph WaveNet for Deep Spatial-Temporal Graph Modeling[C]//The 28th International Joint Conference on Artificial Intelligence (IJCAI). International Joint Conferences on Artificial Intelligence Organization, 2019.

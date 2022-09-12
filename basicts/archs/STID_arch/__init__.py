@@ -1,1 +1,0 @@
-from basicts.archs.STID_arch.STID_arch import STID
