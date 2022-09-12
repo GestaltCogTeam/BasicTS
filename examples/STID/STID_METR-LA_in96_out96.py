@@ -55,7 +55,7 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.002,
+    "lr": 0.0005,
     "weight_decay": 0.0001,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
@@ -99,7 +99,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96]
+CFG.TEST.EVALUATION_HORIZONS = [3, 6, 12, 24, 48, 96]
 CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()

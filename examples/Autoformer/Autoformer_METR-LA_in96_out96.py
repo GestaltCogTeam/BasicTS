@@ -26,7 +26,7 @@ CFG.GPU_NUM = 1
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
-CFG.ENV.SEED = 1
+# CFG.ENV.SEED = 0
 CFG.ENV.CUDNN = EasyDict()
 CFG.ENV.CUDNN.ENABLED = True
 
