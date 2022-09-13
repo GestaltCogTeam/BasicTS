@@ -16,6 +16,7 @@ class BaseRunner(Runner):
             - Support test loader and test process.
             - Support setup_graph for the models acting like tensorflow.
     """
+
     def __init__(self, cfg: dict):
         """Init
 
