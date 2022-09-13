@@ -115,6 +115,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         Returns:
             validation dataset (Dataset)
         """
+
         raw_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
         index_file_path = "{0}/index_in{1}_out{2}.pkl".format(
             cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
