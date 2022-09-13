@@ -30,7 +30,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         self.dataset_type = cfg["DATASET_TYPE"]
 
         # read scaler for re-normalization
-        self.scaler = load_pkl("datasets/" + self.dataset_name + "/scaler.pkl")
+        self.scaler = load_pkl("datasets/" + self.dataset_name + "/scaler_in{0}_out{1}.pkl".format(cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"]))
         # define loss
         self.loss = cfg["TRAIN"]["LOSS"]
         # define metric
@@ -115,8 +115,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         Returns:
             validation dataset (Dataset)
         """
-
-        raw_file_path = "{0}/data.pkl".format(cfg["VAL"]["DATA"]["DIR"])
+        raw_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
         index_file_path = "{0}/index_in{1}_out{2}.pkl".format(
             cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
         dataset = cfg["DATASET_CLS"](
@@ -135,7 +134,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             train dataset (Dataset)
         """
 
-        raw_file_path = "{0}/data.pkl".format(cfg["TEST"]["DATA"]["DIR"])
+        raw_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
         index_file_path = "{0}/index_in{1}_out{2}.pkl".format(
             cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
         dataset = cfg["DATASET_CLS"](
