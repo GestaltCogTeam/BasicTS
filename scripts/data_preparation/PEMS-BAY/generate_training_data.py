@@ -63,7 +63,7 @@ def generate_data(args: argparse.Namespace):
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
     scaler = standard_transform
-    data_norm = scaler(data, output_dir, train_index)
+    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len)
 
     # add external feature
     feature_list = [data_norm]

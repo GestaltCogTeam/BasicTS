@@ -7,13 +7,15 @@ from .registry import SCALER_REGISTRY
 
 
 @SCALER_REGISTRY.register()
-def standard_transform(data: np.array, output_dir: str, train_index: list) -> np.array:
+def standard_transform(data: np.array, output_dir: str, train_index: list, history_seq_len: int, future_seq_len: int) -> np.array:
     """Standard normalization.
 
     Args:
         data (np.array): raw time series data.
         output_dir (str): output dir path.
         train_index (list): train index.
+        history_seq_len (int): historical sequence length.
+        future_seq_len (int): future sequence length.
 
     Returns:
         np.array: normalized raw time series data.
@@ -29,7 +31,8 @@ def standard_transform(data: np.array, output_dir: str, train_index: list) -> np
     scaler = {}
     scaler["func"] = re_standard_transform.__name__
     scaler["args"] = {"mean": mean, "std": std}
-    with open(output_dir + "/scaler.pkl", "wb") as f:
+    # label to identify the scaler for different settings.
+    with open(output_dir + "/scaler_in{0}_out{1}.pkl".format(history_seq_len, future_seq_len), "wb") as f:
         pickle.dump(scaler, f)
 
     def normalize(x):
