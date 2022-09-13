@@ -93,7 +93,7 @@ def generate_data(args: argparse.Namespace):
 
     data = {}
     data["processed_data"] = processed_data
-    with open(output_dir + "/data.pkl", "wb") as f:
+    with open(output_dir + "/data_in{0}_out{1}.pkl".format(history_seq_len, future_seq_len), "wb") as f:
         pickle.dump(data, f)
     # copy adj
     if os.path.exists(args.graph_file_path):
