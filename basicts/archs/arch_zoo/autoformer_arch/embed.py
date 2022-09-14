@@ -59,57 +59,24 @@ class FixedEmbedding(nn.Module):
         return self.emb(x).detach()
 
 
-class TemporalEmbedding(nn.Module):
-    def __init__(self, d_model, embed_type='fixed', freq='h'):
-        super(TemporalEmbedding, self).__init__()
-
-        minute_size = 4
-        hour_size = 24
-        weekday_size = 7
-        day_size = 32
-        month_size = 13
-
-        Embed = FixedEmbedding if embed_type == 'fixed' else nn.Embedding
-        if freq == 't':
-            self.minute_embed = Embed(minute_size, d_model)
-        self.hour_embed = Embed(hour_size, d_model)
-        self.weekday_embed = Embed(weekday_size, d_model)
-        self.day_embed = Embed(day_size, d_model)
-        self.month_embed = Embed(month_size, d_model)
-
-    def forward(self, x):
-        x = x.long()
-
-        minute_x = self.minute_embed(x[:, :, 4]) if hasattr(self, 'minute_embed') else 0.
-        hour_x = self.hour_embed(x[:, :, 3])
-        weekday_x = self.weekday_embed(x[:, :, 2])
-        day_x = self.day_embed(x[:, :, 1])
-        month_x = self.month_embed(x[:, :, 0])
-
-        return hour_x + weekday_x + day_x + month_x + minute_x
-
-
 class TimeFeatureEmbedding(nn.Module):
-    def __init__(self, d_model, embed_type='timeF', freq='h'):
+    def __init__(self, d_model, num_time_features):
         super(TimeFeatureEmbedding, self).__init__()
-
-        freq_map = {'h': 2}         # NOTE: there is different from official autoformer, since METR-LA, PEMS-BAY, and PEMS0X datasets only contain two kind of temporal features (time in day, day in week)
-        d_inp = freq_map[freq]
-        self.embed = nn.Linear(d_inp, d_model, bias=False)
+        # freq_map = {'h': 2}         
+        # NOTE: this is different from official autoformer, since METR-LA, PEMS-BAY, and PEMS0X datasets only contain two kind of temporal features (time in day, day in week)
+        self.embed = nn.Linear(num_time_features, d_model, bias=False)
 
     def forward(self, x):
         return self.embed(x)
 
 
 class DataEmbedding(nn.Module):
-    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
+    def __init__(self, c_in, d_model, num_time_features, dropout=0.1):
         super(DataEmbedding, self).__init__()
 
         self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
         self.position_embedding = PositionalEmbedding(d_model=d_model)
-        self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type,
-                                                    freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(
-            d_model=d_model, embed_type=embed_type, freq=freq)
+        self.temporal_embedding = TimeFeatureEmbedding(d_model=d_model, num_time_features=num_time_features)
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark):
@@ -118,14 +85,12 @@ class DataEmbedding(nn.Module):
 
 
 class DataEmbedding_wo_pos(nn.Module):
-    def __init__(self, c_in, d_model, embed_type='fixed', freq='h', dropout=0.1):
+    def __init__(self, c_in, d_model, num_time_features, dropout=0.1):
         super(DataEmbedding_wo_pos, self).__init__()
 
         self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
         self.position_embedding = PositionalEmbedding(d_model=d_model)
-        self.temporal_embedding = TemporalEmbedding(d_model=d_model, embed_type=embed_type,
-                                                    freq=freq) if embed_type != 'timeF' else TimeFeatureEmbedding(
-            d_model=d_model, embed_type=embed_type, freq=freq)
+        self.temporal_embedding = TimeFeatureEmbedding(d_model=d_model, num_time_features=num_time_features)
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark):

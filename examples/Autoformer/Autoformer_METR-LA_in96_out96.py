@@ -36,18 +36,19 @@ NUM_NODES = 207
 CFG.MODEL.PARAM = EasyDict(
     {
     "seq_len": CFG.DATASET_INPUT_LEN,
-    "label_len": CFG.DATASET_INPUT_LEN/2,      # start token length used in decoder
+    "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
     "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length
-    "moving_avg": 25,                         # window size of moving average
+    "moving_avg": 25,                           # window size of moving average
     "output_attention": False,
-    "enc_in": NUM_NODES,                              # num nodes
+    "enc_in": NUM_NODES,                        # num nodes
     "dec_in": NUM_NODES,
     "c_out": NUM_NODES,
     "d_model": 512,
-    "embed": "timeF",
-    "freq": "h",
+    "num_time_features": 2,                     # number of used time features
+    # "embed": "timeF",
+    # "freq": "h",
     "dropout": 0.05,
-    "factor": 1,                                # attn factor
+    "factor": 3,                                # attn factor
     "n_heads": 8,
     "d_ff": 2048,
     "activation": "gelu",
@@ -64,7 +65,7 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.0005,
+    "lr": 0.002,
     "weight_decay": 0.0001,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()

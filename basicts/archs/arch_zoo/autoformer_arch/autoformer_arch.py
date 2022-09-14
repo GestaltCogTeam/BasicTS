@@ -11,7 +11,7 @@ class Autoformer(nn.Module):
     """
     Paper: Autoformer: Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting
     Link: https://arxiv.org/abs/2206.09112
-    Ref official code: https://github.com/thuml/Autoformer
+    Ref Official Code: https://github.com/thuml/Autoformer
     """
 
     def __init__(self, **model_args):
@@ -29,10 +29,8 @@ class Autoformer(nn.Module):
         # Embedding
         # The series-wise connection inherently contains the sequential information.
         # Thus, we can discard the position embedding of transformers.
-        self.enc_embedding = DataEmbedding_wo_pos(model_args["enc_in"], model_args["d_model"], model_args["embed"], model_args["freq"],
-                                                  model_args["dropout"])
-        self.dec_embedding = DataEmbedding_wo_pos(model_args["dec_in"], model_args["d_model"], model_args["embed"], model_args["freq"],
-                                                  model_args["dropout"])
+        self.enc_embedding = DataEmbedding_wo_pos(model_args["enc_in"], model_args["d_model"], model_args['num_time_features'], model_args["dropout"])
+        self.dec_embedding = DataEmbedding_wo_pos(model_args["dec_in"], model_args["d_model"], model_args['num_time_features'], model_args["dropout"])
 
         # Encoder
         self.encoder = Encoder(
