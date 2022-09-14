@@ -3,13 +3,11 @@ import sys
 
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
-import torch
 from easydict import EasyDict
 from basicts.archs import Autoformer
 from basicts.runners import AutoformerRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
-from basicts.utils import load_adj
 
 
 CFG = EasyDict()
@@ -34,7 +32,7 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "Autoformer"
 CFG.MODEL.ARCH = Autoformer
-adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
+NUM_NODES = 207
 CFG.MODEL.PARAM = EasyDict(
     {
     "seq_len": CFG.DATASET_INPUT_LEN,
@@ -42,9 +40,9 @@ CFG.MODEL.PARAM = EasyDict(
     "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length
     "moving_avg": 25,                         # window size of moving average
     "output_attention": False,
-    "enc_in": 207,                              # num nodes
-    "dec_in": 207,
-    "c_out": 207,
+    "enc_in": NUM_NODES,                              # num nodes
+    "dec_in": NUM_NODES,
+    "c_out": NUM_NODES,
     "d_model": 512,
     "embed": "timeF",
     "freq": "h",
