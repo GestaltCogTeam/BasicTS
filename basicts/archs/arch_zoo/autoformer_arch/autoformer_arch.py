@@ -76,8 +76,26 @@ class Autoformer(nn.Module):
             projection=nn.Linear(model_args["d_model"], model_args["c_out"], bias=True)
         )
 
-    def forward_xformer(self, x_enc, x_mark_enc, x_dec, x_mark_dec,
-                enc_self_mask=None, dec_self_mask=None, dec_enc_mask=None):
+    def forward_xformer(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor, x_mark_dec: torch.Tensor,
+                enc_self_mask: torch.Tensor=None, dec_self_mask: torch.Tensor=None, dec_enc_mask: torch.Tensor=None) -> torch.Tensor:
+        """Feed forward of AutoFormer. Kindly note that `enc_self_mask`, `dec_self_mask`, and `dec_enc_mask` are not actually used in AutoFormer.
+           See: 
+            - https://github.com/thuml/Autoformer/blob/e116bbcf41f537f4ab53d172d9babfc0a026330f/layers/AutoCorrelation.py#L103
+            - https://github.com/thuml/Autoformer/blob/e116bbcf41f537f4ab53d172d9babfc0a026330f/exp/exp_main.py#L136
+
+        Args:
+            x_enc (torch.Tensor): input data of encoder (without the time features). Shape: [B, L1, N]
+            x_mark_enc (torch.Tensor): time features input of encoder w.r.t. x_enc. Shape: [B, L1, C-1]
+            x_dec (torch.Tensor): input data of decoder. Shape: [B, start_token_length + L2, N]
+            x_mark_dec (torch.Tensor): time features input to decoder w.r.t. x_dec. Shape: [B, start_token_length + L2, C-1]
+            enc_self_mask (torch.Tensor, optional): encoder self attention masks. Defaults to None.
+            dec_self_mask (torch.Tensor, optional): decoder self attention masks. Defaults to None.
+            dec_enc_mask (torch.Tensor, optional): decoder encoder self attention masks. Defaults to None.
+
+        Returns:
+            torch.Tensor: outputs with shape [B, L2, N, 1]
+        """
+
         # decomp init
         mean = torch.mean(x_enc, dim=1).unsqueeze(1).repeat(1, self.pred_len, 1)
         zeros = torch.zeros([x_dec.shape[0], self.pred_len, x_dec.shape[2]], device=x_enc.device)
