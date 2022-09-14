@@ -14,6 +14,8 @@ from .runner_zoo.dgcrn_runner import DGCRNRunner
 from .runner_zoo.linear_runner import LinearRunner
 from .runner_zoo.autoformer_runner import AutoformerRunner
 from .runner_zoo.hi_runner import HIRunner
+from .runner_zoo.fedformer_runner import FEDformerRunner
+from .runner_zoo.informer_runner import InformerRunner
 
 __all__ = ["BaseTimeSeriesForecastingRunner",
            "SimpleTimeSeriesForecastingRunner", "STIDRunner",
@@ -21,4 +23,4 @@ __all__ = ["BaseTimeSeriesForecastingRunner",
            "STGCNRunner", "MTGNNRunner", "STNormRunner",
            "AGCRNRunner", "StemGNNRunner", "GTSRunner",
            "DGCRNRunner", "LinearRunner", "AutoformerRunner",
-           "HIRunner"]
+           "HIRunner", "FEDformerRunner", "InformerRunner"]
