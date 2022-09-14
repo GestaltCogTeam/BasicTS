@@ -6,7 +6,8 @@ def data_transformation_4_xformer(history_data: torch.Tensor, future_data: torch
 
     Args:
         history_data (torch.Tensor): history data with shape: [B, L1, N, C].
-        future_data (torch.Tensor): future data with shape: [B, L2, N, C]. L1 and L2 are input sequence length and output sequence length, respectively.
+        future_data (torch.Tensor): future data with shape: [B, L2, N, C]. 
+                                    L1 and L2 are input sequence length and output sequence length, respectively.
         start_token_length (int): length of the decoder start token. Ref: Informer paper.
 
     Returns:
@@ -33,6 +34,6 @@ def data_transformation_4_xformer(history_data: torch.Tensor, future_data: torch
         # get the corresponding x_mark_dec
         x_mark_dec_token = x_mark_enc[:, -start_token_len:, :]            # B, start_token_length, C-1
         x_mark_dec_future = future_data[..., :, 0, 1:]          # B, L2, C-1
-        x_mark_dec = torch.cat([x_mark_dec_token, x_mark_dec_future], dim=1)    # B, (start_token_length+L2), C-1 
+        x_mark_dec = torch.cat([x_mark_dec_token, x_mark_dec_future], dim=1)    # B, (start_token_length+L2), C-1
 
     return x_enc, x_mark_enc, x_dec, x_mark_dec

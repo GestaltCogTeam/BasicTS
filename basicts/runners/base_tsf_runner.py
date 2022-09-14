@@ -30,7 +30,8 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         self.dataset_type = cfg["DATASET_TYPE"]
 
         # read scaler for re-normalization
-        self.scaler = load_pkl("datasets/" + self.dataset_name + "/scaler_in{0}_out{1}.pkl".format(cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"]))
+        self.scaler = load_pkl("datasets/" + self.dataset_name + "/scaler_in{0}_out{1}.pkl".format(
+                                                cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"]))
         # define loss
         self.loss = cfg["TRAIN"]["LOSS"]
         # define metric

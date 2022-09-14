@@ -82,18 +82,18 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 
 # ================= train ================= #
 CFG.TRAIN.CLIP_GRAD_PARAM = {
-    'max_norm': 5.0
+    "max_norm": 5.0
 }
 CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
-    'checkpoints',
-    '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
+    "checkpoints",
+    "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
 CFG.TRAIN.NULL_VAL = 0.0
 # read data
-CFG.TRAIN.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
+CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.TRAIN.DATA.BATCH_SIZE = 64
 CFG.TRAIN.DATA.PREFETCH = False
@@ -107,7 +107,7 @@ CFG.VAL.INTERVAL = 1
 # validating data
 CFG.VAL.DATA = EasyDict()
 # read data
-CFG.VAL.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
+CFG.VAL.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.VAL.DATA.BATCH_SIZE = 64
 CFG.VAL.DATA.PREFETCH = False
@@ -122,7 +122,7 @@ CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
 # read data
-CFG.TEST.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
+CFG.TEST.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.TEST.DATA.BATCH_SIZE = 64
 CFG.TEST.DATA.PREFETCH = False
