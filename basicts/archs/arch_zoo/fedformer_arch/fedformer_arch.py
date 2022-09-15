@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .embed import DataEmbedding_wo_pos
+from .embed import DataEmbedding_wo_pos, DataEmbedding
 from .auto_correlation import AutoCorrelationLayer
 from .fourier_correlation import FourierBlock, FourierCrossAttention
 from .multi_wavelet_correlation import MultiWaveletCross, MultiWaveletTransform
