@@ -52,7 +52,7 @@ CFG.MODEL.PARAM = EasyDict(
     "num_time_features": 2,
     "decoder": "FC",                            # FC or attention
     "device": torch.device("cuda"),             # Pyraformer only support single card
-    "window_size": "[4, 4 ,4]",
+    "window_size": "[2, 2, 2]",
     "inner_size": 5,
     "CSCM": "Bottleneck_Construct",
     "truncate": False,
@@ -69,7 +69,7 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.002,
+    "lr": 0.0005,
     "weight_decay": 0.0001,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()

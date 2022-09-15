@@ -41,7 +41,7 @@ CFG.MODEL.PARAM = EasyDict(
     "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
     "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length
     "moving_avg": 65,                           # window size of moving average. This is a CRUCIAL hyper-parameter.
-    "embedding_type": "DataEmbedding",          # opt: DataEmbedding 
+    "embedding_type": "DataEmbedding",          # opt: DataEmbedding, DataEmbedding_wo_pos
     "output_attention": False,
     "enc_in": NUM_NODES,                        # num nodes
     "dec_in": NUM_NODES,
@@ -68,8 +68,8 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.001,
-    "weight_decay": 0.0001,
+    "lr": 0.0005,
+    "weight_decay": 0.0005,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
@@ -79,9 +79,9 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 }
 
 # ================= train ================= #
-CFG.TRAIN.CLIP_GRAD_PARAM = {
-    "max_norm": 5.0
-}
+# CFG.TRAIN.CLIP_GRAD_PARAM = {
+#     "max_norm": 5.0
+# }
 CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",

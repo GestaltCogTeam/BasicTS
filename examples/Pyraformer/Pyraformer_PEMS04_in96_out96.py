@@ -3,9 +3,10 @@ import sys
 
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
+import torch
 from easydict import EasyDict
-from basicts.archs import FEDformer
-from basicts.runners import FEDformerRunner
+from basicts.archs import Pyraformer
+from basicts.runners import PyraformerRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 
@@ -13,8 +14,8 @@ from basicts.losses import masked_mae
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = "FEDformer model configuration"
-CFG.RUNNER = FEDformerRunner
+CFG.DESCRIPTION = "Pyraformer model configuration"
+CFG.RUNNER = PyraformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "PEMS04"
 CFG.DATASET_TYPE = "Traffic flow"
@@ -30,36 +31,33 @@ CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
-CFG.MODEL.NAME = "FEDformer"
-CFG.MODEL.ARCH = FEDformer
+CFG.MODEL.NAME = "Pyraformer"
+CFG.MODEL.ARCH = Pyraformer
 NUM_NODES = 307
 CFG.MODEL.PARAM = EasyDict(
     {
-    "version": "Fourier",                       # for FEDformer, there are two versions to choose, options: [Fourier, Wavelets]
-    "mode_select": "random",                    # for FEDformer, there are two mode selection method, options: [random, low]
-    "modes": 64,                                # modes to be selected random 64
-    "seq_len": CFG.DATASET_INPUT_LEN,           # input sequence length
-    "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
-    "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length\
-    "output_attention": False,
-    "embedding_type": "DataEmbedding",          # opt: DataEmbedding, DataEmbedding_wo_pos
-    "moving_avg": 35,                           # window size of moving average
-    "enc_in": NUM_NODES,                              # num nodes
+    "input_size": CFG.DATASET_INPUT_LEN,
+    "predict_step": CFG.DATASET_OUTPUT_LEN,
+    "enc_in": NUM_NODES,                        # num nodes
     "dec_in": NUM_NODES,
-    "d_model": 512,
-    "num_time_features": 2,                     # number of used time features
-    # "embed": "timeF",
-    # "freq": "h",
-    "dropout": 0.05,
-    "base": "legendre",                         # mwt base
-    "L": 3,                                     # ignore level
-    "cross_activation": "tanh",                 # mwt cross atention activation function tanh or softmax
-    "n_heads": 8,
-    "d_ff": 2048,
-    "activation": "gelu",
-    "e_layers": 2,                              # num of encoder layers
     "c_out": NUM_NODES,
-    "d_layers": 1                               # num of decoder layers
+    "d_model": 512,
+    "d_inner_hid": 512,
+    "d_k": 128,
+    "d_v": 128,
+    "d_bottleneck": 128,
+    "n_head": 4,
+    "n_layer": 4,
+    "dropout": 0.05,
+    "num_time_features": 2,
+    "decoder": "FC",                            # FC or attention
+    "device": torch.device("cuda"),             # Pyraformer only support single card
+    "window_size": "[2, 2, 2]",
+    "inner_size": 5,
+    "CSCM": "Bottleneck_Construct",
+    "truncate": False,
+    "use_tvm": False,
+    "embed_type": "DataEmbedding"
     }
 )
 CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]
@@ -72,7 +70,7 @@ CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
     "lr": 0.0005,
-    "weight_decay": 0.0005,
+    "weight_decay": 0.0001,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
@@ -82,9 +80,9 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 }
 
 # ================= train ================= #
-# CFG.TRAIN.CLIP_GRAD_PARAM = {
-#     "max_norm": 5.0
-# }
+CFG.TRAIN.CLIP_GRAD_PARAM = {
+    "max_norm": 5.0
+}
 CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
