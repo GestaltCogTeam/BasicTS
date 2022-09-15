@@ -70,12 +70,12 @@ CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
     "lr": 0.0005,
-    "weight_decay": 0.0001,
+    "weight_decay": 0.0005,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones": [1, 50],
+    "milestones": [1, 50, 80],
     "gamma": 0.5
 }
 
