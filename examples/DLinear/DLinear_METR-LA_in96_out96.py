@@ -47,8 +47,8 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.002,
-    "weight_decay": 0.0001,
+    "lr": 0.0005,
+    "weight_decay": 0.0005,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
@@ -58,7 +58,7 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 }
 
 # ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 200
+CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
