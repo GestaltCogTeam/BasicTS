@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from .embed import DataEmbedding_wo_pos
+from .embed import DataEmbedding_wo_pos, DataEmbedding
 from .auto_correlation import AutoCorrelation, AutoCorrelationLayer
 from .enc_dec import Encoder, Decoder, EncoderLayer, DecoderLayer, my_Layernorm, series_decomp
 from ..utils import data_transformation_4_xformer
@@ -16,11 +16,11 @@ class Autoformer(nn.Module):
 
     def __init__(self, **model_args):
         super(Autoformer, self).__init__()
-        assert model_args["seq_len"] % 1 == 0.0 and model_args["seq_len"] % 1 == 0.0 and model_args["pred_len"] % 1 == 0.0
         self.seq_len = int(model_args["seq_len"])
         self.label_len = int(model_args["label_len"])
         self.pred_len = int(model_args["pred_len"])
-        self.output_attention = model_args['output_attention']
+        self.output_attention = model_args["output_attention"]
+        self.embedding_type = model_args["embedding_type"]
 
         # Decomp
         kernel_size = model_args["moving_avg"]
@@ -29,8 +29,14 @@ class Autoformer(nn.Module):
         # Embedding
         # The series-wise connection inherently contains the sequential information.
         # Thus, we can discard the position embedding of transformers.
-        self.enc_embedding = DataEmbedding_wo_pos(model_args["enc_in"], model_args["d_model"], model_args['num_time_features'], model_args["dropout"])
-        self.dec_embedding = DataEmbedding_wo_pos(model_args["dec_in"], model_args["d_model"], model_args['num_time_features'], model_args["dropout"])
+        if self.embedding_type == "DataEmbedding_wo_pos":
+            self.enc_embedding = DataEmbedding_wo_pos(model_args["enc_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
+            self.dec_embedding = DataEmbedding_wo_pos(model_args["dec_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
+        elif self.embedding_type == "DataEmbedding":
+            self.enc_embedding = DataEmbedding(model_args["enc_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
+            self.dec_embedding = DataEmbedding(model_args["dec_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
+        else:
+            raise Exception("Unknown embedding type.")
 
         # Encoder
         self.encoder = Encoder(
