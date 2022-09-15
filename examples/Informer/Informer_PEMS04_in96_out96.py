@@ -4,8 +4,8 @@ import sys
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
-from basicts.archs import FEDformer
-from basicts.runners import FEDformerRunner
+from basicts.archs import Informer
+from basicts.runners import InformerRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 
@@ -13,14 +13,15 @@ from basicts.losses import masked_mae
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = "FEDformer model configuration"
-CFG.RUNNER = FEDformerRunner
+CFG.DESCRIPTION = "Informer model configuration"
+CFG.RUNNER = InformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "METR-LA"
+CFG.DATASET_NAME = "PEMS04"
 CFG.DATASET_TYPE = "Traffic speed"
 CFG.DATASET_INPUT_LEN = 96
 CFG.DATASET_OUTPUT_LEN = 96
 CFG.GPU_NUM = 1
+CFG._ = 1
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
@@ -30,36 +31,33 @@ CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
-CFG.MODEL.NAME = "FEDformer"
-CFG.MODEL.ARCH = FEDformer
-NUM_NODES = 207
+CFG.MODEL.NAME = "Informer"
+CFG.MODEL.ARCH = Informer
+NUM_NODES = 307
 CFG.MODEL.PARAM = EasyDict(
     {
-    "version": "Fourier",                       # for FEDformer, there are two versions to choose, options: [Fourier, Wavelets]
-    "mode_select": "random",                    # for FEDformer, there are two mode selection method, options: [random, low]
-    "modes": 64,                                # modes to be selected random 64
+    "enc_in": NUM_NODES,                              # num nodes
+    "dec_in": NUM_NODES,
+    "c_out": NUM_NODES,
     "seq_len": CFG.DATASET_INPUT_LEN,           # input sequence length
     "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
-    "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length\
-    "output_attention": False,
-    "embedding_type": "DataEmbedding",          # opt: DataEmbedding
-    "moving_avg": 65,                           # window size of moving average
-    "enc_in": NUM_NODES,                        # num nodes
-    "dec_in": NUM_NODES,
+    "out_len": CFG.DATASET_OUTPUT_LEN,          # prediction sequence length\
+    "factor": 5,                                # probsparse attn factor
     "d_model": 512,
-    "num_time_features": 2,                     # number of used time features
+    "n_heads": 8,
+    "e_layers": 2,                              # num of encoder layers
+    # "e_layers": [4, 2, 1],                    # for InformerStack
+    "d_layers": 1,                              # num of decoder layers
+    "d_ff": 2048,
+    "dropout": 0.05,
+    "attn": 'prob',                             # attention used in encoder, options:[prob, full]
     # "embed": "timeF",
     # "freq": "h",
-    "dropout": 0.05,
-    "base": "legendre",                         # mwt base
-    "L": 3,                                     # ignore level
-    "cross_activation": "tanh",                 # mwt cross atention activation function tanh or softmax
-    "n_heads": 8,
-    "d_ff": 2048,
     "activation": "gelu",
-    "e_layers": 2,                              # num of encoder layers
-    "c_out": NUM_NODES,
-    "d_layers": 1                               # num of decoder layers
+    "output_attention": False,
+    "distil": True,                             # whether to use distilling in encoder, using this argument means not using distilling
+    "mix": True,                                # use mix attention in generative decoder
+    "num_time_features": 2,                     # number of used time features
     }
 )
 CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]
@@ -83,18 +81,18 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 
 # ================= train ================= #
 CFG.TRAIN.CLIP_GRAD_PARAM = {
-    "max_norm": 5.0
+    'max_norm': 5.0
 }
 CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
-    "checkpoints",
-    "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
+    'checkpoints',
+    '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
 CFG.TRAIN.NULL_VAL = 0.0
 # read data
-CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
+CFG.TRAIN.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.TRAIN.DATA.BATCH_SIZE = 64
 CFG.TRAIN.DATA.PREFETCH = False
@@ -108,7 +106,7 @@ CFG.VAL.INTERVAL = 1
 # validating data
 CFG.VAL.DATA = EasyDict()
 # read data
-CFG.VAL.DATA.DIR = "datasets/" + CFG.DATASET_NAME
+CFG.VAL.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.VAL.DATA.BATCH_SIZE = 64
 CFG.VAL.DATA.PREFETCH = False
@@ -123,7 +121,7 @@ CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
 # read data
-CFG.TEST.DATA.DIR = "datasets/" + CFG.DATASET_NAME
+CFG.TEST.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.TEST.DATA.BATCH_SIZE = 64
 CFG.TEST.DATA.PREFETCH = False

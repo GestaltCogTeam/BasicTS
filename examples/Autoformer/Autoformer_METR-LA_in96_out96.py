@@ -1,6 +1,8 @@
 import os
 import sys
 
+from basicts.metrics.mae import masked_mae
+
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
@@ -24,7 +26,7 @@ CFG.GPU_NUM = 1
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
-# CFG.ENV.SEED = 0
+CFG.ENV.SEED = 0
 CFG.ENV.CUDNN = EasyDict()
 CFG.ENV.CUDNN.ENABLED = True
 
@@ -38,7 +40,8 @@ CFG.MODEL.PARAM = EasyDict(
     "seq_len": CFG.DATASET_INPUT_LEN,
     "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
     "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length
-    "moving_avg": 25,                           # window size of moving average
+    "moving_avg": 65,                           # window size of moving average. This is a CRUCIAL hyper-parameter.
+    "embedding_type": "DataEmbedding",          # opt: DataEmbedding 
     "output_attention": False,
     "enc_in": NUM_NODES,                        # num nodes
     "dec_in": NUM_NODES,
@@ -48,7 +51,7 @@ CFG.MODEL.PARAM = EasyDict(
     # "embed": "timeF",
     # "freq": "h",
     "dropout": 0.05,
-    "factor": 3,                                # attn factor
+    "factor": 5,                                # attn factor
     "n_heads": 8,
     "d_ff": 2048,
     "activation": "gelu",
@@ -65,7 +68,7 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.002,
+    "lr": 0.001,
     "weight_decay": 0.0001,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()

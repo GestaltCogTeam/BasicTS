@@ -16,7 +16,7 @@ CFG = EasyDict()
 CFG.DESCRIPTION = "FEDformer model configuration"
 CFG.RUNNER = FEDformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "METR-LA"
+CFG.DATASET_NAME = "PEMS04"
 CFG.DATASET_TYPE = "Traffic speed"
 CFG.DATASET_INPUT_LEN = 96
 CFG.DATASET_OUTPUT_LEN = 96
@@ -32,7 +32,7 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "FEDformer"
 CFG.MODEL.ARCH = FEDformer
-NUM_NODES = 207
+NUM_NODES = 307
 CFG.MODEL.PARAM = EasyDict(
     {
     "version": "Fourier",                       # for FEDformer, there are two versions to choose, options: [Fourier, Wavelets]
@@ -42,9 +42,9 @@ CFG.MODEL.PARAM = EasyDict(
     "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
     "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length\
     "output_attention": False,
-    "embedding_type": "DataEmbedding",          # opt: DataEmbedding
-    "moving_avg": 65,                           # window size of moving average
-    "enc_in": NUM_NODES,                        # num nodes
+    "embedding_type": "DataEmbedding",          # opt: DataEmbedding 
+    "moving_avg": 35,                           # window size of moving average
+    "enc_in": NUM_NODES,                              # num nodes
     "dec_in": NUM_NODES,
     "d_model": 512,
     "num_time_features": 2,                     # number of used time features
