@@ -26,6 +26,11 @@ class FEDformer(nn.Module):
         self.label_len = int(model_args["label_len"])
         self.pred_len = int(model_args["pred_len"])
         self.output_attention = model_args["output_attention"]
+        self.embedding_type = model_args["embedding_type"]
+
+        # Decomp
+        kernel_size = model_args["moving_avg"]
+        self.decomp = series_decomp(kernel_size)
 
         # Decomp
         kernel_size = model_args["moving_avg"]
@@ -37,8 +42,14 @@ class FEDformer(nn.Module):
         # Embedding
         # The series-wise connection inherently contains the sequential information.
         # Thus, we can discard the position embedding of transformers.
-        self.enc_embedding = DataEmbedding_wo_pos(model_args["enc_in"], model_args["d_model"], model_args['num_time_features'], model_args["dropout"])
-        self.dec_embedding = DataEmbedding_wo_pos(model_args["dec_in"], model_args["d_model"], model_args['num_time_features'], model_args["dropout"])
+        if self.embedding_type == "DataEmbedding_wo_pos":
+            self.enc_embedding = DataEmbedding_wo_pos(model_args["enc_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
+            self.dec_embedding = DataEmbedding_wo_pos(model_args["dec_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
+        elif self.embedding_type == "DataEmbedding":
+            self.enc_embedding = DataEmbedding(model_args["enc_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
+            self.dec_embedding = DataEmbedding(model_args["dec_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
+        else:
+            raise Exception("Unknown embedding type.")
 
         if model_args["version"] == 'Wavelets':
             encoder_self_att = MultiWaveletTransform(
