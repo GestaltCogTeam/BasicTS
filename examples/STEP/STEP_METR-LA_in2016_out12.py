@@ -29,7 +29,7 @@ CFG.GPU_NUM = 1
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
-CFG.ENV.SEED = 1
+CFG.ENV.SEED = 0
 CFG.ENV.CUDNN = EasyDict()
 CFG.ENV.CUDNN.ENABLED = True
 
@@ -87,7 +87,7 @@ CFG.TRAIN.LOSS = step_loss
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
-    "lr":0.005,
+    "lr":0.0035,
     "weight_decay":1.0e-5,
     "eps":1.0e-8,
 }
@@ -100,7 +100,7 @@ CFG.TRAIN.LR_SCHEDULER.PARAM= {
 
 # ================= train ================= #
 CFG.TRAIN.CLIP_GRAD_PARAM = {
-    "max_norm": 5.0
+    "max_norm": 3.0
 }
 CFG.TRAIN.NUM_EPOCHS = 100
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(

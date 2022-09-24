@@ -5,6 +5,7 @@ from torch import nn
 
 class MaskGenerator(nn.Module):
     """Mask generator."""
+
     def __init__(self, num_tokens, mask_ratio):
         super().__init__()
         self.num_tokens = num_tokens

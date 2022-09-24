@@ -28,8 +28,8 @@ class PositionalEncoding(nn.Module):
             pe = self.position_embedding[:input_data.size(1), :].unsqueeze(0)
         else:
             pe = self.position_embedding[index].unsqueeze(0)
-        input_data  = input_data + pe
-        input_data  = self.dropout(input_data)
+        input_data = input_data + pe
+        input_data = self.dropout(input_data)
         # reshape
         input_data = input_data.view(batch_size, num_nodes, num_patches, num_feat)
         return input_data

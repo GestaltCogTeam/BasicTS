@@ -14,14 +14,14 @@ class STEP(nn.Module):
         self.dataset_name = dataset_name
         self.pre_trained_tsformer_path = pre_trained_tsformer_path
 
-        # initialize pre-training model (TSFormer) and backed model (Graph WaveNet)
-        tsformer_args = tsformer_args          # TSFormer arguments
-        # backend model (Graph WaveNet) arguments
+        # tsformer and backend model args
+        tsformer_args = tsformer_args
         backend_args = backend_args
+        # iniitalize the tsformer and backend models
         self.tsformer = TSFormer(**tsformer_args)
         self.backend = GraphWaveNet(**backend_args)
 
-        # load pre-trained model
+        # load pre-trained tsformer
         self.load_pre_trained_model()
 
         # discrete graph learning
@@ -30,15 +30,8 @@ class STEP(nn.Module):
     def load_pre_trained_model(self):
         """Load pre-trained model"""
 
-        if self.dataset_name == "METR-LA":
-            checkpoint_dict = torch.load(self.pre_trained_tsformer_path)
-        elif self.dataset_name == "PEMS04":
-            checkpoint_dict = torch.load(self.pre_trained_tsformer_path)
-        elif self.dataset_name == "PEMS-BAY":
-            checkpoint_dict = torch.load(self.pre_trained_tsformer_path)
-        else:
-            assert False, "Error"
         # load parameters
+        checkpoint_dict = torch.load(self.pre_trained_tsformer_path)
         self.tsformer.load_state_dict(checkpoint_dict["model_state_dict"])
         # freeze parameters
         for param in self.tsformer.parameters():
@@ -58,6 +51,7 @@ class STEP(nn.Module):
             torch.Tensor: the Bernoulli distribution parameters with shape [B, N, N].
             torch.Tensor: the kNN graph with shape [B, N, N], which is used to guide the training of the dependency graph.
         """
+
         # reshape
         short_term_history = history_data[:, -12:, ...]     # [B, L, N, 1]
         long_term_history = history_data

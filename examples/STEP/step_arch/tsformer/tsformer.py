@@ -1,8 +1,6 @@
-from functools import partial
-
 import torch
 from torch import nn
-from timm.models.vision_transformer import Block, trunc_normal_
+from timm.models.vision_transformer import trunc_normal_
 
 from .patch import PatchEmbedding
 from .mask import MaskGenerator
@@ -70,7 +68,7 @@ class TSFormer(nn.Module):
         # mask token
         trunc_normal_(self.mask_token, std=.02)
 
-    def encoding(self, long_term_history, mask = True):
+    def encoding(self, long_term_history, mask=True):
         """Encoding process of TSFormer: patchify, positional encoding, mask, Transformer layers.
 
         Args:
@@ -112,7 +110,7 @@ class TSFormer(nn.Module):
         Args:
             hidden_states_unmasked (torch.Tensor): hidden states of masked tokens [B, N, P*(1-r), d].
             masked_token_index (list): masked token index
-    
+
         Returns:
             torch.Tensor: reconstructed data
         """
@@ -122,13 +120,16 @@ class TSFormer(nn.Module):
         hidden_states_unmasked = self.enc_2_dec_emb(hidden_states_unmasked)
 
         # add mask tokens
-        hidden_states_masked = self.positional_encoding(self.mask_token.expand(batch_size, num_nodes, len(masked_token_index), hidden_states_unmasked.shape[-1]), index=masked_token_index)
+        hidden_states_masked = self.positional_encoding(
+            self.mask_token.expand(batch_size, num_nodes, len(masked_token_index), hidden_states_unmasked.shape[-1]), 
+            index=masked_token_index
+            )
         hidden_states_full = torch.cat([hidden_states_unmasked, hidden_states_masked], dim=-2)   # B, N, P, d
-        
+
         # decoding
         hidden_states_full = self.decoder(hidden_states_full)
         hidden_states_full = self.decoder_norm(hidden_states_full)
-        
+
         # prediction (reconstruction)
         reconstruction_full = self.output_layer(hidden_states_full.view(batch_size, num_nodes, -1, self.embed_dim))
 
@@ -153,8 +154,8 @@ class TSFormer(nn.Module):
         reconstruction_masked_tokens = reconstruction_masked_tokens.view(batch_size, num_nodes, -1).transpose(1, 2)     # B, r*P*d, N
 
         label_full = real_value_full.permute(0, 3, 1, 2).unfold(1, self.patch_size, self.patch_size)[:, :, :, self.selected_feature, :].transpose(1, 2)  # B, N, P, L
-        label_masked_tokens = label_full[:, :, masked_token_index, :].contiguous()  # B, N, r*P, d
-        label_masked_tokens = label_masked_tokens.view(batch_size, num_nodes, -1).transpose(1, 2)   #      # B, r*P*d, N
+        label_masked_tokens = label_full[:, :, masked_token_index, :].contiguous() # B, N, r*P, d
+        label_masked_tokens = label_masked_tokens.view(batch_size, num_nodes, -1).transpose(1, 2)  # B, r*P*d, N
 
         return reconstruction_masked_tokens, label_masked_tokens
 
