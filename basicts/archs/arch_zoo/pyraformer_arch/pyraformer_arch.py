@@ -113,10 +113,7 @@ class Pyraformer(nn.Module):
 
     def forward_xformer(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor, x_mark_dec: torch.Tensor,
                         enc_self_mask: torch.Tensor = None, dec_self_mask: torch.Tensor = None, dec_enc_mask: torch.Tensor = None) -> torch.Tensor:
-        """Feed forward of AutoFormer. Kindly note that `enc_self_mask`, `dec_self_mask`, and `dec_enc_mask` are not actually used in AutoFormer.
-           See: 
-            - https://github.com/thuml/Autoformer/blob/e116bbcf41f537f4ab53d172d9babfc0a026330f/layers/AutoCorrelation.py#L103
-            - https://github.com/thuml/Autoformer/blob/e116bbcf41f537f4ab53d172d9babfc0a026330f/exp/exp_main.py#L136
+        """Feed forward of PyraFormer. Kindly note that `enc_self_mask`, `dec_self_mask`, and `dec_enc_mask` are not actually used in PyraFormer.
 
         Args:
             x_enc (torch.Tensor): input data of encoder (without the time features). Shape: [B, L1, N]
