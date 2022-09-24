@@ -30,7 +30,8 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         self.dataset_type = cfg["DATASET_TYPE"]
 
         # read scaler for re-normalization
-        self.scaler = load_pkl("datasets/" + self.dataset_name + "/scaler_in{0}_out{1}.pkl".format(cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"]))
+        self.scaler = load_pkl("datasets/" + self.dataset_name + "/scaler_in{0}_out{1}.pkl".format(
+                                                cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"]))
         # define loss
         self.loss = cfg["TRAIN"]["LOSS"]
         # define metric
@@ -42,7 +43,8 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             self.cl_epochs = cfg.TRAIN.CL.get("CL_EPOCHS")
             self.prediction_length = cfg.TRAIN.CL.get("PREDICTION_LENGTH")
         # evaluation horizon
-        self.evaluation_horizons = cfg["TEST"].get("EVALUATION_HORIZONS", range(12))
+        self.evaluation_horizons = [_ - 1 for _ in cfg["TEST"].get("EVALUATION_HORIZONS", range(1, 13))]
+        assert min(self.evaluation_horizons) >= 0, "The horizon should start counting from 0."
 
     def init_training(self, cfg: dict):
         """Initialize training.

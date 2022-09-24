@@ -59,15 +59,16 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         future_data = self.to_running_device(future_data)       # B, L, N, C
         batch_size, length, num_nodes, _ = future_data.shape
 
-        history_data    = self.select_input_features(history_data)
-        _future_data    = self.select_input_features(future_data)
+        history_data = self.select_input_features(history_data)
+        future_data_4_dec = self.select_input_features(future_data)
 
         # curriculum learning
         if self.cl_param is None:
-            prediction_data = self.model(history_data=history_data, future_data=_future_data, batch_seen=iter_num, epoch=epoch, train=train)
-        else: 
+            prediction_data = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train)
+        else:
             task_level = self.curriculum_learning(epoch)
-            prediction_data = self.model(history_data=history_data, future_data=_future_data, batch_seen=iter_num, epoch=epoch, train=train, task_level=task_level)
+            prediction_data = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train,\
+                                                                                                                     task_level=task_level)
         # feed forward
         assert list(prediction_data.shape)[:3] == [batch_size, length, num_nodes], \
             "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"

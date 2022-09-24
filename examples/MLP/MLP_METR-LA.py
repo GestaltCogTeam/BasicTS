@@ -5,10 +5,10 @@ import sys
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
 from basicts.data import TimeSeriesForecastingDataset
+from basicts.losses import masked_mae
 
 from .MLP_arch import MultiLayerPerceptron
 from .MLP_runner import SimpleTimeSeriesForecastingRunner
-from basicts.losses import masked_mae
 
 
 CFG = EasyDict()
@@ -97,7 +97,6 @@ CFG.VAL.DATA.PIN_MEMORY = False
 CFG.TEST = EasyDict()
 CFG.TEST.INTERVAL = 1
 # evluation
-CFG.TEST.EVALUATION_HORIZONS = range(12)
 # test data
 CFG.TEST.DATA = EasyDict()
 # read data

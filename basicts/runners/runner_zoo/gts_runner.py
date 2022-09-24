@@ -62,16 +62,16 @@ class GTSRunner(BaseTimeSeriesForecastingRunner):
         history_data    = self.to_running_device(history_data)      # B, L, N, C
         future_data     = self.to_running_device(future_data)       # B, L, N, C
         batch_size, length, num_nodes, _ = future_data.shape
-        
+
         history_data = self.select_input_features(history_data)
         if train:
             # teacher forcing only use the first dimension.
-            _future_data = future_data[..., [0]]
+            future_data_4_dec = future_data[..., [0]]
         else:
-            _future_data = None
+            future_data_4_dec = None
 
         # feed forward
-        prediction_data, pred_adj, prior_adj = self.model(history_data=history_data, future_data=_future_data, batch_seen=iter_num, epoch=epoch)   # B, L, N, C
+        prediction_data, pred_adj, prior_adj = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch)
         assert list(prediction_data.shape)[:3] == [batch_size, length, num_nodes], \
             "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
         # post process
