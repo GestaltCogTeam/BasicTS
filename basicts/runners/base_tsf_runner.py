@@ -93,14 +93,20 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             train dataset (Dataset)
         """
 
-        raw_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(
-            cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        batch_size = cfg["TRAIN"]["DATA"]["BATCH_SIZE"]
-        dataset = cfg["DATASET_CLS"](
-            raw_file_path, index_file_path, mode="train")
+        data_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
+        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
+
+        # build dataset args
+        dataset_args = cfg.get("DATASET_ARGS", dict())
+        # three necessary arguments, data file path, corresponding index file path, and mode (train, valid, or test)
+        dataset_args["data_file_path"] = data_file_path
+        dataset_args["index_file_path"] = index_file_path
+        dataset_args["mode"] = "train"
+
+        dataset = cfg["DATASET_CLS"](**dataset_args)
         print("train len: {0}".format(len(dataset)))
 
+        batch_size = cfg["TRAIN"]["DATA"]["BATCH_SIZE"]
         self.iter_per_epoch = math.ceil(len(dataset) / batch_size)
 
         return dataset
@@ -115,13 +121,19 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         Returns:
             validation dataset (Dataset)
         """
+        data_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
+        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
 
-        raw_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(
-            cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        dataset = cfg["DATASET_CLS"](
-            raw_file_path, index_file_path, mode="valid")
+        # build dataset args
+        dataset_args = cfg.get("DATASET_ARGS", dict())
+        # three necessary arguments, data file path, corresponding index file path, and mode (train, valid, or test)
+        dataset_args["data_file_path"] = data_file_path
+        dataset_args["index_file_path"] = index_file_path
+        dataset_args["mode"] = "valid"
+
+        dataset = cfg["DATASET_CLS"](**dataset_args)
         print("val len: {0}".format(len(dataset)))
+
         return dataset
 
     @staticmethod
@@ -135,12 +147,19 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             train dataset (Dataset)
         """
 
-        raw_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(
-            cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        dataset = cfg["DATASET_CLS"](
-            raw_file_path, index_file_path, mode="test")
+        data_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
+        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
+
+        # build dataset args
+        dataset_args = cfg.get("DATASET_ARGS", dict())
+        # three necessary arguments, data file path, corresponding index file path, and mode (train, valid, or test)
+        dataset_args["data_file_path"] = data_file_path
+        dataset_args["index_file_path"] = index_file_path
+        dataset_args["mode"] = "test"
+
+        dataset = cfg["DATASET_CLS"](**dataset_args)
         print("test len: {0}".format(len(dataset)))
+
         return dataset
 
     def curriculum_learning(self, epoch: int = None) -> int:
