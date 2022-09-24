@@ -6,13 +6,12 @@ import sys
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 import torch
 from easydict import EasyDict
-from basicts.losses import masked_mae
 from basicts.utils.serialization import load_adj
-from basicts.data import TimeSeriesForecastingDataset
 
 from .step_arch import STEP
 from .step_runner import STEPRunner
 from .step_loss import step_loss
+from .step_data import ForecastingDataset
 
 
 CFG = EasyDict()
@@ -20,11 +19,14 @@ CFG = EasyDict()
 # ================= general ================= #
 CFG.DESCRIPTION = "STEP configuration"
 CFG.RUNNER = STEPRunner
-CFG.DATASET_CLS = TimeSeriesForecastingDataset
+CFG.DATASET_CLS = ForecastingDataset
 CFG.DATASET_NAME = "METR-LA"
 CFG.DATASET_TYPE = "Traffic speed"
-CFG.DATASET_INPUT_LEN = 288 * 7
+CFG.DATASET_INPUT_LEN = 12
 CFG.DATASET_OUTPUT_LEN = 12
+CFG.DATASET_ARGS = {
+    "seq_len": 288 * 7
+    }
 CFG.GPU_NUM = 1
 
 # ================= environment ================= #
@@ -40,7 +42,7 @@ CFG.MODEL.ARCH = STEP
 adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
     "dataset_name": CFG.DATASET_NAME,
-    "pre_trained_tsformer_path": "/workspace/S22/BasicTS/checkpoints/TSFormer_100/1b8a6e09f283baa60f6f2a8bd4895183/TSFormer_best_val_MAE.pt",
+    "pre_trained_tsformer_path": "examples/STEP/TSFormer_METR-LA.pt",
     "tsformer_args": {
                     "patch_size":12,
                     "in_channel":1,

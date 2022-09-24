@@ -45,9 +45,6 @@ def generate_data(args: argparse.Namespace):
 
     l, n, f = data.shape
     num_samples = l - (history_seq_len + future_seq_len) + 1
-    # test_num_short = 6850
-    # valid_num_short = 3425
-    # train_num_short = num_samples - valid_num_short - test_num_short
     train_num_short = round(num_samples * train_ratio)
     valid_num_short = round(num_samples * valid_ratio)
     test_num_short = num_samples - train_num_short - valid_num_short
@@ -103,7 +100,7 @@ def generate_data(args: argparse.Namespace):
 
 if __name__ == "__main__":
     # sliding window size for generating history sequence and target sequence
-    HISTORY_SEQ_LEN = 2016
+    HISTORY_SEQ_LEN = 12
     FUTURE_SEQ_LEN = 12
 
     TRAIN_RATIO = 0.7

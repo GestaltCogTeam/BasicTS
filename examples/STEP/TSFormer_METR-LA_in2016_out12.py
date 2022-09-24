@@ -4,12 +4,11 @@ import sys
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
-from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 
 from .step_arch import TSFormer
 from .step_runner import TSFormerRunner
-# from .masked_auto_encoding_loss import masked_auto_encoding_loss
+from .step_data import PretrainingDataset
 
 
 CFG = EasyDict()
@@ -17,7 +16,7 @@ CFG = EasyDict()
 # ================= general ================= #
 CFG.DESCRIPTION = "Multi-layer perceptron model configuration"
 CFG.RUNNER = TSFormerRunner
-CFG.DATASET_CLS = TimeSeriesForecastingDataset
+CFG.DATASET_CLS = PretrainingDataset
 CFG.DATASET_NAME = "METR-LA"
 CFG.DATASET_TYPE = "Traffic speed"
 CFG.DATASET_INPUT_LEN = 288 * 7

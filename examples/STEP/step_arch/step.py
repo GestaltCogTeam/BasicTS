@@ -37,11 +37,12 @@ class STEP(nn.Module):
         for param in self.tsformer.parameters():
             param.requires_grad = False
 
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, **kwargs) -> torch.Tensor:
+    def forward(self, history_data: torch.Tensor, long_history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, **kwargs) -> torch.Tensor:
         """Feed forward of STEP.
 
         Args:
-            history_data (torch.Tensor): Long-term historical data. shape: [B, L * P, N, 3]
+            history_data (torch.Tensor): Short-term historical data. shape: [B, L, N, 3]
+            long_history_data (torch.Tensor): Long-term historical data. shape: [B, L * P, N, 3]
             future_data (torch.Tensor): future data
             batch_seen (int): number of batches that have been seen
             epoch (int): number of epochs
@@ -53,8 +54,8 @@ class STEP(nn.Module):
         """
 
         # reshape
-        short_term_history = history_data[:, -12:, ...]     # [B, L, N, 1]
-        long_term_history = history_data
+        short_term_history = history_data     # [B, L, N, 1]
+        long_term_history = long_history_data
 
         # STEP
         batch_size, _, num_nodes, _ = short_term_history.shape
