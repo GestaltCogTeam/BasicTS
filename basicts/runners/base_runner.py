@@ -168,7 +168,7 @@ class BaseRunner(Runner):
         self.test()
 
         test_end_time = time.time()
-        self.update_epoch_meter("test_time", test_start_time - test_end_time)
+        self.update_epoch_meter("test_time", test_end_time - test_start_time)
         # print test meters
         self.print_epoch_meters("test")
         if train_epoch is not None:
