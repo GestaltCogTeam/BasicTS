@@ -34,6 +34,7 @@ class BaseRunner(Runner):
         # declare data loader
         self.train_data_loader = None
         self.val_data_loader = None
+        self.test_data_loader = None
 
         # set proctitle
         proctitle_name = "{0}({1})".format(cfg["MODEL"].get(
