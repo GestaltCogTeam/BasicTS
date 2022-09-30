@@ -1,4 +1,5 @@
 import math
+import functools
 from typing import Tuple, Union, Optional
 
 import torch
@@ -202,6 +203,24 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
 
         raise NotImplementedError()
 
+    def metric_forward(self, metric_func, args):
+        """Computing metrics.
+
+        Args:
+            metric_func (function, functools.partial): metric function.
+            args (list): arguments for metrics computation.
+        """
+
+        if isinstance(metric_func, functools.partial) and list(metric_func.keywords.keys()) == ["null_val"]:
+            # support partial(metric_func, null_val = something)
+            metric_item = metric_func(*args)
+        elif callable(metric_func):
+            # is a function
+            metric_item = metric_func(*args, null_val=self.null_val)
+        else:
+            raise TypeError("Unknown metric type: {0}".format(type(metric_func)))
+        return metric_item
+
     def train_iters(self, epoch: int, iter_index: int, data: Union[torch.Tensor, Tuple]) -> torch.Tensor:
         """Training details.
 
@@ -227,10 +246,10 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         else:
             forward_return[0] = prediction_rescaled
             forward_return[1] = real_value_rescaled
-        loss = self.loss(*forward_return, null_val=self.null_val)
+        loss = self.metric_forward(self.loss, forward_return)
         # metrics
         for metric_name, metric_func in self.metrics.items():
-            metric_item = metric_func(*forward_return[:2], null_val=self.null_val)
+            metric_item = self.metric_forward(metric_func, forward_return[:2])
             self.update_epoch_meter("train_"+metric_name, metric_item.item())
         return loss
 
@@ -249,7 +268,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         real_value_rescaled = SCALER_REGISTRY.get(self.scaler["func"])(forward_return[1], **self.scaler["args"])
         # metrics
         for metric_name, metric_func in self.metrics.items():
-            metric_item = metric_func(prediction_rescaled, real_value_rescaled, null_val=self.null_val)
+            metric_item = self.metric_forward(metric_func, [prediction_rescaled, real_value_rescaled])
             self.update_epoch_meter("val_"+metric_name, metric_item.item())
 
     @torch.no_grad()
@@ -284,7 +303,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             # metrics
             metric_results = {}
             for metric_name, metric_func in self.metrics.items():
-                metric_item = metric_func(pred, real, null_val=self.null_val)
+                metric_item = self.metric_forward(metric_func, [pred, real])
                 metric_results[metric_name] = metric_item.item()
             log = "Evaluate best model on test data for horizon " + \
                 "{:d}, Test MAE: {:.4f}, Test RMSE: {:.4f}, Test MAPE: {:.4f}"
@@ -293,7 +312,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             self.logger.info(log)
         # test performance overall
         for metric_name, metric_func in self.metrics.items():
-            metric_item = metric_func(prediction, real_value, null_val=self.null_val)
+            metric_item = self.metric_forward(metric_func, [prediction, real_value])
             self.update_epoch_meter("test_"+metric_name, metric_item.item())
             metric_results[metric_name] = metric_item.item()
 
