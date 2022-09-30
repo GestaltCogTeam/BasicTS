@@ -1,5 +1,4 @@
 import pickle
-from einops import asnumpy
 
 import torch
 import numpy as np
@@ -22,7 +21,7 @@ def standard_transform(data: np.array, output_dir: str, train_index: list, histo
         np.array: normalized raw time series data.
     """
 
-    # data: L, N, C
+    # data: L, N, C, C=1
     data_train = data[:train_index[-1][1], ...]
 
     mean, std = data_train[..., 0].mean(), data_train[..., 0].std()
@@ -74,11 +73,12 @@ def min_max_transform(data: np.array, output_dir: str, train_index: list, histor
     Returns:
         np.array: normalized raw time series data.
     """
-    # L, N, C
+
+    # L, N, C, C=1
     data_train = data[:train_index[-1][1], ...]
 
-    min_value = data_train.min(axis=(0, 1), keepdims=True)
-    max_value = data_train.max(axis=(0, 1), keepdims=True)
+    min_value = data_train.min(axis=(0, 1), keepdims=False)[0]
+    max_value = data_train.max(axis=(0, 1), keepdims=False)[0]
 
     print("min: (training data)", min_value)
     print("max: (training data)", max_value)
