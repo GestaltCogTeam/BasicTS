@@ -2,6 +2,7 @@ import math
 from typing import Tuple, Union, Optional
 
 import torch
+import numpy as np
 from easytorch.utils.dist import master_only
 
 from .base_runner import BaseRunner
@@ -26,7 +27,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         super().__init__(cfg)
         self.dataset_name = cfg["DATASET_NAME"]
         # different datasets have different null_values, e.g., 0.0 or np.nan.
-        self.null_val = cfg["TRAIN"].get("NULL_VAL", 0)
+        self.null_val = cfg["TRAIN"].get("NULL_VAL", np.nan)    # consist with metric functions
         self.dataset_type = cfg["DATASET_TYPE"]
 
         # read scaler for re-normalization
@@ -99,7 +100,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
 
         # build dataset args
-        dataset_args = cfg.get("DATASET_ARGS", dict())
+        dataset_args = cfg.get("DATASET_ARGS", {})
         # three necessary arguments, data file path, corresponding index file path, and mode (train, valid, or test)
         dataset_args["data_file_path"] = data_file_path
         dataset_args["index_file_path"] = index_file_path
@@ -127,7 +128,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
 
         # build dataset args
-        dataset_args = cfg.get("DATASET_ARGS", dict())
+        dataset_args = cfg.get("DATASET_ARGS", {})
         # three necessary arguments, data file path, corresponding index file path, and mode (train, valid, or test)
         dataset_args["data_file_path"] = data_file_path
         dataset_args["index_file_path"] = index_file_path
@@ -153,7 +154,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
 
         # build dataset args
-        dataset_args = cfg.get("DATASET_ARGS", dict())
+        dataset_args = cfg.get("DATASET_ARGS", {})
         # three necessary arguments, data file path, corresponding index file path, and mode (train, valid, or test)
         dataset_args["data_file_path"] = data_file_path
         dataset_args["index_file_path"] = index_file_path
