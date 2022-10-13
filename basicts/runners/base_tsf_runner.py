@@ -44,6 +44,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             self.warm_up_epochs = cfg.TRAIN.CL.get("WARM_EPOCHS", 0)
             self.cl_epochs = cfg.TRAIN.CL.get("CL_EPOCHS")
             self.prediction_length = cfg.TRAIN.CL.get("PREDICTION_LENGTH")
+            self.cl_step_size = cfg.TRAIN.CL.get("STEP_SIZE", 1)
         # evaluation horizon
         self.evaluation_horizons = [_ - 1 for _ in cfg["TEST"].get("EVALUATION_HORIZONS", range(1, 13))]
         assert min(self.evaluation_horizons) >= 0, "The horizon should start counting from 0."
@@ -184,7 +185,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             # still warm up
             cl_length = self.prediction_length
         else:
-            _ = (epoch - self.warm_up_epochs) // self.cl_epochs + 1
+            _ = ((epoch - self.warm_up_epochs) // self.cl_epochs + 1) * self.cl_step_size
             cl_length = min(_, self.prediction_length)
         return cl_length
 
