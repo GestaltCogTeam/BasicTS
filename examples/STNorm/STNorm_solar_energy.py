@@ -17,7 +17,7 @@ CFG.DESCRIPTION = "STNorm model configuration"
 CFG.RUNNER = STNormRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "solar_energy"
-CFG.DATASET_TYPE = "energy"
+CFG.DATASET_TYPE = "Energy"
 CFG.DATASET_INPUT_LEN = 168
 CFG.DATASET_OUTPUT_LEN = 12
 CFG.GPU_NUM = 1
@@ -91,7 +91,7 @@ CFG.VAL.DATA = EasyDict()
 # read data
 CFG.VAL.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
-CFG.VAL.DATA.BATCH_SIZE = 16 # Notice: while using this model on solar-energy, please set this to 16
+CFG.VAL.DATA.BATCH_SIZE = 16
 CFG.VAL.DATA.PREFETCH = False
 CFG.VAL.DATA.SHUFFLE = False
 CFG.VAL.DATA.NUM_WORKERS = 2

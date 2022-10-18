@@ -13,12 +13,19 @@ from basicts.utils import load_adj
 
 CFG = EasyDict()
 
+"""
+Please notice that on the first few epochs, MTGNN will predict same metrics in the last few Horizons.
+This problem will gradually be fixed as the epoch increases. You will get normal metrics after about 20 epochs.
+This may be because the solar energy dataset contains a large number of 0.0s, and MTGNN will predict the labels of long time steps as 0.0 in the first few epochs.
+If you find a specific reason for this problem, please contact us.
+"""
+
 # ================= general ================= #
 CFG.DESCRIPTION = "MTGNN model configuration"
 CFG.RUNNER = MTGNNRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "solar_energy"
-CFG.DATASET_TYPE = "energy"
+CFG.DATASET_TYPE = "Energy"
 CFG.DATASET_INPUT_LEN = 168
 CFG.DATASET_OUTPUT_LEN = 12
 CFG.GPU_NUM = 1

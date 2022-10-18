@@ -17,7 +17,7 @@ CFG.DESCRIPTION = "HI model configuration"
 CFG.RUNNER = HIRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "solar_energy"
-CFG.DATASET_TYPE = "energy"
+CFG.DATASET_TYPE = "Energy"
 CFG.DATASET_INPUT_LEN = 168
 CFG.DATASET_OUTPUT_LEN = 96
 CFG.GPU_NUM = 1
@@ -92,7 +92,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = 12
+CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96]
 CFG.TEST.INTERVAL = 1
 # validating data
 CFG.TEST.DATA = EasyDict()
