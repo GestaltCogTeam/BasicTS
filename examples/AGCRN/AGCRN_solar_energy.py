@@ -34,13 +34,13 @@ CFG.MODEL.NAME = "AGCRN"
 CFG.MODEL.ARCH = AGCRN
 CFG.MODEL.PARAM = {
     "num_nodes" : 137,
-    "input_dim" : 1,
+    "input_dim" : 2,
     "rnn_units" : 32,
     "output_dim": 1,
     "horizon"   : 12,
     "num_layers": 2,
     "default_graph": True,
-    "embed_dim" : 10,
+    "embed_dim" : 2,
     "cheb_k"    : 2
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1]

@@ -102,6 +102,7 @@ if __name__ == "__main__":
     TRAIN_RATIO = 0.6
     VALID_RATIO = 0.2
     TARGET_CHANNEL = [0]                   # target channel(s)
+    STEPS_PER_DAY = 4                      # 6 hours
 
     DATASET_NAME = "exchange_rate"
     TOD = True                  # if add time_of_day feature

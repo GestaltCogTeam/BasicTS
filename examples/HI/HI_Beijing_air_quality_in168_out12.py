@@ -16,10 +16,10 @@ CFG = EasyDict()
 CFG.DESCRIPTION = "HI model configuration"
 CFG.RUNNER = HIRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "exchange_rate"
-CFG.DATASET_TYPE = "Economics"
+CFG.DATASET_NAME = "Beijing_air_quality"
+CFG.DATASET_TYPE = "Environmental protection"
 CFG.DATASET_INPUT_LEN = 168
-CFG.DATASET_OUTPUT_LEN = 96
+CFG.DATASET_OUTPUT_LEN = 12
 CFG.GPU_NUM = 1
 
 # ================= environment ================= #
@@ -92,7 +92,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96]
+CFG.TEST.EVALUATION_HORIZONS = [3, 6, 12]
 CFG.TEST.INTERVAL = 1
 # validating data
 CFG.TEST.DATA = EasyDict()

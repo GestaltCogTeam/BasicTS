@@ -15,7 +15,7 @@ CFG = EasyDict()
 
 """
 Please notice that on the first few epochs, MTGNN will predict same metrics in the last few Horizons.
-This problem will gradually be fixed as the epoch increases. You will get normal metrics after about 20 epochs.
+This problem will gradually be fixed as the epoch increases. You will get correct metrics after about 20 epochs.
 This may be because the solar energy dataset contains a large number of 0.0s, and MTGNN will predict the labels of long time steps as 0.0 in the first few epochs.
 If you find a specific reason for this problem, please contact us.
 """
