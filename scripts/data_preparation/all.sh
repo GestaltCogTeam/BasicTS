@@ -5,10 +5,3 @@ python scripts/data_preparation/PEMS03/generate_training_data.py
 python scripts/data_preparation/PEMS04/generate_training_data.py
 python scripts/data_preparation/PEMS07/generate_training_data.py
 python scripts/data_preparation/PEMS08/generate_training_data.py
-python scripts/data_preparation/Electricity336/generate_training_data.py
-python scripts/data_preparation/exchange_rate/generate_training_data.py
-python scripts/data_preparation/solar_energy/generate_training_data.py
-python scripts/data_preparation/Beijing_air_quality/generate_training_data.py
-
-
-

@@ -105,7 +105,6 @@ class MTGNNRunner(BaseTimeSeriesForecastingRunner):
                 idx = self.perm[j * num_sub:]
             idx = torch.tensor(idx)
             future_data, history_data = data
-            # print("future_data.shape: {0}, history_data.shape: {1}, idx: {2}".format(future_data.shape, history_data.shape, idx))
             data = future_data[:, :, idx, :], history_data[:, :, idx, :], idx
             loss = super().train_iters(epoch, iter_index, data)
             self.backward(loss)
