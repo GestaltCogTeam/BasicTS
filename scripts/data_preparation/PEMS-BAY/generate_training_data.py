@@ -9,7 +9,7 @@ import pandas as pd
 
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../../.."))
-from basicts.data.transform import standard_transform
+from basicts.data.transform import min_max_transform
 
 
 def generate_data(args: argparse.Namespace):
@@ -62,7 +62,7 @@ def generate_data(args: argparse.Namespace):
     test_index = index_list[train_num_short +
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
-    scaler = standard_transform
+    scaler = min_max_transform
     data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len)
 
     # add external feature

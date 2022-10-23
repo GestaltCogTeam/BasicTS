@@ -33,10 +33,11 @@ def generate_data(args):
     train_ratio = args.train_ratio
     valid_ratio = args.valid_ratio
     data_file_path = args.data_file_path
+    steps_per_day = args.steps_per_day
 
     # read data
-    df = pd.read_hdf(data_file_path)
-    data = np.expand_dims(df.values, axis=-1)
+    data = np.loadtxt(args.data_file_path, delimiter=',')
+    data = np.expand_dims(data, axis=-1)
 
     data = data[..., target_channel]
     print("raw time series shape: {0}".format(data.shape))
@@ -67,14 +68,16 @@ def generate_data(args):
     feature_list = [data_norm]
     if add_time_of_day:
         # numerical time_of_day
-        tod = (
-            df.index.values - df.index.values.astype("datetime64[D]")) / np.timedelta64(1, "D")
+        tod = [i % steps_per_day /
+               steps_per_day for i in range(data_norm.shape[0])]
+        tod = np.array(tod)
         tod_tiled = np.tile(tod, [1, n, 1]).transpose((2, 1, 0))
         feature_list.append(tod_tiled)
 
     if add_day_of_week:
         # numerical day_of_week
-        dow = df.index.dayofweek
+        dow = [(i // steps_per_day) % 7 for i in range(data_norm.shape[0])]
+        dow = np.array(dow)
         dow_tiled = np.tile(dow, [1, n, 1]).transpose((2, 1, 0))
         feature_list.append(dow_tiled)
 
@@ -119,6 +122,8 @@ if __name__ == "__main__":
                         default=HISTORY_SEQ_LEN, help="Sequence Length.")
     parser.add_argument("--future_seq_len", type=int,
                         default=FUTURE_SEQ_LEN, help="Sequence Length.")
+    parser.add_argument("--steps_per_day", type=int,
+                        default=STEPS_PER_DAY, help="Sequence Length.")
     parser.add_argument("--tod", type=bool, default=TOD,
                         help="Add feature time_of_day.")
     parser.add_argument("--dow", type=bool, default=DOW,

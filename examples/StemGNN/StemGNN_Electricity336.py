@@ -3,20 +3,19 @@ import sys
 
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
-import torch
 from easydict import EasyDict
-from basicts.archs import MTGNN
-from basicts.runners import MTGNNRunner
+from basicts.archs import StemGNN
+from basicts.runners import StemGNNRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
-from basicts.utils import load_adj
 
+"""Different from the official code, we use Adam as the optimizer and MAE as the loss function since they bring better performance."""
 
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = "MTGNN model configuration"
-CFG.RUNNER = MTGNNRunner
+CFG.DESCRIPTION = "StemGNN model configuration"
+CFG.RUNNER = StemGNNRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "exchange_rate"
 CFG.DATASET_TYPE = "Economics"
@@ -32,39 +31,18 @@ CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
-CFG.MODEL.NAME = "MTGNN"
-CFG.MODEL.ARCH = MTGNN
-buildA_true = True
-num_nodes = 8
-if buildA_true: # self-learned adjacency matrix
-    adj_mx = None
-else:           # use predefined adjacency matrix
-    _, adj_mx = load_adj("datasets/" + CFG.DATASET_NAME + "/adj_mx.pkl", "doubletransition")
-    adj_mx = torch.tensor(adj_mx)-torch.eye(num_nodes)
-
+CFG.MODEL.NAME = "StemGNN"
+CFG.MODEL.ARCH = StemGNN
 CFG.MODEL.PARAM = {
-    "gcn_true"  : True,
-    "buildA_true": buildA_true,
-    "gcn_depth": 2,
-    "num_nodes": num_nodes,
-    "predefined_A":adj_mx,
-    "dropout":0.3,
-    "subgraph_size":8,
-    "node_dim":40,
-    "dilation_exponential":1,
-    "conv_channels":32,
-    "residual_channels":32,
-    "skip_channels":64,
-    "end_channels":128,
-    "seq_length": 168,
-    "in_dim":2,
-    "out_dim":12,
-    "layers":3,
-    "propalpha":0.05,
-    "tanhalpha":3,
-    "layer_norm_affline":True
+    "units":    336,
+    "stack_cnt": 2,
+    "time_step": 168,
+    "multi_layer": 5,
+    "horizon": 12,
+    "dropout_rate": 0.5,
+    "leaky_rate": 0.2
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]
+CFG.MODEL.FROWARD_FEATURES = [0]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
@@ -73,20 +51,17 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM= {
-    "lr": 0.001,
-    "weight_decay": 0.0001,
+    "lr":0.0004
+}
+CFG.TRAIN.LR_SCHEDULER = EasyDict()
+CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
+CFG.TRAIN.LR_SCHEDULER.PARAM = {
+    "milestones": [1, 50],
+    "gamma": 0.5
 }
 
 # ================= train ================= #
-CFG.TRAIN.CUSTOM            = EasyDict()          # MTGNN custom training args
-CFG.TRAIN.CUSTOM.STEP_SIZE  = 100
-CFG.TRAIN.CUSTOM.NUM_NODES  = num_nodes
-CFG.TRAIN.CUSTOM.NUM_SPLIT  = 1
-
-# CFG.TRAIN.CLIP_GRAD_PARAM = {
-#     "max_norm": 5.0
-# }
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
@@ -97,16 +72,11 @@ CFG.TRAIN.NULL_VAL = 0.0
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE = 64
+CFG.TRAIN.DATA.BATCH_SIZE = 4
 CFG.TRAIN.DATA.PREFETCH = False
 CFG.TRAIN.DATA.SHUFFLE = True
 CFG.TRAIN.DATA.NUM_WORKERS = 2
 CFG.TRAIN.DATA.PIN_MEMORY = False
-## curriculum learning
-CFG.TRAIN.CL    = EasyDict()
-CFG.TRAIN.CL.WARM_EPOCHS    = 0
-CFG.TRAIN.CL.CL_EPOCHS      = 3
-CFG.TRAIN.CL.PREDICTION_LENGTH  = 12
 
 # ================= validate ================= #
 CFG.VAL = EasyDict()
