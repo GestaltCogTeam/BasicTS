@@ -4,7 +4,6 @@ import pickle
 import argparse
 
 import numpy as np
-import pandas as pd
 
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../../.."))
@@ -18,7 +17,7 @@ def generate_data(args):
         - Dataset division: 6:2:2.
         - Window size: history 168, future 12.
         - Channels (features): three channels [exchange rate, time of day, day of week]
-        - Target: predict the electricity consumption of the future 12 time steps.
+        - Target: predict the exchange rate of the future 12 time steps.
 
     Args:
         args (argparse): configurations of preprocessing
@@ -36,7 +35,7 @@ def generate_data(args):
     steps_per_day = args.steps_per_day
 
     # read data
-    data = np.loadtxt(args.data_file_path, delimiter=',')
+    data = np.loadtxt(data_file_path, delimiter=",")
     data = np.expand_dims(data, axis=-1)
 
     data = data[..., target_channel]
@@ -117,7 +116,7 @@ if __name__ == "__main__":
     parser.add_argument("--output_dir", type=str,
                         default=OUTPUT_DIR, help="Output directory.")
     parser.add_argument("--data_file_path", type=str,
-                        default=DATA_FILE_PATH, help="Raw traffic readings.")
+                        default=DATA_FILE_PATH, help="Raw exchange-rate readings.")
     parser.add_argument("--history_seq_len", type=int,
                         default=HISTORY_SEQ_LEN, help="Sequence Length.")
     parser.add_argument("--future_seq_len", type=int,
