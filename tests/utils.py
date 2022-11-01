@@ -21,6 +21,7 @@ def test(model, dataset, exception_log_file):
     for h in logger.handlers:
         h.close()
     logger.handlers = []
-    easytorch.utils.logging.logger_initialized.remove("easytorch-training")
+    if "easytorch-training" in easytorch.utils.logging.logger_initialized:
+        easytorch.utils.logging.logger_initialized.remove("easytorch-training")
 
     print("*" * 141)
