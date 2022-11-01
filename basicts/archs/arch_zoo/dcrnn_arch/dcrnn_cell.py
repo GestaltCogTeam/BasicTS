@@ -113,11 +113,11 @@ class DCGRUCell(torch.nn.Module):
             pass
         else:
             for support in self._supports:
-                x1 = torch.mm(support, x0)
+                x1 = torch.mm(support.to(x0.device), x0)
                 x = self._concat(x, x1)
 
                 for k in range(2, self._max_diffusion_step + 1):
-                    x2 = 2 * torch.mm(support, x1) - x0
+                    x2 = 2 * torch.mm(support.to(x0.device), x1) - x0
                     x = self._concat(x, x2)
                     x1, x0 = x2, x1
 

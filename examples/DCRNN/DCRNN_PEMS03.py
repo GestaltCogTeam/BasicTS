@@ -53,7 +53,7 @@ CFG.MODEL.PARAM = {
     "output_dim": 1,
     "rnn_units": 64,
     "seq_len": 12,
-    "adj_mx": [torch.tensor(i).cuda() for i in adj_mx],
+    "adj_mx": [torch.tensor(i) for i in adj_mx],
     "use_curriculum_learning": True
 }
 CFG.MODEL.FROWARD_FEATURES = [0, 1]
