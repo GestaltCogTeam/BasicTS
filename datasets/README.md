@@ -6,7 +6,7 @@ The raw data can be downloaded at this [Google Drive](https://drive.google.com/d
 
 ## Datasets Description
 
-### ETT (Electricity Transformer Temperature) Datasets
+### 1. ETT (Electricity Transformer Temperature) Datasets
 
 **Source**: [Informer: Beyond Efﬁcient Transformer for Long Sequence Time-Series Forecasting, AAAI 2021](https://github.com/zhouhaoyi/Informer2020). [Data Link](https://github.com/zhouhaoyi/ETDataset)
 
@@ -25,9 +25,9 @@ The first six variates are overload data, while the last one is oil temperature.
 - **S**: Univariate time series forecasting. Input 1 feature (oil temperature default), predict the corresponding feature.
 - **MS**: Multivariate predict univariate. Input all 7 features, predict 1 feature (oil temperature default).
 
-### Electricity
+### 2. Electricity
 
-**Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet).(Data Link](https://github.com/laiguokun/multivariate-time-series-data). 
+**Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet). [Data Link](https://github.com/laiguokun/multivariate-time-series-data).
 
 **Description**: Electricity contains the electricity consumption in kWh from 2012 to 2014. The data is converted to reflect hourly consumption. It contains 321 clients. 
 
@@ -41,9 +41,9 @@ The first six variates are overload data, while the last one is oil temperature.
 
 - **M**: Multivariate time series forecasting. Input all 321 features, predict all 321 features.
 
-### Weather
+### 3. Weather
 
-**Source**: [Informer: Beyond Efﬁcient Transformer for Long Sequence Time-Series Forecasting, AAAI 2021](https://github.com/zhouhaoyi/Informer2020).
+**Source**: [Informer: Beyond Efﬁcient Transformer for Long Sequence Time-Series Forecasting, AAAI 2021](https://github.com/zhouhaoyi/Informer2020). [Data Link](https://github.com/zhouhaoyi/Informer2020)
 
 **Description**: Weather contains  4 years‘ local climatological data from 2010 to 2013, where data points are collected every 1 hour.
 Kindly note that there are multiple versions of Weather dataset in different papers, such as AutoFormer and Informer.
@@ -61,9 +61,9 @@ We choose the version of Informer.
 - **S**: Univariate time series forecasting. Input 1 feature (wet bulb default), predict the corresponding feature.
 - **MS**: Multivariate predict univariate. Input all 12 features, predict 1 feature (wet bulb default).
 
-### Solar-Energy
+### 4. Solar-Energy
 
-**Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet).(Data Link](https://github.com/laiguokun/multivariate-time-series-data). 
+**Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet). [Data Link](https://github.com/laiguokun/multivariate-time-series-data). 
 
 **Description**:  The solar power production records in the year of 2006, which is sampled every 10 minutes from 137 PV plants in Alabama State.
 
@@ -77,9 +77,9 @@ We choose the version of Informer.
 
 - **M**: Multivariate time series forecasting. Input all 137 features, predict all 137 features.
 
-### Exchange-Rate
+### 5. Exchange-Rate
 
-**Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet).(Data Link](https://github.com/laiguokun/multivariate-time-series-data). 
+**Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet). [Data Link](https://github.com/laiguokun/multivariate-time-series-data). 
 
 **Description**:  The collection of the daily exchange rates of eight countries including Australia, British, Canada, Switzerland, China, Japan, New Zealand, and Singapore.
 
@@ -93,7 +93,7 @@ We choose the version of Informer.
 
 - Multivariate time series forecasting. Input all 8 features, predict all 8 features.
 
-### Beijing Air Quality
+### 6. Beijing Air Quality
 
 **Source**: https://quotsoft.net/air/
 
