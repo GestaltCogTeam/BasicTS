@@ -128,8 +128,9 @@ class D2STGNN(nn.Module):
         node_emb_d = self.node_emb_d  # [N, d]
         # time slot embedding
         # [B, L, N, d]
-        T_i_D = self.T_i_D_emb[(X[:, :, :, num_feat] *
-                                288).type(torch.LongTensor)]
+        # In the datasets used in D2STGNN, the time_of_day feature is normalized to [0, 1]. We multiply it by 288 to get the index.
+        # If you use other datasets, you may need to change this line.
+        T_i_D = self.T_i_D_emb[(X[:, :, :, num_feat] * 288).type(torch.LongTensor)]
         # [B, L, N, d]
         D_i_W = self.D_i_W_emb[(X[:, :, :, num_feat+1]).type(torch.LongTensor)]
         # traffic signals
