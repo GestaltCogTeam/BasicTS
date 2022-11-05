@@ -36,7 +36,7 @@ CFG.MODEL.PARAM = {
     "seq_len": CFG.DATASET_INPUT_LEN,
     "pred_len": CFG.DATASET_OUTPUT_LEN
 }
-CFG.MODEL.FROWARD_FEATURES = [0]  # traffic speed, time in day
+CFG.MODEL.FORWARD_FEATURES = [0]  # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES = [0] # traffic speed
 
 # ================= optim ================= #

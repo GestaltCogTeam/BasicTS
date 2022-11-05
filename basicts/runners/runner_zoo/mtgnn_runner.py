@@ -9,7 +9,7 @@ from ..base_tsf_runner import BaseTimeSeriesForecastingRunner
 class MTGNNRunner(BaseTimeSeriesForecastingRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
-        self.forward_features = cfg["MODEL"].get("FROWARD_FEATURES", None)
+        self.forward_features = cfg["MODEL"].get("FORWARD_FEATURES", None)
         self.target_features = cfg["MODEL"].get("TARGET_FEATURES", None)
         # graph training
         self.step_size = cfg.TRAIN.CUSTOM.STEP_SIZE

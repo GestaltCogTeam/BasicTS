@@ -52,7 +52,7 @@ CFG.MODEL.PARAM = {
     "rnn_size": 64,
     "hyperGNN_dim": 16
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]
+CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #

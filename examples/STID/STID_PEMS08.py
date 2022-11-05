@@ -46,7 +46,7 @@ CFG.MODEL.PARAM = {
     "temp_dim_tid": 32,
     "temp_dim_diw": 32,
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1, 2] # traffic flow, time in day
+CFG.MODEL.FORWARD_FEATURES = [0, 1, 2] # traffic flow, time in day
 CFG.MODEL.TARGET_FEATURES = [0] # traffic flow
 
 # ================= optim ================= #

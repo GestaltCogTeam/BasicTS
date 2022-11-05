@@ -38,7 +38,7 @@ CFG.MODEL.PARAM = {
     "individual": False,
     "enc_in": 358
 }
-CFG.MODEL.FROWARD_FEATURES = [0]  # traffic speed, time in day
+CFG.MODEL.FORWARD_FEATURES = [0]  # traffic speed, time in day
 CFG.MODEL.TARGET_FEATURES = [0] # traffic speed
 
 # ================= optim ================= #

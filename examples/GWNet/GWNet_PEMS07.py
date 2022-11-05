@@ -53,7 +53,7 @@ CFG.MODEL.PARAM = {
     "blocks": 4,
     "layers": 2
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]
+CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #

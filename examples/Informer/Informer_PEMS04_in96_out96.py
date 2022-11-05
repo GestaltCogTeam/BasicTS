@@ -60,7 +60,7 @@ CFG.MODEL.PARAM = EasyDict(
     "num_time_features": 2,                     # number of used time features
     }
 )
-CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]
+CFG.MODEL.FORWARD_FEATURES = [0, 1, 2]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
