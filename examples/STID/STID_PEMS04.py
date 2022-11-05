@@ -45,6 +45,8 @@ CFG.MODEL.PARAM = {
     "if_D_i_W": True,
     "temp_dim_tid": 32,
     "temp_dim_diw": 32,
+    "time_of_day_size": 288,
+    "day_of_week_size": 7
 }
 CFG.MODEL.FORWARD_FEATURES = [0, 1, 2] # traffic flow, time in day
 CFG.MODEL.TARGET_FEATURES = [0] # traffic flow

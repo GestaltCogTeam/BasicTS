@@ -23,6 +23,8 @@ class STID(nn.Module):
         self.num_layer = model_args["num_layer"]
         self.temp_dim_tid = model_args["temp_dim_tid"]
         self.temp_dim_diw = model_args["temp_dim_diw"]
+        self.time_of_day_size = model_args["time_of_day_size"]
+        self.day_of_week_size = model_args["day_of_week_size"]
 
         self.if_time_in_day = model_args["if_T_i_D"]
         self.if_day_in_week = model_args["if_D_i_W"]
@@ -36,11 +38,11 @@ class STID(nn.Module):
         # temporal embeddings
         if self.if_time_in_day:
             self.time_in_day_emb = nn.Parameter(
-                torch.empty(288, self.temp_dim_tid))
+                torch.empty(self.time_of_day_size, self.temp_dim_tid))
             nn.init.xavier_uniform_(self.time_in_day_emb)
         if self.if_day_in_week:
             self.day_in_week_emb = nn.Parameter(
-                torch.empty(7, self.temp_dim_diw))
+                torch.empty(self.time_of_day_size, self.temp_dim_diw))
             nn.init.xavier_uniform_(self.day_in_week_emb)
 
         # embedding layer
@@ -73,8 +75,9 @@ class STID(nn.Module):
 
         if self.if_time_in_day:
             t_i_d_data = history_data[..., 1]
-            time_in_day_emb = self.time_in_day_emb[(
-                t_i_d_data[:, -1, :] * 288).type(torch.LongTensor)]
+            # In the datasets used in STID, the time_of_day feature is normalized to [0, 1]. We multiply it by 288 to get the index.
+            # If you use other datasets, you may need to change this line.
+            time_in_day_emb = self.time_in_day_emb[(t_i_d_data[:, -1, :] * 288).type(torch.LongTensor)]
         else:
             time_in_day_emb = None
         if self.if_day_in_week:
