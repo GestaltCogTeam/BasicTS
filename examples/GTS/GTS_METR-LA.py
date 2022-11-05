@@ -62,7 +62,7 @@ CFG.MODEL.PARAM = {
     "temp": 0.5,
     "k": 10
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]
+CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #

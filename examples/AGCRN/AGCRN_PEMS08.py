@@ -43,7 +43,7 @@ CFG.MODEL.PARAM = {
     "embed_dim" : 2,
     "cheb_k"    : 2
 }
-CFG.MODEL.FROWARD_FEATURES = [0]
+CFG.MODEL.FORWARD_FEATURES = [0]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #

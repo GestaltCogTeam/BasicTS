@@ -36,7 +36,7 @@ CFG.MODEL.PARAM = {
     "input_length": CFG.DATASET_INPUT_LEN,
     "output_length": CFG.DATASET_OUTPUT_LEN
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]
+CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #

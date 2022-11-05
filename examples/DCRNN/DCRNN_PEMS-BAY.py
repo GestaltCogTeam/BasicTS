@@ -56,7 +56,7 @@ CFG.MODEL.PARAM = {
     "adj_mx": [torch.tensor(i) for i in adj_mx],
     "use_curriculum_learning": True
 }
-CFG.MODEL.FROWARD_FEATURES = [0, 1]
+CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #

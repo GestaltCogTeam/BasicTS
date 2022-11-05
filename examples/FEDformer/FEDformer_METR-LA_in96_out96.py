@@ -62,7 +62,7 @@ CFG.MODEL.PARAM = EasyDict(
     "d_layers": 1                               # num of decoder layers
     }
 )
-CFG.MODEL.FROWARD_FEATURES = [0, 1, 2]
+CFG.MODEL.FORWARD_FEATURES = [0, 1, 2]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #

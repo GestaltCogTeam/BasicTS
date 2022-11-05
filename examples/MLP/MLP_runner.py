@@ -9,7 +9,7 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
 
     def __init__(self, cfg: dict):
         super().__init__(cfg)
-        self.forward_features = cfg["MODEL"].get("FROWARD_FEATURES", None)
+        self.forward_features = cfg["MODEL"].get("FORWARD_FEATURES", None)
         self.target_features = cfg["MODEL"].get("TARGET_FEATURES", None)
 
     def select_input_features(self, data: torch.Tensor) -> torch.Tensor:

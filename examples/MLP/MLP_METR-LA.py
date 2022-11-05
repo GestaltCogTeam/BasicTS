@@ -38,7 +38,7 @@ CFG.MODEL.PARAM = {
     "prediction_seq_len": CFG.DATASET_OUTPUT_LEN,
     "hidden_dim": 32
 }
-CFG.MODEL.FROWARD_FEATURES = [0]
+CFG.MODEL.FORWARD_FEATURES = [0]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
