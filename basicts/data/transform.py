@@ -7,7 +7,7 @@ from .registry import SCALER_REGISTRY
 
 
 @SCALER_REGISTRY.register()
-def standard_transform(data: np.array, output_dir: str, train_index: list, history_seq_len: int, future_seq_len: int) -> np.array:
+def standard_transform(data: np.array, output_dir: str, train_index: list, history_seq_len: int, future_seq_len: int, heterogeneous: int = False) -> np.array:
     """Standard normalization.
 
     Args:
@@ -16,6 +16,7 @@ def standard_transform(data: np.array, output_dir: str, train_index: list, histo
         train_index (list): train index.
         history_seq_len (int): historical sequence length.
         future_seq_len (int): future sequence length.
+        heterogeneous (bool): whether the multiple time series is heterogeneous.
 
     Returns:
         np.array: normalized raw time series data.
@@ -23,8 +24,10 @@ def standard_transform(data: np.array, output_dir: str, train_index: list, histo
 
     # data: L, N, C, C=1
     data_train = data[:train_index[-1][1], ...]
-
-    mean, std = data_train[..., 0].mean(), data_train[..., 0].std()
+    if heterogeneous:
+        mean, std = data_train.mean(axis=0, keepdims=True), data_train.std(axis=0, keepdims=True)
+    else:
+        mean, std = data_train[..., 0].mean(), data_train[..., 0].std()
 
     print("mean (training data):", mean)
     print("std (training data):", std)
@@ -54,6 +57,9 @@ def re_standard_transform(data: torch.Tensor, **kwargs) -> torch.Tensor:
     """
 
     mean, std = kwargs["mean"], kwargs["std"]
+    if isinstance(mean, np.ndarray):
+        mean = torch.from_numpy(mean).type_as(data).to(data.device).unsqueeze(0)
+        std = torch.from_numpy(std).type_as(data).to(data.device).unsqueeze(0)
     data = data * std
     data = data + mean
     return data
