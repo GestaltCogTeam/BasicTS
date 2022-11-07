@@ -20,7 +20,12 @@ class Autoformer(nn.Module):
         self.label_len = int(model_args["label_len"])
         self.pred_len = int(model_args["pred_len"])
         self.output_attention = model_args["output_attention"]
-        self.embedding_type = model_args["embedding_type"]
+
+        self.time_of_day_size = model_args.get("time_of_day_size", None)
+        self.day_of_week_size = model_args.get("day_of_week_size", None)
+        self.day_of_month_size = model_args.get("day_of_month_size", None)
+        self.day_of_year_size = model_args.get("day_of_year_size", None)
+        self.embed = model_args["embed"]
 
         # Decomp
         kernel_size = model_args["moving_avg"]
@@ -29,14 +34,26 @@ class Autoformer(nn.Module):
         # Embedding
         # The series-wise connection inherently contains the sequential information.
         # Thus, we can discard the position embedding of transformers.
-        if self.embedding_type == "DataEmbedding_wo_pos":
-            self.enc_embedding = DataEmbedding_wo_pos(model_args["enc_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
-            self.dec_embedding = DataEmbedding_wo_pos(model_args["dec_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
-        elif self.embedding_type == "DataEmbedding":
-            self.enc_embedding = DataEmbedding(model_args["enc_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
-            self.dec_embedding = DataEmbedding(model_args["dec_in"], model_args["d_model"], model_args["num_time_features"], model_args["dropout"])
-        else:
-            raise Exception("Unknown embedding type.")
+        self.enc_embedding = DataEmbedding_wo_pos(
+                                                    model_args["enc_in"],
+                                                    model_args["d_model"],
+                                                    self.time_of_day_size,
+                                                    self.day_of_week_size,
+                                                    self.day_of_month_size,
+                                                    self.day_of_year_size,
+                                                    model_args["embed"],
+                                                    model_args["num_time_features"],
+                                                    model_args["dropout"])
+        self.dec_embedding = DataEmbedding_wo_pos(
+                                                    model_args["dec_in"],
+                                                    model_args["d_model"],
+                                                    self.time_of_day_size,
+                                                    self.day_of_week_size,
+                                                    self.day_of_month_size,
+                                                    self.day_of_year_size,
+                                                    model_args["embed"],
+                                                    model_args["num_time_features"],
+                                                    model_args["dropout"])
 
         # Encoder
         self.encoder = Encoder(
@@ -129,7 +146,8 @@ class Autoformer(nn.Module):
         Returns:
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
-
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len)
+        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len,
+                                                                            time_of_day_size=self.time_of_day_size, day_of_week_size=self.day_of_week_size,
+                                                                            day_of_month_size=self.day_of_month_size, day_of_year_size=self.day_of_year_size, embed_type=self.embed)
         prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
         return prediction

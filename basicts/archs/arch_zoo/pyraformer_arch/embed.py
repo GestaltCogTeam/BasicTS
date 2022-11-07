@@ -62,30 +62,54 @@ class FixedEmbedding(nn.Module):
         return self.emb(x).detach()
 
 
+class TemporalEmbedding(nn.Module):
+    def __init__(self, d_model, time_of_day_size, day_of_week_size, day_of_month_size, day_of_year_size, embed_type='fixed'):
+        super(TemporalEmbedding, self).__init__()
+
+        Embed = FixedEmbedding if embed_type=='fixed' else nn.Embedding
+        self.time_of_day_embed = Embed(time_of_day_size, d_model)
+        self.day_of_week_embed = Embed(day_of_week_size, d_model)
+        self.day_of_month_embed = Embed(day_of_month_size, d_model)
+        self.day_of_year_embed = Embed(day_of_year_size, d_model)
+
+    def forward(self, x):
+        x = x.long()
+
+        time_of_day_x = self.time_of_day_embed(x[:, :, 0])
+        day_of_week_x = self.day_of_week_embed(x[:, :, 1])
+        day_of_month_x = self.day_of_month_embed(x[:, :, 2])
+        day_of_year_x = self.day_of_year_embed(x[:, :, 3])
+
+        return time_of_day_x + day_of_week_x + day_of_month_x + day_of_year_x
+
+
 class TimeFeatureEmbedding(nn.Module):
     def __init__(self, d_model, num_time_features):
         super(TimeFeatureEmbedding, self).__init__()
-        self.embed = nn.Linear(num_time_features, d_model, bias=False)
+        self.embed = nn.Linear(num_time_features, d_model, bias=True)
 
     def forward(self, x):
         return self.embed(x)
 
 
 class DataEmbedding(nn.Module):
-    def __init__(self, c_in, d_model, num_time_features, dropout=0.1):
+    def __init__(self, c_in, d_model, time_of_day_size, day_of_week_size, day_of_month_size, day_of_year_size, embed_type='fixed', num_time_features=-1, dropout=0.1):
         super(DataEmbedding, self).__init__()
 
         self.value_embedding = TokenEmbedding(c_in=c_in, d_model=d_model)
         self.position_embedding = PositionalEmbedding(d_model=d_model)
-        self.temporal_embedding = TimeFeatureEmbedding(
-            d_model=d_model, num_time_features=num_time_features)
+        self.temporal_embedding = TemporalEmbedding(d_model=d_model,
+                                                    time_of_day_size=time_of_day_size,
+                                                    day_of_week_size=day_of_week_size,
+                                                    day_of_month_size=day_of_month_size,
+                                                     day_of_year_size=day_of_year_size,
+                                                     embed_type=embed_type) if embed_type!='timeF' else TimeFeatureEmbedding(d_model=d_model, num_time_features=num_time_features)
+
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, x, x_mark):
-        x = self.value_embedding(
-            x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
+        x = self.value_embedding(x) + self.position_embedding(x) + self.temporal_embedding(x_mark)
         return self.dropout(x)
-
 
 class CustomEmbedding(nn.Module):
     def __init__(self, c_in, d_model, temporal_size, seq_num, dropout=0.1):

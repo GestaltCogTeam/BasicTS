@@ -16,6 +16,7 @@ class Informer(nn.Module):
     """
 
     def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, out_len, 
+                time_of_day_size, day_of_week_size, day_of_month_size=None, day_of_year_size=None,
                 factor=5, d_model=512, n_heads=8, e_layers=3, d_layers=2, d_ff=512, 
                 dropout=0.0, attn='prob', embed='fixed', freq='h', activation='gelu', 
                 output_attention = False, distil=True, mix=True, num_time_features=-1):
@@ -25,9 +26,15 @@ class Informer(nn.Module):
         self.attn = attn
         self.output_attention = output_attention
 
+        self.time_of_day_size =time_of_day_size
+        self.day_of_week_size = day_of_week_size
+        self.day_of_month_size = day_of_month_size
+        self.day_of_year_size = day_of_year_size
+        self.embed = embed
+
         # Encoding
-        self.enc_embedding = DataEmbedding(enc_in, d_model, num_time_features, dropout)
-        self.dec_embedding = DataEmbedding(dec_in, d_model, num_time_features, dropout)
+        self.enc_embedding = DataEmbedding(enc_in, d_model, time_of_day_size, day_of_week_size, day_of_month_size, day_of_year_size, embed, num_time_features, dropout)
+        self.dec_embedding = DataEmbedding(dec_in, d_model, time_of_day_size, day_of_week_size, day_of_month_size, day_of_year_size, embed, num_time_features, dropout)
         # Attention
         Attn = ProbAttention if attn=='prob' else FullAttention
         # Encoder
@@ -107,7 +114,9 @@ class Informer(nn.Module):
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
 
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len)
+        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len,
+                                                                            time_of_day_size=self.time_of_day_size, day_of_week_size=self.day_of_week_size,
+                                                                            day_of_month_size=self.day_of_month_size, day_of_year_size=self.day_of_year_size, embed_type=self.embed)
         prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
         return prediction
 
@@ -195,7 +204,7 @@ class InformerStack(nn.Module):
         dec_out = self.dec_embedding(x_dec, x_mark_dec)
         dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)
         dec_out = self.projection(dec_out)
-        
+
         return dec_out[:, -self.pred_len:, :].unsqueeze(-1)  # [B, L, N, C]
 
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
@@ -209,6 +218,8 @@ class InformerStack(nn.Module):
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
 
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len)
+        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len,
+                                                                            time_of_day_size=self.time_of_day_size, day_of_week_size=self.day_of_week_size,
+                                                                            day_of_month_size=self.day_of_month_size, day_of_year_size=self.day_of_year_size, embed_type=self.embed)
         prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
         return prediction

@@ -16,6 +16,12 @@ class Encoder(nn.Module):
     def __init__(self, opt):
         super().__init__()
 
+        self.time_of_day_size = opt.get("time_of_day_size", None)
+        self.day_of_week_size = opt.get("day_of_week_size", None)
+        self.day_of_month_size = opt.get("day_of_month_size", None)
+        self.day_of_year_size = opt.get("day_of_year_size", None)
+        self.embed = opt["embed"]
+
         self.d_model = opt.d_model
         self.window_size = opt.window_size
         self.truncate = opt.truncate
@@ -47,7 +53,7 @@ class Encoder(nn.Module):
                              normalize_before=False) for i in range(opt.n_layer)
             ])
 
-        if opt.embed_type == 'CustomEmbedding':
+        if opt.embed == 'CustomEmbedding':
             # NOTE: Here is different from official code.
             #       We follow the implementation in "Are Transformers Effective for Time Series Forecasting?" (https://arxiv.org/abs/2205.13504).
             # Here is a possible reason:
@@ -55,11 +61,27 @@ class Encoder(nn.Module):
             #           and it is similar to a cruical technique similar to STID[1] for MTS forecasting, which may cause unfairness.
             #       [1] Spatial-Temporal Identity: A Simple yet Effective Baseline for Multivariate Time Series Forecasting.
             self.enc_embedding = DataEmbedding(
-                opt.enc_in, opt.d_model, opt.num_time_features, opt.dropout)
+                                                opt["enc_in"],
+                                                opt["d_model"],
+                                                self.time_of_day_size,
+                                                self.day_of_week_size,
+                                                self.day_of_month_size,
+                                                self.day_of_year_size,
+                                                opt["embed"],
+                                                opt["num_time_features"],
+                                                opt["dropout"])
             # self.enc_embedding = CustomEmbedding(opt.enc_in, opt.d_model, opt.covariate_size, opt.seq_num, opt.dropout)
         else:
             self.enc_embedding = DataEmbedding(
-                opt.enc_in, opt.d_model, opt.num_time_features, opt.dropout)
+                                                opt["enc_in"],
+                                                opt["d_model"],
+                                                self.time_of_day_size,
+                                                self.day_of_week_size,
+                                                self.day_of_month_size,
+                                                self.day_of_year_size,
+                                                opt["embed"],
+                                                opt["num_time_features"],
+                                                opt["dropout"])
 
         self.conv_layers = eval(opt.CSCM)(
             opt.d_model, opt.window_size, opt.d_bottleneck)
@@ -94,6 +116,12 @@ class Pyraformer(nn.Module):
 
         opt = EasyDict(model_args)
         opt.window_size = eval(opt.window_size)
+
+        self.time_of_day_size = opt.get("time_of_day_size", None)
+        self.day_of_week_size = opt.get("day_of_week_size", None)
+        self.day_of_month_size = opt.get("day_of_month_size", None)
+        self.day_of_year_size = opt.get("day_of_year_size", None)
+        self.embed = opt["embed"]
 
         self.predict_step = opt.predict_step
         self.d_model = opt.d_model
@@ -155,8 +183,9 @@ class Pyraformer(nn.Module):
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
 
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(
-            history_data=history_data, future_data=future_data, start_token_len=0)
+        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=0,
+                                                                            time_of_day_size=self.time_of_day_size, day_of_week_size=self.day_of_week_size,
+                                                                            day_of_month_size=self.day_of_month_size, day_of_year_size=self.day_of_year_size, embed_type=self.embed)
 
         predict_token = torch.zeros(x_enc.size(
             0), 1, x_enc.size(-1), device=x_enc.device)
