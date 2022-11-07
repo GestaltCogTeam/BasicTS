@@ -14,9 +14,6 @@ def masked_mae(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.n
         torch.Tensor: masked mean absolute error
     """
 
-    # fix very small values of labels, which should be 0. Otherwise, nan detector will fail.
-    labels = torch.where(labels < 1e-4, torch.zeros_like(labels), labels)
-    # TODO fix very large values
     if np.isnan(null_val):
         mask = ~torch.isnan(labels)
     else:
