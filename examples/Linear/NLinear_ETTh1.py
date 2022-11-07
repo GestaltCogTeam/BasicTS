@@ -16,10 +16,10 @@ CFG = EasyDict()
 CFG.DESCRIPTION = "Linear model configuration"
 CFG.RUNNER = LinearRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "PEMS08"
-CFG.DATASET_TYPE = "Traffic flow"
-CFG.DATASET_INPUT_LEN = 12
-CFG.DATASET_OUTPUT_LEN = 12
+CFG.DATASET_NAME = "ETTh1"
+CFG.DATASET_TYPE = "Electricity Transformer Temperature"
+CFG.DATASET_INPUT_LEN = 336
+CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 
 # ================= environment ================= #
@@ -33,11 +33,11 @@ CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "NLinear"
 CFG.MODEL.ARCH = NLinear
 CFG.MODEL.PARAM = {
-    "seq_len": 12,
-    "pred_len": 12
+    "seq_len": CFG.DATASET_INPUT_LEN,
+    "pred_len": CFG.DATASET_OUTPUT_LEN
 }
-CFG.MODEL.FORWARD_FEATURES = [0]  # traffic speed, time in day
-CFG.MODEL.TARGET_FEATURES = [0] # traffic speed
+CFG.MODEL.FORWARD_FEATURES = [0]
+CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()
@@ -63,7 +63,7 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.NULL_VAL = 0.0
+# CFG.TRAIN.NULL_VAL = np.nan
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
@@ -89,11 +89,12 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
+CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96, 192, 288, 336]
 CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
 # read data
-CFG.TEST.DATA.DIR = "datasets/" + CFG.DATASET_NAME
+CFG.TEST.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.TEST.DATA.BATCH_SIZE = 64
 CFG.TEST.DATA.PREFETCH = False

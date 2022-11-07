@@ -13,13 +13,13 @@ from basicts.losses import masked_mae
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = "Informer model configuration"
+CFG.DESCRIPTION = "Informer model configuration 1"
 CFG.RUNNER = InformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "METR-LA"
-CFG.DATASET_TYPE = "Traffic speed"
-CFG.DATASET_INPUT_LEN = 96
-CFG.DATASET_OUTPUT_LEN = 96
+CFG.DATASET_NAME = "ETTh1"
+CFG.DATASET_TYPE = "Electricity Transformer Temperature"
+CFG.DATASET_INPUT_LEN = 336
+CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 
 # ================= environment ================= #
@@ -32,7 +32,7 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "Informer"
 CFG.MODEL.ARCH = Informer
-NUM_NODES = 207
+NUM_NODES = 7
 CFG.MODEL.PARAM = EasyDict(
     {
     "enc_in": NUM_NODES,                              # num nodes
@@ -41,7 +41,7 @@ CFG.MODEL.PARAM = EasyDict(
     "seq_len": CFG.DATASET_INPUT_LEN,           # input sequence length
     "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
     "out_len": CFG.DATASET_OUTPUT_LEN,          # prediction sequence length\
-    "factor": 5,                                # probsparse attn factor
+    "factor": 3,                                # probsparse attn factor
     "d_model": 512,
     "n_heads": 8,
     "e_layers": 2,                              # num of encoder layers
@@ -50,16 +50,19 @@ CFG.MODEL.PARAM = EasyDict(
     "d_ff": 2048,
     "dropout": 0.05,
     "attn": 'prob',                             # attention used in encoder, options:[prob, full]
-    # "embed": "timeF",
-    # "freq": "h",
+    "embed": "timeF",                           # [timeF, fixed, learned]
     "activation": "gelu",
     "output_attention": False,
     "distil": True,                             # whether to use distilling in encoder, using this argument means not using distilling
     "mix": True,                                # use mix attention in generative decoder
-    "num_time_features": 2,                     # number of used time features
+    "num_time_features": 4,                     # number of used time features [time_of_day, day_of_week, day_of_month, day_of_year]
+    "time_of_day_size": 24,
+    "day_of_week_size": 7,
+    "day_of_month_size": 31,
+    "day_of_year_size": 365
     }
 )
-CFG.MODEL.FORWARD_FEATURES = [0, 1, 2]
+CFG.MODEL.FORWARD_FEATURES = [0, 1, 2, 3, 4]    # [raw_data, time_of_day, day_of_week, day_of_month, day_of_year]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
@@ -68,7 +71,7 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.0005,
+    "lr": 0.0002,
     "weight_decay": 0.0005,
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
@@ -89,7 +92,7 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.NULL_VAL = 0.0
+# CFG.TRAIN.NULL_VAL = np.nan
 # read data
 CFG.TRAIN.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
 # dataloader args, optional
@@ -115,7 +118,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96]
+CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96, 192, 288, 336]
 CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
