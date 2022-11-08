@@ -58,7 +58,7 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 }
 
 # ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 20
+CFG.TRAIN.NUM_EPOCHS = 10
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])

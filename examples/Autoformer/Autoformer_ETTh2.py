@@ -7,7 +7,7 @@ from easydict import EasyDict
 from basicts.archs import Autoformer
 from basicts.runners import AutoformerRunner
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.losses import l2_loss
+from basicts.losses import masked_mae
 
 
 CFG = EasyDict()
@@ -64,7 +64,7 @@ CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()
-CFG.TRAIN.LOSS = l2_loss
+CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
