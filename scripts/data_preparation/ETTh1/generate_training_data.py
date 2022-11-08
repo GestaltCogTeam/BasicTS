@@ -1,6 +1,5 @@
 import os
 import sys
-import shutil
 import pickle
 import argparse
 
@@ -40,7 +39,7 @@ def generate_data(args: argparse.Namespace):
 
     # read data
     df = pd.read_csv(data_file_path)
-    df_index = pd.to_datetime(df['date'].values, format='%Y-%m-%d %H:%M').to_numpy()
+    df_index = pd.to_datetime(df["date"].values, format="%Y-%m-%d %H:%M").to_numpy()
     df = df[df.columns[1:]]
     df.index = df_index
 
@@ -69,14 +68,16 @@ def generate_data(args: argparse.Namespace):
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
     scaler = standard_transform
-    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, heterogeneous=True)      # ETT series of datasets are heterogeneous between the different time series.
-
+    # ETT series of datasets are heterogeneous between the different time series.
+    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, heterogeneous=True)
     # add external feature
     feature_list = [data_norm]
     if add_time_of_day:
-        # IMPORTANT NOTE: 
-        # # In traffic related datasets (e.g., METR-LA, PEMS-BAY, PEMS0X) which are usually used in spatial-temporal prediciton in STGNN-based methods, the time of day is normalized to [0, 1].
-        # # However, in other datasets (e.g., ETT) which are usually used in Long Time Series Forecasting (LSTF) in Transformer-based methods, the time of day is not normalized.
+        # IMPORTANT NOTE:
+        # # In traffic related datasets (e.g., METR-LA, PEMS-BAY, PEMS0X) which are usually used in spatial-temporal prediciton in STGNN-based methods,
+        # #     the time of day is normalized to [0, 1].
+        # # However, in other datasets (e.g., ETT) which are usually used in Long Time Series Forecasting (LSTF) in Transformer-based methods,
+        # #     the time of day is not normalized.
         tod = [i % steps_per_day for i in range(data_norm.shape[0])]
         tod = np.array(tod)
         tod_tiled = np.tile(tod, [1, n, 1]).transpose((2, 1, 0))
