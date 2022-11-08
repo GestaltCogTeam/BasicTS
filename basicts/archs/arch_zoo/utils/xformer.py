@@ -11,15 +11,16 @@ def date_normalize(data: torch.Tensor, time_of_day_size: int, day_of_week_size: 
         day_of_year_size (int): the size of month in year
     """
     # time in day
-    data[:, :, 0] = data[:, :, 0] / (time_of_day_size-1) - 0.5
+    if time_of_day_size is not None and torch.all(data[:, :, 0].round() == data[:, :, 0]):   # not normalized
+        data[:, :, 0] = data[:, :, 0] / (time_of_day_size - 1) - 0.5
     # day in week
-    if day_of_week_size is not None:
+    if day_of_week_size is not None and torch.all(data[:, :, 1].round() == data[:, :, 1]):
         data[:, :, 1] = data[:, :, 1] / (day_of_week_size-1) - 0.5
     # day in month
-    if day_of_month_size is not None:
+    if day_of_month_size is not None and torch.all(data[:, :, 2].round() == data[:, :, 2]):
         data[:, :, 2] = data[:, :, 2] / (day_of_month_size-1) - 0.5
     # month in year
-    if day_of_year_size is not None:
+    if day_of_year_size is not None and torch.all(data[:, :, 3].round() == data[:, :, 3]):
         data[:, :, 3] = data[:, :, 3] / (day_of_year_size-1) - 0.5
 
     return data
