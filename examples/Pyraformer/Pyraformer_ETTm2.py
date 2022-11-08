@@ -4,8 +4,10 @@ import sys
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
-from basicts.archs import Autoformer
-from basicts.runners import AutoformerRunner
+import torch
+
+from basicts.archs import Pyraformer
+from basicts.runners import PyraformerRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 
@@ -13,10 +15,10 @@ from basicts.losses import masked_mae
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = "Autoformer model configuration"
-CFG.RUNNER = AutoformerRunner
+CFG.DESCRIPTION = "Pyraformer model configuration"
+CFG.RUNNER = PyraformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "ETTm1"
+CFG.DATASET_NAME = "ETTm2"
 CFG.DATASET_TYPE = "Electricity Transformer Temperature"
 CFG.DATASET_INPUT_LEN = 336
 CFG.DATASET_OUTPUT_LEN = 336
@@ -26,33 +28,37 @@ CFG.GPU_NUM = 1
 CFG.ENV = EasyDict()
 CFG.ENV.SEED = 0
 CFG.ENV.CUDNN = EasyDict()
-CFG.ENV.CUDNN.ENABLED = True
+CFG.ENV.CUDNN.ENABLED = False
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
-CFG.MODEL.NAME = "Autoformer"
-CFG.MODEL.ARCH = Autoformer
+CFG.MODEL.NAME = "Pyraformer"
+CFG.MODEL.ARCH = Pyraformer
 NUM_NODES = 7
 CFG.MODEL.PARAM = EasyDict(
     {
     "enc_in": NUM_NODES,                        # num nodes
     "dec_in": NUM_NODES,
     "c_out": NUM_NODES,
-    "seq_len": CFG.DATASET_INPUT_LEN,
-    "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
-    "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length
-    "factor": 3,                                # attn factor
+    "input_size": CFG.DATASET_INPUT_LEN,
+    "predict_step": CFG.DATASET_OUTPUT_LEN,
     "d_model": 512,
-    "moving_avg": 25,                           # window size of moving average. This is a CRUCIAL hyper-parameter.
-    "n_heads": 8,
-    "e_layers": 2,                              # num of encoder layers
-    "d_layers": 1,                              # num of decoder layers
-    "d_ff": 2048,
+    "d_inner_hid": 512,
+    "d_k": 128,
+    "d_v": 128,
+    "d_bottleneck": 128,
+    "n_head": 4,
+    "n_layer": 4,
     "dropout": 0.05,
-    "output_attention": False,
-    "embed": "timeF",                           # [timeF, fixed, learned]
-    "activation": "gelu",
-    "num_time_features": 4,                     # number of used time features
+    "decoder": "FC",                            # FC or attention
+    "device": torch.device("cuda"),             # Pyraformer only support single card
+    "window_size": "[2, 2, 2]",
+    "inner_size": 5,
+    "CSCM": "Bottleneck_Construct",
+    "truncate": False,
+    "use_tvm": False,
+    "embed": "DataEmbedding",
+    "num_time_features": 4,
     "time_of_day_size": 96,
     "day_of_week_size": 7,
     "day_of_month_size": 31,

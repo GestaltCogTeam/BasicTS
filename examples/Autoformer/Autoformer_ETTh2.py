@@ -13,12 +13,12 @@ from basicts.losses import l2_loss
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = "Autoformer model configuration123"
+CFG.DESCRIPTION = "Autoformer model configuration"
 CFG.RUNNER = AutoformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "ETTh2"
 CFG.DATASET_TYPE = "Electricity Transformer Temperature"
-CFG.DATASET_INPUT_LEN = 96
+CFG.DATASET_INPUT_LEN = 336
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 
@@ -26,7 +26,7 @@ CFG.GPU_NUM = 1
 CFG.ENV = EasyDict()
 CFG.ENV.SEED = 0
 CFG.ENV.CUDNN = EasyDict()
-CFG.ENV.CUDNN.ENABLED = False
+CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
@@ -72,7 +72,7 @@ CFG.TRAIN.OPTIM.PARAM = {
 }
 
 # ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 10
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])

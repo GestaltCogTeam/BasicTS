@@ -15,7 +15,7 @@ from basicts.losses import masked_mae
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = "Autoformer model configuration"
+CFG.DESCRIPTION = "Pyraformer model configuration"
 CFG.RUNNER = PyraformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "ETTh1"
@@ -58,7 +58,7 @@ CFG.MODEL.PARAM = EasyDict(
     "truncate": False,
     "use_tvm": False,
     "embed": "DataEmbedding",
-    "num_time_features": 2,
+    "num_time_features": 4,
     "time_of_day_size": 24,
     "day_of_week_size": 7,
     "day_of_month_size": 31,
@@ -78,7 +78,7 @@ CFG.TRAIN.OPTIM.PARAM = {
 }
 
 # ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 10
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])

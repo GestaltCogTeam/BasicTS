@@ -18,15 +18,15 @@ CFG.RUNNER = AutoformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "ETTm2"
 CFG.DATASET_TYPE = "Electricity Transformer Temperature"
-CFG.DATASET_INPUT_LEN = 96
-CFG.DATASET_OUTPUT_LEN = 288
+CFG.DATASET_INPUT_LEN = 336
+CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
 CFG.ENV.SEED = 0
 CFG.ENV.CUDNN = EasyDict()
-CFG.ENV.CUDNN.ENABLED = False
+CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
@@ -72,7 +72,7 @@ CFG.TRAIN.OPTIM.PARAM = {
 }
 
 # ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 100
+CFG.TRAIN.NUM_EPOCHS = 10
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
@@ -106,7 +106,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96, 192, 288]
+CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96, 192, 288, 336]
 CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
