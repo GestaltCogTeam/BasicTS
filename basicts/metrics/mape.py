@@ -27,7 +27,7 @@ def masked_mape(preds: torch.Tensor, labels: torch.Tensor, null_val: float = 0.0
     mask = mask.float()
     mask /= torch.mean((mask))
     mask = torch.where(torch.isnan(mask), torch.zeros_like(mask), mask)
-    loss = torch.abs(preds-labels)/labels
+    loss = torch.abs(torch.abs(preds-labels)/labels)
     loss = loss * mask
     loss = torch.where(torch.isnan(loss), torch.zeros_like(loss), loss)
     return torch.mean(loss)
