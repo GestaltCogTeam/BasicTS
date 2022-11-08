@@ -19,11 +19,13 @@ def masked_mape(preds: torch.Tensor, labels: torch.Tensor, null_val: float = 0.0
     # we do not allow null_val to be changed
     null_val = 0.0
     # delete small values to avoid abnormal results
+    # TODO: support multiple null values
     labels = torch.where(torch.abs(labels) < 1e-4, torch.zeros_like(labels), labels)
     if np.isnan(null_val):
         mask = ~torch.isnan(labels)
     else:
-        mask = (labels != null_val)
+        eps = 5e-5
+        mask = ~torch.isclose(labels, torch.tensor(null_val).expand_as(labels).to(labels.device), atol=eps, rtol=0.)
     mask = mask.float()
     mask /= torch.mean((mask))
     mask = torch.where(torch.isnan(mask), torch.zeros_like(mask), mask)
