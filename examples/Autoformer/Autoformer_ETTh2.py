@@ -7,16 +7,16 @@ from easydict import EasyDict
 from basicts.archs import Autoformer
 from basicts.runners import AutoformerRunner
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.losses import masked_mae
+from basicts.losses import l2_loss
 
 
 CFG = EasyDict()
 
 # ================= general ================= #
-CFG.DESCRIPTION = "Autoformer model configuration12345"
+CFG.DESCRIPTION = "Autoformer model configuration123"
 CFG.RUNNER = AutoformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "ETTh1"
+CFG.DATASET_NAME = "ETTh2"
 CFG.DATASET_TYPE = "Electricity Transformer Temperature"
 CFG.DATASET_INPUT_LEN = 96
 CFG.DATASET_OUTPUT_LEN = 336
@@ -64,7 +64,7 @@ CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()
-CFG.TRAIN.LOSS = masked_mae
+CFG.TRAIN.LOSS = l2_loss
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
