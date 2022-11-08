@@ -15,6 +15,7 @@ if __name__ == "__main__":
     TRAIN_RATIO = 0.6
     VALID_RATIO = 0.2
     TARGET_CHANNEL = [0]                   # target channel(s)
+    STEPS_PER_DAY = 24 * 4      # every 15 minutes
 
     DATASET_NAME = "ETTm1"      # sampling frequency: every 1 hour
     TOD = True                  # if add time_of_day feature
@@ -34,6 +35,8 @@ if __name__ == "__main__":
                         default=HISTORY_SEQ_LEN, help="Sequence Length.")
     parser.add_argument("--future_seq_len", type=int,
                         default=FUTURE_SEQ_LEN, help="Sequence Length.")
+    parser.add_argument("--steps_per_day", type=int,
+                        default=STEPS_PER_DAY, help="Sequence Length.")
     parser.add_argument("--tod", type=bool, default=TOD,
                         help="Add feature time_of_day.")
     parser.add_argument("--dow", type=bool, default=DOW,

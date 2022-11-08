@@ -36,6 +36,7 @@ def generate_data(args: argparse.Namespace):
     train_ratio = args.train_ratio
     valid_ratio = args.valid_ratio
     data_file_path = args.data_file_path
+    steps_per_day = args.steps_per_day
 
     # read data
     df = pd.read_csv(data_file_path)
@@ -76,7 +77,8 @@ def generate_data(args: argparse.Namespace):
         # IMPORTANT NOTE: 
         # # In traffic related datasets (e.g., METR-LA, PEMS-BAY, PEMS0X) which are usually used in spatial-temporal prediciton in STGNN-based methods, the time of day is normalized to [0, 1].
         # # However, in other datasets (e.g., ETT) which are usually used in Long Time Series Forecasting (LSTF) in Transformer-based methods, the time of day is not normalized.
-        tod = df.index.hour
+        tod = [i % steps_per_day for i in range(data_norm.shape[0])]
+        tod = np.array(tod)
         tod_tiled = np.tile(tod, [1, n, 1]).transpose((2, 1, 0))
         feature_list.append(tod_tiled)
 
@@ -122,6 +124,7 @@ if __name__ == "__main__":
     TRAIN_RATIO = 0.6
     VALID_RATIO = 0.2
     TARGET_CHANNEL = [0]                   # target channel(s)
+    STEPS_PER_DAY = 24          # every 1 hour
 
     DATASET_NAME = "ETTh1"      # sampling frequency: every 1 hour
     TOD = True                  # if add time_of_day feature
@@ -141,6 +144,8 @@ if __name__ == "__main__":
                         default=HISTORY_SEQ_LEN, help="Sequence Length.")
     parser.add_argument("--future_seq_len", type=int,
                         default=FUTURE_SEQ_LEN, help="Sequence Length.")
+    parser.add_argument("--steps_per_day", type=int,
+                        default=STEPS_PER_DAY, help="Sequence Length.")
     parser.add_argument("--tod", type=bool, default=TOD,
                         help="Add feature time_of_day.")
     parser.add_argument("--dow", type=bool, default=DOW,
