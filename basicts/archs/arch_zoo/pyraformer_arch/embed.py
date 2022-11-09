@@ -67,20 +67,40 @@ class TemporalEmbedding(nn.Module):
         super(TemporalEmbedding, self).__init__()
 
         Embed = FixedEmbedding if embed_type=='fixed' else nn.Embedding
-        self.time_of_day_embed = Embed(time_of_day_size, d_model)
-        self.day_of_week_embed = Embed(day_of_week_size, d_model)
-        self.day_of_month_embed = Embed(day_of_month_size, d_model)
-        self.day_of_year_embed = Embed(day_of_year_size, d_model)
+        self.time_of_day_size = time_of_day_size
+        self.day_of_week_size = day_of_week_size
+        self.day_of_month_size = day_of_month_size
+        self.day_of_year_size = day_of_year_size
+
+        if time_of_day_size is not None:
+            self.time_of_day_embed = Embed(time_of_day_size, d_model)
+        if day_of_week_size is not None:
+            self.day_of_week_embed = Embed(day_of_week_size, d_model)
+        if day_of_month_size is not None:
+            self.day_of_month_embed = Embed(day_of_month_size, d_model)
+        if day_of_year_size is not None:
+            self.day_of_year_embed = Embed(day_of_year_size, d_model)
 
     def forward(self, x):
         x = x.long()
+        temporal_embeddings = []
+        if self.time_of_day_size is not None:
+            time_of_day_x = self.time_of_day_embed(x[:, :, 0])
+            temporal_embeddings.append(time_of_day_x)
+        if self.day_of_week_size is not None:
+            day_of_week_x = self.day_of_week_embed(x[:, :, 1])
+            temporal_embeddings.append(day_of_week_x)
+        if self.day_of_month_size is not None:
+            day_of_month_x = self.day_of_month_embed(x[:, :, 2])
+            temporal_embeddings.append(day_of_month_x)
+        if self.day_of_year_size is not None:
+            day_of_year_x = self.day_of_year_embed(x[:, :, 3])
+            temporal_embeddings.append(day_of_year_x)
 
-        time_of_day_x = self.time_of_day_embed(x[:, :, 0])
-        day_of_week_x = self.day_of_week_embed(x[:, :, 1])
-        day_of_month_x = self.day_of_month_embed(x[:, :, 2])
-        day_of_year_x = self.day_of_year_embed(x[:, :, 3])
-
-        return time_of_day_x + day_of_week_x + day_of_month_x + day_of_year_x
+        if len(temporal_embeddings) == 0:
+            return 0
+        else:
+            return sum(temporal_embeddings)
 
 
 class TimeFeatureEmbedding(nn.Module):
