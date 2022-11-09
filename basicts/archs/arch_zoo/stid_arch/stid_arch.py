@@ -42,7 +42,7 @@ class STID(nn.Module):
             nn.init.xavier_uniform_(self.time_in_day_emb)
         if self.if_day_in_week:
             self.day_in_week_emb = nn.Parameter(
-                torch.empty(self.time_of_day_size, self.temp_dim_diw))
+                torch.empty(self.day_of_week_size, self.temp_dim_diw))
             nn.init.xavier_uniform_(self.day_in_week_emb)
 
         # embedding layer
