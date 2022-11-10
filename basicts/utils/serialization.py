@@ -71,9 +71,9 @@ def load_adj(file_path: str, adj_type: str):
     elif adj_type == "doubletransition":
         adj = [calculate_transition_matrix(adj_mx).T, calculate_transition_matrix(adj_mx.T).T]
     elif adj_type == "identity":
-        adj = [np.diag(np.ones(adj_mx.shape[0])).astype(np.float32).todense()]
+        adj = [np.diag(np.ones(adj_mx.shape[0])).astype(np.float32)]
     elif adj_type == "original":
-        adj = adj_mx
+        adj = [adj_mx]
     else:
         error = 0
         assert error, "adj type not defined"
