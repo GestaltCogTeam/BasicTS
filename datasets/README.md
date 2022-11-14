@@ -31,7 +31,7 @@ The first six variates are overload data, while the last one is oil temperature.
 
 **Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet). [Data Link](https://github.com/laiguokun/multivariate-time-series-data).
 
-**Description**: Electricity contains the electricity consumption in kWh from 2012 to 2014. The data is converted to reflect hourly consumption. It contains 321 clients. 
+**Description**: Electricity records the electricity consumption in kWh every 1 hour from 2012 to 2014. It contains 321 clients. 
 
 **Period**: 2012 -> 2014
 
