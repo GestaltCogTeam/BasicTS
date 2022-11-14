@@ -35,7 +35,7 @@ The first six variates are overload data, while the last one is oil temperature.
 
 **Period**: 2012 -> 2014
 
-**Dataset Split**: 6:2:2.
+**Dataset Split**: 7:1:2.
 
 **Number of Time Steps**:  26304
 

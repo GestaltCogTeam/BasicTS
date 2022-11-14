@@ -126,8 +126,8 @@ if __name__ == "__main__":
     HISTORY_SEQ_LEN = 336
     FUTURE_SEQ_LEN = 336
 
-    TRAIN_RATIO = 0.6
-    VALID_RATIO = 0.2
+    TRAIN_RATIO = 0.7
+    VALID_RATIO = 0.1
     TARGET_CHANNEL = [0]                   # target channel(s)
     STEPS_PER_DAY = 24          # every 1 hour
 
