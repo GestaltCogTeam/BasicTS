@@ -112,3 +112,75 @@ We choose the version of Informer.
 **Typical Settings**:
 
 - Multivariate time series forecasting. Input all 7 features, predict all 7 features.
+
+### 7. METR-LA
+
+**Source**: [Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting, ICLR'18](https://github.com/liyaguang/DCRNN). [Data Link](https://github.com/liyaguang/DCRNN).
+
+**Description**: METR-LA is a traffic speed dataset collected from loop-detectors located on the LA County road network. It contains data of 207 sensors over a period of 4 months from Mar 2012 to Jun 2012. The traffic information is recorded at the rate of every 5 minutes. METR-LA also includes a sensor graph to indicate dependencies between sensors. DCRNN computes the pairwise road network distances between sensors and build the adjacency matrix using a thresholded Gaussian kernel. Details can be found in the [paper](https://arxiv.org/pdf/1707.01926.pdf).
+
+**Period**: 2012/3/1 0:00:00 -> 2012/6/27 23:55:00
+
+**Number of Time Steps**: 34272
+
+**Dataset Split**: 7:1:2.
+
+**Variates**: Each variate represents the traffic speed of a sensor.
+
+**Typical Settings**:
+
+- Multivariate time series forecasting. Input all 207 features, predict all 207 features.
+
+### 8. PEMS-BAY
+
+**Source**: [Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting, ICLR'18](https://github.com/liyaguang/DCRNN). [Data Link](https://github.com/liyaguang/DCRNN).
+
+**Description**: PEMS-BAY is a traffic speed dataset collected from California Transportation Agencies (CalTrans) Performance Measurement System (PeMS). It contains data of 325 sensors in the Bay Area over a period of 6 months from Jan 2017 to June 2017. The traffic information is recorded at the rate of every 5 minutes. PEMS-BAY also includes a sensor graph to indicate dependencies between sensors. DCRNN computes the pairwise road network distances between sensors and build the adjacency matrix using a thresholded Gaussian kernel. Details can be found in the [paper](https://arxiv.org/pdf/1707.01926.pdf).
+
+**Period**: 2017/1/1 0:00:00 -> 2017/6/30 23:55:00
+
+**Number of Time Steps**: 52116
+
+**Dataset Split**: 7:1:2.
+
+**Variates**: Each variate represents the traffic speed of a sensor.
+
+**Typical Settings**:
+
+- Multivariate time series forecasting. Input all 325 features, predict all 325 features.
+
+### 9. PEMS0X
+
+**Source**: [Learning dynamics and heterogeneity of spatial-temporal graph data for traffic forecasting, TKDE'21](https://ieeexplore.ieee.org/abstract/document/9346058). [Data Link](https://github.com/guoshnBJTU/ASTGNN/tree/main/data).
+
+**Description**: PEMS0X is a series of traffic flow dataset, including PEMS03, PEMS04, PEMS07, and PEMS08. X represents the code of district where the data is collected. The traffic information is recorded at the rate of every 5 minutes. Similar to METR-LA and PEMS-BAY, PEMS0X also includes a sensor graph to indicate dependencies between sensors. The details of the computation of the adjacency matrix can be found in the [ASTGCN](https://ojs.aaai.org/index.php/AAAI/article/view/3881/3759).
+
+
+**Period**:
+
+- PEMS03: 2018/09/01 -> 2018/11/30
+- PEMS04: 2018/01/01 -> 2018/2/28
+- PEMS07: 2017/05/01 -> 2017/08/31
+- PEMS08: 2016/07/01 -> 2016/08/31
+
+**Number of Time Steps**:
+
+- PEMS03: 26208
+- PEMS04: 16992
+- PEMS07: 28224
+- PEMS08: 17856
+
+**Dataset Split**: 6:2:2.
+
+**Variates**: Each variate represents the traffic flow of a sensor.
+
+**Number of Variates**:
+
+- PEMS03: 358
+- PEMS04: 307
+- PEMS07: 883
+- PEMS08: 170
+
+**Typical Settings**:
+
+- Multivariate time series forecasting. Input all features, predict all features.
