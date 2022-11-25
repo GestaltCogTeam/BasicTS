@@ -58,7 +58,9 @@ We choose the version of AutoFormer.
 
 **Number of Time Steps**: 52696
 
-**Variates**: Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenheit, DewPointCelsius, RelativeHumidity, Windspeed, WindDirection, StationPressure, Altimeter and WetBulbCelsius.
+**Variates**: 'p (mbar)', 'T (degC)', 'Tpot (K)', 'Tdew (degC)', 'rh (%)', 'VPmax (mbar)', 'VPact (mbar)', 'VPdef (mbar)', 'sh (g/kg)','H2OC (mmol/mol)', 'rho (g/m**3)', 'wv (m/s)', 'max. wv (m/s)', 'wd (deg)', 'rain (mm)', 'raining (s)', 'SWDR', 'PAR', 'max. PAR', 'Tlog (degC)', 'OT']
+
+Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenheit, DewPointCelsius, RelativeHumidity, Windspeed, WindDirection, StationPressure, Altimeter and WetBulbCelsius.
 
 **Typical Settings**:
 
