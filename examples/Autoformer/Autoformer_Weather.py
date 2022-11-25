@@ -16,8 +16,8 @@ CFG = EasyDict()
 CFG.DESCRIPTION = "Autoformer model configuration"
 CFG.RUNNER = AutoformerRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "Electricity"
-CFG.DATASET_TYPE = "Electricity Consumption"
+CFG.DATASET_NAME = "Weather"
+CFG.DATASET_TYPE = "Weather Data"
 CFG.DATASET_INPUT_LEN = 96
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
@@ -32,7 +32,7 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "Autoformer"
 CFG.MODEL.ARCH = Autoformer
-NUM_NODES = 321
+NUM_NODES = 21
 CFG.MODEL.PARAM = EasyDict(
     {
     "enc_in": NUM_NODES,                        # num nodes
@@ -53,7 +53,7 @@ CFG.MODEL.PARAM = EasyDict(
     "embed": "timeF",                           # [timeF, fixed, learned]
     "activation": "gelu",
     "num_time_features": 4,                     # number of used time features
-    "time_of_day_size": 24,
+    "time_of_day_size": 144,
     "day_of_week_size": 7,
     "day_of_month_size": 31,
     "day_of_year_size": 366
@@ -105,7 +105,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96, 192, 288, 336]
+CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96, 168]
 CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()

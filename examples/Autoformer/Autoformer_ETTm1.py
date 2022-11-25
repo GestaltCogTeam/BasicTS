@@ -78,7 +78,6 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
 )
 # train data
-CFG.TRAIN.SETUP_GRAPH = True
 CFG.TRAIN.DATA = EasyDict()
 # CFG.TRAIN.NULL_VAL = np.nan
 # read data

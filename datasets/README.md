@@ -47,23 +47,24 @@ The first six variates are overload data, while the last one is oil temperature.
 
 ### 3. Weather
 
-**Source**: [Informer: Beyond Efﬁcient Transformer for Long Sequence Time-Series Forecasting, AAAI 2021](https://github.com/zhouhaoyi/Informer2020). [Data Link](https://github.com/zhouhaoyi/Informer2020)
+**Source**: [Autoformer: Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting, NeurIPS 2021](https://github.com/thuml/Autoformer). [Data Link](https://github.com/thuml/Autoformer)
 
-**Description**: Weather contains  4 years‘ local climatological data from 2010 to 2013, where data points are collected every 1 hour.
-Kindly note that there are multiple versions of Weather dataset in different papers, such as AutoFormer and Informer.
-We choose the version of Informer.
+**Description**: Weather is recorded every 10 minutes for 2020 whole year, which contains 21 meteorological indicators, such as air temperature, humidity, etc. Kindly note that there are multiple versions of Weather dataset in different papers, such as AutoFormer and Informer.
+We choose the version of AutoFormer.
 
-**Period**: 2010/1/1 0:00 -> 12/31/2013 23:00
+**Period**: 2020/1/1 0:10 -> 2021/1/1 0:00
 
-**Number of Time Steps**: 35064
+**Dataset Split**: 7:1:2
+
+**Number of Time Steps**: 52696
 
 **Variates**: Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenheit, DewPointCelsius, RelativeHumidity, Windspeed, WindDirection, StationPressure, Altimeter and WetBulbCelsius.
 
-**Typical Settings**: 
+**Typical Settings**:
 
-- **M**: Multivariate time series forecasting. Input all 12 features, predict all 12 features.
+- **M**: Multivariate time series forecasting. Input all 21 features, predict all 21 features.
 - **S**: Univariate time series forecasting. Input 1 feature (wet bulb default), predict the corresponding feature.
-- **MS**: Multivariate predict univariate. Input all 12 features, predict 1 feature (wet bulb default).
+- **MS**: Multivariate predict univariate. Input all 21 features, predict 1 feature (wet bulb default).
 
 ### 4. Solar-Energy
 

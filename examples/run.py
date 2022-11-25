@@ -37,12 +37,14 @@ def parse_args():
     # parser.add_argument("-c", "--cfg", default="examples/FEDformer/FEDformer_ETTh2.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/FEDformer/FEDformer_Electricity.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_ETTh1.py", help="training config")
-    parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_Electricity.py", help="training config")
+    # parser.add_argument("-c", "--cfg", default="examples/FEDformer/FEDformer_Weather.py", help="training config")
+    parser.add_argument("-c", "--cfg", default="examples/Informer/Informer_Weather.py", help="training config")
+    # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_Weather.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/atfm_04.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/Autoformer_METR-LA.py", help="training config")
 
     # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_METR-LA_in96_out96.py", help="training config")
-    parser.add_argument("--gpus", default="0", help="visible gpus")
+    parser.add_argument("--gpus", default="", help="visible gpus")
     return parser.parse_args()
 
 if __name__ == "__main__":
