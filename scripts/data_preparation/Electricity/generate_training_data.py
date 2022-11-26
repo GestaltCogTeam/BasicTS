@@ -71,7 +71,7 @@ def generate_data(args: argparse.Namespace):
 
     # Although each time series in Electricity dataset is all the electricity consumption (i.e., homogeneous),
     # they have very different scales.
-    # Therefore, they are still treated as heterogeneous time series in this project to to normalize each time series separately.
+    # Therefore, they are still treated as heterogeneous time series in this project to normalize each time series separately.
     # Such an operation is also consistent with the original paper.
     data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, heterogeneous=True)
     # add external feature
