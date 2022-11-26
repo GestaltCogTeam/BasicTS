@@ -92,6 +92,8 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 **Period**: 1990 -> 2016
 
+**Dataset Split**: 7:1:2
+
 **Number of Time Steps**: 7588
 
 **Variates**: Exchange rates of Australia, British, Canada, Switzerland, China, Japan, New Zealand, and Singapore.
