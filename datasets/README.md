@@ -104,13 +104,15 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 **Source**: https://quotsoft.net/air/
 
-**Description**:  The air quality index of Beijing, including seven indicators: AQI(Air quality index), PM2.5, PM10, SO2, NO2, O3, and CO. The sampling rate is 6 hours.
+**Description**:  The air quality index of Beijing, including seven indicators: AQI(Air quality index), PM2.5, PM10, SO2, NO2, O3, and CO. The sampling rate is 1 hours. Missing values are filled using linear interpolation.
 
 **Period**: 2014 -> 2018
 
-**Number of Time Steps**: 6000
+**Dataset Split**: 6:2:2
 
-**Variates**:AQI, PM2.5, PM10, SO2, NO2, O3, and CO.
+**Number of Time Steps**: 36000
+
+**Variates**: AQI, PM2.5, PM10, SO2, NO2, O3, and CO.
 
 **Typical Settings**:
 
