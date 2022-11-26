@@ -68,23 +68,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 - **S**: Univariate time series forecasting. Input 1 feature (wet bulb default), predict the corresponding feature.
 - **MS**: Multivariate predict univariate. Input all 21 features, predict 1 feature (wet bulb default).
 
-### 4. Solar-Energy
-
-**Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet). [Data Link](https://github.com/laiguokun/multivariate-time-series-data). 
-
-**Description**:  The solar power production records in the year of 2006, which is sampled every 10 minutes from 137 PV plants in Alabama State.
-
-**Period**: 2006/01/01 00:00 -> 2006/12/31 23:50
-
-**Number of Time Steps**: 52560
-
-**Variates**: Each variate represents the power output of a PV plant.
-
-**Typical Settings**:
-
-- **M**: Multivariate time series forecasting. Input all 137 features, predict all 137 features.
-
-### 5. Exchange-Rate
+### 4. Exchange Rate
 
 **Source**: [Modeling Long- and Short-Term Temporal Patterns with Deep Neural Networks, SIGIR'18](https://github.com/laiguokun/LSTNet). [Data Link](https://github.com/laiguokun/multivariate-time-series-data). 
 
@@ -102,7 +86,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 - Multivariate time series forecasting. Input all 8 features, predict all 8 features.
 
-### 6. Beijing Air Quality
+### 5. Beijing Air Quality
 
 **Source**: https://quotsoft.net/air/
 
@@ -120,7 +104,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 - Multivariate time series forecasting. Input all 7 features, predict all 7 features.
 
-### 7. METR-LA
+### 6. METR-LA
 
 **Source**: [Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting, ICLR'18](https://github.com/liyaguang/DCRNN). [Data Link](https://github.com/liyaguang/DCRNN).
 
@@ -138,7 +122,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 - Multivariate time series forecasting. Input all 207 features, predict all 207 features.
 
-### 8. PEMS-BAY
+### 7. PEMS-BAY
 
 **Source**: [Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting, ICLR'18](https://github.com/liyaguang/DCRNN). [Data Link](https://github.com/liyaguang/DCRNN).
 
@@ -156,7 +140,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 - Multivariate time series forecasting. Input all 325 features, predict all 325 features.
 
-### 9. PEMS0X
+### 8. PEMS0X
 
 **Source**: [Learning dynamics and heterogeneity of spatial-temporal graph data for traffic forecasting, TKDE'21](https://ieeexplore.ieee.org/abstract/document/9346058). [Data Link](https://github.com/guoshnBJTU/ASTGNN/tree/main/data).
 
