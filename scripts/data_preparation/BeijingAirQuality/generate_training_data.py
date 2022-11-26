@@ -29,8 +29,6 @@ def generate_data(args: argparse.Namespace):
     history_seq_len = args.history_seq_len
     add_time_of_day = args.tod
     add_day_of_week = args.dow
-    add_day_of_month = args.dom
-    add_day_of_year = args.doy
     output_dir = args.output_dir
     train_ratio = args.train_ratio
     valid_ratio = args.valid_ratio
