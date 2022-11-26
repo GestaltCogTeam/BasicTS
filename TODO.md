@@ -1,6 +1,5 @@
 # 📆 TODO
 
-- Add Transformer-based methods, such as Informer, AutoFormer, FEDFormer, PyraFormer.
 - Add more datasets, such as electricity, ETT, exchange rate, weather, traffic, and illness.
 - Publish to PyPI
 - Add more docs.
