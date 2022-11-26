@@ -36,3 +36,4 @@ zipp==3.8.0
 timm==0.6.11
 pandas==1.5.1
 tables==3.7.0
+openpyxl==3.0.10
