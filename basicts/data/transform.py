@@ -7,7 +7,7 @@ from .registry import SCALER_REGISTRY
 
 
 @SCALER_REGISTRY.register()
-def standard_transform(data: np.array, output_dir: str, train_index: list, history_seq_len: int, future_seq_len: int, heterogeneous: int = False) -> np.array:
+def standard_transform(data: np.array, output_dir: str, train_index: list, history_seq_len: int, future_seq_len: int, norm_each_channel: int = False) -> np.array:
     """Standard normalization.
 
     Args:
@@ -16,7 +16,7 @@ def standard_transform(data: np.array, output_dir: str, train_index: list, histo
         train_index (list): train index.
         history_seq_len (int): historical sequence length.
         future_seq_len (int): future sequence length.
-        heterogeneous (bool): whether the multiple time series is heterogeneous.
+        norm_each_channel (bool): whether to normalization each channel.
 
     Returns:
         np.array: normalized raw time series data.
@@ -24,7 +24,7 @@ def standard_transform(data: np.array, output_dir: str, train_index: list, histo
 
     # data: L, N, C, C=1
     data_train = data[:train_index[-1][1], ...]
-    if heterogeneous:
+    if norm_each_channel:
         mean, std = data_train.mean(axis=0, keepdims=True), data_train.std(axis=0, keepdims=True)
     else:
         mean, std = data_train[..., 0].mean(), data_train[..., 0].std()

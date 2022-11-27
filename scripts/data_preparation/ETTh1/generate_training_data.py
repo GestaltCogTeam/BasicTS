@@ -68,8 +68,10 @@ def generate_data(args: argparse.Namespace):
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
     scaler = standard_transform
-    # ETT series of datasets are heterogeneous between the different time series.
-    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, heterogeneous=True)
+    # Although related works (e.g. informer and autoformer) normalize each channel separately,
+    # we find that normalizing the data for the whole dataset results in a significant performance gain.
+    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, norm_each_channel=False)
+
     # add external feature
     feature_list = [data_norm]
     if add_time_of_day:

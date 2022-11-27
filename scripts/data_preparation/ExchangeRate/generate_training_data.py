@@ -68,11 +68,10 @@ def generate_data(args: argparse.Namespace):
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
     scaler = standard_transform
-    # Following Autoformer[1], we still treat ExchangeRate dataset as a heterogeneous dataset, which mean we normalize each channel separately.
-    # WARNING: However, treating the ExchangeRate dataset as a homogeneous dataset will result in a significant performance gain.
-    # TODO: Test other datasets are not tested.
-    # [1] Autoformer: Decomposition Transformers with {Auto-Correlation} for Long-Term Series Forecasting. NeurIPS 2021.
-    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, heterogeneous=True)
+    # Although related works (e.g. informer and autoformer) normalize each channel separately,
+    # we find that normalizing the data for the whole dataset results in a significant performance gain.
+    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, norm_each_channel=False)
+
     # add external feature
     feature_list = [data_norm]
     if add_time_of_day:

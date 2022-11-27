@@ -68,12 +68,10 @@ def generate_data(args: argparse.Namespace):
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
     scaler = standard_transform
+    # Although related works (e.g. informer and autoformer) normalize each channel separately,
+    # we find that normalizing the data for the whole dataset results in a significant performance gain.
+    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, norm_each_channel=False)
 
-    # Although each time series in Electricity dataset is all the electricity consumption (i.e., homogeneous),
-    # they have very different scales.
-    # Therefore, they are still treated as heterogeneous time series in this project to normalize each time series separately.
-    # Such an operation is also consistent with the original paper.
-    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, heterogeneous=True)
     # add external feature
     feature_list = [data_norm]
     if add_time_of_day:
