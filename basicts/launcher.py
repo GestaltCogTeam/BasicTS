@@ -16,4 +16,8 @@ def launch_training(cfg: Union[Dict, str], gpus: str = None, node_rank: int = 0)
     # config checking
     pass
     # launch training based on easytorch
-    easytorch.launch_training(cfg=cfg, gpus=gpus, node_rank=node_rank)
+    try:
+        easytorch.launch_training(cfg=cfg, gpus=gpus, node_rank=node_rank)
+    except:
+        # fit higher easy-torch version
+        easytorch.launch_training(cfg=cfg, devices=gpus, node_rank=node_rank)
