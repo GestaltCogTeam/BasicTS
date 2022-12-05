@@ -68,9 +68,8 @@ def generate_data(args: argparse.Namespace):
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
     scaler = standard_transform
-    # Although related works (e.g. informer and autoformer) normalize each channel separately,
-    # we find that normalizing the data for the whole dataset results in a significant performance gain.
-    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, norm_each_channel=False)
+    # Following related works (e.g. informer and autoformer), we normalize each channel separately.
+    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, norm_each_channel=True)
 
     # add external feature
     feature_list = [data_norm]
