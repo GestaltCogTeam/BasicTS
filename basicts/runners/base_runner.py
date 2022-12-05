@@ -37,7 +37,7 @@ class BaseRunner(Runner):
         self.test_data_loader = None
 
         # fit higher easy-torch version
-        if not hasattr(self,'to_running_device'):
+        if not hasattr(self,"to_running_device"):
             from easytorch.device import to_device
             self.to_running_device = to_device
 
