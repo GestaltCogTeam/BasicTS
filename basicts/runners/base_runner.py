@@ -1,7 +1,6 @@
 import time
 from typing import Dict
 
-from easytorch.device import to_device
 import setproctitle
 import torch
 from torch import nn
@@ -39,6 +38,7 @@ class BaseRunner(Runner):
 
         # fit higher easy-torch version
         if not hasattr(self,'to_running_device'):
+            from easytorch.device import to_device
             self.to_running_device = to_device
 
         # set proctitle
