@@ -1,6 +1,7 @@
 import time
 from typing import Dict
 
+from easytorch.device import to_device
 import setproctitle
 import torch
 from torch import nn
@@ -35,6 +36,10 @@ class BaseRunner(Runner):
         self.train_data_loader = None
         self.val_data_loader = None
         self.test_data_loader = None
+
+        # fit higher easy-torch version
+        if not hasattr(self,'to_running_device'):
+            self.to_running_device = to_device
 
         # set proctitle
         proctitle_name = "{0}({1})".format(cfg["MODEL"].get(
