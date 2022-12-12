@@ -17,7 +17,10 @@ def launch_training(cfg: Union[Dict, str], gpus: str = None, node_rank: int = 0)
     pass
     # launch training based on easytorch
     try:
-        easytorch.launch_training(cfg=cfg, gpus=gpus, node_rank=node_rank)
-    except TypeError:
-        # fit higher easy-torch version
         easytorch.launch_training(cfg=cfg, devices=gpus, node_rank=node_rank)
+    except TypeError as e:
+        if "launch_training() got an unexpected keyword argument" in repr(e):
+            # NOTE: for earlier easytorch version
+            easytorch.launch_training(cfg=cfg, gpus=gpus, node_rank=node_rank)
+        else:
+            raise e
