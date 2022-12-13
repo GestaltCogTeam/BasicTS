@@ -28,7 +28,7 @@ if __name__ == '__main__':
     try:
         launch_runner(args.cfg, main, (args.ckpt,), devices=args.gpus)
     except TypeError as e:
-        if "launch_training() got an unexpected keyword argument" in repr(e):
+        if "launch_runner() got an unexpected keyword argument" in repr(e):
             # NOTE: for earlier easytorch version
             launch_runner(args.cfg, main, (args.ckpt,), gpus=args.gpus)
         else:
