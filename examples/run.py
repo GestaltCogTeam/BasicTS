@@ -4,7 +4,11 @@ from argparse import ArgumentParser
 
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../.."))
+import torch
 from basicts import launch_training
+
+torch.set_num_threads(1) # aviod high cpu avg usage
+
 
 def parse_args():
     parser = ArgumentParser(description="Run time series forecasting model in BasicTS framework!")
