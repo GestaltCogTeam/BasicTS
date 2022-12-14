@@ -17,8 +17,6 @@ def generate_data(args: argparse.Namespace):
         - Normalization method: standard norm.
         - Dataset division: 7:1:2.
         - Window size: history 12, future 12.
-        - Channels (features): three channels [traffic speed, time of day, day of week]
-        - Target: predict the traffic speed of the future 12 time steps.
 
     Args:
         args (argparse): configurations of preprocessing

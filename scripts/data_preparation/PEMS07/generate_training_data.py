@@ -19,7 +19,7 @@ def generate_data(args: argparse.Namespace):
         - Dataset division: 6:2:2.
         - Window size: history 12, future 12.
         - Channels (features): three channels [traffic flow, time of day, day of week]
-        - Target: predict the traffic speed of the future 12 time steps.
+        - Target: predict the traffic flolw of the future 12 time steps.
 
     Args:
         args (argparse): configurations of preprocessing
