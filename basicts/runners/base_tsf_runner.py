@@ -30,6 +30,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         # different datasets have different null_values, e.g., 0.0 or np.nan.
         self.null_val = cfg["TRAIN"].get("NULL_VAL", np.nan)    # consist with metric functions
         self.dataset_type = cfg["DATASET_TYPE"]
+        self.evaluate_on_gpu = cfg["TEST"].get("USE_GPU", True)     # evaluate on gpu or cpu (gpu is faster but may cause OOM)
 
         # read scaler for re-normalization
         self.scaler = load_pkl("{0}/scaler_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"]))
@@ -301,20 +302,20 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             pred = prediction[:, i, :, :]
             real = real_value[:, i, :, :]
             # metrics
-            metric_results = {}
+            metric_repr = ""
             for metric_name, metric_func in self.metrics.items():
                 metric_item = self.metric_forward(metric_func, [pred, real])
-                metric_results[metric_name] = metric_item.item()
-            log = "Evaluate best model on test data for horizon " + \
-                "{:d}, Test MAE: {:.4f}, Test RMSE: {:.4f}, Test MAPE: {:.4f}"
-            log = log.format(
-                i+1, metric_results["MAE"], metric_results["RMSE"], metric_results["MAPE"])
+                metric_repr += ", Test {0}: {1:.4f}".format(metric_name, metric_item.item())
+            log = "Evaluate best model on test data for horizon {:d}" + metric_repr
+            log = log.format(i+1)
             self.logger.info(log)
         # test performance overall
         for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, [prediction, real_value])
+            if self.evaluate_on_gpu:
+                metric_item = self.metric_forward(metric_func, [prediction, real_value])
+            else:
+                metric_item = self.metric_forward(metric_func, [prediction.detach().cpu(), real_value.detach().cpu()])
             self.update_epoch_meter("test_"+metric_name, metric_item.item())
-            metric_results[metric_name] = metric_item.item()
 
     @master_only
     def on_validating_end(self, train_epoch: Optional[int]):
