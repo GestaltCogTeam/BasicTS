@@ -77,7 +77,7 @@ class STID(nn.Module):
             t_i_d_data = history_data[..., 1]
             # In the datasets used in STID, the time_of_day feature is normalized to [0, 1]. We multiply it by 288 to get the index.
             # If you use other datasets, you may need to change this line.
-            time_in_day_emb = self.time_in_day_emb[(t_i_d_data[:, -1, :] * 288).type(torch.LongTensor)]
+            time_in_day_emb = self.time_in_day_emb[(t_i_d_data[:, -1, :] * self.time_of_day_size).type(torch.LongTensor)]
         else:
             time_in_day_emb = None
         if self.if_day_in_week:
