@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
 from basicts.archs import AGCRN
-from basicts.runners import AGCRNRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 
@@ -14,7 +14,7 @@ CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = "AGCRN model configuration"
-CFG.RUNNER = AGCRNRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "METR-LA"
 CFG.DATASET_TYPE = "Traffic speed"

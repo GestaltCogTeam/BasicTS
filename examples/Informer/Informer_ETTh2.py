@@ -5,7 +5,7 @@ import sys
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
 from basicts.archs import Informer
-from basicts.runners import InformerRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 
@@ -14,7 +14,7 @@ CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = "Informer model configuration"
-CFG.RUNNER = InformerRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "ETTh2"
 CFG.DATASET_TYPE = "Electricity Transformer Temperature"

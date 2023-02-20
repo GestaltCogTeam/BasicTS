@@ -7,7 +7,7 @@ from easydict import EasyDict
 import torch
 
 from basicts.archs import Pyraformer
-from basicts.runners import PyraformerRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 
@@ -16,7 +16,7 @@ CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = "Pyraformer model configuration"
-CFG.RUNNER = PyraformerRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "Weather"
 CFG.DATASET_TYPE = "Weather Data"

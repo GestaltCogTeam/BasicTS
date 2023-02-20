@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(__file__ + "/../../.."))
 import torch
 from easydict import EasyDict
 from basicts.archs import D2STGNN
-from basicts.runners import D2STGNNRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 from basicts.utils import load_adj
@@ -15,7 +15,7 @@ CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = "D2STGNN model configuration"
-CFG.RUNNER = D2STGNNRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "METR-LA"
 CFG.DATASET_TYPE = "Traffic speed"

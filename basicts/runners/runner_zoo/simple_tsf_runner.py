@@ -4,7 +4,7 @@ from ..base_tsf_runner import BaseTimeSeriesForecastingRunner
 
 
 class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
-    """Simple Runner: select forward features and target features."""
+    """Simple Runner: select forward features and target features. This runner can cover most cases."""
 
     def __init__(self, cfg: dict):
         super().__init__(cfg)

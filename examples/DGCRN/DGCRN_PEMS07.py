@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(__file__ + "/../../.."))
 import torch
 from easydict import EasyDict
 from basicts.archs import DGCRN
-from basicts.runners import DGCRNRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 from basicts.utils import load_adj
@@ -16,7 +16,7 @@ CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = "DGCRN model configuration"
-CFG.RUNNER  = DGCRNRunner
+CFG.RUNNER  = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "PEMS07"
 CFG.DATASET_TYPE = "Traffic flow"

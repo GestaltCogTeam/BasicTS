@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
 from basicts.losses import masked_mae
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.runners import STIDRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.archs import STID
 
 
@@ -15,7 +15,7 @@ CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = "STID model configuration"
-CFG.RUNNER = STIDRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "PEMS07"
 CFG.DATASET_TYPE = "Traffic flow"

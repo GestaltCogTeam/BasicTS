@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
 from basicts.losses import masked_mae
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.runners import LinearRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.archs import NLinear
 
 
@@ -14,7 +14,7 @@ CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = "Linear model configuration"
-CFG.RUNNER = LinearRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "ETTm2"
 CFG.DATASET_TYPE = "Electricity Transformer Temperature"
