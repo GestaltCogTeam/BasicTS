@@ -7,18 +7,11 @@ from easydict import EasyDict
 from basicts.archs import MegaCRN
 from basicts.runners import MegaCRNRunner
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.utils.serialization import load_pkl
 
 from .loss import megacrn_loss
 
 
 CFG = EasyDict()
-
-# GTS does not allow to load parameters since it creates parameters in the first iteration
-resume = False
-if not resume:
-    import random
-    _ = random.randint(-1e6, 1e6)
 
 # ================= general ================= #
 CFG.DESCRIPTION = "MegaCRN model configuration"
@@ -28,38 +21,25 @@ CFG.DATASET_NAME = "METR-LA"
 CFG.DATASET_TYPE = "Traffic speed"
 CFG.DATASET_INPUT_LEN = 12
 CFG.DATASET_OUTPUT_LEN = 12
-CFG._ = _
 CFG.GPU_NUM = 1
-
-# ================= environment ================= #
-CFG.ENV = EasyDict()
-CFG.ENV.SEED = 100
-CFG.ENV.CUDNN = EasyDict()
-CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "MegaCRN"
 CFG.MODEL.ARCH = MegaCRN
-
-node_feats_full = load_pkl("datasets/{0}/data_in{1}_out{2}.pkl".format(CFG.DATASET_NAME, CFG.DATASET_INPUT_LEN, CFG.DATASET_OUTPUT_LEN))["processed_data"][..., 0]
-train_index_list = load_pkl("datasets/{0}/index_in{1}_out{2}.pkl".format(CFG.DATASET_NAME, CFG.DATASET_INPUT_LEN, CFG.DATASET_OUTPUT_LEN))["train"]
-node_feats = node_feats_full[:train_index_list[-1][-1], ...]
 CFG.MODEL.PARAM = {
     "num_nodes": 207,
     "input_dim": 1,
     "output_dim": 1,
     "horizon": 12,
-    "rnn_units": 32,
+    "rnn_units": 64,
     "num_layers":1,
-    "embed_dim":8,
     "cheb_k":3,
     "ycov_dim":1,
-    "mem_num":10,
-    "mem_dim":32,
-    "memory_type":True,
-    "meta_type":True,
-    "decoder_type":'stepwise'
+    "mem_num":20,
+    "mem_dim":64,
+    "cl_decay_steps":2000,
+    "use_curriculum_learning":True
 }
 CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
@@ -70,11 +50,20 @@ CFG.TRAIN.LOSS = megacrn_loss
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.001,
+    "lr": 0.01,
     "eps": 1e-3
+}
+CFG.TRAIN.LR_SCHEDULER = EasyDict()
+CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
+CFG.TRAIN.LR_SCHEDULER.PARAM = {
+    "milestones": [50, 100],
+    "gamma": 0.1
 }
 
 # ================= train ================= #
+CFG.TRAIN.CLIP_GRAD_PARAM = {
+    "max_norm": 5.0
+}
 CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
@@ -89,9 +78,6 @@ CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.TRAIN.DATA.BATCH_SIZE = 64
 CFG.TRAIN.DATA.PREFETCH = False
-# NOTE:
-# TODO:
-## WARNING: MegaCRN seems to fail when the train dataset is not shuffled.
 CFG.TRAIN.DATA.SHUFFLE = True
 CFG.TRAIN.DATA.NUM_WORKERS = 2
 CFG.TRAIN.DATA.PIN_MEMORY = False
