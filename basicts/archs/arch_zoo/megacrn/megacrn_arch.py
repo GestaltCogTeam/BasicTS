@@ -117,6 +117,7 @@ class MegaCRN(nn.Module):
     """
     Paper: Spatio-Temporal Meta-Graph Learning for Traffic Forecasting
     Link: https://aps.arxiv.org/abs/2212.05989
+    Official Code: https://github.com/deepkashiwa20/MegaCRN
     Notes:
         The first version of official MegaCRN code had information leakage issues. (Refer to [1])
         In the second version of the code, the authors have modified the model structure and used a correct setting.

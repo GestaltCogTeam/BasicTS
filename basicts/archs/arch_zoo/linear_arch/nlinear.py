@@ -3,8 +3,9 @@ import torch.nn as nn
 
 class NLinear(nn.Module):
     """
-    The implementation of the normalization-linear model in Paper "Are Transformers Effective for Time Series Forecasting?"
+    Paper: Are Transformers Effective for Time Series Forecasting?
     Link: https://arxiv.org/abs/2205.13504
+    Official Code: https://github.com/cure-lab/DLinear
     """
 
     def __init__(self, **model_args):

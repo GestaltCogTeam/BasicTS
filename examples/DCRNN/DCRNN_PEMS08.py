@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(__file__ + "/../../.."))
 import torch
 from easydict import EasyDict
 from basicts.archs import DCRNN
-from basicts.runners import DCRNNRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
 from basicts.utils import load_adj
@@ -22,7 +22,7 @@ if not resume:
 
 # ================= general ================= #
 CFG.DESCRIPTION = "DCRNN model configuration"
-CFG.RUNNER = DCRNNRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "PEMS08"
 CFG.DATASET_TYPE = "Traffic flow"
@@ -30,6 +30,7 @@ CFG.DATASET_INPUT_LEN = 12
 CFG.DATASET_OUTPUT_LEN = 12
 CFG._ = _
 CFG.GPU_NUM = 1
+CFG.NULL_VAL = 0.0
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
@@ -56,6 +57,7 @@ CFG.MODEL.PARAM = {
     "adj_mx": [torch.tensor(i) for i in adj_mx],
     "use_curriculum_learning": True
 }
+CFG.MODEL.SETUP_GRAPH = True
 CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
 
@@ -84,10 +86,8 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
 )
-CFG.TRAIN.SETUP_GRAPH = True
 # train data
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.NULL_VAL = 0.0
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional

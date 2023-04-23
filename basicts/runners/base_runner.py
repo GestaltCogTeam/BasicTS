@@ -14,7 +14,6 @@ class BaseRunner(Runner):
     """
         An expanded easytorch runner for benchmarking time series models.
             - Support test loader and test process.
-            - Support setup_graph for the models acting like tensorflow.
     """
 
     def __init__(self, cfg: dict):
@@ -49,32 +48,6 @@ class BaseRunner(Runner):
     @staticmethod
     def define_model(cfg: Dict) -> nn.Module:
         return cfg["MODEL"]["ARCH"](**cfg.MODEL.PARAM)
-
-    def build_train_data_loader(self, cfg: dict) -> DataLoader:
-        """Support "setup_graph" for the models acting like tensorflow.
-
-        Args:
-            cfg (dict): all in one configurations
-
-        Returns:
-            DataLoader: train dataloader
-        """
-
-        train_data_loader = super().build_train_data_loader(cfg)
-        if cfg["TRAIN"].get("SETUP_GRAPH", False):
-            for data in train_data_loader:
-                self.setup_graph(data)
-                break
-        return train_data_loader
-
-    def setup_graph(self, data: torch.Tensor):
-        """Setup all parameters and the computation graph.
-
-        Args:
-            data (torch.Tensor): data necessary for a forward pass
-        """
-
-        pass
 
     def init_training(self, cfg: dict):
         """Initialize training and support test dataloader.

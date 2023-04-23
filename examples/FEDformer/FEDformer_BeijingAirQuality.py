@@ -7,7 +7,7 @@ from easydict import EasyDict
 from basicts.archs import FEDformer
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.losses import masked_mae
+from basicts.metrics import masked_mse, masked_mae
 
 
 CFG = EasyDict()
@@ -18,9 +18,11 @@ CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "BeijingAirQuality"
 CFG.DATASET_TYPE = "Beijing Air Quality"
-CFG.DATASET_INPUT_LEN = 336
+CFG.DATASET_INPUT_LEN = 96
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
+CFG.RESCALE = False
+CFG.METRICS = {"MAE": masked_mae, "MSE": masked_mse}
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
@@ -67,7 +69,7 @@ CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()
-CFG.TRAIN.LOSS = masked_mae
+CFG.TRAIN.LOSS = masked_mse
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
@@ -81,9 +83,7 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
 )
 # train data
-CFG.TRAIN.SETUP_GRAPH = True
 CFG.TRAIN.DATA = EasyDict()
-# CFG.TRAIN.NULL_VAL = np.nan
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
@@ -109,7 +109,6 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96, 192, 288, 336]
 CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
@@ -121,3 +120,7 @@ CFG.TEST.DATA.PREFETCH = False
 CFG.TEST.DATA.SHUFFLE = False
 CFG.TEST.DATA.NUM_WORKERS = 2
 CFG.TEST.DATA.PIN_MEMORY = False
+
+# ================= evaluate ================= #
+CFG.EVAL = EasyDict()
+CFG.EVAL.HORIZONS = [12, 24, 48, 96, 192, 288, 336]

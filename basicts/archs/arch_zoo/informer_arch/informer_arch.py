@@ -114,9 +114,7 @@ class Informer(nn.Module):
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
 
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len,
-                                                                            time_of_day_size=self.time_of_day_size, day_of_week_size=self.day_of_week_size,
-                                                                            day_of_month_size=self.day_of_month_size, day_of_year_size=self.day_of_year_size, embed_type=self.embed)
+        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len)
         prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
         return prediction
 
@@ -218,8 +216,6 @@ class InformerStack(nn.Module):
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
 
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len,
-                                                                            time_of_day_size=self.time_of_day_size, day_of_week_size=self.day_of_week_size,
-                                                                            day_of_month_size=self.day_of_month_size, day_of_year_size=self.day_of_year_size, embed_type=self.embed)
+        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len)
         prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
         return prediction

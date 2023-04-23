@@ -23,6 +23,7 @@ CFG.DATASET_TYPE = "Traffic speed"
 CFG.DATASET_INPUT_LEN = 12
 CFG.DATASET_OUTPUT_LEN = 12
 CFG.GPU_NUM = 1
+CFG.NULL_VAL = 0.0
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
@@ -78,7 +79,6 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.NULL_VAL = 0.0
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional

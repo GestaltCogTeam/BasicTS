@@ -109,7 +109,11 @@ class Encoder(nn.Module):
 
 
 class Pyraformer(nn.Module):
-    """ A sequence to sequence model with attention mechanism. """
+    """
+        Paper: Pyraformer: Low complexity pyramidal Attention For Long-range Time Series Modeling and Forecasting
+        Official Code: https://github.com/ant-research/Pyraformer
+        Link: https://openreview.net/forum?id=0EXmFzUn5I
+    """
 
     def __init__(self, **model_args):
         super().__init__()
@@ -183,9 +187,7 @@ class Pyraformer(nn.Module):
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
 
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=0,
-                                                                            time_of_day_size=self.time_of_day_size, day_of_week_size=self.day_of_week_size,
-                                                                            day_of_month_size=self.day_of_month_size, day_of_year_size=self.day_of_year_size, embed_type=self.embed)
+        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=0)
 
         predict_token = torch.zeros(x_enc.size(
             0), 1, x_enc.size(-1), device=x_enc.device)

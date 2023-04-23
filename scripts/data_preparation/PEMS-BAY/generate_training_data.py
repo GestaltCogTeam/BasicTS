@@ -14,12 +14,6 @@ from basicts.data.transform import standard_transform
 
 def generate_data(args: argparse.Namespace):
     """Preprocess and generate train/valid/test datasets.
-    Default settings of PEMS-BAY dataset:
-        - Normalization method: standard norm.
-        - Dataset division: 7:1:2.
-        - Window size: history 12, future 12.
-        - Channels (features): three channels [traffic speed, time of day, day of week]
-        - Target: predict the traffic speed of the future 12 time steps.
 
     Args:
         args (argparse): configurations of preprocessing
@@ -30,11 +24,14 @@ def generate_data(args: argparse.Namespace):
     history_seq_len = args.history_seq_len
     add_time_of_day = args.tod
     add_day_of_week = args.dow
+    add_day_of_month = args.dom
+    add_day_of_year = args.doy
     output_dir = args.output_dir
     train_ratio = args.train_ratio
     valid_ratio = args.valid_ratio
     data_file_path = args.data_file_path
     graph_file_path = args.graph_file_path
+    norm_each_channel = args.norm_each_channel
 
     # read data
     df = pd.read_hdf(data_file_path)
@@ -43,6 +40,7 @@ def generate_data(args: argparse.Namespace):
     data = data[..., target_channel]
     print("raw time series shape: {0}".format(data.shape))
 
+    # split data
     l, n, f = data.shape
     num_samples = l - (history_seq_len + future_seq_len) + 1
     train_num_short = round(num_samples * train_ratio)
@@ -62,10 +60,11 @@ def generate_data(args: argparse.Namespace):
     test_index = index_list[train_num_short +
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
+    # normalize data
     scaler = standard_transform
-    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len)
+    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, norm_each_channel=norm_each_channel)
 
-    # add external feature
+    # add temporal feature
     feature_list = [data_norm]
     if add_time_of_day:
         # numerical time_of_day
@@ -80,9 +79,21 @@ def generate_data(args: argparse.Namespace):
         dow_tiled = np.tile(dow, [1, n, 1]).transpose((2, 1, 0))
         feature_list.append(dow_tiled)
 
+    if add_day_of_month:
+        # numerical day_of_month
+        dom = (df.index.day - 1 ) / 31 # df.index.day starts from 1. We need to minus 1 to make it start from 0.
+        dom_tiled = np.tile(dom, [1, n, 1]).transpose((2, 1, 0))
+        feature_list.append(dom_tiled)
+
+    if add_day_of_year:
+        # numerical day_of_year
+        doy = (df.index.dayofyear - 1) / 366 # df.index.month starts from 1. We need to minus 1 to make it start from 0.
+        doy_tiled = np.tile(doy, [1, n, 1]).transpose((2, 1, 0))
+        feature_list.append(doy_tiled)
+
     processed_data = np.concatenate(feature_list, axis=-1)
 
-    # dump data
+    # save data
     index = {}
     index["train"] = train_index
     index["valid"] = valid_index
@@ -110,6 +121,11 @@ if __name__ == "__main__":
     DATASET_NAME = "PEMS-BAY"
     TOD = True                  # if add time_of_day feature
     DOW = True                  # if add day_of_week feature
+    DOM = True                  # if add day_of_month feature
+    DOY = True                  # if add day_of_year feature
+
+    NORM_EACH_CHANNEL = False
+
     OUTPUT_DIR = "datasets/" + DATASET_NAME
     DATA_FILE_PATH = "datasets/raw_data/{0}/{0}.h5".format(DATASET_NAME)
     GRAPH_FILE_PATH = "datasets/raw_data/{0}/adj_{0}.pkl".format(DATASET_NAME)
@@ -129,12 +145,18 @@ if __name__ == "__main__":
                         help="Add feature time_of_day.")
     parser.add_argument("--dow", type=bool, default=DOW,
                         help="Add feature day_of_week.")
+    parser.add_argument("--dom", type=bool, default=DOM,
+                        help="Add feature day_of_week.")
+    parser.add_argument("--doy", type=bool, default=DOY,
+                        help="Add feature day_of_week.")
     parser.add_argument("--target_channel", type=list,
                         default=TARGET_CHANNEL, help="Selected channels.")
     parser.add_argument("--train_ratio", type=float,
                         default=TRAIN_RATIO, help="Train ratio")
     parser.add_argument("--valid_ratio", type=float,
                         default=VALID_RATIO, help="Validate ratio.")
+    parser.add_argument("--norm_each_channel", type=float,
+                        default=NORM_EACH_CHANNEL, help="Validate ratio.")
     args_metr = parser.parse_args()
 
     # print args

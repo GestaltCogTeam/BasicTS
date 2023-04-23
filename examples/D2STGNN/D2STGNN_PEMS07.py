@@ -23,6 +23,7 @@ CFG.DATASET_TYPE = "Traffic flow"
 CFG.DATASET_INPUT_LEN = 12
 CFG.DATASET_OUTPUT_LEN = 12
 CFG.GPU_NUM = 1
+CFG.NULL_VAL = 0.0
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
@@ -50,6 +51,8 @@ CFG.MODEL.PARAM = {
     "num_modalities": 2,
     "node_hidden": 10,
     "time_emb_dim": 10,
+    "time_in_day_size": 288,
+    "day_in_week_size": 7,
 }
 CFG.MODEL.FORWARD_FEATURES = [0, 1, 2]
 CFG.MODEL.TARGET_FEATURES = [0]
@@ -82,7 +85,6 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.NULL_VAL = 0.0
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional

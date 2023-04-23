@@ -23,6 +23,7 @@ CFG.DATASET_TYPE = "Traffic speed"
 CFG.DATASET_INPUT_LEN = 12
 CFG.DATASET_OUTPUT_LEN = 12
 CFG.GPU_NUM = 1
+CFG.NULL_VAL = 0.0
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
@@ -38,7 +39,7 @@ adj_mx, _ = load_adj("datasets/" + CFG.DATASET_NAME +
                      "/adj_mx.pkl", "doubletransition")
 CFG.MODEL.PARAM = {
     "num_nodes": 207,
-    "supports": [torch.ones(207, 207) for i in adj_mx],
+    "supports": [torch.tensor(i) for i in adj_mx],
     "dropout": 0.3,
     "gcn_bool": True,
     "addaptadj": True,
@@ -83,7 +84,6 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.NULL_VAL = 0.0
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional

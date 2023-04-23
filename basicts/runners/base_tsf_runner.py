@@ -4,6 +4,7 @@ from typing import Tuple, Union, Optional
 
 import torch
 import numpy as np
+from easydict import EasyDict
 from easytorch.utils.dist import master_only
 
 from .base_runner import BaseRunner
@@ -19,6 +20,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
     Features:
         - Evaluate at horizon 3, 6, 12, and overall.
         - Metrics: MAE, RMSE, MAPE. The best model is the one with the smallest mae at validation.
+        - Support setup_graph for the models acting like tensorflow.
         - Loss: MAE (masked_mae). Allow customization.
         - Support curriculum learning.
         - Users only need to implement the `forward` function.
@@ -28,26 +30,43 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         super().__init__(cfg)
         self.dataset_name = cfg["DATASET_NAME"]
         # different datasets have different null_values, e.g., 0.0 or np.nan.
-        self.null_val = cfg["TRAIN"].get("NULL_VAL", np.nan)    # consist with metric functions
-        self.dataset_type = cfg["DATASET_TYPE"]
-        self.evaluate_on_gpu = cfg["TEST"].get("USE_GPU", True)     # evaluate on gpu or cpu (gpu is faster but may cause OOM)
+        self.null_val = cfg.get("NULL_VAL", np.nan)    # consist with metric functions
+        self.dataset_type = cfg.get("DATASET_TYPE", " ")
+        self.if_rescale = cfg.get("RESCALE", True)   # if rescale data when calculating loss or metrics, default as True
+
+        # setup graph
+        self.need_setup_graph = cfg["MODEL"].get("SETUP_GRAPH", False)
 
         # read scaler for re-normalization
         self.scaler = load_pkl("{0}/scaler_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"]))
         # define loss
         self.loss = cfg["TRAIN"]["LOSS"]
         # define metric
-        self.metrics = {"MAE": masked_mae, "RMSE": masked_rmse, "MAPE": masked_mape}
+        self.metrics = cfg.get("METRICS", {"MAE": masked_mae, "RMSE": masked_rmse, "MAPE": masked_mape})
         # curriculum learning for output. Note that this is different from the CL in Seq2Seq archs.
-        self.cl_param = cfg.TRAIN.get("CL", None)
+        self.cl_param = cfg["TRAIN"].get("CL", None)
         if self.cl_param is not None:
-            self.warm_up_epochs = cfg.TRAIN.CL.get("WARM_EPOCHS", 0)
-            self.cl_epochs = cfg.TRAIN.CL.get("CL_EPOCHS")
-            self.prediction_length = cfg.TRAIN.CL.get("PREDICTION_LENGTH")
-            self.cl_step_size = cfg.TRAIN.CL.get("STEP_SIZE", 1)
-        # evaluation horizon
-        self.evaluation_horizons = [_ - 1 for _ in cfg["TEST"].get("EVALUATION_HORIZONS", range(1, 13))]
-        assert min(self.evaluation_horizons) >= 0, "The horizon should start counting from 0."
+            self.warm_up_epochs = cfg["TRAIN"].CL.get("WARM_EPOCHS", 0)
+            self.cl_epochs = cfg["TRAIN"].CL.get("CL_EPOCHS")
+            self.prediction_length = cfg["TRAIN"].CL.get("PREDICTION_LENGTH")
+            self.cl_step_size = cfg["TRAIN"].CL.get("STEP_SIZE", 1)
+        # evaluation
+        self.if_evaluate_on_gpu = cfg.get("EVAL", EasyDict()).get("USE_GPU", True)     # evaluate on gpu or cpu (gpu is faster but may cause OOM)
+        self.evaluation_horizons = [_ - 1 for _ in cfg.get("EVAL", EasyDict()).get("HORIZONS", range(1, 13))]
+        assert min(self.evaluation_horizons) >= 0, "The horizon should start counting from 1."
+
+    def setup_graph(self, cfg: dict, train: bool):
+        """Setup all parameters and the computation graph.
+        Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
+
+        Args:
+            cfg (dict): config
+            train (bool): training or inferencing
+        """
+
+        dataloader = self.build_test_data_loader(cfg=cfg) if not train else self.build_train_data_loader(cfg=cfg)
+        data = next(enumerate(dataloader))[1] # get the first batch
+        self.forward(data=data, epoch=1, iter_num=0, train=train)
 
     def init_training(self, cfg: dict):
         """Initialize training.
@@ -58,6 +77,10 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             cfg (dict): config
         """
 
+        # setup graph
+        if self.need_setup_graph:
+            self.setup_graph(cfg=cfg, train=True)
+            self.need_setup_graph = False
         super().init_training(cfg)
         for key, _ in self.metrics.items():
             self.register_epoch_meter("train_"+key, "train", "{:.4f}")
@@ -84,6 +107,9 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             cfg (dict): config
         """
 
+        if self.need_setup_graph:
+            self.setup_graph(cfg=cfg, train=False)
+            self.need_setup_graph = False
         super().init_test(cfg)
         for key, _ in self.metrics.items():
             self.register_epoch_meter("test_"+key, "test", "{:.4f}")
@@ -126,6 +152,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         Returns:
             validation dataset (Dataset)
         """
+
         data_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
         index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
 
@@ -222,6 +249,18 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             raise TypeError("Unknown metric type: {0}".format(type(metric_func)))
         return metric_item
 
+    def rescale_data(self, data: torch.Tensor) -> torch.Tensor:
+        """Rescale data.
+
+        Args:
+            data (torch.Tensor): data to be re-scaled.
+
+        Returns:
+            torch.Tensor: re-scaled data.
+        """
+
+        return SCALER_REGISTRY.get(self.scaler["func"])(data, **self.scaler["args"])
+
     def train_iters(self, epoch: int, iter_index: int, data: Union[torch.Tensor, Tuple]) -> torch.Tensor:
         """Training details.
 
@@ -237,20 +276,20 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         iter_num = (epoch-1) * self.iter_per_epoch + iter_index
         forward_return = list(self.forward(data=data, epoch=epoch, iter_num=iter_num, train=True))
         # re-scale data
-        prediction_rescaled = SCALER_REGISTRY.get(self.scaler["func"])(forward_return[0], **self.scaler["args"])
-        real_value_rescaled = SCALER_REGISTRY.get(self.scaler["func"])(forward_return[1], **self.scaler["args"])
+        prediction = self.rescale_data(forward_return[0]) if self.if_rescale else forward_return[0]
+        real_value = self.rescale_data(forward_return[1]) if self.if_rescale else forward_return[1]
         # loss
         if self.cl_param:
             cl_length = self.curriculum_learning(epoch=epoch)
-            forward_return[0] = prediction_rescaled[:, :cl_length, :, :]
-            forward_return[1] = real_value_rescaled[:, :cl_length, :, :]
+            forward_return[0] = prediction[:, :cl_length, :, :]
+            forward_return[1] = real_value[:, :cl_length, :, :]
         else:
-            forward_return[0] = prediction_rescaled
-            forward_return[1] = real_value_rescaled
+            forward_return[0] = prediction
+            forward_return[1] = real_value
         loss = self.metric_forward(self.loss, forward_return)
         # metrics
         for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, forward_return[:2])
+            metric_item = self.metric_forward(metric_func, [prediction, real_value])
             self.update_epoch_meter("train_"+metric_name, metric_item.item())
         return loss
 
@@ -258,19 +297,47 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         """Validation details.
 
         Args:
-            data (Union[torch.Tensor, Tuple]): Data provided by DataLoader
-            train_epoch (int): current epoch if in training process. Else None.
             iter_index (int): current iter.
+            data (Union[torch.Tensor, Tuple]): Data provided by DataLoader
         """
 
-        forward_return = self.forward(data=data, epoch=None, iter_num=None, train=False)
+        forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
         # re-scale data
-        prediction_rescaled = SCALER_REGISTRY.get(self.scaler["func"])(forward_return[0], **self.scaler["args"])
-        real_value_rescaled = SCALER_REGISTRY.get(self.scaler["func"])(forward_return[1], **self.scaler["args"])
+        prediction = self.rescale_data(forward_return[0]) if self.if_rescale else forward_return[0]
+        real_value = self.rescale_data(forward_return[1]) if self.if_rescale else forward_return[1]
         # metrics
         for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, [prediction_rescaled, real_value_rescaled])
+            metric_item = self.metric_forward(metric_func, [prediction, real_value])
             self.update_epoch_meter("val_"+metric_name, metric_item.item())
+
+    def evaluate(self, prediction, real_value):
+        """Evaluate the model on test data.
+
+        Args:
+            prediction (torch.Tensor): prediction data [B, L, N, C].
+            real_value (torch.Tensor): ground truth [B, L, N, C].
+        """
+
+        if not self.if_evaluate_on_gpu:
+            prediction = prediction.detach().cpu()
+            real_value = real_value.detach().cpu()
+        # test performance of different horizon
+        for i in self.evaluation_horizons:
+            # For horizon i, only calculate the metrics **at that time** slice here.
+            pred = prediction[:, i, :, :]
+            real = real_value[:, i, :, :]
+            # metrics
+            metric_repr = ""
+            for metric_name, metric_func in self.metrics.items():
+                metric_item = self.metric_forward(metric_func, [pred, real])
+                metric_repr += ", Test {0}: {1:.4f}".format(metric_name, metric_item.item())
+            log = "Evaluate best model on test data for horizon {:d}" + metric_repr
+            log = log.format(i+1)
+            self.logger.info(log)
+        # test performance overall
+        for metric_name, metric_func in self.metrics.items():
+            metric_item = self.metric_forward(metric_func, [prediction, real_value])
+            self.update_epoch_meter("test_"+metric_name, metric_item.item())
 
     @torch.no_grad()
     @master_only
@@ -291,31 +358,10 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         prediction = torch.cat(prediction, dim=0)
         real_value = torch.cat(real_value, dim=0)
         # re-scale data
-        prediction = SCALER_REGISTRY.get(self.scaler["func"])(
-            prediction, **self.scaler["args"])
-        real_value = SCALER_REGISTRY.get(self.scaler["func"])(
-            real_value, **self.scaler["args"])
-        # summarize the results.
-        # test performance of different horizon
-        for i in self.evaluation_horizons:
-            # For horizon i, only calculate the metrics **at that time** slice here.
-            pred = prediction[:, i, :, :]
-            real = real_value[:, i, :, :]
-            # metrics
-            metric_repr = ""
-            for metric_name, metric_func in self.metrics.items():
-                metric_item = self.metric_forward(metric_func, [pred, real])
-                metric_repr += ", Test {0}: {1:.4f}".format(metric_name, metric_item.item())
-            log = "Evaluate best model on test data for horizon {:d}" + metric_repr
-            log = log.format(i+1)
-            self.logger.info(log)
-        # test performance overall
-        for metric_name, metric_func in self.metrics.items():
-            if self.evaluate_on_gpu:
-                metric_item = self.metric_forward(metric_func, [prediction, real_value])
-            else:
-                metric_item = self.metric_forward(metric_func, [prediction.detach().cpu(), real_value.detach().cpu()])
-            self.update_epoch_meter("test_"+metric_name, metric_item.item())
+        prediction = self.rescale_data(prediction) if self.if_rescale else prediction
+        real_value = self.rescale_data(real_value) if self.if_rescale else real_value
+        # evaluate
+        self.evaluate(prediction, real_value)
 
     @master_only
     def on_validating_end(self, train_epoch: Optional[int]):

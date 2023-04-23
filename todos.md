@@ -11,26 +11,37 @@
     - 代码库的组织结构。
     - 代码库的约定习惯。
     - 如何修改/扩展标准的pipeline。
-    - 如何进行模型验证。
+    - 如何进行模型验证。    
 
 - 清理不符合规范的代码
-    - 代码注释。
-    - 统一数据预处理的结果。
-    - 清理Runner，删除没有特殊定义的Runner。
-    - 统一模型名字的大小写
+    - 代码注释。 ✅
+    - 统一数据预处理的结果。 ✅
+    - 清理Runner。 ✅
+        1. 梳理时间序列预测的Pipeline，并标注对应的CFG选项、接口设计
+        2. 修改Scripts
+            2.1 添加Norm Each Channel选项 ✅
+            2.2 统一Temporal Feature的格式 ✅
+        3. 修改arch
+            3.1 修改Xformer的数据处理 ✅
+        4. 修改runner
+            4.1 NULL Value提到General Parameters里面去 ✅
+            4.2 添加Rescale选项（General Parameters） ✅
+            4.3 Evaluate单独写一个函数 ✅
+            4.4 ReScale单独写一个函数 ✅
+            4.5 整理Setup Graph，使其更合理，并使其推理脚本更加简洁易懂 ✅
+            4.6 SETUP_Graph 选项应该放在MODEL里面 ✅
+            4.7 Format一下CFG.TRAIN和CFG.get("TRAIN")以及cfg["TRAIN] ✅
+            4.8 XFormer的Metrics和Loss需要适配 ✅
+        5. 删除没有特殊定义的Runner ✅
 
-- 规范文件命名。
-    - 数据集/模型的大小写问题。
-
-- 添加icon，并整理README。
+- 添加icon，并整理README。 ✅
 
 ## New Feature
 
-- 支持独立加载模型。
-- 支持更多的Runner内部函数的解耦操作，从而支持更灵活的模型验证。
-- 每次运行保存Model和Runner文件。
-- 支持自定义是否re-scale。
-- 将ETT数据集按照现有工作的习惯划分重新处理。
+- 支持独立加载模型。✅
+- 支持更多的Runner内部函数的解耦操作，从而支持更灵活的模型验证。✅
+- 支持自定义是否re-scale。✅
+- 将ETT数据集按照现有工作的习惯划分重新处理。 ✅
 
 ## Documentation
 

@@ -4,12 +4,12 @@ import argparse
 
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../../.."))
-from scripts.data_preparation.ETTh1.generate_training_data import generate_data
+from scripts.data_preparation.ETTm1.generate_training_data import generate_data
 
 
 if __name__ == "__main__":
     # sliding window size for generating history sequence and target sequence
-    HISTORY_SEQ_LEN = 336
+    HISTORY_SEQ_LEN = 96
     FUTURE_SEQ_LEN = 336
 
     TRAIN_RATIO = 0.6
@@ -22,6 +22,8 @@ if __name__ == "__main__":
     DOW = True                  # if add day_of_week feature
     DOM = True                  # if add day_of_month feature
     DOY = True                  # if add day_of_year feature
+
+    NORM_EACH_CHANNEL = True
 
     OUTPUT_DIR = "datasets/" + DATASET_NAME
     DATA_FILE_PATH = "datasets/raw_data/{0}/{0}.csv".format(DATASET_NAME)
@@ -51,6 +53,8 @@ if __name__ == "__main__":
                         default=TRAIN_RATIO, help="Train ratio")
     parser.add_argument("--valid_ratio", type=float,
                         default=VALID_RATIO, help="Validate ratio.")
+    parser.add_argument("--norm_each_channel", type=float,
+                        default=NORM_EACH_CHANNEL, help="Validate ratio.")
     args_metr = parser.parse_args()
 
     # print args

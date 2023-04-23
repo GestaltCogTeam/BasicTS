@@ -141,6 +141,7 @@ class DCRNN(nn.Module, Seq2SeqAttrs):
         history_data = history_data.transpose(0, 1)         # [L, B, N*C]
 
         if future_data is not None:
+            future_data = future_data[..., [0]]     # teacher forcing only use the first dimension.
             batch_size, length, num_nodes, channels = future_data.shape
             future_data = future_data.reshape(batch_size, length, num_nodes * channels)      # [B, L, N*C]
             future_data = future_data.transpose(0, 1)         # [L, B, N*C]
@@ -155,11 +156,6 @@ class DCRNN(nn.Module, Seq2SeqAttrs):
         outputs = outputs.transpose(0, 1)  # [B, L, N*C_out]
         outputs = outputs.view(B, L, self.num_nodes,
                                self.decoder_model.output_dim)
-
-        if not self.training:
-            assert future_data == None, "Future data should not be visible when validating/testing."
-        else:
-            pass
 
         if batch_seen == 0:
             print("Warning: decoder only takes the first dimension as groundtruth.")

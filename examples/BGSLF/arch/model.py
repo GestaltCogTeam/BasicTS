@@ -14,7 +14,7 @@ def cosine_similarity_torch(x1, x2=None, eps=1e-8):
     return torch.mm(x1, x2.t()) / (w1 * w2.t()).clamp(min=eps)
 
 class Adjacency_generator(nn.Module):
-    def __init__(self, embedding_size, num_nodes, time_series, kernel_size, freq, requires_graph, seq_len, input_dim, device):
+    def __init__(self, embedding_size, num_nodes, time_series, kernel_size, freq, requires_graph, seq_len, feas_dim, input_dim, device, reduction_ratio=16):
         super(Adjacency_generator, self).__init__()
         self.freq = freq
         self.kernel_size = kernel_size
@@ -22,13 +22,15 @@ class Adjacency_generator(nn.Module):
         self.embedding = embedding_size
         self.time_series = time_series
         self.seq_len = seq_len
+        self.feas_dim = feas_dim
         self.input_dim = input_dim
         self.segm = int((self.time_series.shape[0]-1) // self.freq)
         self.graphs = requires_graph
-        self.delta_series = torch.zeros(self.time_series.shape[0], self.time_series.shape[1]).to(device)
-        self.conv1d = nn.Conv1d(in_channels=self.segm, out_channels=self.graphs, kernel_size=kernel_size, padding=0)
+        self.delta_series = torch.zeros_like(self.time_series).to(device)
+        self.conv1d = nn.Conv1d(in_channels=self.segm * self.feas_dim, out_channels=self.graphs, kernel_size=kernel_size, padding=0)
         self.fc_1 = nn.Linear(self.freq - self.kernel_size + 1, self.embedding)
-        self.fc_2 = nn.Linear(self.embedding, self.num_nodes)
+        self.fc_2 = nn.Linear(self.embedding, self.embedding // reduction_ratio)
+        self.fc_3 = nn.Linear(self.embedding // reduction_ratio, self.num_nodes)
         self.process()
         self.device = device
 
@@ -41,16 +43,20 @@ class Adjacency_generator(nn.Module):
                 self.delta_series[i] = self.time_series[i]-self.time_series[i-1]
         times = []
         for i in range(self.segm):
-            time_seg = self.delta_series[i * self.freq + 1:(i+1) * self.freq + 1]
+            time_seg = self.delta_series[i*self.freq + 1 : (i+1)*self.freq + 1]
             times.append(time_seg)
 
-        self.times = torch.stack(times, dim=0) # (graphs, freq, num_nodes)
+        t = torch.stack(times, dim=0).reshape(self.segm, self.freq, self.num_nodes, self.feas_dim) # (num_segment, freq, num_nodes, feas_dim)
+        self.t = t
 
     def forward(self, node_feas): # input: (seq_len, batch_size, num_sensor * input_dim)
-        mid_input = self.conv1d(self.times.permute(2,0,1)).permute(1,0,2) #(graphs, num_nodes, freq-kernel_size+1)
+        t = self.t.permute(2, 0, 3, 1)
+        self.times = t.reshape(self.num_nodes, -1, self.freq)
+        mid_input = self.conv1d(self.times).permute(1,0,2) # (graphs, num_nodes, freq-kernel_size+1)
         mid_output = torch.stack([F.relu(self.fc_1(mid_input[i,...])) for i in range(self.graphs)], dim=0)
-        output = torch.sigmoid(self.fc_2(mid_output))
-        # 对于cos_similarity来说，值越大表示越接近
+        out_put = F.relu(self.fc_2(mid_output))
+        output = torch.sigmoid(self.fc_3(out_put))
+        # cos_similarity
         max_similarity = -999999
         seq_len = node_feas.shape[0]
         batch_size = node_feas.shape[1]
@@ -155,7 +161,15 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
         return output, torch.stack(hidden_states)
 
 
-class LSCGFModel(nn.Module, Seq2SeqAttrs):
+class BGSLF(nn.Module, Seq2SeqAttrs):
+    """
+        Paper:
+            Balanced Spatial-Temporal Graph Structure Learning for Multivariate Time Series Forecasting: A Trade-off between Efficiency and Flexibility
+            https://proceedings.mlr.press/v189/chen23a.html
+
+        Official Codes:
+            https://github.com/onceCWJ/BGSLF
+    """
     def __init__(self, node_feas, temperature, args):
         super().__init__()
         Seq2SeqAttrs.__init__(self, args)
@@ -167,13 +181,14 @@ class LSCGFModel(nn.Module, Seq2SeqAttrs):
         self.temperature = temperature
         self.embedding_size = args.embedding_size
         self.seq_len = args.seq_len
+        self.feas_dim = args.feas_dim
         self.input_dim = args.input_dim
         self.kernel_size = args.kernel_size
         self.freq = args.freq
         self.requires_graph = args.requires_graph
         self.Adjacency_generator = Adjacency_generator(embedding_size=self.embedding_size, num_nodes = self.num_nodes, time_series = node_feas,
                                                        kernel_size=self.kernel_size, freq=self.freq, requires_graph = self.requires_graph,
-                                                       seq_len=self.seq_len, input_dim = self.input_dim, device = args.device)
+                                                       seq_len=self.seq_len, feas_dim=self.feas_dim, input_dim = self.input_dim, device = args.device)
         self.device = args.device
 
 
@@ -220,19 +235,17 @@ class LSCGFModel(nn.Module, Seq2SeqAttrs):
                     decoder_input = labels[t]
         outputs = torch.stack(outputs)
         return outputs
+
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
         # history_data (torch.Tensor): shape [B, L, N, C]
         batch_size, seq_len, num_nodes, input_dim = history_data.shape
         inputs = history_data.permute(1, 0, 2, 3).contiguous().view(seq_len, -1, num_nodes * input_dim)
-        labels = future_data[..., [0]].permute(1, 0, 2, 3).contiguous().view(seq_len, -1, num_nodes * 1)
-        """
-        :param inputs: shape (seq_len, batch_size, num_sensor * input_dim)
-        :param labels: shape (horizon, batch_size, num_sensor * output)
-        :param batches_seen: batches seen till now
-        :return: output: (self.horizon, batch_size, self.num_nodes * self.output_dim)
-        """
+        if future_data is not None:
+            labels = future_data[..., [0]].permute(1, 0, 2, 3).contiguous().view(seq_len, -1, num_nodes * 1)
+        else:
+            labels = None
 
-        adj = SmoothSparseUnit(self.Adjacency_generator(inputs), 1, 0.10)
+        adj = SmoothSparseUnit(self.Adjacency_generator(inputs), 1, 0.02)
         # adj = F.relu(self.Adjacency_generator(inputs))
 
         encoder_hidden_state = self.encoder(inputs, adj)

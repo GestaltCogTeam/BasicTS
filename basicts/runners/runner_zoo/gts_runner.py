@@ -9,12 +9,6 @@ class GTSRunner(BaseTimeSeriesForecastingRunner):
         self.forward_features = cfg["MODEL"].get("FORWARD_FEATURES", None)
         self.target_features = cfg["MODEL"].get("TARGET_FEATURES", None)
 
-    def setup_graph(self, data):
-        try:
-            self.train_iters(1, 0, data)
-        except AttributeError:
-            pass
-
     def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
         """Select input features and reshape data to fit the target model.
 

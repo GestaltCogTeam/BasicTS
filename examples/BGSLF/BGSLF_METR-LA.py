@@ -3,24 +3,34 @@ import sys
 
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
+import torch
 from easydict import EasyDict
-from basicts.losses import masked_mae
-from basicts.data import TimeSeriesForecastingDataset
 from basicts.runners import SimpleTimeSeriesForecastingRunner
-from basicts.archs import NLinear
+from basicts.data import TimeSeriesForecastingDataset
+from basicts.utils.serialization import load_pkl
+from basicts.losses import masked_mae
 
+from .arch import BGSLF
 
 CFG = EasyDict()
 
+# GTS does not allow to load parameters since it creates parameters in the first iteration
+resume = False
+if not resume:
+    import random
+    _ = random.randint(-1e6, 1e6)
+
 # ================= general ================= #
-CFG.DESCRIPTION = "Linear model configuration"
-CFG.RUNNER = SimpleTimeSeriesForecastingRunner
+CFG.DESCRIPTION = "BGSLF model configuration"
+CFG.RUNNER  = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "Weather"
-CFG.DATASET_TYPE = "Weather Data"
-CFG.DATASET_INPUT_LEN = 96
-CFG.DATASET_OUTPUT_LEN = 336
+CFG.DATASET_NAME = "METR-LA"
+CFG.DATASET_TYPE = "Traffic speed"
+CFG.DATASET_INPUT_LEN = 12
+CFG.DATASET_OUTPUT_LEN = 12
+CFG._ = _
 CFG.GPU_NUM = 1
+CFG.NULL_VAL = 0.0
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
@@ -30,13 +40,38 @@ CFG.ENV.CUDNN.ENABLED = True
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
-CFG.MODEL.NAME = "NLinear"
-CFG.MODEL.ARCH = NLinear
+CFG.MODEL.NAME = "BGSLF"
+CFG.MODEL.ARCH = BGSLF
+node_feats_full = load_pkl("datasets/{0}/data_in{1}_out{2}.pkl".format(CFG.DATASET_NAME, CFG.DATASET_INPUT_LEN, CFG.DATASET_OUTPUT_LEN))["processed_data"][..., 0]
+train_index_list = load_pkl("datasets/{0}/index_in{1}_out{2}.pkl".format(CFG.DATASET_NAME, CFG.DATASET_INPUT_LEN, CFG.DATASET_OUTPUT_LEN))["train"]
+node_feats = node_feats_full[:train_index_list[-1][-1], ...]
 CFG.MODEL.PARAM = {
-    "seq_len": CFG.DATASET_INPUT_LEN,
-    "pred_len": CFG.DATASET_OUTPUT_LEN
+    "node_feas": torch.Tensor(node_feats),
+    "temperature": 0.5,
+    "args": EasyDict({
+        "device": torch.device("cuda:0"),
+        "cl_decay_steps": 2000,
+        "filter_type": "dual_random_walk",
+        "horizon": 12,
+        "feas_dim": 1,
+        "input_dim": 2,
+        "ll_decay": 0,
+        "num_nodes": 207,
+        "max_diffusion_step": 2,
+        "num_rnn_layers": 1,
+        "output_dim": 1,
+        "rnn_units": 64,
+        "seq_len": 12,
+        "use_curriculum_learning": True,
+        "embedding_size": 256,
+        "kernel_size": 12,
+        "freq": 288,
+        "requires_graph": 2
+    })
+
 }
-CFG.MODEL.FORWARD_FEATURES = [0]
+CFG.MODEL.SETUP_GRAPH = True
+CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 # ================= optim ================= #
@@ -45,29 +80,31 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.002,
-    "weight_decay": 0.0001,
+    "lr": 0.003,
+    "eps": 1e-3
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones": [1, 50, 80],
-    "gamma": 0.5
+    "milestones": [20, 40],
+    "gamma": 0.1
 }
 
 # ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 10
+CFG.TRAIN.CLIP_GRAD_PARAM = {
+    "max_norm": 5.0
+}
+CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
-# CFG.TRAIN.NULL_VAL = np.nan
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE = 32
+CFG.TRAIN.DATA.BATCH_SIZE = 64
 CFG.TRAIN.DATA.PREFETCH = False
 CFG.TRAIN.DATA.SHUFFLE = True
 CFG.TRAIN.DATA.NUM_WORKERS = 2
@@ -89,12 +126,11 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96, 192, 288, 336]
 CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
 # read data
-CFG.TEST.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
+CFG.TEST.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
 CFG.TEST.DATA.BATCH_SIZE = 64
 CFG.TEST.DATA.PREFETCH = False

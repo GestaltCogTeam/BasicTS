@@ -22,6 +22,7 @@ CFG.DATASET_TYPE = "Traffic speed"
 CFG.DATASET_INPUT_LEN = 12
 CFG.DATASET_OUTPUT_LEN = 12
 CFG.GPU_NUM = 1
+CFG.NULL_VAL = 0.0
 
 # ================= model ================= #
 CFG.MODEL = EasyDict()
@@ -41,6 +42,7 @@ CFG.MODEL.PARAM = {
     "cl_decay_steps":2000,
     "use_curriculum_learning":True
 }
+CFG.MODEL.SETUP_GRAPH = True
 CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
 
@@ -69,10 +71,8 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
 )
-CFG.TRAIN.SETUP_GRAPH = True
 # train data
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.NULL_VAL = 0.0
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional

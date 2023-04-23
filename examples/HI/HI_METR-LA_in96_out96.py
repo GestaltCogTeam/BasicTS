@@ -21,6 +21,7 @@ CFG.DATASET_TYPE = "Traffic speed"
 CFG.DATASET_INPUT_LEN = 96
 CFG.DATASET_OUTPUT_LEN = 96
 CFG.GPU_NUM = 1
+CFG.NULL_VAL = 0.0
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
@@ -66,7 +67,6 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
 )
 # train data
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.NULL_VAL = 0.0
 # read data
 CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
 # dataloader args, optional
@@ -92,7 +92,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.EVALUATION_HORIZONS = [12, 24, 48, 96]
+CFG.TEST.HORIZONS = [12, 24, 48, 96]
 CFG.TEST.INTERVAL = 1
 # validating data
 CFG.TEST.DATA = EasyDict()

@@ -13,10 +13,6 @@ from basicts.data.transform import standard_transform
 
 def generate_data(args: argparse.Namespace):
     """Preprocess and generate train/valid/test datasets.
-    Default settings of METR-LA dataset:
-        - Normalization method: standard norm.
-        - Dataset division: 7:1:2.
-        - Window size: history 12, future 12.
 
     Args:
         args (argparse): configurations of preprocessing
@@ -32,6 +28,8 @@ def generate_data(args: argparse.Namespace):
     valid_ratio = args.valid_ratio
     data_file_path = args.data_file_path
     steps_per_day = args.steps_per_day
+    norm_each_channel = args.norm_each_channel
+
     # read data
     df = pd.read_excel(data_file_path)
     data = df.values
@@ -41,6 +39,7 @@ def generate_data(args: argparse.Namespace):
     print("raw time series shape: {0}".format(data.shape))
     print("columns: {0}".format(colums))
 
+    # split data
     l, n, f = data.shape
     num_samples = l - (history_seq_len + future_seq_len) + 1
     train_num_short = round(num_samples * train_ratio)
@@ -60,10 +59,11 @@ def generate_data(args: argparse.Namespace):
     test_index = index_list[train_num_short +
                             valid_num_short: train_num_short + valid_num_short + test_num_short]
 
+    # normalize data
     scaler = standard_transform
-    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, norm_each_channel=True)
+    data_norm = scaler(data, output_dir, train_index, history_seq_len, future_seq_len, norm_each_channel=norm_each_channel)
 
-    # add external feature
+    # add temporal feature
     feature_list = [data_norm]
     if add_time_of_day:
         # numerical time_of_day
@@ -75,14 +75,14 @@ def generate_data(args: argparse.Namespace):
 
     if add_day_of_week:
         # numerical day_of_week
-        dow = [(i // steps_per_day) % 7 for i in range(data_norm.shape[0])]
+        dow = [(i // steps_per_day) % 7 / 7 for i in range(data_norm.shape[0])]
         dow = np.array(dow)
         dow_tiled = np.tile(dow, [1, n, 1]).transpose((2, 1, 0))
         feature_list.append(dow_tiled)
 
     processed_data = np.concatenate(feature_list, axis=-1)
 
-    # dump data
+    # save data
     index = {}
     index["train"] = train_index
     index["valid"] = valid_index
@@ -98,7 +98,7 @@ def generate_data(args: argparse.Namespace):
 
 if __name__ == "__main__":
     # sliding window size for generating history sequence and target sequence
-    HISTORY_SEQ_LEN = 336
+    HISTORY_SEQ_LEN = 96
     FUTURE_SEQ_LEN = 336
 
     TRAIN_RATIO = 0.6
@@ -111,6 +111,8 @@ if __name__ == "__main__":
     DOW = True                  # if add day_of_week feature
     DOM = True                  # if add day_of_month feature
     DOY = True                  # if add day_of_year feature
+
+    NORM_EACH_CHANNEL = True
 
     OUTPUT_DIR = "datasets/" + DATASET_NAME
     DATA_FILE_PATH = "datasets/raw_data/{0}/{0}.xlsx".format(DATASET_NAME)
@@ -140,6 +142,8 @@ if __name__ == "__main__":
                         default=TRAIN_RATIO, help="Train ratio")
     parser.add_argument("--valid_ratio", type=float,
                         default=VALID_RATIO, help="Validate ratio.")
+    parser.add_argument("--norm_each_channel", type=float,
+                        default=NORM_EACH_CHANNEL, help="Validate ratio.")
     args_metr = parser.parse_args()
 
     # print args

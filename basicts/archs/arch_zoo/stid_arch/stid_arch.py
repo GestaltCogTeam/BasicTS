@@ -6,9 +6,9 @@ from .mlp import MultiLayerPerceptron
 
 class STID(nn.Module):
     """
-    The implementation of CIKM 2022 short paper
-        "Spatial-Temporal Identity: A Simple yet Effective Baseline for Multivariate Time Series Forecasting"
+    Paper: Spatial-Temporal Identity: A Simple yet Effective Baseline for Multivariate Time Series Forecasting
     Link: https://arxiv.org/abs/2208.05233
+    Official Code: https://github.com/zezhishao/STID
     """
 
     def __init__(self, **model_args):
@@ -82,8 +82,7 @@ class STID(nn.Module):
             time_in_day_emb = None
         if self.if_day_in_week:
             d_i_w_data = history_data[..., 2]
-            day_in_week_emb = self.day_in_week_emb[(
-                d_i_w_data[:, -1, :]).type(torch.LongTensor)]
+            day_in_week_emb = self.day_in_week_emb[(d_i_w_data[:, -1, :] * self.day_of_week_size).type(torch.LongTensor)]
         else:
             day_in_week_emb = None
 
