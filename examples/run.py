@@ -13,7 +13,7 @@ torch.set_num_threads(1) # aviod high cpu avg usage
 def parse_args():
     parser = ArgumentParser(description="Run time series forecasting model in BasicTS framework!")
     # parser.add_argument("-c", "--cfg", default="examples/DGCRN/DGCRN_METR-LA.py", help="training config")
-    parser.add_argument("-c", "--cfg", default="examples/LSCGF/LSCGF_METR-LA.py", help="training config")
+    # parser.add_argument("-c", "--cfg", default="examples/LSCGF/LSCGF_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/STID/STID_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/DCRNN/DCRNN_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/GTS/GTS_PEMS03.py", help="training config")
@@ -45,6 +45,7 @@ def parse_args():
     # parser.add_argument("-c", "--cfg", default="examples/STID/STID_ExchangeRate.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/DGCRN/DGCRN_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/MTGNN/MTGNN_METR-LA.py", help="training config")
+    parser.add_argument("-c", "--cfg", default="examples/MegaCRN/MegaCRN_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Informer/Informer_Weather.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_Weather.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/atfm_04.py", help="training config")
