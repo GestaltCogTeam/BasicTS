@@ -4,7 +4,7 @@ from .runner_zoo.dcrnn_runner import DCRNNRunner
 from .runner_zoo.mtgnn_runner import MTGNNRunner
 from .runner_zoo.gts_runner import GTSRunner
 from .runner_zoo.hi_runner import HIRunner
-from .runner_zoo.megecrn_runner import MegaCRNRunner
+from .runner_zoo.megacrn_runner import MegaCRNRunner
 
 __all__ = ["BaseTimeSeriesForecastingRunner",
            "SimpleTimeSeriesForecastingRunner",

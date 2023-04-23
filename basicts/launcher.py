@@ -1,6 +1,8 @@
 from typing import Dict, Union
+from packaging import version
 
 import easytorch
+
 
 def launch_training(cfg: Union[Dict, str], gpus: str = None, node_rank: int = 0):
     """Extended easytorch launch_training.
@@ -16,11 +18,8 @@ def launch_training(cfg: Union[Dict, str], gpus: str = None, node_rank: int = 0)
     # config checking
     pass
     # launch training based on easytorch
-    try:
+    easytorch_version = easytorch.__version__
+    if version.parse(easytorch_version) >= version.parse("1.3"):
         easytorch.launch_training(cfg=cfg, devices=gpus, node_rank=node_rank)
-    except TypeError as e:
-        if "launch_training() got an unexpected keyword argument" in repr(e):
-            # NOTE: for earlier easytorch version
-            easytorch.launch_training(cfg=cfg, gpus=gpus, node_rank=node_rank)
-        else:
-            raise e
+    else:
+        easytorch.launch_training(cfg=cfg, gpus=gpus, node_rank=node_rank)

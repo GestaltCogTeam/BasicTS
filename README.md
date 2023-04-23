@@ -15,6 +15,8 @@ On the one hand, BasicTS utilizes a ***unified and standard pipeline*** to give 
 
 On the other hand, BasicTS provides users with ***easy-to-use and extensible interfaces*** to facilitate the quick design and evaluation of new models. At a minimum, users only need to define the model architecture, and all other details can be configured in a configuration file.
 
+If you have any questions or suggestions, please feel free to [create a new issue](https://github.com/zezhishao/BasicTS/issues/new/choose) and I will reply as soon as possible.
+
 ## ✨ Highlighted Features
 
 BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch)[1], an easy-to-use and powerful open-source neural network training framework.
@@ -24,7 +26,7 @@ Thanks to EasyTorch, BasicTS has the following highlighted features:
 
 - 🛡**Rich Datasets**. BasicTS supports rich datasets to perform an exhaustive evaluation of a given model based on a unified pipeline. More datasets will be added in the future.
 
-- ⚔️**Rich Baselines**. BasicTS has a wealth of built-in methods, such as Spatial-Temporal Graph Neural Network-based (STGNN) methods and Transformer-based methods (under construction👷).
+- ⚔️**Rich Baselines**. BasicTS has a wealth of built-in methods, such as Spatial-Temporal Graph Neural Network-based (STGNN) methods and Transformer-based methods.
 
 ### 👨‍💻 Developing with BasicTS
 

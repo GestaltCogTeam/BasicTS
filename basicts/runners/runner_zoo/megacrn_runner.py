@@ -9,12 +9,6 @@ class MegaCRNRunner(BaseTimeSeriesForecastingRunner):
         self.forward_features = cfg["MODEL"].get("FORWARD_FEATURES", None)
         self.target_features = cfg["MODEL"].get("TARGET_FEATURES", None)
 
-    def setup_graph(self, data):
-        try:
-            self.train_iters(1, 0, data)
-        except AttributeError:
-            pass
-
     def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
         """Select input features and reshape data to fit the target model.
 
@@ -64,9 +58,10 @@ class MegaCRNRunner(BaseTimeSeriesForecastingRunner):
         batch_size, length, num_nodes, _ = future_data.shape
 
         history_data = self.select_input_features(history_data)
+        future_data = self.select_input_features(future_data)
 
         # feed forward
-        prediction_data, h_att, query, pos, neg = self.model(history_data=history_data, batch_seen=iter_num, epoch=epoch)
+        prediction_data, h_att, query, pos, neg = self.model(history_data=history_data, future_data=future_data, batch_seen=iter_num, epoch=epoch)
         assert list(prediction_data.shape)[:3] == [batch_size, length, num_nodes], \
             "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
         # post process
