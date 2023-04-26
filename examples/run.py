@@ -15,7 +15,7 @@ def parse_args():
     # parser.add_argument("-c", "--cfg", default="examples/DGCRN/DGCRN_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/LSCGF/LSCGF_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/STID/STID_METR-LA.py", help="training config")
-    parser.add_argument("-c", "--cfg", default="examples/DCRNN/DCRNN_METR-LA.py", help="training config")
+    # parser.add_argument("-c", "--cfg", default="examples/DCRNN/DCRNN_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/GTS/GTS_PEMS03.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/STID/STID_PEMS-BAY.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/HI/HI_METR-LA.py", help="training config")
@@ -50,6 +50,7 @@ def parse_args():
     # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_ETTm1.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/Autoformer_ETTm1.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/Autoformer_METR-LA.py", help="training config")
+    parser.add_argument("-c", "--cfg", default="examples/Triformer/Triformer_ETTh1.py", help="training config")
 
     # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_METR-LA_in96_out96.py", help="training config")
     parser.add_argument("--gpus", default="1", help="visible gpus")

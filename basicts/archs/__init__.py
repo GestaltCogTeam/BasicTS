@@ -15,7 +15,9 @@ from .arch_zoo.hi_arch import HINetwork
 from .arch_zoo.fedformer_arch import FEDformer
 from .arch_zoo.informer_arch import Informer, InformerStack
 from .arch_zoo.pyraformer_arch import Pyraformer
-from .arch_zoo.megacrn import MegaCRN
+from .arch_zoo.megacrn_arch import MegaCRN
+from .arch_zoo.crossformer_arch import Crossformer
+from .arch_zoo.triformer_arch import Triformer
 
 __all__ = ["STID", "GraphWaveNet", "DCRNN",
            "D2STGNN", "STGCN", "MTGNN",
@@ -24,4 +26,5 @@ __all__ = ["STID", "GraphWaveNet", "DCRNN",
            "DLinear", "NLinear", "Autoformer",
            "HINetwork", "FEDformer", "Informer",
            "InformerStack", "Pyraformer",
-           "MegaCRN"]
+           "MegaCRN", "Crossformer",
+           "Triformer"]
