@@ -59,6 +59,7 @@ CFG.MODEL.PARAM = {
 }
 CFG.MODEL.FORWARD_FEATURES = [0, 1]
 CFG.MODEL.TARGET_FEATURES = [0]
+CFG.MODEL.SETUP_GRAPH = True
 
 # ================= optim ================= #
 CFG.TRAIN = EasyDict()
@@ -85,7 +86,6 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     "checkpoints",
     "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
 )
-CFG.TRAIN.SETUP_GRAPH = True
 # train data
 CFG.TRAIN.DATA = EasyDict()
 # read data
