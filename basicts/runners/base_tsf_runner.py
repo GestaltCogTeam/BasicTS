@@ -15,13 +15,12 @@ from ..metrics import masked_mae, masked_mape, masked_rmse
 
 class BaseTimeSeriesForecastingRunner(BaseRunner):
     """
-    Runner for short term multivariate time series forecasting datasets.
-    Typically, models predict the future 12 time steps based on historical time series.
+    Runner for multivariate time series forecasting datasets.
     Features:
-        - Evaluate at horizon 3, 6, 12, and overall.
-        - Metrics: MAE, RMSE, MAPE. The best model is the one with the smallest mae at validation.
+        - Evaluate at pre-defined horizons (1~12 as default) and overall.
+        - Metrics: MAE, RMSE, MAPE. Allow customization. The best model is the one with the smallest mae at validation.
         - Support setup_graph for the models acting like tensorflow.
-        - Loss: MAE (masked_mae). Allow customization.
+        - Loss: MAE (masked_mae) as default. Allow customization.
         - Support curriculum learning.
         - Users only need to implement the `forward` function.
     """

@@ -40,22 +40,22 @@ def generate_data(args: argparse.Namespace):
     # split data
     l, n, f = data.shape
     num_samples = l - (history_seq_len + future_seq_len) + 1
-    train_num_short = round(num_samples * train_ratio)
-    valid_num_short = round(num_samples * valid_ratio)
-    test_num_short = num_samples - train_num_short - valid_num_short
-    print("number of training samples:{0}".format(train_num_short))
-    print("number of validation samples:{0}".format(valid_num_short))
-    print("number of test samples:{0}".format(test_num_short))
+    train_num = round(num_samples * train_ratio)
+    valid_num = round(num_samples * valid_ratio)
+    test_num = num_samples - train_num - valid_num
+    print("number of training samples:{0}".format(train_num))
+    print("number of validation samples:{0}".format(valid_num))
+    print("number of test samples:{0}".format(test_num))
 
     index_list = []
     for t in range(history_seq_len, num_samples + history_seq_len):
         index = (t-history_seq_len, t, t+future_seq_len)
         index_list.append(index)
 
-    train_index = index_list[:train_num_short]
-    valid_index = index_list[train_num_short: train_num_short + valid_num_short]
-    test_index = index_list[train_num_short +
-                            valid_num_short: train_num_short + valid_num_short + test_num_short]
+    train_index = index_list[:train_num]
+    valid_index = index_list[train_num: train_num + valid_num]
+    test_index = index_list[train_num +
+                            valid_num: train_num + valid_num + test_num]
 
     # normalize data
     scaler = standard_transform

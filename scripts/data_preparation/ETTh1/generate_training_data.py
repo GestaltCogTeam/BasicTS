@@ -48,22 +48,22 @@ def generate_data(args: argparse.Namespace):
     # split data
     l, n, f = data.shape
     num_samples = l - (history_seq_len + future_seq_len) + 1
-    train_num_short = round(num_samples * train_ratio)
-    valid_num_short = round(num_samples * valid_ratio)
-    test_num_short = num_samples - train_num_short - valid_num_short
-    print("number of training samples:{0}".format(train_num_short))
-    print("number of validation samples:{0}".format(valid_num_short))
-    print("number of test samples:{0}".format(test_num_short))
+    train_num = round(num_samples * train_ratio)
+    valid_num = round(num_samples * valid_ratio)
+    test_num = num_samples - train_num - valid_num
+    print("number of training samples:{0}".format(train_num))
+    print("number of validation samples:{0}".format(valid_num))
+    print("number of test samples:{0}".format(test_num))
 
     index_list = []
     for t in range(history_seq_len, num_samples + history_seq_len):
         index = (t-history_seq_len, t, t+future_seq_len)
         index_list.append(index)
 
-    train_index = index_list[:train_num_short]
-    valid_index = index_list[train_num_short: train_num_short + valid_num_short]
-    test_index = index_list[train_num_short +
-                            valid_num_short: train_num_short + valid_num_short + test_num_short]
+    train_index = index_list[:train_num]
+    valid_index = index_list[train_num: train_num + valid_num]
+    test_index = index_list[train_num +
+                            valid_num: train_num + valid_num + test_num]
 
     # normalize data
     scaler = standard_transform
@@ -73,11 +73,7 @@ def generate_data(args: argparse.Namespace):
     # add temporal feature
     feature_list = [data_norm]
     if add_time_of_day:
-        # IMPORTANT NOTE:
-        # # In traffic related datasets (e.g., METR-LA, PEMS-BAY, PEMS0X) which are usually used in spatial-temporal prediciton in STGNN-based methods,
-        # #     the time of day is normalized to [0, 1].
-        # # However, in other datasets (e.g., ETT) which are usually used in Long Time Series Forecasting (LSTF) in Transformer-based methods,
-        # #     the time of day is not normalized.
+        # numerical time_of_day
         tod = [i % steps_per_day / steps_per_day for i in range(data_norm.shape[0])]
         tod = np.array(tod)
         tod_tiled = np.tile(tod, [1, n, 1]).transpose((2, 1, 0))
