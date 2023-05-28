@@ -223,6 +223,8 @@ class GraphConv(nn.Module):
         #bs, c_in, ts, n_vertex = x.shape
         x = torch.permute(x, (0, 2, 3, 1))
 
+        self.gso = self.gso.to(x.device)
+
         first_mul = torch.einsum('hi,btij->bthj', self.gso, x)
         second_mul = torch.einsum('bthi,ij->bthj', first_mul, self.weight)
 
