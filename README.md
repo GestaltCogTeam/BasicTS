@@ -2,7 +2,7 @@
   <img src="assets/basicts_logo.png" height=200>
   <!-- <h1><b> BasicTS </b></h1> -->
   <!-- <h2><b> BasicTS </b></h2> -->
-  <h3><b> An Standard and Fair Time Series Forecasting Benchmark and Toolkit. </b></h3>
+  <h3><b> A Standard and Fair Time Series Forecasting Benchmark and Toolkit. </b></h3>
 </div>
 
 ---
