@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(__file__ + "/../.."))
 import torch
 from basicts import launch_training
 
-torch.set_num_threads(1) # aviod high cpu avg usage
+torch.set_num_threads(3) # aviod high cpu avg usage
 
 
 def parse_args():
@@ -50,10 +50,11 @@ def parse_args():
     # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_ETTm1.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/Autoformer_ETTm1.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/Autoformer_METR-LA.py", help="training config")
-    parser.add_argument("-c", "--cfg", default="examples/Triformer/Triformer_ETTh1.py", help="training config")
+    # parser.add_argument("-c", "--cfg", default="examples/Triformer/Triformer_ETTh1.py", help="training config")
+    parser.add_argument("-c", "--cfg", default="examples/STID/STID_CA.py", help="training config")
 
     # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_METR-LA_in96_out96.py", help="training config")
-    parser.add_argument("--gpus", default="1", help="visible gpus")
+    parser.add_argument("--gpus", default="0, 1, 2, 3", help="visible gpus")
     return parser.parse_args()
 
 if __name__ == "__main__":

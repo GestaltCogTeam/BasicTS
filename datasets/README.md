@@ -4,6 +4,8 @@
 
 The raw data can be downloaded at this [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp) or [Baidu Yun](https://pan.baidu.com/s/11d_am76_orMTV2vNejmuyg?pwd=v3ii)(password: v3ii), and should be unzipped to datasets/raw_data/.
 
+The `raw_data (with large-scale datasets).zip` in the link is the full version with all datasets, including large-scale datasets. If you don't need these large-scale datasets, you can download `raw_data.zip`.
+
 ## Datasets Description
 
 ### 1. ETT (Electricity Transformer Temperature) Datasets
@@ -23,9 +25,10 @@ The first six variates are overload data, while the last one is oil temperature.
 
 **Typical Settings**: 
 
-- **M**: Multivariate time series forecasting. Input all 7 features, predict all 7 features. BasicTS use this setting as default for ETT datasets.
-- **S**: Univariate time series forecasting. Input 1 feature (oil temperature default), predict the corresponding feature.
-- **MS**: Multivariate predict univariate. Input all 7 features, predict 1 feature (oil temperature default).
+- Long time series forecasting.
+    - **M**: Multivariate time series forecasting. Input all 7 features, predict all 7 features. BasicTS use this setting as default for ETT datasets.
+    - **S**: Univariate time series forecasting. Input 1 feature (oil temperature default), predict the corresponding feature.
+    - **MS**: Multivariate predict univariate. Input all 7 features, predict 1 feature (oil temperature default).
 
 ### 2. Electricity
 
@@ -43,7 +46,7 @@ The first six variates are overload data, while the last one is oil temperature.
 
 **Typical Settings**: 
 
-- **M**: Multivariate time series forecasting. Input all 321 features, predict all 321 features.
+- Long time series forecasting.
 
 ### 3. Weather
 
@@ -64,9 +67,10 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 **Typical Settings**:
 
-- **M**: Multivariate time series forecasting. Input all 21 features, predict all 21 features.
-- **S**: Univariate time series forecasting. Input 1 feature (wet bulb default), predict the corresponding feature.
-- **MS**: Multivariate predict univariate. Input all 21 features, predict 1 feature (wet bulb default).
+- Long time series forecasting.
+    - **M**: Multivariate time series forecasting. Input all 21 features, predict all 21 features.
+    - **S**: Univariate time series forecasting. Input 1 feature (wet bulb default), predict the corresponding feature.
+    - **MS**: Multivariate predict univariate. Input all 21 features, predict 1 feature (wet bulb default).
 
 ### 4. Exchange Rate
 
@@ -84,7 +88,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 **Typical Settings**:
 
-- Multivariate time series forecasting. Input all 8 features, predict all 8 features.
+- Long time series forecasting.
 
 ### 5. Beijing Air Quality
 
@@ -102,7 +106,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 **Typical Settings**:
 
-- Multivariate time series forecasting. Input all 7 features, predict all 7 features.
+- Long time series forecasting.
 
 ### 6. METR-LA
 
@@ -120,7 +124,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 **Typical Settings**:
 
-- Multivariate time series forecasting. Input all 207 features, predict all 207 features.
+- Spatial temporal forecasting.
 
 ### 7. PEMS-BAY
 
@@ -138,7 +142,7 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 **Typical Settings**:
 
-- Multivariate time series forecasting. Input all 325 features, predict all 325 features.
+-  Spatial temporal forecasting.
 
 ### 8. PEMS0X
 
@@ -174,4 +178,36 @@ Visibility, DryBulbFarenheit, DryBulbCelsius, WetBulbFarenheit, DewPointFarenhei
 
 **Typical Settings**:
 
-- Multivariate time series forecasting. Input all features, predict all features.
+- Spatial temporal forecasting.
+
+### 8. LargeST (CA, GLA, GBA, and SD)
+
+**Source**: [LargeST: A Benchmark Dataset for Large-Scale Traffic Forecasting.](https://arxiv.org/pdf/2306.08259.pdf). [Data Link](https://github.com/liuxu77/LargeST).
+
+**Description**: LargeST is a series of large scale traffic flow datasets, including CA, GLA, GBA, SD. Similar to METR-LA and PEMS-BAY, PEMS0X also includes a sensor graph to indicate dependencies between sensors. Moreover, LargeST also includes a meta data graph of each node. Following the original paper, we use the data from 2019. The details of largeST can be found in the [LargeST: A Benchmark Dataset for Large-Scale Traffic Forecasting.](https://arxiv.org/pdf/2306.08259.pdf)
+
+
+**Period**: 2019
+
+
+**Number of Time Steps**:
+
+- CA: 35040
+- GLA: 35040
+- GBA: 35040
+- SD: 35040
+
+**Dataset Split**: 6:2:2.
+
+**Variates**: Each variate represents the traffic flow of a sensor.
+
+**Number of Variates**:
+
+- CA: 8600
+- GLA: 3834
+- GBA: 2352
+- SD: 716
+
+**Typical Settings**:
+
+- Spatial temporal forecasting.
