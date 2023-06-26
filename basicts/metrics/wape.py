@@ -2,8 +2,8 @@ import torch
 import numpy as np
 
 
-def masked_mae(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
-    """Masked mean absolute error.
+def masked_wape(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+    """Masked weighted absolute percentage error (WAPE)
 
     Args:
         preds (torch.Tensor): predicted values
@@ -20,9 +20,6 @@ def masked_mae(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.n
         eps = 5e-5
         mask = ~torch.isclose(labels, torch.tensor(null_val).expand_as(labels).to(labels.device), atol=eps, rtol=0.)
     mask = mask.float()
-    mask /= torch.mean((mask))
-    mask = torch.where(torch.isnan(mask), torch.zeros_like(mask), mask)
-    loss = torch.abs(preds-labels)
-    loss = loss * mask
-    loss = torch.where(torch.isnan(loss), torch.zeros_like(loss), loss)
+    preds, labels = preds * mask, labels * mask
+    loss = torch.sum(torch.abs(preds-labels)) / torch.sum(torch.abs(labels))
     return torch.mean(loss)
