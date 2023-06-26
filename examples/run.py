@@ -51,10 +51,10 @@ def parse_args():
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/Autoformer_ETTm1.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Autoformer/Autoformer_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/Triformer/Triformer_ETTh1.py", help="training config")
-    parser.add_argument("-c", "--cfg", default="examples/STID/STID_CA.py", help="training config")
+    parser.add_argument("-c", "--cfg", default="examples/STID/STID_METR-LA.py", help="training config")
 
     # parser.add_argument("-c", "--cfg", default="examples/Pyraformer/Pyraformer_METR-LA_in96_out96.py", help="training config")
-    parser.add_argument("--gpus", default="0, 1, 2, 3", help="visible gpus")
+    parser.add_argument("--gpus", default="0", help="visible gpus")
     return parser.parse_args()
 
 if __name__ == "__main__":

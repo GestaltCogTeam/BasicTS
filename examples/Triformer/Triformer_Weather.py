@@ -23,7 +23,6 @@ CFG.DATASET_INPUT_LEN = 336
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 CFG.RESCALE = False
-CFG.METRICS = {"MAE": masked_mae, "MSE": masked_mse}
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()

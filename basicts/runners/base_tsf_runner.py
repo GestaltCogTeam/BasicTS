@@ -10,7 +10,7 @@ from easytorch.utils.dist import master_only
 from .base_runner import BaseRunner
 from ..data import SCALER_REGISTRY
 from ..utils import load_pkl
-from ..metrics import masked_mae, masked_mape, masked_rmse
+from ..metrics import masked_mae, masked_mape, masked_rmse, masked_wape, masked_mse
 
 
 class BaseTimeSeriesForecastingRunner(BaseRunner):
@@ -41,7 +41,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         # define loss
         self.loss = cfg["TRAIN"]["LOSS"]
         # define metric
-        self.metrics = cfg.get("METRICS", {"MAE": masked_mae, "RMSE": masked_rmse, "MAPE": masked_mape})
+        self.metrics = cfg.get("METRICS", {"MAE": masked_mae, "RMSE": masked_rmse, "MAPE": masked_mape, "WAPE": masked_wape, "MSE": masked_mse})
         # curriculum learning for output. Note that this is different from the CL in Seq2Seq archs.
         self.cl_param = cfg["TRAIN"].get("CL", None)
         if self.cl_param is not None:
