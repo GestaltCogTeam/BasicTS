@@ -75,7 +75,7 @@ def generate_data(args: argparse.Namespace):
 
     if add_day_of_week:
         # numerical day_of_week
-        dow = df.index.dayofweek
+        dow = df.index.dayofweek / 7
         dow_tiled = np.tile(dow, [1, n, 1]).transpose((2, 1, 0))
         feature_list.append(dow_tiled)
 
