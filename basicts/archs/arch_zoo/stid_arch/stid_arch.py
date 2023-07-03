@@ -67,7 +67,7 @@ class STID(nn.Module):
             history_data (torch.Tensor): history data with shape [B, L, N, C]
 
         Returns:
-            torch.Tensor: prediction wit shape [B, L, N, C]
+            torch.Tensor: prediction with shape [B, L, N, C]
         """
 
         # prepare data

@@ -15,13 +15,13 @@ class Linear(nn.Module):
         self.Linear = nn.Linear(self.seq_len, self.pred_len)
 
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
-        """Feed forward of STID.
+        """Feed forward of Linear.
 
         Args:
             history_data (torch.Tensor): history data with shape [B, L, N, C]
 
         Returns:
-            torch.Tensor: prediction wit shape [B, L, N, C]
+            torch.Tensor: prediction with shape [B, L, N, C]
         """
 
         assert history_data.shape[-1] == 1      # only use the target feature

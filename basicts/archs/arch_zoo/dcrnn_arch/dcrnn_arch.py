@@ -132,7 +132,7 @@ class DCRNN(nn.Module, Seq2SeqAttrs):
             batch_seen (int, optional): batches seen till now, used for curriculum learning. Defaults to None.
 
         Returns:
-            torch.Tensor: prediction wit shape [L, B, N*C_out]
+            torch.Tensor: prediction with shape [L, B, N*C_out]
         """
 
         # reshape data
