@@ -19,7 +19,7 @@ from .arch_zoo.megacrn_arch import MegaCRN
 from .arch_zoo.crossformer_arch import Crossformer
 from .arch_zoo.triformer_arch import Triformer
 from .arch_zoo.patchtst_arch import PatchTST
-
+from .arch_zoo.wavenet_atch import WaveNet
 
 __all__ = ["STID", "GraphWaveNet", "DCRNN",
            "D2STGNN", "STGCN", "MTGNN",
@@ -29,4 +29,4 @@ __all__ = ["STID", "GraphWaveNet", "DCRNN",
            "HINetwork", "FEDformer", "Informer",
            "InformerStack", "Pyraformer",
            "MegaCRN", "Crossformer",
-           "Triformer", "PatchTST"]
+           "Triformer", "PatchTST", "WaveNet"]
