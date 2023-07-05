@@ -27,21 +27,21 @@ class Encoder(nn.Module):
         self.truncate = opt.truncate
         if opt.decoder == 'attention':
             self.mask, self.all_size = get_mask(
-                opt.input_size, opt.window_size, opt.inner_size, opt.device)
+                opt.input_size, opt.window_size, opt.inner_size)
         else:
             self.mask, self.all_size = get_mask(
-                opt.input_size+1, opt.window_size, opt.inner_size, opt.device)
+                opt.input_size+1, opt.window_size, opt.inner_size)
         self.decoder_type = opt.decoder
         if opt.decoder == 'FC':
             self.indexes = refer_points(
-                self.all_size, opt.window_size, opt.device)
+                self.all_size, opt.window_size)
 
         if opt.use_tvm:
             assert len(set(self.window_size)
                        ) == 1, "Only constant window size is supported."
             padding = 1 if opt.decoder == 'FC' else 0
             q_k_mask = get_q_k(opt.input_size + padding,
-                               opt.inner_size, opt.window_size[0], opt.device)
+                               opt.inner_size, opt.window_size[0])
             k_q_mask = get_k_q(q_k_mask)
             self.layers = nn.ModuleList([
                 EncoderLayer(opt.d_model, opt.d_inner_hid, opt.n_head, opt.d_k, opt.d_v, dropout=opt.dropout,

@@ -9,7 +9,7 @@ from .embed import DataEmbedding, CustomEmbedding
 from .pam_tvm import PyramidalAttention
 
 
-def get_mask(input_size, window_size, inner_size, device):
+def get_mask(input_size, window_size, inner_size):
     """Get the attention mask of PAM-Naive"""
     # Get the size of all layers
     all_size = []
@@ -19,7 +19,7 @@ def get_mask(input_size, window_size, inner_size, device):
         all_size.append(layer_size)
 
     seq_length = sum(all_size)
-    mask = torch.zeros(seq_length, seq_length, device=device)
+    mask = torch.zeros(seq_length, seq_length)
 
     # get intra-scale mask
     inner_window = inner_size // 2
@@ -49,10 +49,10 @@ def get_mask(input_size, window_size, inner_size, device):
     return mask, all_size
 
 
-def refer_points(all_sizes, window_size, device):
+def refer_points(all_sizes, window_size):
     """Gather features from PAM's pyramid sequences"""
     input_size = all_sizes[0]
-    indexes = torch.zeros(input_size, len(all_sizes), device=device)
+    indexes = torch.zeros(input_size, len(all_sizes))
 
     for i in range(input_size):
         indexes[i][0] = i
@@ -91,7 +91,7 @@ def get_subsequent_mask(input_size, window_size, predict_step, truncate):
     return mask
 
 
-def get_q_k(input_size, window_size, stride, device):
+def get_q_k(input_size, window_size, stride):
     """
     Get the index of the key that a given query needs to attend to.
     """
@@ -109,7 +109,7 @@ def get_q_k(input_size, window_size, stride, device):
 
     max_attn += window_size + 1
     mask = torch.zeros(full_length, max_attn,
-                       dtype=torch.int32, device=device) - 1
+                       dtype=torch.int32) - 1
 
     for i in range(input_size):
         mask[i, 0:window_size] = i + \

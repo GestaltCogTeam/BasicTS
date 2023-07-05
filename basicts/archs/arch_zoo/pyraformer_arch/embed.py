@@ -72,19 +72,36 @@ class TemporalEmbedding(nn.Module):
         self.day_of_month_size = day_of_month_size
         self.day_of_year_size = day_of_year_size
 
-        self.time_of_day_embed = Embed(time_of_day_size, d_model)
-        self.day_of_week_embed = Embed(day_of_week_size, d_model)
-        self.day_of_month_embed = Embed(day_of_month_size, d_model)
-        self.day_of_year_embed = Embed(day_of_year_size, d_model)
-    
+        if time_of_day_size is not None:
+            self.time_of_day_embed = Embed(time_of_day_size, d_model)
+        if day_of_week_size is not None:
+            self.day_of_week_embed = Embed(day_of_week_size, d_model)
+        if day_of_month_size is not None:
+            self.day_of_month_embed = Embed(day_of_month_size, d_model)
+        if day_of_year_size is not None:
+            self.day_of_year_embed = Embed(day_of_year_size, d_model)
+
     def forward(self, x):
         x = x + 0.5 # re-normalize to [0, 1) to get correct index. ref: arch_zoo/utils/xformer.py data_transformation_4_xformer
-        time_of_day_x = self.time_of_day_embed((x[:, :, 0] * self.time_of_day_size).type(torch.LongTensor).to(x.device))
-        day_of_week_x = self.day_of_week_embed((x[:, :, 1] * self.day_of_week_size).type(torch.LongTensor).to(x.device))
-        day_of_month_x = self.day_of_month_embed((x[:, :, 2] * self.day_of_month_size).type(torch.LongTensor).to(x.device))
-        day_of_year_x = self.day_of_year_embed((x[:, :, 3] * self.day_of_year_size).type(torch.LongTensor).to(x.device))
+        x0 = x[..., 0]
+        temporal_embeddings = []
+        if self.time_of_day_size is not None:
+            time_of_day_x = self.time_of_day_embed((x[:, :, 0] * self.time_of_day_size).long())
+            temporal_embeddings.append(time_of_day_x)
+        if self.day_of_week_size is not None:
+            day_of_week_x = self.day_of_week_embed((x[:, :, 1] * self.day_of_week_size).long())
+            temporal_embeddings.append(day_of_week_x)
+        if self.day_of_month_size is not None:
+            day_of_month_x = self.day_of_month_embed((x[:, :, 2] * self.day_of_month_size).long())
+            temporal_embeddings.append(day_of_month_x)
+        if self.day_of_year_size is not None:
+            day_of_year_x = self.day_of_year_embed((x[:, :, 3] * self.day_of_year_size).long())
+            temporal_embeddings.append(day_of_year_x)
 
-        return time_of_day_x + day_of_week_x + day_of_month_x + day_of_year_x
+        if len(temporal_embeddings) == 0:
+            return 0
+        else:
+            return sum(temporal_embeddings)
 
 
 class TimeFeatureEmbedding(nn.Module):

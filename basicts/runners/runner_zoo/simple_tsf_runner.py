@@ -65,7 +65,7 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         else:
             future_data_4_dec = self.select_input_features(future_data)
             # only use the temporal features
-            future_data_4_dec[:, 0, ...] = torch.empty_like(future_data_4_dec[:, 0, ...])
+            future_data_4_dec[..., 0] = torch.empty_like(future_data_4_dec[..., 0])
 
         # curriculum learning
         prediction_data = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train)
