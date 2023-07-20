@@ -31,7 +31,7 @@ class DGCRNRunner(SimpleTimeSeriesForecastingRunner):
         else:
             future_data_4_dec = self.select_input_features(future_data)
             # only use the temporal features
-            future_data_4_dec[:, 0, ...] = torch.empty_like(future_data_4_dec[:, 0, ...])
+            future_data_4_dec[..., 0] = torch.empty_like(future_data_4_dec[..., 0])
 
         # curriculum learning
         task_level = self.curriculum_learning(epoch)

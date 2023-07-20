@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(__file__ + "/../.."))
 import torch
 from basicts import launch_training
 
-torch.set_num_threads(3) # aviod high cpu avg usage
+# torch.set_num_threads(3) # aviod high cpu avg usage
 
 
 def parse_args():
