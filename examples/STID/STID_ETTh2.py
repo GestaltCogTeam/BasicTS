@@ -16,7 +16,7 @@ CFG = EasyDict()
 CFG.DESCRIPTION = "STID model configuration"
 CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "ETTh1"
+CFG.DATASET_NAME = "ETTh2"
 CFG.DATASET_TYPE = "Electricity Transformer Temperature"
 CFG.DATASET_INPUT_LEN = 336
 CFG.DATASET_OUTPUT_LEN = 336
@@ -38,7 +38,7 @@ CFG.MODEL.PARAM = {
     "num_nodes": 7,
     "input_len": CFG.DATASET_INPUT_LEN,
     "input_dim": 1,
-    "embed_dim": 512,
+    "embed_dim": 1024,
     "output_len": CFG.DATASET_OUTPUT_LEN,
     "num_layer": 1,
     "if_node": True,
