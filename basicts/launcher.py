@@ -9,7 +9,7 @@ def launch_runner(cfg: Union[Dict, str], fn: Callable, args: Tuple = (), device_
     if version.parse(easytorch_version) >= version.parse("1.3"):
         easytorch.launch_runner(cfg=cfg, fn=fn, args=args, device_type=device_type, devices=devices)
     else:
-        easytorch.launch_runner(cfg=cfg, fn=fn, args=args, gpus=args.gpus)
+        easytorch.launch_runner(cfg=cfg, fn=fn, args=args, gpus=devices)
 
 def launch_training(cfg: Union[Dict, str], gpus: str = None, node_rank: int = 0):
     """Extended easytorch launch_training.
