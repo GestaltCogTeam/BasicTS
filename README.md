@@ -137,14 +137,14 @@ BasicTS is built on PyTorch 1.9.1 or 1.10.0, while other versions have not been 
 
 - **Define Your Model Architecture**
 
-    The `forward` function needs to follow the conventions of BasicTS. You can find an example of the Multi-Layer Perceptron (`MLP`) model in [examples/MLP/mlp_arch.py](examples/MLP/mlp_arch.py)
+    The `forward` function needs to follow the conventions of BasicTS. You can find an example of the Multi-Layer Perceptron (`MLP`) model in [baselines/MLP/mlp_arch.py](baselines/MLP/mlp_arch.py)
 
 - **Define Your Runner for Your Model** (Optional)
 
     BasicTS provides a unified and standard pipeline in `basicts.runner.BaseTimeSeriesForecastingRunner`.
     Nevertheless, you still need to define the specific forward process (the `forward` function in the **runner**).
     Fortunately, BasicTS also provides such an implementation in `basicts.runner.SimpleTimeSeriesForecastingRunner`, which can cover most of the situations.
-    [The runner](examples/MLP/mlp_runner.py) for the `MLP` model can also use this built-in runner.
+    The runner for the `MLP` model can also use this built-in runner.
     You can also find more runners in `basicts.runners.runner_zoo` to learn more about the runner design.
 
 - **Configure your Configuration File**
@@ -170,18 +170,18 @@ python experiments/train.py -c /path/to/your/config/file.py --gpus '0'
 BasicTS provides a wealth of built-in models. You can find all the built-in models and their corresponding runners in [`basicts/archs/arch_zoo`](basicts/archs/arch_zoo/) and [`basicts/runners/runner_zoo`](basicts/runners/runner_zoo/), respectively. You can reproduce these models by running the following command:
 
 ```bash
-python examples/run.py -c examples/${MODEL_NAME}/${MODEL_NAME}_${DATASET_NAME}.py --gpus '0'
+python experiments/train.py -c baselines/${MODEL_NAME}/${MODEL_NAME}_${DATASET_NAME}.py --gpus '0'
 ```
 
 Replace `${DATASET_NAME}` and `${MODEL_NAME}` with any supported models and datasets. For example, you can run Graph WaveNet on METR-LA dataset by:
 
 ```bash
-python examples/run.py -c examples/GWNet/GWNet_METR-LA.py --gpus '0'
+python experiments/train.py -c baselines/GWNet/GWNet_METR-LA.py --gpus '0'
 ```
 
 ### Customized Your Own Model
 
-- [Multi-Layer Perceptron (MLP)](examples/MLP)
+- [Multi-Layer Perceptron (MLP)](baselines/MLP)
 - More...
 
 
