@@ -67,8 +67,8 @@ BasicTS support a variety of datasets, including spatial-temporal forecasting, l
 ### ⚔️ Baselines
 
 BasicTS provides a wealth of built-in models, including both spatial-temporal forecasting models and long time-series forecasting models, e.g.,
-- DCRNN, Graph WaveNet, MTGNN, STID, D2STGNN, STEP, DGCRN, DGCRN, STNorm, AGCRN, GTS, StemGNN, MegaCRN, STGCN
-- Informer, Autoformer, FEDformer, Pyraformer, DLinear, NLinear, Triformer, Crossformer
+- DCRNN, Graph WaveNet, MTGNN, STID, D2STGNN, STEP, DGCRN, DGCRN, STNorm, AGCRN, GTS, StemGNN, MegaCRN, STGCN, ...
+- Informer, Autoformer, FEDformer, Pyraformer, DLinear, NLinear, Triformer, Crossformer, ...
 
 ## 💿 Dependencies
 
