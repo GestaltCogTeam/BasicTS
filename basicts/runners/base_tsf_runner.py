@@ -67,6 +67,12 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         data = next(enumerate(dataloader))[1] # get the first batch
         self.forward(data=data, epoch=1, iter_num=0, train=train)
 
+    def count_parameters(self):
+        """Count the number of parameters in the model."""
+
+        num_parameters = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        self.logger.info("Number of parameters: {0}".format(num_parameters))
+
     def init_training(self, cfg: dict):
         """Initialize training.
 
@@ -80,9 +86,12 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         if self.need_setup_graph:
             self.setup_graph(cfg=cfg, train=True)
             self.need_setup_graph = False
+        # init training
         super().init_training(cfg)
+        # count parameters
+        self.count_parameters()
         for key, _ in self.metrics.items():
-            self.register_epoch_meter("train_"+key, "train", "{:.4f}")
+            self.register_epoch_meter("train_"+key, "train", "{:.6f}")
 
     def init_validation(self, cfg: dict):
         """Initialize validation.
@@ -95,7 +104,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
 
         super().init_validation(cfg)
         for key, _ in self.metrics.items():
-            self.register_epoch_meter("val_"+key, "val", "{:.4f}")
+            self.register_epoch_meter("val_"+key, "val", "{:.6f}")
 
     def init_test(self, cfg: dict):
         """Initialize test.
@@ -111,10 +120,10 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             self.need_setup_graph = False
         super().init_test(cfg)
         for key, _ in self.metrics.items():
-            self.register_epoch_meter("test_"+key, "test", "{:.4f}")
+            self.register_epoch_meter("test_"+key, "test", "{:.6f}")
 
     def build_train_dataset(self, cfg: dict):
-        """Build MNIST train dataset
+        """Build train dataset
 
         Args:
             cfg (dict): config
@@ -143,7 +152,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
 
     @staticmethod
     def build_val_dataset(cfg: dict):
-        """Build MNIST val dataset
+        """Build val dataset
 
         Args:
             cfg (dict): config
@@ -169,7 +178,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
 
     @staticmethod
     def build_test_dataset(cfg: dict):
-        """Build MNIST val dataset
+        """Build val dataset
 
         Args:
             cfg (dict): config
@@ -317,9 +326,6 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             real_value (torch.Tensor): ground truth [B, L, N, C].
         """
 
-        if not self.if_evaluate_on_gpu:
-            prediction = prediction.detach().cpu()
-            real_value = real_value.detach().cpu()
         # test performance of different horizon
         for i in self.evaluation_horizons:
             # For horizon i, only calculate the metrics **at that time** slice here.
@@ -329,7 +335,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             metric_repr = ""
             for metric_name, metric_func in self.metrics.items():
                 metric_item = self.metric_forward(metric_func, [pred, real])
-                metric_repr += ", Test {0}: {1:.4f}".format(metric_name, metric_item.item())
+                metric_repr += ", Test {0}: {1:.6f}".format(metric_name, metric_item.item())
             log = "Evaluate best model on test data for horizon {:d}" + metric_repr
             log = log.format(i+1)
             self.logger.info(log)
@@ -351,7 +357,9 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         prediction = []
         real_value = []
         for _, data in enumerate(self.test_data_loader):
-            forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
+            forward_return = list(self.forward(data, epoch=None, iter_num=None, train=False))
+            if self.if_evaluate_on_gpu:
+                forward_return[0], forward_return[1] = forward_return[0].detach().cpu(), forward_return[1].detach().cpu()
             prediction.append(forward_return[0])        # preds = forward_return[0]
             real_value.append(forward_return[1])        # testy = forward_return[1]
         prediction = torch.cat(prediction, dim=0)
