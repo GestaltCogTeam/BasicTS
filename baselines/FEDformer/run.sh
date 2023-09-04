@@ -1,0 +1,10 @@
+#!/bin/bash
+# python experiments/train.py -c baselines/FEDformer/FEDformer_ETTh1.py --gpus '2'
+# python experiments/train.py -c baselines/FEDformer/FEDformer_ETTh2.py --gpus '2'
+# python experiments/train.py -c baselines/FEDformer/FEDformer_ETTm1.py --gpus '2'
+# python experiments/train.py -c baselines/FEDformer/FEDformer_ETTm2.py --gpus '2'
+# python experiments/train.py -c baselines/FEDformer/FEDformer_Electricity.py --gpus '2'
+# python experiments/train.py -c baselines/FEDformer/FEDformer_ExchangeRate.py --gpus '2'
+# python experiments/train.py -c baselines/FEDformer/FEDformer_Weather.py --gpus '2'
+python experiments/train.py -c baselines/FEDformer/FEDformer_PEMS04.py --gpus '2'
+python experiments/train.py -c baselines/FEDformer/FEDformer_PEMS08.py --gpus '2'

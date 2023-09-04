@@ -1,0 +1,10 @@
+#!/bin/bash
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_ETTh1.py --gpus '0'
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_ETTh2.py --gpus '0'
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_ETTm1.py --gpus '0'
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_ETTm2.py --gpus '0'
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_Electricity.py --gpus '0'
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_ExchangeRate.py --gpus '0'
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_Weather.py --gpus '0'
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_PEMS04.py --gpus '0'
+python experiments/train.py -c baselines/Pyraformer/Pyraformer_PEMS08.py --gpus '0'

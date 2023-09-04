@@ -1,0 +1,10 @@
+# # !/bin/bash
+python experiments/train.py -c baselines/Triformer/Triformer_ETTh1.py --gpus '0'
+python experiments/train.py -c baselines/Triformer/Triformer_ETTh2.py --gpus '0'
+python experiments/train.py -c baselines/Triformer/Triformer_ETTm1.py --gpus '0'
+python experiments/train.py -c baselines/Triformer/Triformer_ETTm2.py --gpus '0'
+python experiments/train.py -c baselines/Triformer/Triformer_Electricity.py --gpus '0'
+python experiments/train.py -c baselines/Triformer/Triformer_ExchangeRate.py --gpus '0'
+python experiments/train.py -c baselines/Triformer/Triformer_Weather.py --gpus '0'
+python experiments/train.py -c baselines/Triformer/Triformer_PEMS04.py --gpus '0'
+# python experiments/train.py -c baselines/Triformer/Triformer_PEMS08.py --gpus '0'

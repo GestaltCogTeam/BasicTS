@@ -1,0 +1,10 @@
+#!/bin/bash
+python experiments/train.py -c baselines/PatchTST/PatchTST_ETTh1.py --gpus '0'
+python experiments/train.py -c baselines/PatchTST/PatchTST_ETTh2.py --gpus '0'
+python experiments/train.py -c baselines/PatchTST/PatchTST_ETTm1.py --gpus '0'
+python experiments/train.py -c baselines/PatchTST/PatchTST_ETTm2.py --gpus '0'
+python experiments/train.py -c baselines/PatchTST/PatchTST_Electricity.py --gpus '0'
+python experiments/train.py -c baselines/PatchTST/PatchTST_ExchangeRate.py --gpus '0'
+python experiments/train.py -c baselines/PatchTST/PatchTST_Weather.py --gpus '0'
+python experiments/train.py -c baselines/PatchTST/PatchTST_PEMS04.py --gpus '0'
+python experiments/train.py -c baselines/PatchTST/PatchTST_PEMS08.py --gpus '0'

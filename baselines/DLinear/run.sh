@@ -1,0 +1,10 @@
+#!/bin/bash
+python experiments/train.py -c baselines/DLinear/DLinear_ETTh1.py --gpus '0'
+python experiments/train.py -c baselines/DLinear/DLinear_ETTh2.py --gpus '0'
+python experiments/train.py -c baselines/DLinear/DLinear_ETTm1.py --gpus '0'
+python experiments/train.py -c baselines/DLinear/DLinear_ETTm2.py --gpus '0'
+python experiments/train.py -c baselines/DLinear/DLinear_Electricity.py --gpus '0'
+python experiments/train.py -c baselines/DLinear/DLinear_ExchangeRate.py --gpus '0'
+python experiments/train.py -c baselines/DLinear/DLinear_Weather.py --gpus '0'
+python experiments/train.py -c baselines/DLinear/DLinear_PEMS04.py --gpus '0'
+python experiments/train.py -c baselines/DLinear/DLinear_PEMS08.py --gpus '0'

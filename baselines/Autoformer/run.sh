@@ -1,0 +1,10 @@
+# #!/bin/bash
+# python experiments/train.py -c baselines/Autoformer/Autoformer_ETTh1.py --gpus '1'
+# python experiments/train.py -c baselines/Autoformer/Autoformer_ETTh2.py --gpus '1'
+# python experiments/train.py -c baselines/Autoformer/Autoformer_ETTm1.py --gpus '1'
+# python experiments/train.py -c baselines/Autoformer/Autoformer_ETTm2.py --gpus '1'
+# python experiments/train.py -c baselines/Autoformer/Autoformer_Electricity.py --gpus '1'
+# python experiments/train.py -c baselines/Autoformer/Autoformer_ExchangeRate.py --gpus '1'
+# python experiments/train.py -c baselines/Autoformer/Autoformer_Weather.py --gpus '1'
+python experiments/train.py -c baselines/Autoformer/Autoformer_PEMS04.py --gpus '1'
+python experiments/train.py -c baselines/Autoformer/Autoformer_PEMS08.py --gpus '1'
