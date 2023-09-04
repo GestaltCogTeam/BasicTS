@@ -6,9 +6,9 @@ sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.losses import masked_mae
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 
-from .MLP_arch import MultiLayerPerceptron
-from .MLP_runner import SimpleTimeSeriesForecastingRunner
+from .mlp_arch import MultiLayerPerceptron
 
 
 CFG = EasyDict()
