@@ -19,7 +19,7 @@ from .arch_zoo.megacrn_arch import MegaCRN
 from .arch_zoo.crossformer_arch import Crossformer
 from .arch_zoo.triformer_arch import Triformer
 from .arch_zoo.patchtst_arch import PatchTST
-from .arch_zoo.wavenet_atch import WaveNet
+from .arch_zoo.wavenet_arch import WaveNet
 from .arch_zoo.stgode import STGODE
 
 __all__ = ["STID", "GraphWaveNet", "DCRNN",
