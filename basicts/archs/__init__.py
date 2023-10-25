@@ -21,6 +21,7 @@ from .arch_zoo.triformer_arch import Triformer
 from .arch_zoo.patchtst_arch import PatchTST
 from .arch_zoo.wavenet_arch import WaveNet
 from .arch_zoo.stgode import STGODE
+from .arch_zoo.staeformer_arch import STAEformer
 # from .arch_zoo.stwave_arch import STWave
 
 __all__ = ["STID", "GraphWaveNet", "DCRNN",
@@ -32,4 +33,4 @@ __all__ = ["STID", "GraphWaveNet", "DCRNN",
            "InformerStack", "Pyraformer",
            "MegaCRN", "Crossformer",
            "Triformer", "PatchTST", "WaveNet",
-           "STGODE", "STWave"]
+           "STGODE", "STWave", "STAEformer"]
