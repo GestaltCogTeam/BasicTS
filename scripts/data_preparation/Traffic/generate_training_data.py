@@ -72,10 +72,17 @@ def generate_data(args: argparse.Namespace):
     feature_list = [data_norm]
     if add_time_of_day:
         # numerical time_of_day
-        tod = [i % steps_per_day / steps_per_day for i in range(data_norm.shape[0])]
-        tod = np.array(tod)
+        
+        tod = (
+            df.index.values - df.index.values.astype("datetime64[D]")) / np.timedelta64(1, "D")
         tod_tiled = np.tile(tod, [1, n, 1]).transpose((2, 1, 0))
         feature_list.append(tod_tiled)
+
+
+        # tod = [i % steps_per_day / steps_per_day for i in range(data_norm.shape[0])]
+        # tod = np.array(tod)
+        # tod_tiled = np.tile(tod, [1, n, 1]).transpose((2, 1, 0))
+        # feature_list.append(tod_tiled)
 
     if add_day_of_week:
         # numerical day_of_week
@@ -121,7 +128,7 @@ if __name__ == "__main__":
     TARGET_CHANNEL = [0]                   # target channel(s)
     STEPS_PER_DAY = 24          # every 1 hour
 
-    DATASET_NAME = "Traffic"      # sampling frequency: every 1 hour
+    DATASET_NAME = "Electricity"      # sampling frequency: every 1 hour
     TOD = True                  # if add time_of_day feature
     DOW = True                  # if add day_of_week feature
     DOM = True                  # if add day_of_month feature
