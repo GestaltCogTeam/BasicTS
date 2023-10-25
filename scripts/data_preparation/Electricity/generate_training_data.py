@@ -131,7 +131,7 @@ if __name__ == "__main__":
     # Thus, because larger values of the loss function will be obtained when the magnitudes of different variables differ significantly,
     # the model will be trained to focus on the variable with the largest magnitude. Then, the loss is more likely to be reduced.
     # If downstream tasks have other requirements, you can set norm_each_channel to according to your needs.
-    NORM_EACH_CHANNEL = True   # if normalize each channel of data separately.
+    NORM_EACH_CHANNEL = False   # if normalize each channel of data separately.
 
     OUTPUT_DIR = "datasets/" + DATASET_NAME
     DATA_FILE_PATH = "datasets/raw_data/{0}/{0}.csv".format(DATASET_NAME)
