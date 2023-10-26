@@ -194,13 +194,8 @@ Thanks to all contributors!
 
 ## 📉 Main Results
 
-### Spatial-Temporal Forecasting
-
-![STF results.](assets/STF_results.png)
-
-### Long Time- Series Forecasting
-
-![LTSF results.](assets/LTSF_results.png)
+See the paper *[Exploring Progress in Multivariate Time Series Forecasting:
+Comprehensive Benchmarking and Heterogeneity Analysis](https://arxiv.org/pdf/2310.06119.pdf).*
 
 ## 🔗 Acknowledgement
 
