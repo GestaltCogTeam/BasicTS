@@ -59,7 +59,7 @@ CFG.MODEL.PARAM = EasyDict(
     "cross_activation": "tanh",                 # mwt cross atention activation function tanh or softmax
     "activation": "gelu",
     "num_time_features": 4,                     # number of used time features
-    "time_of_day_size": 96,
+    "time_of_day_size": 1,
     "day_of_week_size": 7,
     "day_of_month_size": 31,
     "day_of_year_size": 366

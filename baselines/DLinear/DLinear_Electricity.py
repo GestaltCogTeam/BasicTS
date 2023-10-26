@@ -105,4 +105,4 @@ CFG.TEST.DATA.PIN_MEMORY = False
 
 # ================= evaluate ================= #
 CFG.EVAL = EasyDict()
-CFG.EVAL.HORIZONS = [12, 24, 48, 96, 192, 288, 336]
+CFG.EVAL.HORIZONS = [12, 24, 48, 96]
