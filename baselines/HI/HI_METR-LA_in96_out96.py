@@ -7,8 +7,8 @@ from easydict import EasyDict
 from basicts.losses import masked_mae
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.runners import NoBPRunner
-from basicts.archs import HINetwork
 
+from .arch import HINetwork
 
 CFG = EasyDict()
 
@@ -18,8 +18,8 @@ CFG.RUNNER = NoBPRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "METR-LA"
 CFG.DATASET_TYPE = "Traffic speed"
-CFG.DATASET_INPUT_LEN = 96
-CFG.DATASET_OUTPUT_LEN = 96
+CFG.DATASET_INPUT_LEN = 12
+CFG.DATASET_OUTPUT_LEN = 12
 CFG.GPU_NUM = 1
 CFG.NULL_VAL = 0.0
 

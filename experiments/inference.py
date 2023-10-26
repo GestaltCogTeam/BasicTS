@@ -38,7 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--batch_size', default=BATCH_SIZE, type=int, help='batch size')
     args = parser.parse_args()
 
-    cfg_path = 'baselines/{0}/{0}_{1}.py'.format(args.model, args.dataset)
+    cfg_path = 'baselines/{0}/{1}.py'.format(args.model, args.dataset)
     ckpt_path = 'ckpt/{0}/{1}/{0}_best_val_MAE.pt'.format(args.model, args.dataset)
 
     launch_runner(cfg_path, inference, (ckpt_path, args.batch_size), devices=args.gpus)

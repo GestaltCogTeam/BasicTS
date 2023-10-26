@@ -76,3 +76,5 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         prediction = self.select_target_features(prediction_data)
         real_value = self.select_target_features(future_data)
         return prediction, real_value
+
+

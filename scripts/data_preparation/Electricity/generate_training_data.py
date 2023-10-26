@@ -121,7 +121,7 @@ if __name__ == "__main__":
     TARGET_CHANNEL = [0]                   # target channel(s)
     STEPS_PER_DAY = 24          # every 1 hour
 
-    DATASET_NAME = "Traffic"      # sampling frequency: every 1 hour
+    DATASET_NAME = "Electricity"      # sampling frequency: every 1 hour
     TOD = True                  # if add time_of_day feature
     DOW = True                  # if add day_of_week feature
     DOM = True                  # if add day_of_month feature

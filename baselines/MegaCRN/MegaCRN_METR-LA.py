@@ -4,12 +4,11 @@ import sys
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
-from basicts.archs import MegaCRN
-from basicts.runners import MegaCRNRunner
 from basicts.data import TimeSeriesForecastingDataset
 
+from .arch import MegaCRN
 from .loss import megacrn_loss
-
+from .runner import MegaCRNRunner
 
 CFG = EasyDict()
 
