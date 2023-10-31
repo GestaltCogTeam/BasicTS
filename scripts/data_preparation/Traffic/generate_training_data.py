@@ -31,6 +31,7 @@ def generate_data(args: argparse.Namespace):
     data_file_path = args.data_file_path
     steps_per_day = args.steps_per_day
     norm_each_channel = args.norm_each_channel
+    if_rescale = not norm_each_channel # if evaluate on rescaled data. see `basicts.runner.base_tsf_runner.BaseTimeSeriesForecastingRunner.build_train_dataset` for details.
 
     # read data
     df = pd.read_csv(data_file_path)
@@ -109,12 +110,12 @@ def generate_data(args: argparse.Namespace):
     index["train"] = train_index
     index["valid"] = valid_index
     index["test"] = test_index
-    with open(output_dir + "/index_in{0}_out{1}.pkl".format(history_seq_len, future_seq_len), "wb") as f:
+    with open(output_dir + "/index_in_{0}_out_{1}_rescale_{2}.pkl".format(history_seq_len, future_seq_len, if_rescale), "wb") as f:
         pickle.dump(index, f)
 
     data = {}
     data["processed_data"] = processed_data
-    with open(output_dir + "/data_in{0}_out{1}.pkl".format(history_seq_len, future_seq_len), "wb") as f:
+    with open(output_dir + "/data_in_{0}_out_{1}_rescale_{2}.pkl".format(history_seq_len, future_seq_len, if_rescale), "wb") as f:
         pickle.dump(data, f)
 
 
@@ -133,12 +134,6 @@ if __name__ == "__main__":
     DOW = True                  # if add day_of_week feature
     DOM = True                  # if add day_of_month feature
     DOY = True                  # if add day_of_year feature
-
-    # It is recommended to set norm_each_channel to False when evaluating rescaled data, especially when the magnitudes of different variables differ significantly.
-    # Thus, because larger values of the loss function will be obtained when the magnitudes of different variables differ significantly,
-    # the model will be trained to focus on the variable with the largest magnitude. Then, the loss is more likely to be reduced.
-    # If downstream tasks have other requirements, you can set norm_each_channel to according to your needs.
-    NORM_EACH_CHANNEL = False   # if normalize each channel of data separately.
 
     OUTPUT_DIR = "datasets/" + DATASET_NAME
     DATA_FILE_PATH = "datasets/raw_data/{0}/{0}.csv".format(DATASET_NAME)
@@ -168,8 +163,7 @@ if __name__ == "__main__":
                         default=TRAIN_RATIO, help="Train ratio")
     parser.add_argument("--valid_ratio", type=float,
                         default=VALID_RATIO, help="Validate ratio.")
-    parser.add_argument("--norm_each_channel", type=float,
-                        default=NORM_EACH_CHANNEL, help="Validate ratio.")
+    parser.add_argument("--norm_each_channel", type=float, help="Validate ratio.")
     args = parser.parse_args()
 
     # print args
@@ -180,4 +174,7 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
+    args.norm_each_channel = True
+    generate_data(args)
+    args.norm_each_channel = False
     generate_data(args)

@@ -25,8 +25,6 @@ if __name__ == "__main__":
     DOM = True                  # if add day_of_month feature
     DOY = True                  # if add day_of_year feature
 
-    NORM_EACH_CHANNEL = False
-
     OUTPUT_DIR = "datasets/" + DATASET_NAME
     DATA_FILE_PATH = "datasets/raw_data/{0}/{0}.h5".format(DATASET_NAME)
     GRAPH_FILE_PATH = "datasets/raw_data/{0}/adj_{0}.npy".format(DATASET_NAME)
@@ -57,21 +55,18 @@ if __name__ == "__main__":
                         default=TRAIN_RATIO, help="Train ratio")
     parser.add_argument("--valid_ratio", type=float,
                         default=VALID_RATIO, help="Validate ratio.")
-    parser.add_argument("--norm_each_channel", type=float,
-                        default=NORM_EACH_CHANNEL, help="Validate ratio.")
-    args_metr = parser.parse_args()
+    parser.add_argument("--norm_each_channel", type=float, help="Validate ratio.")
+    args = parser.parse_args()
 
     # print args
     print("-"*(20+45+5))
-    for key, value in sorted(vars(args_metr).items()):
+    for key, value in sorted(vars(args).items()):
         print("|{0:>20} = {1:<45}|".format(key, str(value)))
     print("-"*(20+45+5))
 
-    if os.path.exists(args_metr.output_dir):
-        reply = str(input(
-            f"{args_metr.output_dir} exists. Do you want to overwrite it? (y/n)")).lower().strip()
-        if reply[0] != "y":
-            sys.exit(0)
-    else:
-        os.makedirs(args_metr.output_dir)
-    generate_data(args_metr)
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+    args.norm_each_channel = True
+    generate_data(args)
+    args.norm_each_channel = False
+    generate_data(args)
