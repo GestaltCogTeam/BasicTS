@@ -37,7 +37,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         self.need_setup_graph = cfg["MODEL"].get("SETUP_GRAPH", False)
 
         # read scaler for re-normalization
-        self.scaler = load_pkl("{0}/scaler_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"]))
+        self.scaler = load_pkl("{0}/scaler_in_{1}_out_{2}_rescale_{3}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"], cfg.get("RESCALE", True)))
         # define loss
         self.loss = cfg["TRAIN"]["LOSS"]
         # define metric
@@ -125,15 +125,36 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
     def build_train_dataset(self, cfg: dict):
         """Build train dataset
 
+            There are two types of preprocessing methods in BasicTS,
+                1. Normalize across the WHOLE dataset.
+                2. Normalize on EACH channel (i.e., calculate the mean and std of each channel).
+
+            The reason why there are two different preprocessing methods is that each channel of the dataset may have a different value range.
+                1. Normalizing the WHOLE data set will preserve the relative size relationship between channels. 
+                   Larger channels usually produce larger loss values, so more attention will be paid to these channels when optimizing the model.
+                   Therefore, this approach will achieve better performance when we evaluate on the rescaled dataset.
+                   For example, when evaluating rescaled data for two channels with values in the range [0, 1], [9000, 10000], the prediction on channel [0,1] is trivial.
+                2. Normalizing each channel will eliminate the gap in value range between channels.
+                   For example, a channel with a value in the range [0, 1] may be as important as a channel with a value in the range [9000, 10000].
+                   In this case we need to normalize each channel and evaluate without rescaling.
+
+            There is no absolute good or bad distinction between the above two situations,
+                  and the decision needs to be made based on actual requirements or academic research habits.
+            For example, the first approach is often adopted in the field of Spatial-Temporal Forecasting (STF).
+            The second approach is often adopted in the field of Long-term Time Series Forecasting (LTSF).
+
+            To avoid confusion for users and facilitate them to obtain results comparable to existing studies, we automatically select data based on the cfg.get("RESCALE") flag (default to True).
+            if_rescale == True: use the data that is normalized across the WHOLE dataset
+            if_rescale == False: use the data that is normalized on EACH channel
+
         Args:
             cfg (dict): config
 
         Returns:
             train dataset (Dataset)
         """
-
-        data_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
+        data_file_path = "{0}/data_in_{1}_out_{2}_rescale_{3}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"], cfg.get("RESCALE", True))
+        index_file_path = "{0}/index_in_{1}_out_{2}_rescale_{3}.pkl".format(cfg["TRAIN"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"], cfg.get("RESCALE", True))
 
         # build dataset args
         dataset_args = cfg.get("DATASET_ARGS", {})
@@ -160,9 +181,9 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         Returns:
             validation dataset (Dataset)
         """
-
-        data_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
+        # see build_train_dataset for details
+        data_file_path = "{0}/data_in_{1}_out_{2}_rescale_{3}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"], cfg.get("RESCALE", True))
+        index_file_path = "{0}/index_in_{1}_out_{2}_rescale_{3}.pkl".format(cfg["VAL"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"], cfg.get("RESCALE", True))
 
         # build dataset args
         dataset_args = cfg.get("DATASET_ARGS", {})
@@ -186,9 +207,8 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         Returns:
             train dataset (Dataset)
         """
-
-        data_file_path = "{0}/data_in{1}_out{2}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
-        index_file_path = "{0}/index_in{1}_out{2}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"])
+        data_file_path = "{0}/data_in_{1}_out_{2}_rescale_{3}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"], cfg.get("RESCALE", True))
+        index_file_path = "{0}/index_in_{1}_out_{2}_rescale_{3}.pkl".format(cfg["TEST"]["DATA"]["DIR"], cfg["DATASET_INPUT_LEN"], cfg["DATASET_OUTPUT_LEN"], cfg.get("RESCALE", True))
 
         # build dataset args
         dataset_args = cfg.get("DATASET_ARGS", {})

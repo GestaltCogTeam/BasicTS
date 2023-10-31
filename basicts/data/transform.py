@@ -21,7 +21,7 @@ def standard_transform(data: np.array, output_dir: str, train_index: list, histo
     Returns:
         np.array: normalized raw time series data.
     """
-
+    if_rescale = not norm_each_channel # if evaluate on rescaled data. see `basicts.runner.base_tsf_runner.BaseTimeSeriesForecastingRunner.build_train_dataset` for details.
     # data: L, N, C, C=1
     data_train = data[:train_index[-1][1], ...]
     if norm_each_channel:
@@ -35,7 +35,7 @@ def standard_transform(data: np.array, output_dir: str, train_index: list, histo
     scaler["func"] = re_standard_transform.__name__
     scaler["args"] = {"mean": mean, "std": std}
     # label to identify the scaler for different settings.
-    with open(output_dir + "/scaler_in{0}_out{1}.pkl".format(history_seq_len, future_seq_len), "wb") as f:
+    with open(output_dir + "/scaler_in_{0}_out_{1}_rescale_{2}.pkl".format(history_seq_len, future_seq_len, if_rescale), "wb") as f:
         pickle.dump(scaler, f)
 
     def normalize(x):
@@ -94,7 +94,7 @@ def min_max_transform(data: np.array, output_dir: str, train_index: list, histor
     # label to identify the scaler for different settings.
     # To be fair, only one transformation can be implemented per dataset.
     # TODO: Therefore we (for now) do not distinguish between the data produced by the different transformation methods.
-    with open(output_dir + "/scaler_in{0}_out{1}.pkl".format(history_seq_len, future_seq_len), "wb") as f:
+    with open(output_dir + "/scaler_in_{0}_out_{1}.pkl".format(history_seq_len, future_seq_len), "wb") as f:
         pickle.dump(scaler, f)
 
     def normalize(x):
