@@ -42,8 +42,8 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "BGSLF"
 CFG.MODEL.ARCH = BGSLF
-node_feats_full = load_pkl("datasets/{0}/data_in{1}_out{2}.pkl".format(CFG.DATASET_NAME, CFG.DATASET_INPUT_LEN, CFG.DATASET_OUTPUT_LEN))["processed_data"][..., 0]
-train_index_list = load_pkl("datasets/{0}/index_in{1}_out{2}.pkl".format(CFG.DATASET_NAME, CFG.DATASET_INPUT_LEN, CFG.DATASET_OUTPUT_LEN))["train"]
+node_feats_full = load_pkl("datasets/{0}/data_in_{1}_out_{2}_rescale_{3}.pkl".format(CFG.DATASET_NAME, CFG.DATASET_INPUT_LEN, CFG.DATASET_OUTPUT_LEN, CFG.get("RESCALE", True)))["processed_data"][..., 0]
+train_index_list = load_pkl("datasets/{0}/index_in_{1}_out_{2}_rescale_{3}.pkl".format(CFG.DATASET_NAME, CFG.DATASET_INPUT_LEN, CFG.DATASET_OUTPUT_LEN, CFG.get("RESCALE", True)))["train"]
 node_feats = node_feats_full[:train_index_list[-1][-1], ...]
 CFG.MODEL.PARAM = {
     "node_feas": torch.Tensor(node_feats),

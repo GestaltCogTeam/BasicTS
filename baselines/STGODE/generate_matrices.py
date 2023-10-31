@@ -1,5 +1,8 @@
 # STGODE has a different way of generating the matrices, so we need to use this script to generate the matrices for STGODE
 import os
+import sys
+# TODO: remove it when basicts can be installed by pip
+sys.path.append(os.path.abspath(__file__ + "/../../.."))
 import csv
 import pickle
 import argparse
@@ -26,7 +29,7 @@ def get_normalized_adj(A):
     return torch.from_numpy(A_reg.astype(np.float32))
 
 
-def generate_dtw_spa_matrix(dataset_name, in_len, out_len, sigma1=0.1, thres1=0.6, sigma2=10, thres2=0.5):
+def generate_dtw_spa_matrix(dataset_name, in_len, out_len, sigma1=0.1, thres1=0.6, sigma2=10, thres2=0.5, re_scale=True):
     """read data, generate spatial adjacency matrix and semantic adjacency matrix by dtw
 
     Args:
@@ -42,7 +45,7 @@ def generate_dtw_spa_matrix(dataset_name, in_len, out_len, sigma1=0.1, thres1=0.
     """
 
     # original STGODE use the full time series to generate the matrices, which is not reasonable since the test set is not available in real world
-    data_file = "./datasets/{0}/data_in{1}_out{2}.pkl".format(dataset_name, in_len, out_len)
+    data_file = "./datasets/{0}/data_in_{1}_out_{2}_rescale_{3}.pkl".format(dataset_name, in_len, out_len, re_scale)
     with open(data_file, 'rb') as f:
         data = pickle.load(f)["processed_data"]
     num_node = data.shape[1]
@@ -108,4 +111,4 @@ def generate_dtw_spa_matrix(dataset_name, in_len, out_len, sigma1=0.1, thres1=0.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    generate_dtw_spa_matrix("PEMS04", 12, 12)
+    generate_dtw_spa_matrix("PEMS04", 12, 12, re_scale=True)
