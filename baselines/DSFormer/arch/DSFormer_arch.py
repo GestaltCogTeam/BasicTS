@@ -9,14 +9,11 @@ from .revin import RevIN
 class DSFormer(nn.Module):
     def __init__(self, Input_len, out_len, num_id, num_layer, dropout, muti_head, num_samp, IF_node):
         """
-        Input_len: History length
-        out_len：future length
-        num_id：number of variables
-        num_layer：number of layer. 1 or 2
-        muti_head：number of muti_head attention. 1 to 4
-        dropout：dropout. 0.15 to 0.3
-        num_samp：muti_head subsequence. 2 or 3
-        IF_node:Whether to use node embedding. True or False
+        Paper: Dsformer: A double sampling transformer for multivariate time series long-term prediction. CIKM 2023
+        Link: https://dl.acm.org/doi/abs/10.1145/3583780.3614851
+        Ref Official Code: https://github.com/ChengqingYu/DSformer
+        Note: The authors have optimized the code in the raw paper. The current version can achieve better results on some datasets
+        
         """
         super(DSFormer, self).__init__()
 
