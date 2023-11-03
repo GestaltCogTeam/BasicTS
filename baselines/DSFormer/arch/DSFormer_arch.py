@@ -9,10 +9,14 @@ from .revin import RevIN
 class DSFormer(nn.Module):
     def __init__(self, Input_len, out_len, num_id, num_layer, dropout, muti_head, num_samp, IF_node):
         """
-        Paper: Dsformer: A double sampling transformer for multivariate time series long-term prediction. CIKM 2023
-        Link: https://dl.acm.org/doi/abs/10.1145/3583780.3614851
-        Ref Official Code: https://github.com/ChengqingYu/DSformer
-        Note: The authors have optimized the code in the raw paper. The current version can achieve better results on some datasets
+        Paper: 
+            Dsformer: A double sampling transformer for multivariate time series long-term prediction. CIKM 2023
+        Link: 
+            https://dl.acm.org/doi/abs/10.1145/3583780.3614851
+        Ref Official Code: 
+            https://github.com/ChengqingYu/DSformer
+        Note: 
+            The authors have optimized the code in the raw paper. The current version can achieve better results on some datasets (Traffic, weather and electrical)
         
         """
         super(DSFormer, self).__init__()
