@@ -378,7 +378,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         real_value = []
         for _, data in enumerate(self.test_data_loader):
             forward_return = list(self.forward(data, epoch=None, iter_num=None, train=False))
-            if self.if_evaluate_on_gpu:
+            if not self.if_evaluate_on_gpu:
                 forward_return[0], forward_return[1] = forward_return[0].detach().cpu(), forward_return[1].detach().cpu()
             prediction.append(forward_return[0])        # preds = forward_return[0]
             real_value.append(forward_return[1])        # testy = forward_return[1]
