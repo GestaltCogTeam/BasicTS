@@ -155,34 +155,24 @@ BasicTS is built on PyTorch 1.9.1 or 1.10.0, while other versions have not been 
 
 ### Run It!
 
-An example of a start script can be found in [experiments/train.py](experiments/train.py).
-You can run your model by the following command:
+- **Reproducing Built-in Models**
 
-```bash
-python experiments/train.py -c /path/to/your/config/file.py --gpus '0'
-```
+  BasicTS provides a wealth of built-in models. You can reproduce these models by running the following command:
 
+  ```bash
+  python experiments/train.py -c baselines/${MODEL_NAME}/${DATASET_NAME}.py --gpus '0'
+  ```
 
-## 📌 Examples
+  Replace `${DATASET_NAME}` and `${MODEL_NAME}` with any supported models and datasets. For example, you can run Graph WaveNet on METR-LA dataset by:
 
-### Reproducing Built-in Models
+  ```bash
+  python experiments/train.py -c baselines/GWNet/METR-LA.py --gpus '0'
+  ```
 
-BasicTS provides a wealth of built-in models. You can find all the built-in models and their corresponding runners in [`basicts/archs/arch_zoo`](basicts/archs/arch_zoo/) and [`basicts/runners/runner_zoo`](basicts/runners/runner_zoo/), respectively. You can reproduce these models by running the following command:
+- **Customized Your Own Model**
 
-```bash
-python experiments/train.py -c baselines/${MODEL_NAME}/${DATASET_NAME}.py --gpus '0'
-```
+  [Example: Multi-Layer Perceptron (MLP)](baselines/MLP)
 
-Replace `${DATASET_NAME}` and `${MODEL_NAME}` with any supported models and datasets. For example, you can run Graph WaveNet on METR-LA dataset by:
-
-```bash
-python experiments/train.py -c baselines/GWNet/METR-LA.py --gpus '0'
-```
-
-### Customized Your Own Model
-
-- [Multi-Layer Perceptron (MLP)](baselines/MLP)
-- More...
 
 ## ❤️ Contributors
 
