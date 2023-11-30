@@ -18,7 +18,7 @@ CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "PEMS04"
 CFG.DATASET_TYPE = "Traffic Flow"
-CFG.DATASET_INPUT_LEN = 336
+CFG.DATASET_INPUT_LEN = 720
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 CFG.NULL_VAL = 0.0
@@ -46,8 +46,8 @@ CFG.MODEL.PARAM = EasyDict(
     "dropout": 0.2,
     "fc_dropout": 0.2,
     "head_dropout": 0.0,
-    "patch_len": 16,
-    "stride": 8,
+    "patch_len": 32,
+    "stride": 16,
     "individual": 0,                            # individual head; True 1 False 0
     "padding_patch": "end",                     # None: None; end: padding on the end
     "revin": 1,                                 # RevIN; True 1 False 0

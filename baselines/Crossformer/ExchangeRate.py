@@ -18,7 +18,7 @@ CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "ExchangeRate"
 CFG.DATASET_TYPE = "Exchange Rate"
-CFG.DATASET_INPUT_LEN = 336
+CFG.DATASET_INPUT_LEN = 96
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 # CFG.RESCALE = False
@@ -68,7 +68,7 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 }
 
 # ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 50
+CFG.TRAIN.NUM_EPOCHS = 20
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])

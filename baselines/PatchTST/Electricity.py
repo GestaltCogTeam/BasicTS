@@ -33,18 +33,18 @@ CFG.ENV.CUDNN.ENABLED = True
 CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = "PatchTST"
 CFG.MODEL.ARCH = PatchTST
-NUM_NODES = 8
+NUM_NODES = 321
 CFG.MODEL.PARAM = EasyDict(
     {
     "enc_in": NUM_NODES,                        # num nodes
     "seq_len": CFG.DATASET_INPUT_LEN,           # input sequence length
     "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length
     "e_layers": 3,                              # num of encoder layers
-    "n_heads": 4,
-    "d_model": 16,
-    "d_ff": 128,
-    "dropout": 0.3,
-    "fc_dropout": 0.3,
+    "n_heads": 16,
+    "d_model": 128,
+    "d_ff": 256,
+    "dropout": 0.2,
+    "fc_dropout": 0.2,
     "head_dropout": 0.0,
     "patch_len": 16,
     "stride": 8,

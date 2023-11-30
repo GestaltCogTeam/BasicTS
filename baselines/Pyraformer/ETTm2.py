@@ -20,7 +20,7 @@ CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "ETTm2"
 CFG.DATASET_TYPE = "Electricity Transformer Temperature"
-CFG.DATASET_INPUT_LEN = 336
+CFG.DATASET_INPUT_LEN = 192
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 # CFG.RESCALE = False
@@ -59,7 +59,7 @@ CFG.MODEL.PARAM = EasyDict(
     "use_tvm": False,
     "embed": "DataEmbedding",
     "num_time_features": 4,
-    "time_of_day_size": 24 * 4,
+    "time_of_day_size": 24,
     "day_of_week_size": 7,
     "day_of_month_size": 31,
     "day_of_year_size": 366

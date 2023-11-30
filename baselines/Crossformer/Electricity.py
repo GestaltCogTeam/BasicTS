@@ -18,7 +18,7 @@ CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "Electricity"
 CFG.DATASET_TYPE = "Electricity"
-CFG.DATASET_INPUT_LEN = 336
+CFG.DATASET_INPUT_LEN = 192
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
 # CFG.RESCALE = False
@@ -38,13 +38,13 @@ CFG.MODEL.PARAM = {
     "data_dim": NUM_NODES,
     "in_len": CFG.DATASET_INPUT_LEN,
     "out_len": CFG.DATASET_OUTPUT_LEN,
-    "seg_len": 6,
+    "seg_len": 24,
     "win_size": 2,
     # default parameters
     "factor": 10,
-    "d_model": 256,
-    "d_ff": 512,
-    "n_heads": 4,
+    "d_model": 64,
+    "d_ff": 128,
+    "n_heads": 2,
     "e_layers": 3,
     "dropout": 0.2,
     "baseline": False
@@ -58,20 +58,17 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.0001
+    "lr": 0.001
 }
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones": [1],
+    "milestones": [1, 20, 40, 60, 80, 100, 150],
     "gamma": 0.5
 }
 
 # ================= train ================= #
-CFG.TRAIN.CLIP_GRAD_PARAM = {
-    "max_norm": 5.0
-}
-CFG.TRAIN.NUM_EPOCHS = 50
+CFG.TRAIN.NUM_EPOCHS = 200
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     '_'.join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
@@ -81,7 +78,7 @@ CFG.TRAIN.DATA = EasyDict()
 # read data
 CFG.TRAIN.DATA.DIR = 'datasets/' + CFG.DATASET_NAME
 # dataloader args, optional
-CFG.TRAIN.DATA.BATCH_SIZE = 8
+CFG.TRAIN.DATA.BATCH_SIZE = 32
 CFG.TRAIN.DATA.PREFETCH = False
 CFG.TRAIN.DATA.SHUFFLE = True
 CFG.TRAIN.DATA.NUM_WORKERS = 2
