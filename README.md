@@ -22,6 +22,8 @@ On the one hand, BasicTS utilizes a ***unified and standard pipeline*** to give 
 
 On the other hand, BasicTS provides users with ***easy-to-use and extensible interfaces*** to facilitate the quick design and evaluation of new models. At a minimum, users only need to define the model architecture.
 
+We are collecting **TODOs** and **HOWTOs**, if you need more features (*e.g.* more datasets or baselines) or have any questions, please feel free to create an issue or leave a comment [here](https://github.com/zezhishao/BasicTS/issues/95).
+
 ## ✨ Highlighted Features
 
 BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch), an easy-to-use and powerful open-source neural network training framework.
