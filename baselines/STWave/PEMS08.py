@@ -12,10 +12,10 @@ import torch
 from easydict import EasyDict
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.losses import stwave_masked_mae
 from basicts.utils import load_adj
 
 from .arch import STWave
+from .loss import stwave_masked_mae
 
 def laplacian(W):
     """Return the Laplacian of the weight matrix."""
