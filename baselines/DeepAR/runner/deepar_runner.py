@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict
 import torch
 from basicts.data.registry import SCALER_REGISTRY
 from easytorch.utils.dist import master_only
@@ -42,22 +42,25 @@ class DeepARRunner(BaseTimeSeriesForecastingRunner):
         data = data[:, :, :, self.target_features]
         return data
 
-    def rescale_data(self, input_data: List[torch.Tensor]) -> List[torch.Tensor]:
+    def rescale_data(self, input_data: Dict) -> Dict:
         """Rescale data.
 
         Args:
-            data (List[torch.Tensor]): list of data to be re-scaled.
+            data (Dict): Dict of data to be re-scaled.
 
         Returns:
-            List[torch.Tensor]: list of re-scaled data.
+            Dict: Dict re-scaled data.
         """
-        prediction, real_value, mus, sigmas = input_data
+
         if self.if_rescale:
-            prediction = SCALER_REGISTRY.get(self.scaler["func"])(prediction, **self.scaler["args"])
-            real_value = SCALER_REGISTRY.get(self.scaler["func"])(real_value, **self.scaler["args"])
-            mus = SCALER_REGISTRY.get(self.scaler["func"])(mus, **self.scaler["args"])
-            sigmas = SCALER_REGISTRY.get(self.scaler["func"])(sigmas, **self.scaler["args"])
-        return [prediction, real_value, mus, sigmas]
+            input_data["inputs"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["inputs"], **self.scaler["args"])
+            input_data["prediction"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["prediction"], **self.scaler["args"])
+            input_data["target"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["target"], **self.scaler["args"])
+            if "mus" in input_data.keys():
+                input_data["mus"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["mus"], **self.scaler["args"])
+            if "sigmas" in input_data.keys():
+                input_data["sigmas"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["sigmas"], **self.scaler["args"])
+        return input_data
 
     @torch.no_grad()
     @master_only
@@ -69,22 +72,25 @@ class DeepARRunner(BaseTimeSeriesForecastingRunner):
         """
 
         # test loop
-        prediction = []
-        real_value = []
+        prediction =[]
+        target = []
+        inputs = []
         for _, data in enumerate(self.test_data_loader):
-            forward_return = list(self.forward(data, epoch=None, iter_num=None, train=False))
+            forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
             if not self.if_evaluate_on_gpu:
-                forward_return[0], forward_return[1] = forward_return[0].detach().cpu(), forward_return[1].detach().cpu()
-            prediction.append(forward_return[0])        # preds = forward_return[0]
-            real_value.append(forward_return[1])        # testy = forward_return[1]
+                forward_return["prediction"] = forward_return["prediction"].detach().cpu()
+                forward_return["target"] = forward_return["target"].detach().cpu()
+                forward_return["inputs"] = forward_return["inputs"].detach().cpu()
+            prediction.append(forward_return["prediction"])
+            target.append(forward_return["target"])
+            inputs.append(forward_return["inputs"])
         prediction = torch.cat(prediction, dim=0)
-        real_value = torch.cat(real_value, dim=0)
+        target = torch.cat(target, dim=0)
+        inputs = torch.cat(inputs, dim=0)
         # re-scale data
-        if self.if_rescale:
-            prediction = SCALER_REGISTRY.get(self.scaler["func"])(prediction, **self.scaler["args"])[:, -self.output_seq_len:, :, :]
-            real_value = SCALER_REGISTRY.get(self.scaler["func"])(real_value, **self.scaler["args"])[:, -self.output_seq_len:, :, :]
+        returns_all = self.rescale_data({"prediction": prediction[:, -self.output_seq_len:, :, :], "target": target[:, -self.output_seq_len:, :, :], "inputs": inputs})
         # evaluate
-        self.evaluate(prediction, real_value)
+        self.evaluate(returns_all)
 
     def forward(self, data: tuple, epoch:int = None, iter_num: int = None, train:bool = True, **kwargs) -> tuple:
         """feed forward process for train, val, and test. Note that the outputs are NOT re-scaled.
@@ -96,21 +102,23 @@ class DeepARRunner(BaseTimeSeriesForecastingRunner):
             train (bool, optional): if in the training process. Defaults to True.
 
         Returns:
-            tuple: (prediction, real_value)
+            dict: keys that must be included: inputs, prediction, target
         """
 
         # preprocess
         future_data, history_data = data
         history_data    = self.to_running_device(history_data)      # B, L, N, C
         future_data     = self.to_running_device(future_data)       # B, L, N, C
-        batch_size, length, num_nodes, _ = future_data.shape
-
+        
         history_data = self.select_input_features(history_data)
         future_data_4_dec = self.select_input_features(future_data)
 
-        # feed forward
-        pred_values, real_values, mus, sigmas = self.model(history_data=history_data, future_data=future_data_4_dec, train=train)
-        # post process
-        prediction = self.select_target_features(pred_values)
-        real_value = self.select_target_features(real_values)
-        return prediction, real_value, mus, sigmas
+        # model forward
+        model_return = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train)
+
+        # parse model return
+        if isinstance(model_return, torch.Tensor): model_return = {"prediction": model_return}
+        model_return["inputs"] = self.select_target_features(history_data)
+        if "target" not in model_return:
+            model_return["target"] = self.select_target_features(future_data)
+        return model_return

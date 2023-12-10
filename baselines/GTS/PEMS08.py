@@ -6,10 +6,10 @@ sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.utils.serialization import load_pkl
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 
 from .arch import GTS
 from .loss import gts_loss
-from .runner import GTSRunner
 
 CFG = EasyDict()
 
@@ -21,7 +21,7 @@ if not resume:
 
 # ================= general ================= #
 CFG.DESCRIPTION = "GTS model configuration"
-CFG.RUNNER = GTSRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "PEMS08"
 CFG.DATASET_TYPE = "Traffic flow"

@@ -73,8 +73,6 @@ class DeepAR(nn.Module):
         for t in range(1, len_in + len_out):
             if not (t > len_in and not train): # not in the decoding stage when inferecing
                 history_next = input_feat_full[:, t-1:t, :, 0:1]
-            else:
-                a = 1
             embed_feat = self.input_embed(history_next)
             covar_feat = covar_feat_full[:, t:t+1, :, :]
             if self.use_ts_id:
@@ -98,4 +96,5 @@ class DeepAR(nn.Module):
         mus = torch.concat(mus, dim=1)
         sigmas = torch.concat(sigmas, dim=1)
         reals = input_feat_full[:, -preds.shape[1]:, :, :]
-        return preds, reals, mus, sigmas
+
+        return {"prediction": preds, "target": reals, "mus": mus, "sigmas": sigmas}

@@ -5,16 +5,16 @@ import sys
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
 from basicts.data import TimeSeriesForecastingDataset
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 
 from .arch import MegaCRN
 from .loss import megacrn_loss
-from .runner import MegaCRNRunner
 
 CFG = EasyDict()
 
 # ================= general ================= #
 CFG.DESCRIPTION = "MegaCRN model configuration"
-CFG.RUNNER  = MegaCRNRunner
+CFG.RUNNER  = SimpleTimeSeriesForecastingRunner
 CFG.DATASET_CLS = TimeSeriesForecastingDataset
 CFG.DATASET_NAME = "METR-LA"
 CFG.DATASET_TYPE = "Traffic speed"

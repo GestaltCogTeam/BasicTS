@@ -62,13 +62,10 @@ class STEPRunner(BaseTimeSeriesForecastingRunner):
         long_history_data = self.select_input_features(long_history_data)
 
         # feed forward
-        prediction, pred_adj, prior_adj, gsl_coefficient = self.model(history_data=history_data, long_history_data=long_history_data, future_data=None, batch_seen=iter_num, epoch=epoch)
+        model_return = self.model(history_data=history_data, long_history_data=long_history_data, future_data=None, batch_seen=iter_num, epoch=epoch)
 
-        batch_size, length, num_nodes, _ = future_data.shape
-        assert list(prediction.shape)[:3] == [batch_size, length, num_nodes], \
-            "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
-
-        # post process
-        prediction = self.select_target_features(prediction)
-        real_value = self.select_target_features(future_data)
-        return prediction, real_value, pred_adj, prior_adj, gsl_coefficient
+        # parse model return
+        if isinstance(model_return, torch.Tensor): model_return = {"prediction": model_return}
+        model_return["inputs"] = self.select_target_features(history_data)
+        model_return["target"] = self.select_target_features(future_data)
+        return model_return

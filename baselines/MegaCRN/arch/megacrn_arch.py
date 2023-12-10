@@ -217,4 +217,4 @@ class MegaCRN(nn.Module):
                     go = labels[:, t, ...]
         output = torch.stack(out, dim=1)
         
-        return output, h_att, query, pos, neg
+        return {'prediction': output, 'query': query, 'pos': pos, 'neg': neg}

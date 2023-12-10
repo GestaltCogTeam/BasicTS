@@ -16,7 +16,7 @@ class DGCRNRunner(SimpleTimeSeriesForecastingRunner):
             train (bool, optional): if in the training process. Defaults to True.
 
         Returns:
-            tuple: (prediction, real_value)
+            dict: keys that must be included: inputs, prediction, target
         """
 
         # preprocess
@@ -35,12 +35,11 @@ class DGCRNRunner(SimpleTimeSeriesForecastingRunner):
 
         # customized curriculum learning
         task_level = self.curriculum_learning(epoch)
-        prediction_data = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train, task_level=task_level)
-        # feed forward
-        assert list(prediction_data.shape)[:3] == [batch_size, length, num_nodes], \
+        model_return = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train, task_level=task_level)
+        # parse model return
+        if isinstance(model_return, torch.Tensor): model_return = {"prediction": model_return}
+        model_return["inputs"] = self.select_target_features(history_data)
+        model_return["target"] = self.select_target_features(future_data)
+        assert list(model_return["prediction"].shape)[:3] == [batch_size, length, num_nodes], \
             "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
-        # post process
-        prediction = self.select_target_features(prediction_data)
-        real_value = self.select_target_features(future_data)
-        return prediction, real_value
- 
+        return model_return

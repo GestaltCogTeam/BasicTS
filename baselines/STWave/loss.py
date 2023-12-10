@@ -4,7 +4,7 @@ import numpy as np
 from basicts.losses import masked_mae
 
 
-def stwave_masked_mae(preds: list, labels: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+def stwave_masked_mae(prediction: list, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
     """Masked mean absolute error.
 
     Args:
@@ -15,7 +15,7 @@ def stwave_masked_mae(preds: list, labels: torch.Tensor, null_val: float = np.na
     Returns:
         torch.Tensor: masked mean absolute error
     """
-    lloss = masked_mae(preds[...,1:2], preds[...,2:])
-    loss = masked_mae(preds[...,:1], labels)
+    lloss = masked_mae(prediction[...,1:2], prediction[...,2:], null_val)
+    loss = masked_mae(prediction[...,:1], target, null_val)
 
     return loss + lloss

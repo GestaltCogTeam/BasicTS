@@ -286,5 +286,7 @@ class GTS(nn.Module, Seq2SeqAttrs):
         outputs = self.decoder(encoder_hidden_state, adj, labels, batches_seen=batch_seen)
         if batch_seen == 0:
             print("Total trainable parameters {}".format(count_parameters(self)))
-
-        return outputs.transpose(1, 0).unsqueeze(-1), x.softmax(-1)[:, 0].clone().reshape(self.num_nodes, -1), self.prior_adj
+        prediction = outputs.transpose(1, 0).unsqueeze(-1)
+        pred_adj = x.softmax(-1)[:, 0].clone().reshape(self.num_nodes, -1)
+        prior_adj = self.prior_adj
+        return {"prediction": prediction, "pred_adj": pred_adj, "prior_adj": prior_adj}

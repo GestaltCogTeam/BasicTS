@@ -69,4 +69,9 @@ class STEP(nn.Module):
             gsl_coefficient = 1 / (int(epoch/6)+1)
         else:
             gsl_coefficient = 0
-        return y_hat.unsqueeze(-1), bernoulli_unnorm.softmax(-1)[..., 0].clone().reshape(batch_size, num_nodes, num_nodes), adj_knn, gsl_coefficient
+
+        prediction = y_hat.unsqueeze(-1)
+        pred_adj = bernoulli_unnorm.softmax(-1)[..., 0].clone().reshape(batch_size, num_nodes, num_nodes)
+        prior_adj = adj_knn
+        gsl_coefficient = gsl_coefficient
+        return {"prediction": prediction, "pred_adj": pred_adj, "prior_adj": prior_adj, "gsl_coefficient": gsl_coefficient}
