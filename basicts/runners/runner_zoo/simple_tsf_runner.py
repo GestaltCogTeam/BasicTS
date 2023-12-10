@@ -50,7 +50,7 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
             train (bool, optional): if in the training process. Defaults to True.
 
         Returns:
-            tuple: (prediction, real_value)
+            dict: keys that must be included: inputs, prediction, target
         """
 
         # preprocess
@@ -67,14 +67,13 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
             # only use the temporal features
             future_data_4_dec[..., 0] = torch.empty_like(future_data_4_dec[..., 0])
 
-        # curriculum learning
-        prediction_data = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train)
-        # feed forward
-        assert list(prediction_data.shape)[:3] == [batch_size, length, num_nodes], \
+        # model forward
+        model_return = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train)
+
+        # parse model return
+        if isinstance(model_return, torch.Tensor): model_return = {"prediction": model_return}
+        if "inputs" not in model_return: model_return["inputs"] = self.select_target_features(history_data)
+        if "target" not in model_return: model_return["target"] = self.select_target_features(future_data)
+        assert list(model_return["prediction"].shape)[:3] == [batch_size, length, num_nodes], \
             "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
-        # post process
-        prediction = self.select_target_features(prediction_data)
-        real_value = self.select_target_features(future_data)
-        return prediction, real_value
-
-
+        return model_return

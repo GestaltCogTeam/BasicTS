@@ -1,6 +1,6 @@
 import math
 import functools
-from typing import Tuple, Union, Optional, List
+from typing import Tuple, Union, Optional, Dict
 
 import torch
 import numpy as np
@@ -25,7 +25,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         - Users only need to implement the `forward` function.
     """
 
-    def __init__(self, cfg: dict):
+    def __init__(self, cfg: Dict):
         super().__init__(cfg)
         self.dataset_name = cfg["DATASET_NAME"]
         # different datasets have different null_values, e.g., 0.0 or np.nan.
@@ -46,6 +46,8 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         self.loss = cfg["TRAIN"]["LOSS"]
         # define metric
         self.metrics = cfg.get("METRICS", {"MAE": masked_mae, "RMSE": masked_rmse, "MAPE": masked_mape, "WAPE": masked_wape, "MSE": masked_mse})
+        # TODO: use loss as the metric
+        self.target_metrics = cfg.get("TARGET_METRICS", "MAE")
         # curriculum learning for output. Note that this is different from the CL in Seq2Seq archs.
         self.cl_param = cfg["TRAIN"].get("CL", None)
         if self.cl_param is not None:
@@ -58,12 +60,12 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         self.evaluation_horizons = [_ - 1 for _ in cfg.get("EVAL", EasyDict()).get("HORIZONS", range(1, 13))]
         assert min(self.evaluation_horizons) >= 0, "The horizon should start counting from 1."
 
-    def setup_graph(self, cfg: dict, train: bool):
+    def setup_graph(self, cfg: Dict, train: bool):
         """Setup all parameters and the computation graph.
         Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
 
         Args:
-            cfg (dict): config
+            cfg (Dict): config
             train (bool): training or inferencing
         """
 
@@ -77,13 +79,13 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         num_parameters = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
         self.logger.info("Number of parameters: {0}".format(num_parameters))
 
-    def init_training(self, cfg: dict):
+    def init_training(self, cfg: Dict):
         """Initialize training.
 
         Including loss, training meters, etc.
 
         Args:
-            cfg (dict): config
+            cfg (Dict): config
         """
 
         # setup graph
@@ -97,26 +99,26 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         for key, _ in self.metrics.items():
             self.register_epoch_meter("train_"+key, "train", "{:.6f}")
 
-    def init_validation(self, cfg: dict):
+    def init_validation(self, cfg: Dict):
         """Initialize validation.
 
         Including validation meters, etc.
 
         Args:
-            cfg (dict): config
+            cfg (Dict): config
         """
 
         super().init_validation(cfg)
         for key, _ in self.metrics.items():
             self.register_epoch_meter("val_"+key, "val", "{:.6f}")
 
-    def init_test(self, cfg: dict):
+    def init_test(self, cfg: Dict):
         """Initialize test.
 
         Including test meters, etc.
 
         Args:
-            cfg (dict): config
+            cfg (Dict): config
         """
 
         if self.need_setup_graph:
@@ -126,7 +128,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         for key, _ in self.metrics.items():
             self.register_epoch_meter("test_"+key, "test", "{:.6f}")
 
-    def build_train_dataset(self, cfg: dict):
+    def build_train_dataset(self, cfg: Dict):
         """Build train dataset
 
             There are two types of preprocessing methods in BasicTS,
@@ -153,7 +155,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             if_rescale == False: use the data that is normalized on EACH channel
 
         Args:
-            cfg (dict): config
+            cfg (Dict): config
 
         Returns:
             train dataset (Dataset)
@@ -185,11 +187,11 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         return dataset
 
     @staticmethod
-    def build_val_dataset(cfg: dict):
+    def build_val_dataset(cfg: Dict):
         """Build val dataset
 
         Args:
-            cfg (dict): config
+            cfg (Dict): config
 
         Returns:
             validation dataset (Dataset)
@@ -219,11 +221,11 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         return dataset
 
     @staticmethod
-    def build_test_dataset(cfg: dict):
+    def build_test_dataset(cfg: Dict):
         """Build val dataset
 
         Args:
-            cfg (dict): config
+            cfg (Dict): config
 
         Returns:
             train dataset (Dataset)
@@ -283,43 +285,50 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             train (bool, optional): if in the training process. Defaults to True.
 
         Returns:
-            tuple: (prediction, real_value). [B, L, N, C] for each of them.
+            Dict: must contain keys: inputs, prediction, target
         """
 
         raise NotImplementedError()
 
-    def metric_forward(self, metric_func, args):
+    def metric_forward(self, metric_func, args) -> torch.Tensor:
         """Computing metrics.
 
         Args:
             metric_func (function, functools.partial): metric function.
-            args (list): arguments for metrics computation.
-        """
+            args (Dict): arguments for metrics computation.
 
-        if isinstance(metric_func, functools.partial) and list(metric_func.keywords.keys()) == ["null_val"]:
-            # support partial(metric_func, null_val = something)
-            metric_item = metric_func(*args)
+        Returns:
+            torch.Tensor: metric value.
+        """
+        # filter out keys that are not in function arguments
+        args = {k: v for k, v in args.items() if k in metric_func.__code__.co_varnames}
+
+        if isinstance(metric_func, functools.partial):
+            # support partial function
+            # users can define their partial function in the config file
+            # e.g., functools.partial(masked_mase, freq="4", null_val=np.nan)
+            metric_item = metric_func(**args)
         elif callable(metric_func):
             # is a function
-            metric_item = metric_func(*args, null_val=self.null_val)
+            metric_item = metric_func(**args, null_val=self.null_val)
         else:
             raise TypeError("Unknown metric type: {0}".format(type(metric_func)))
         return metric_item
 
-    def rescale_data(self, input_data: List[torch.Tensor]) -> List[torch.Tensor]:
+    def rescale_data(self, input_data: Dict) -> Dict:
         """Rescale data.
 
         Args:
-            data (List[torch.Tensor]): list of data to be re-scaled.
+            data (Dict): Dict of data to be re-scaled.
 
         Returns:
-            List[torch.Tensor]: list of re-scaled data.
+            Dict: Dict re-scaled data.
         """
 
-        # prediction, real_value = input_data[:2]
         if self.if_rescale:
-            input_data[0] = SCALER_REGISTRY.get(self.scaler["func"])(input_data[0], **self.scaler["args"])
-            input_data[1] = SCALER_REGISTRY.get(self.scaler["func"])(input_data[1], **self.scaler["args"])
+            input_data["prediction"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["prediction"], **self.scaler["args"])
+            input_data["target"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["target"], **self.scaler["args"])
+            input_data["inputs"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["inputs"], **self.scaler["args"])
         return input_data
 
     def train_iters(self, epoch: int, iter_index: int, data: Union[torch.Tensor, Tuple]) -> torch.Tensor:
@@ -335,18 +344,18 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         """
 
         iter_num = (epoch-1) * self.iter_per_epoch + iter_index
-        forward_return = list(self.forward(data=data, epoch=epoch, iter_num=iter_num, train=True))
+        forward_return = self.forward(data=data, epoch=epoch, iter_num=iter_num, train=True)
         # re-scale data
         forward_return = self.rescale_data(forward_return)
         # loss
         if self.cl_param:
             cl_length = self.curriculum_learning(epoch=epoch)
-            forward_return[0] = forward_return[0][:, :cl_length, :, :] # prediction
-            forward_return[1] = forward_return[1][:, :cl_length, :, :] # real_value
+            forward_return["prediction"] = forward_return["prediction"][:, :cl_length, :, :]
+            forward_return["target"] = forward_return["target"][:, :cl_length, :, :]
         loss = self.metric_forward(self.loss, forward_return)
         # metrics
         for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, forward_return[:2])
+            metric_item = self.metric_forward(metric_func, forward_return)
             self.update_epoch_meter("train_"+metric_name, metric_item.item())
         return loss
 
@@ -358,38 +367,38 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             data (Union[torch.Tensor, Tuple]): Data provided by DataLoader
         """
 
-        forward_return = list(self.forward(data=data, epoch=None, iter_num=iter_index, train=False))
+        forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
         # re-scale data
         forward_return = self.rescale_data(forward_return)
         # metrics
         for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, forward_return[:2])
+            metric_item = self.metric_forward(metric_func, forward_return)
             self.update_epoch_meter("val_"+metric_name, metric_item.item())
 
-    def evaluate(self, prediction, real_value):
+    def evaluate(self, returns_all):
         """Evaluate the model on test data.
 
         Args:
-            prediction (torch.Tensor): prediction data [B, L, N, C].
-            real_value (torch.Tensor): ground truth [B, L, N, C].
+            returns_all (Dict): must contain keys: inputs, prediction, target
         """
 
         # test performance of different horizon
         for i in self.evaluation_horizons:
             # For horizon i, only calculate the metrics **at that time** slice here.
-            pred = prediction[:, i, :, :]
-            real = real_value[:, i, :, :]
+            pred = returns_all["prediction"][:, i, :, :]
+            real = returns_all["target"][:, i, :, :]
             # metrics
             metric_repr = ""
             for metric_name, metric_func in self.metrics.items():
-                metric_item = self.metric_forward(metric_func, [pred, real])
+                if metric_name.lower() == "mase": continue # MASE needs to be calculated after all horizons
+                metric_item = self.metric_forward(metric_func, {"prediction": pred, "target": real})
                 metric_repr += ", Test {0}: {1:.6f}".format(metric_name, metric_item.item())
             log = "Evaluate best model on test data for horizon {:d}" + metric_repr
             log = log.format(i+1)
             self.logger.info(log)
         # test performance overall
         for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, [prediction, real_value])
+            metric_item = self.metric_forward(metric_func, returns_all)
             self.update_epoch_meter("test_"+metric_name, metric_item.item())
 
     @torch.no_grad()
@@ -401,23 +410,27 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             train_epoch (int, optional): current epoch if in training process.
         """
 
+        # TODO: fix OOM: especially when inputs, targets, and predictions are saved at the same time.
         # test loop
-        prediction = []
-        real_value = []
+        prediction =[]
+        target = []
+        inputs = []
         for _, data in enumerate(self.test_data_loader):
-            forward_return = list(self.forward(data, epoch=None, iter_num=None, train=False))
+            forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
             if not self.if_evaluate_on_gpu:
-                forward_return[0], forward_return[1] = forward_return[0].detach().cpu(), forward_return[1].detach().cpu()
-            prediction.append(forward_return[0])        # preds = forward_return[0]
-            real_value.append(forward_return[1])        # testy = forward_return[1]
+                forward_return["prediction"] = forward_return["prediction"].detach().cpu()
+                forward_return["target"] = forward_return["target"].detach().cpu()
+                forward_return["inputs"] = forward_return["inputs"].detach().cpu()
+            prediction.append(forward_return["prediction"])
+            target.append(forward_return["target"])
+            inputs.append(forward_return["inputs"])
         prediction = torch.cat(prediction, dim=0)
-        real_value = torch.cat(real_value, dim=0)
+        target = torch.cat(target, dim=0)
+        inputs = torch.cat(inputs, dim=0)
         # re-scale data
-        if self.if_rescale:
-            prediction = SCALER_REGISTRY.get(self.scaler["func"])(prediction, **self.scaler["args"])
-            real_value = SCALER_REGISTRY.get(self.scaler["func"])(real_value, **self.scaler["args"])
+        returns_all = self.rescale_data({"prediction": prediction, "target": target, "inputs": inputs})
         # evaluate
-        self.evaluate(prediction, real_value)
+        self.evaluate(returns_all)
 
     @master_only
     def on_validating_end(self, train_epoch: Optional[int]):
@@ -428,4 +441,4 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         """
 
         if train_epoch is not None:
-            self.save_best_model(train_epoch, "val_MAE", greater_best=False)
+            self.save_best_model(train_epoch, "val_" + self.target_metrics, greater_best=False)

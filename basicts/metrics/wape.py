@@ -2,12 +2,12 @@ import torch
 import numpy as np
 
 
-def masked_wape(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+def masked_wape(prediction: torch.Tensor, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
     """Masked weighted absolute percentage error (WAPE)
 
     Args:
-        preds (torch.Tensor): predicted values
-        labels (torch.Tensor): labels
+        prediction (torch.Tensor): predicted values
+        target (torch.Tensor): labels
         null_val (float, optional): null value. Defaults to np.nan.
 
     Returns:
@@ -15,11 +15,11 @@ def masked_wape(preds: torch.Tensor, labels: torch.Tensor, null_val: float = np.
     """
 
     if np.isnan(null_val):
-        mask = ~torch.isnan(labels)
+        mask = ~torch.isnan(target)
     else:
         eps = 5e-5
-        mask = ~torch.isclose(labels, torch.tensor(null_val).expand_as(labels).to(labels.device), atol=eps, rtol=0.)
+        mask = ~torch.isclose(target, torch.tensor(null_val).expand_as(target).to(target.device), atol=eps, rtol=0.)
     mask = mask.float()
-    preds, labels = preds * mask, labels * mask
-    loss =  torch.sum(torch.abs(preds-labels)) / (torch.sum(torch.abs(labels)) + 5e-5)
+    prediction, target = prediction * mask, target * mask
+    loss =  torch.sum(torch.abs(prediction-target)) / (torch.sum(torch.abs(target)) + 5e-5)
     return torch.mean(loss)
