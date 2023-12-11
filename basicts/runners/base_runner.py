@@ -26,9 +26,9 @@ class BaseRunner(Runner):
         super().__init__(cfg)
 
         # validate every `val_interval` epoch
-        self.val_interval = cfg["VAL"].get("INTERVAL", 1)
+        self.val_interval = cfg["VAL"].get("INTERVAL", 1) if hasattr(cfg, "VAL") else None
         # test every `test_interval` epoch
-        self.test_interval = cfg["TEST"].get("INTERVAL", 1)
+        self.test_interval = cfg["TEST"].get("INTERVAL", 1) if hasattr(cfg, "TEST") else None
 
         # declare data loader
         self.train_data_loader = None
