@@ -3,7 +3,7 @@ import os
 import torch
 from torch.utils.data import Dataset
 
-from ..utils import load_pkl
+from ...utils import load_pkl
 
 
 class TimeSeriesForecastingDataset(Dataset):

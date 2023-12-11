@@ -1,4 +1,5 @@
 import math
+import inspect
 import functools
 from typing import Tuple, Union, Optional, Dict
 
@@ -300,16 +301,19 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         Returns:
             torch.Tensor: metric value.
         """
-        # filter out keys that are not in function arguments
-        args = {k: v for k, v in args.items() if k in metric_func.__code__.co_varnames}
+        covariate_names = inspect.signature(metric_func).parameters.keys()
+        args = {k: v for k, v in args.items() if k in covariate_names}
 
         if isinstance(metric_func, functools.partial):
             # support partial function
             # users can define their partial function in the config file
             # e.g., functools.partial(masked_mase, freq="4", null_val=np.nan)
+            if "null_val" in covariate_names and "null_val" not in metric_func.keywords: # if null_val is required but not provided
+                args["null_val"] = self.null_val
             metric_item = metric_func(**args)
         elif callable(metric_func):
             # is a function
+            # filter out keys that are not in function arguments
             metric_item = metric_func(**args, null_val=self.null_val)
         else:
             raise TypeError("Unknown metric type: {0}".format(type(metric_func)))

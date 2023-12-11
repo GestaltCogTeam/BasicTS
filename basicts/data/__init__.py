@@ -3,7 +3,7 @@ import os
 from easytorch.utils.registry import scan_modules
 
 from .registry import SCALER_REGISTRY
-from .dataset import TimeSeriesForecastingDataset
+from .dataset_zoo.simple_tsf_dataset import TimeSeriesForecastingDataset
 
 __all__ = ["SCALER_REGISTRY", "TimeSeriesForecastingDataset"]
 

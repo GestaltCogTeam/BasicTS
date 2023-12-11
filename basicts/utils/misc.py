@@ -1,7 +1,16 @@
 import time
+from functools import partial
 
 import torch
 
+
+class partial_func(partial):
+    """partial class.
+        __str__ in functools.partial contains the address of the function, which changes randomly and will disrupt easytorch's md5 calculation.
+    """
+
+    def __str__(self):
+        return "partial({}, {})".format(self.func.__name__, self.keywords)
 
 def clock(func):
     """clock decorator"""
