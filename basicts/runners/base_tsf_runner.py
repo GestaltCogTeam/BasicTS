@@ -308,13 +308,18 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             # support partial function
             # users can define their partial function in the config file
             # e.g., functools.partial(masked_mase, freq="4", null_val=np.nan)
-            if "null_val" in covariate_names and "null_val" not in metric_func.keywords: # if null_val is required but not provided
+            if "null_val" in metric_func.keywords: # null_val is provided
+                # assert self.null_val is None, "Null_val is provided in metric function. The CFG.NULL_VAL should not be set."
+                pass # error when using multiple metrics, some of which require null_val and some do not
+            elif "null_val" in covariate_names: # null_val is required but not provided
                 args["null_val"] = self.null_val
             metric_item = metric_func(**args)
         elif callable(metric_func):
             # is a function
             # filter out keys that are not in function arguments
-            metric_item = metric_func(**args, null_val=self.null_val)
+            if "null_val" in covariate_names: # null_val is required
+                args["null_val"] = self.null_val
+            metric_item = metric_func(**args)
         else:
             raise TypeError("Unknown metric type: {0}".format(type(metric_func)))
         return metric_item

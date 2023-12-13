@@ -1,15 +1,17 @@
+from typing import Optional
+
 import numpy as np
 import torch
 import torch.nn.functional as F
 
 
-def l1_loss(prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+def l1_loss(prediction: torch.Tensor, target: torch._tensor, size_average: Optional[bool] = None, reduce: Optional[bool] = None, reduction: str = "mean") -> torch.Tensor:
     """unmasked mae."""
 
     return F.l1_loss(prediction, target)
 
 
-def l2_loss(prediction: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+def l2_loss(prediction: torch.Tensor, target: torch.Tensor, size_average: Optional[bool] = None, reduce: Optional[bool] = None, reduction: str = "mean") -> torch.Tensor:
     """unmasked mse"""
 
     return F.mse_loss(prediction, target)
