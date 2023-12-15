@@ -3,7 +3,7 @@ import torch
 from ..base_m4_runner import BaseM4Runner
 
 
-class M4Runner(BaseM4Runner):
+class M4ForecastingRunner(BaseM4Runner):
     """Simple Runner: select forward features and target features. This runner can cover most cases."""
 
     def __init__(self, cfg: dict):

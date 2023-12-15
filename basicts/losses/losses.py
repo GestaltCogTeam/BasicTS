@@ -8,13 +8,13 @@ import torch.nn.functional as F
 def l1_loss(prediction: torch.Tensor, target: torch._tensor, size_average: Optional[bool] = None, reduce: Optional[bool] = None, reduction: str = "mean") -> torch.Tensor:
     """unmasked mae."""
 
-    return F.l1_loss(prediction, target)
+    return F.l1_loss(prediction, target, size_average=size_average, reduce=reduce, reduction=reduction)
 
 
 def l2_loss(prediction: torch.Tensor, target: torch.Tensor, size_average: Optional[bool] = None, reduce: Optional[bool] = None, reduction: str = "mean") -> torch.Tensor:
     """unmasked mse"""
 
-    return F.mse_loss(prediction, target)
+    return F.mse_loss(prediction, target, size_average=size_average, reduce=reduce, reduction=reduction)
 
 
 def masked_mae(prediction: torch.Tensor, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:

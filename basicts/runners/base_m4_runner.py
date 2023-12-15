@@ -1,7 +1,7 @@
 import math
 import inspect
 import functools
-from typing import Tuple, Union, Optional, Dict
+from typing import Tuple, Union, Dict
 
 import torch
 import numpy as np
@@ -10,12 +10,14 @@ from easytorch.utils.dist import master_only
 
 from .base_runner import BaseRunner
 from ..data import SCALER_REGISTRY
-from ..metrics import masked_mae, masked_mape, masked_rmse, masked_wape, masked_mse
 
 
 class BaseM4Runner(BaseRunner):
     """
     Runner for M4 dataset.
+        - There is no validation set.
+        - On training end, we inference on the test set and save the prediction results.
+        - No metrics (but the loss). Since the evaluation is not done in this runner, thus no metrics are needed.
     """
 
     def __init__(self, cfg: dict):
@@ -33,8 +35,7 @@ class BaseM4Runner(BaseRunner):
         # define loss
         self.loss = cfg["TRAIN"]["LOSS"]
         # define metric
-        self.metrics = cfg.get("METRICS", {"MAE": masked_mae, "RMSE": masked_rmse, "MAPE": masked_mape, "WAPE": masked_wape, "MSE": masked_mse})
-        self.target_metrics = cfg.get("TARGET_METRICS", "MAE")
+        self.metrics = cfg.get("METRICS", {"loss": self.loss})
         # curriculum learning for output. Note that this is different from the CL in Seq2Seq archs.
         self.cl_param = cfg["TRAIN"].get("CL", None)
         if self.cl_param is not None:
@@ -45,7 +46,8 @@ class BaseM4Runner(BaseRunner):
         # evaluation
         self.if_evaluate_on_gpu = cfg.get("EVAL", EasyDict()).get("USE_GPU", True)     # evaluate on gpu or cpu (gpu is faster but may cause OOM)
         self.evaluation_horizons = [_ - 1 for _ in cfg.get("EVAL", EasyDict()).get("HORIZONS", range(1, 13))]
-        assert min(self.evaluation_horizons) >= 0, "The horizon should start counting from 1."
+        assert len(self.evaluation_horizons) == 0 or min(self.evaluation_horizons) >= 0, "The horizon should start counting from 1."
+        self.save_path = cfg.get("EVAL", EasyDict()).get("SAVE_PATH") # save path for inference results, should not be None
 
     def build_train_dataset(self, cfg: dict):
         """Build train dataset
@@ -86,19 +88,6 @@ class BaseM4Runner(BaseRunner):
         batch_size = cfg["TRAIN"]["DATA"]["BATCH_SIZE"]
         self.iter_per_epoch = math.ceil(len(dataset) / batch_size)
 
-        return dataset
-
-    @staticmethod
-    def build_val_dataset(cfg: dict):
-        """Build val dataset
-
-        Args:
-            cfg (dict): config
-
-        Returns:
-            validation dataset (Dataset)
-        """
-        dataset = BaseM4Runner.build_test_dataset(cfg=cfg)
         return dataset
 
     @staticmethod
@@ -153,8 +142,6 @@ class BaseM4Runner(BaseRunner):
         """
         raise NotImplementedError()
 
-    # same as BaseTimeSeriesForecastingRunner
-
     def setup_graph(self, cfg: dict, train: bool):
         """Setup all parameters and the computation graph.
         Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
@@ -193,19 +180,6 @@ class BaseM4Runner(BaseRunner):
         self.count_parameters()
         for key, _ in self.metrics.items():
             self.register_epoch_meter("train_"+key, "train", "{:.6f}")
-
-    def init_validation(self, cfg: dict):
-        """Initialize validation.
-
-        Including validation meters, etc.
-
-        Args:
-            cfg (dict): config
-        """
-
-        super().init_validation(cfg)
-        for key, _ in self.metrics.items():
-            self.register_epoch_meter("val_"+key, "val", "{:.6f}")
 
     def init_test(self, cfg: dict):
         """Initialize test.
@@ -301,47 +275,17 @@ class BaseM4Runner(BaseRunner):
             self.update_epoch_meter("train_"+metric_name, metric_item.item())
         return loss
 
-    def val_iters(self, iter_index: int, data: Union[torch.Tensor, Tuple]):
-        """Validation details.
-
-        Args:
-            iter_index (int): current iter.
-            data (Union[torch.Tensor, Tuple]): Data provided by DataLoader
-        """
-
-        forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
-        # re-scale data
-        forward_return = self.rescale_data(forward_return)
-        # metrics
-        for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, forward_return)
-            self.update_epoch_meter("val_"+metric_name, metric_item.item())
-
-    def evaluate(self, returns_all):
+    def save_prediction(self, returns_all):
         """Evaluate the model on test data.
 
         Args:
             returns_all (Dict): must contain keys: inputs, prediction, target
         """
-
-        # test performance of different horizon
-        for i in self.evaluation_horizons:
-            # For horizon i, only calculate the metrics **at that time** slice here.
-            pred = returns_all["prediction"][:, i, :, :]
-            real = returns_all["target"][:, i, :, :]
-            # metrics
-            metric_repr = ""
-            for metric_name, metric_func in self.metrics.items():
-                if metric_name.lower() == "mase": continue # MASE needs to be calculated after all horizons
-                metric_item = self.metric_forward(metric_func, {"prediction": pred, "target": real})
-                metric_repr += ", Test {0}: {1:.6f}".format(metric_name, metric_item.item())
-            log = "Evaluate best model on test data for horizon {:d}" + metric_repr
-            log = log.format(i+1)
-            self.logger.info(log)
-        # test performance overall
-        for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, returns_all)
-            self.update_epoch_meter("test_"+metric_name, metric_item.item())
+        prediction = returns_all["prediction"].detach().cpu().numpy()
+        loss = self.metric_forward(self.loss, returns_all)
+        self.update_epoch_meter("test_loss", loss.item())
+        # save prediction as self.save_path/self.dataset_name.npy
+        np.save("{0}/{1}.npy".format(self.save_path, self.dataset_name), prediction)
 
     @torch.no_grad()
     @master_only
@@ -372,18 +316,7 @@ class BaseM4Runner(BaseRunner):
         # re-scale data
         returns_all = self.rescale_data({"prediction": prediction, "target": target, "inputs": inputs})
         # evaluate
-        self.evaluate(returns_all)
-
-    @master_only
-    def on_validating_end(self, train_epoch: Optional[int]):
-        """Callback at the end of validating.
-
-        Args:
-            train_epoch (Optional[int]): current epoch if in training process.
-        """
-
-        if train_epoch is not None:
-            self.save_best_model(train_epoch, "val_" + self.target_metrics, greater_best=False)
+        self.save_prediction(returns_all)
 
     def rescale_data(self, input_data: Dict) -> Dict:
         """Rescale data.
