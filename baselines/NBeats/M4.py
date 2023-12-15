@@ -8,7 +8,7 @@ from basicts.losses import masked_mae
 from basicts.data import M4ForecastingDataset
 from basicts.runners import M4ForecastingRunner
 
-from .arch import STID
+from .arch import NBeats
 
 def get_cfg(seasonal_pattern):
     assert seasonal_pattern in ["Yearly", "Quarterly", "Monthly", "Weekly", "Daily", "Hourly"]
@@ -36,25 +36,30 @@ def get_cfg(seasonal_pattern):
 
     # ================= model ================= #
     CFG.MODEL = EasyDict()
-    CFG.MODEL.NAME = "STID"
-    CFG.MODEL.ARCH = STID
+    CFG.MODEL.NAME = "NBeats"
+    CFG.MODEL.ARCH = NBeats
     CFG.MODEL.PARAM = {
-        "num_nodes": num_nodes,
-        "input_len": CFG.DATASET_INPUT_LEN,
-        "input_dim": 1,
-        "embed_dim": 32,
-        "output_len": CFG.DATASET_OUTPUT_LEN,
-        "num_layer": 2,
-        "if_node": True,
-        "node_dim": 16,
-        "if_T_i_D": False, # no temporal features in M4
-        "if_D_i_W": False,
-        "temp_dim_tid": 32,
-        "temp_dim_diw": 32,
-        "time_of_day_size": 288,
-        "day_of_week_size": 7
+        "type": "generic",
+        "input_size": CFG.DATASET_INPUT_LEN,
+        "output_size": CFG.DATASET_OUTPUT_LEN,
+        "layer_size": 512,
+        "layers": 4,
+        "stacks": 30
     }
-    CFG.MODEL.FORWARD_FEATURES = [0, 1]  # values, node id
+    # CFG.MODEL.PARAM = {
+    #     "type": "interpretable",
+    #     "input_size": CFG.DATASET_INPUT_LEN,
+    #     "output_size": CFG.DATASET_OUTPUT_LEN,
+    #     "seasonality_layer_size": 2048,
+    #     "seasonality_blocks": 3,
+    #     "seasonality_layers": 4,
+    #     "trend_layer_size": 256,
+    #     "degree_of_polynomial": 2,
+    #     "trend_blocks": 3,
+    #     "trend_layers": 4,
+    #     "num_of_harmonics": 1
+    # }
+    CFG.MODEL.FORWARD_FEATURES = [0]
     CFG.MODEL.TARGET_FEATURES = [0]
 
     # ================= optim ================= #
@@ -69,7 +74,7 @@ def get_cfg(seasonal_pattern):
     CFG.TRAIN.LR_SCHEDULER = EasyDict()
     CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
     CFG.TRAIN.LR_SCHEDULER.PARAM = {
-        "milestones": [1, 30, 38, 46, 54, 62, 70, 80],
+        "milestones": [1, 50, 80],
         "gamma": 0.5
     }
 
