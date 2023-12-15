@@ -59,7 +59,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         # evaluation
         self.if_evaluate_on_gpu = cfg.get("EVAL", EasyDict()).get("USE_GPU", True)     # evaluate on gpu or cpu (gpu is faster but may cause OOM)
         self.evaluation_horizons = [_ - 1 for _ in cfg.get("EVAL", EasyDict()).get("HORIZONS", range(1, 13))]
-        assert min(self.evaluation_horizons) >= 0, "The horizon should start counting from 1."
+        assert len(self.evaluation_horizons) == 0 or min(self.evaluation_horizons) >= 0, "The horizon should start counting from 1."
 
     def setup_graph(self, cfg: Dict, train: bool):
         """Setup all parameters and the computation graph.
