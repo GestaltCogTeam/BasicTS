@@ -7,9 +7,9 @@ def clear_loggers():
         # logging.getLogger(logger_name).handlers.clear()
         logger = logging.getLogger(logger_name)
         # disable the logger
-        logger.disabled = True
+        # logger.disabled = True
         # remove handlers
         for handler in logger.handlers:
-            logger.removeHandler(handler)
-            handler.close
+            handler.close()
+        logger.handlers.clear()
     logger_initialized.clear()
