@@ -20,7 +20,7 @@ def get_cfg(seasonal_pattern):
     CFG = EasyDict()
 
     # ================= general ================= #
-    CFG.DESCRIPTION = "Multi-layer perceptron model configuration "
+    CFG.DESCRIPTION = "Multi-layer perceptron model configuration"
     CFG.RUNNER = M4ForecastingRunner
     CFG.DATASET_CLS = M4ForecastingDataset
     CFG.DATASET_NAME = "M4_" + seasonal_pattern
@@ -42,9 +42,9 @@ def get_cfg(seasonal_pattern):
         "num_nodes": num_nodes,
         "input_len": CFG.DATASET_INPUT_LEN,
         "input_dim": 1,
-        "embed_dim": 32,
+        "embed_dim": 256 if seasonal_pattern not in ["Yearly", "Quarterly", "Monthly"] else 128,
         "output_len": CFG.DATASET_OUTPUT_LEN,
-        "num_layer": 2,
+        "num_layer": 4,
         "if_node": True,
         "node_dim": 16,
         "if_T_i_D": False, # no temporal features in M4
@@ -69,7 +69,7 @@ def get_cfg(seasonal_pattern):
     CFG.TRAIN.LR_SCHEDULER = EasyDict()
     CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
     CFG.TRAIN.LR_SCHEDULER.PARAM = {
-        "milestones": [1, 30, 38, 46, 54, 62, 70, 80],
+        "milestones": [1, 50, 80],
         "gamma": 0.5
     }
 

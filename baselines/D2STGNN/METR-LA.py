@@ -126,3 +126,7 @@ CFG.TEST.DATA.PREFETCH = False
 CFG.TEST.DATA.SHUFFLE = False
 CFG.TEST.DATA.NUM_WORKERS = 2
 CFG.TEST.DATA.PIN_MEMORY = False
+
+# ================= evaluate ================= #
+CFG.EVAL = EasyDict()
+CFG.EVAL.HORIZONS = [3, 6, 12]
