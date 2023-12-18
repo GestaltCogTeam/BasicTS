@@ -1,0 +1,10 @@
+# #!/bin/bash
+python experiments/train.py -c baselines/ITransformer/ETTh1.py --gpus '1'
+python experiments/train.py -c baselines/ITransformer/ETTh2.py --gpus '1'
+python experiments/train.py -c baselines/ITransformer/ETTm1.py --gpus '1'
+python experiments/train.py -c baselines/ITransformer/ETTm2.py --gpus '1'
+python experiments/train.py -c baselines/ITransformer/Electricity.py --gpus '1'
+python experiments/train.py -c baselines/ITransformer/ExchangeRate.py --gpus '1'
+python experiments/train.py -c baselines/ITransformer/Weather.py --gpus '1'
+python experiments/train.py -c baselines/ITransformer/PEMS04.py --gpus '1'
+python experiments/train.py -c baselines/ITransformer/PEMS08.py --gpus '1'
