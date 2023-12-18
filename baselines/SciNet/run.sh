@@ -1,0 +1,10 @@
+#!/bin/bash
+python experiments/train.py -c baselines/SciNet/ETTh1.py --gpus '0'
+python experiments/train.py -c baselines/SciNet/ETTh2.py --gpus '0'
+python experiments/train.py -c baselines/SciNet/ETTm1.py --gpus '0'
+python experiments/train.py -c baselines/SciNet/ETTm2.py --gpus '0'
+python experiments/train.py -c baselines/SciNet/Electricity.py --gpus '0'
+python experiments/train.py -c baselines/SciNet/ExchangeRate.py --gpus '0'
+python experiments/train.py -c baselines/SciNet/Weather.py --gpus '0'
+python experiments/train.py -c baselines/SciNet/PEMS04.py --gpus '0'
+python experiments/train.py -c baselines/SciNet/PEMS08.py --gpus '0'
