@@ -82,7 +82,7 @@ def get_cfg(seasonal_pattern):
     CFG.TRAIN.CLIP_GRAD_PARAM = {
         'max_norm': 5.0
     }
-    CFG.TRAIN.NUM_EPOCHS = 100
+    CFG.TRAIN.NUM_EPOCHS = 52
     CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
         "checkpoints",
         "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
@@ -100,7 +100,7 @@ def get_cfg(seasonal_pattern):
 
     # ================= test ================= #
     CFG.TEST = EasyDict()
-    CFG.TEST.INTERVAL = CFG.TRAIN.NUM_EPOCHS
+    CFG.TEST.INTERVAL = 52
     # test data
     CFG.TEST.DATA = EasyDict()
     # read data

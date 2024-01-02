@@ -4,11 +4,11 @@ import sys
 # TODO: remove it when basicts can be installed by pip
 sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
-from basicts.losses import masked_mae
 from basicts.data import M4ForecastingDataset
-from basicts.runners import M4ForecastingRunner
 
-from .arch import STID
+from .arch import DeepAR
+from .loss import gaussian_loss
+from .runner import DeepARRunner
 
 def get_cfg(seasonal_pattern):
     assert seasonal_pattern in ["Yearly", "Quarterly", "Monthly", "Weekly", "Daily", "Hourly"]
@@ -20,8 +20,8 @@ def get_cfg(seasonal_pattern):
     CFG = EasyDict()
 
     # ================= general ================= #
-    CFG.DESCRIPTION = "Multi-layer perceptron model configuration"
-    CFG.RUNNER = M4ForecastingRunner
+    CFG.DESCRIPTION = "DeepAR M4"
+    CFG.RUNNER = DeepARRunner
     CFG.DATASET_CLS = M4ForecastingDataset
     CFG.DATASET_NAME = "M4_" + seasonal_pattern
     CFG.DATASET_INPUT_LEN = history_len
@@ -36,34 +36,27 @@ def get_cfg(seasonal_pattern):
 
     # ================= model ================= #
     CFG.MODEL = EasyDict()
-    CFG.MODEL.NAME = "STID"
-    CFG.MODEL.ARCH = STID
+    CFG.MODEL.NAME = "DeepAR"
+    CFG.MODEL.ARCH = DeepAR
     CFG.MODEL.PARAM = {
-        "num_nodes": num_nodes,
-        "input_len": CFG.DATASET_INPUT_LEN,
-        "input_dim": 1,
-        "embed_dim": 256 if seasonal_pattern not in ["Yearly", "Quarterly", "Monthly"] else 128,
-        "output_len": CFG.DATASET_OUTPUT_LEN,
-        "num_layer": 4,
-        "if_node": True,
-        "node_dim": 16,
-        "if_T_i_D": False, # no temporal features in M4
-        "if_D_i_W": False,
-        "temp_dim_tid": 32,
-        "temp_dim_diw": 32,
-        "time_of_day_size": 288,
-        "day_of_week_size": 7
+        "cov_feat_size" : 0,
+        "embedding_size" : 32,
+        "hidden_size" : 64,
+        "num_layers": 3,
+        "use_ts_id"   : False,
+        "id_feat_size": None,
+        "num_nodes": None
     }
-    CFG.MODEL.FORWARD_FEATURES = [0, 1]  # values, node id
+    CFG.MODEL.FORWARD_FEATURES = [0]  # values, node id
     CFG.MODEL.TARGET_FEATURES = [0]
 
     # ================= optim ================= #
     CFG.TRAIN = EasyDict()
-    CFG.TRAIN.LOSS = masked_mae
+    CFG.TRAIN.LOSS = gaussian_loss
     CFG.TRAIN.OPTIM = EasyDict()
     CFG.TRAIN.OPTIM.TYPE = "Adam"
     CFG.TRAIN.OPTIM.PARAM = {
-        "lr": 0.002,
+        "lr": 0.0005,
         "weight_decay": 0.0001,
     }
     CFG.TRAIN.LR_SCHEDULER = EasyDict()
@@ -77,7 +70,7 @@ def get_cfg(seasonal_pattern):
     CFG.TRAIN.CLIP_GRAD_PARAM = {
         'max_norm': 5.0
     }
-    CFG.TRAIN.NUM_EPOCHS = 99
+    CFG.TRAIN.NUM_EPOCHS = 101
     CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
         "checkpoints",
         "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
@@ -95,7 +88,7 @@ def get_cfg(seasonal_pattern):
 
     # ================= test ================= #
     CFG.TEST = EasyDict()
-    CFG.TEST.INTERVAL = CFG.TRAIN.NUM_EPOCHS
+    CFG.TEST.INTERVAL = 1
     # test data
     CFG.TEST.DATA = EasyDict()
     # read data

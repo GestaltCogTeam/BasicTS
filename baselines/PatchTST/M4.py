@@ -8,19 +8,18 @@ from basicts.losses import masked_mae
 from basicts.data import M4ForecastingDataset
 from basicts.runners import M4ForecastingRunner
 
-from .arch import STID
+from .arch import PatchTST
 
 def get_cfg(seasonal_pattern):
     assert seasonal_pattern in ["Yearly", "Quarterly", "Monthly", "Weekly", "Daily", "Hourly"]
     prediction_len = {"Yearly": 6, "Quarterly": 8, "Monthly": 18, "Weekly": 13, "Daily": 14, "Hourly": 48}[seasonal_pattern]
-    num_nodes = {"Yearly": 23000, "Quarterly": 24000, "Monthly": 48000, "Weekly": 359, "Daily": 4227, "Hourly": 414}[seasonal_pattern]
     history_size = 2
     history_len = history_size * prediction_len
 
     CFG = EasyDict()
 
     # ================= general ================= #
-    CFG.DESCRIPTION = "Multi-layer perceptron model configuration"
+    CFG.DESCRIPTION = "Multi-layer perceptron model configuration "
     CFG.RUNNER = M4ForecastingRunner
     CFG.DATASET_CLS = M4ForecastingDataset
     CFG.DATASET_NAME = "M4_" + seasonal_pattern
@@ -36,25 +35,30 @@ def get_cfg(seasonal_pattern):
 
     # ================= model ================= #
     CFG.MODEL = EasyDict()
-    CFG.MODEL.NAME = "STID"
-    CFG.MODEL.ARCH = STID
+    CFG.MODEL.NAME = "PatchTST"
+    CFG.MODEL.ARCH = PatchTST
     CFG.MODEL.PARAM = {
-        "num_nodes": num_nodes,
-        "input_len": CFG.DATASET_INPUT_LEN,
-        "input_dim": 1,
-        "embed_dim": 256 if seasonal_pattern not in ["Yearly", "Quarterly", "Monthly"] else 128,
-        "output_len": CFG.DATASET_OUTPUT_LEN,
-        "num_layer": 4,
-        "if_node": True,
-        "node_dim": 16,
-        "if_T_i_D": False, # no temporal features in M4
-        "if_D_i_W": False,
-        "temp_dim_tid": 32,
-        "temp_dim_diw": 32,
-        "time_of_day_size": 288,
-        "day_of_week_size": 7
+            "enc_in": 1,                        # num nodes
+            "seq_len": CFG.DATASET_INPUT_LEN,           # input sequence length
+            "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length
+            "e_layers": 3,                              # num of encoder layers
+            "n_heads": 4,
+            "d_model": 16,
+            "d_ff": 128,
+            "dropout": 0.3,
+            "fc_dropout": 0.3,
+            "head_dropout": 0.0,
+            "patch_len": 2,
+            "stride": 1,
+            "individual": 0,                            # individual head; True 1 False 0
+            "padding_patch": "end",                     # None: None; end: padding on the end
+            "revin": 1,                                 # RevIN; True 1 False 0
+            "affine": 0,                                # RevIN-affine; True 1 False 0
+            "subtract_last": 0,                         # 0: subtract mean; 1: subtract last
+            "decomposition": 0,                         # decomposition; True 1 False 0
+            "kernel_size": 2,                          # decomposition-kernel
     }
-    CFG.MODEL.FORWARD_FEATURES = [0, 1]  # values, node id
+    CFG.MODEL.FORWARD_FEATURES = [0]
     CFG.MODEL.TARGET_FEATURES = [0]
 
     # ================= optim ================= #
@@ -77,7 +81,7 @@ def get_cfg(seasonal_pattern):
     CFG.TRAIN.CLIP_GRAD_PARAM = {
         'max_norm': 5.0
     }
-    CFG.TRAIN.NUM_EPOCHS = 99
+    CFG.TRAIN.NUM_EPOCHS = 100
     CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
         "checkpoints",
         "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
@@ -95,7 +99,7 @@ def get_cfg(seasonal_pattern):
 
     # ================= test ================= #
     CFG.TEST = EasyDict()
-    CFG.TEST.INTERVAL = CFG.TRAIN.NUM_EPOCHS
+    CFG.TEST.INTERVAL = 5
     # test data
     CFG.TEST.DATA = EasyDict()
     # read data
