@@ -151,7 +151,7 @@ class M4Summary:
                               grouped_smapes[k] / grouped_naive2_smapes[k]) / 2
         def round_all(d):
             return dict(map(lambda kv: (kv[0], np.round(kv[1], 3)), d.items()))
-        return round_all(grouped_smapes), round_all(grouped_owa)
+        return round_all(grouped_smapes), round_all(grouped_model_mases), round_all(grouped_owa)
 
     def summarize_groups(self, scores):
         """
@@ -217,5 +217,5 @@ def m4_summary(save_dir, project_dir):
     test_values = build_cache("*-test.csv")
     print("Summarizing M4 dataset...")
     summary = M4Summary(info_file_path, train_values, test_values, data_dir + "/submission-Naive2.csv")
-    results = pd.DataFrame(summary.evaluate(prediction), index=["SMAPE", "OWA"])
+    results = pd.DataFrame(summary.evaluate(prediction), index=["SMAPE", "MASE", "OWA"])
     return results

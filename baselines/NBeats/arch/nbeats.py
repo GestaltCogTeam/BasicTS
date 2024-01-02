@@ -111,18 +111,20 @@ class NBeats(t.nn.Module):
             self.blocks = t.nn.ModuleList(
                 [trend_block for _ in range(trend_blocks)] + [seasonality_block for _ in range(seasonality_blocks)])
 
-    def forward(self, history_data: t.Tensor, history_mask: t.Tensor, **kwargs) -> t.Tensor:
+    def forward(self, history_data: t.Tensor, **kwargs) -> t.Tensor:
+        B, L, N, C = history_data.shape
+        history_data = history_data[..., [0]].transpose(1, 2)   # [B, N, L, 1]
+        history_data = history_data.reshape(B*N, L, 1)
+        
         x = history_data.squeeze()
-        input_mask = history_mask.squeeze()
         
         residuals = x.flip(dims=(1,))
-        input_mask = input_mask.flip(dims=(1,))
         forecast = x[:, -1:]
         for i, block in enumerate(self.blocks):
             backcast, block_forecast = block(residuals)
-            residuals = (residuals - backcast) * input_mask
+            residuals = (residuals - backcast)
             forecast = forecast + block_forecast
-        forecast = forecast.unsqueeze(-1).unsqueeze(-1)
+        forecast = forecast.reshape(B, N, forecast.shape[-1]).unsqueeze(-1).transpose(1, 2)
         return forecast
 
 
