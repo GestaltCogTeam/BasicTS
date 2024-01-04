@@ -1,1 +1,1 @@
-[STWave](https://ieeexplore.ieee.org/document/10184591) requires Pytorch_Wavelets package, which should be manually installed according to this [github page](https://github.com/fbcotter/pytorch_wavelets).
+[STWave](https://ieeexplore.ieee.org/document/10184591) requires PyWavelets.
