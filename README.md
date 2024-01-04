@@ -195,6 +195,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/zezhishao"><img src="https://avatars.githubusercontent.com/u/33691477?v=4?s=100" width="100px;" alt="S22"/><br /><sub><b>S22</b></sub></a><br /><a href="#maintenance-zezhishao" title="Maintenance">🚧</a> <a href="#infra-zezhishao" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="https://github.com/zezhishao/BasicTS/commits?author=zezhishao" title="Code">💻</a> <a href="https://github.com/zezhishao/BasicTS/issues?q=author%3Azezhishao" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/LMissher"><img src="https://avatars.githubusercontent.com/u/37818979?v=4?s=100" width="100px;" alt="LMissher"/><br /><sub><b>LMissher</b></sub></a><br /><a href="https://github.com/zezhishao/BasicTS/commits?author=LMissher" title="Code">💻</a> <a href="https://github.com/zezhishao/BasicTS/issues?q=author%3ALMissher" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>
