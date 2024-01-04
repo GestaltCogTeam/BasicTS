@@ -175,15 +175,6 @@ BasicTS is built on PyTorch 1.9.1 or 1.10.0, while other versions have not been 
 
   [Example: Multi-Layer Perceptron (MLP)](baselines/MLP)
 
-## 📉 Main Results
-
-See the paper *[Exploring Progress in Multivariate Time Series Forecasting:
-Comprehensive Benchmarking and Heterogeneity Analysis](https://arxiv.org/pdf/2310.06119.pdf).*
-
-## 🔗 Acknowledgement
-
-BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch), an easy-to-use and powerful open-source neural network training framework.
-
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
@@ -210,3 +201,12 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
+## 📉 Main Results
+
+See the paper *[Exploring Progress in Multivariate Time Series Forecasting:
+Comprehensive Benchmarking and Heterogeneity Analysis](https://arxiv.org/pdf/2310.06119.pdf).*
+
+## 🔗 Acknowledgement
+
+BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch), an easy-to-use and powerful open-source neural network training framework.
