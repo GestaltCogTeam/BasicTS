@@ -104,16 +104,16 @@ class STNorm(nn.Module):
                 self.filter_convs.append(nn.Conv2d(
                     in_channels=num * channels, out_channels=channels, kernel_size=(1, kernel_size), dilation=new_dilation))
 
-                self.gate_convs.append(nn.Conv1d(
+                self.gate_convs.append(nn.Conv2d(
                     in_channels=num * channels, out_channels=channels, kernel_size=(1, kernel_size), dilation=new_dilation))
 
                 # 1x1 convolution for residual connection
                 self.residual_convs.append(
-                    nn.Conv1d(in_channels=channels, out_channels=channels, kernel_size=(1, 1)))
+                    nn.Conv2d(in_channels=channels, out_channels=channels, kernel_size=(1, 1)))
 
                 # 1x1 convolution for skip connection
                 self.skip_convs.append(
-                    nn.Conv1d(in_channels=channels, out_channels=channels, kernel_size=(1, 1)))
+                    nn.Conv2d(in_channels=channels, out_channels=channels, kernel_size=(1, 1)))
                 new_dilation *= 2
                 receptive_field += additional_scope
                 additional_scope *= 2
