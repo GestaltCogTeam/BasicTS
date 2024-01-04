@@ -36,6 +36,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "Azusa-Yuan",
+      "name": "Azusa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61765965?v=4",
+      "profile": "https://github.com/Azusa-Yuan",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
