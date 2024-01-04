@@ -1,7 +1,4 @@
 <div align="center">
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
   <img src="assets/basicts_logo.png" height=200>
   <!-- <h1><b> BasicTS </b></h1> -->
   <!-- <h2><b> BasicTS </b></h2> -->
