@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
-from pytorch_wavelets import DWT1DForward, DWT1DInverse
+import pywt
 
 class temporalEmbedding(nn.Module):
     def __init__(self, D):
@@ -287,7 +287,7 @@ class STWave(nn.Module):
 
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs):
         '''
-        x:[B,T,N,1]
+        x:[B,T,N,D]
         '''
         x = history_data
         te = torch.cat([x[:,:,0,1:2]*self.td, x[:,:,0,2:]*self.dw], -1)
@@ -298,7 +298,7 @@ class STWave(nn.Module):
         te = te[...,[1,0]]
 
         inputs = x[...,:self.id]
-        xl, xh = disentangle(inputs[...,0].cpu(), self.wt, self.wl)
+        xl, xh = disentangle(inputs[...,0:1].cpu().numpy(), self.wt, self.wl)
 
         xl, xh, TE = self.start_emb_l(xl.to(x.device)), self.start_emb_h(xh.to(x.device)), self.te_emb(te, self.td, self.dw)
 
@@ -312,21 +312,22 @@ class STWave(nn.Module):
         hat_y, hat_y_l = self.end_emb(hat_y), self.end_emb_l(hat_y_l)
         
         if self.training:
-            label_yl, _ = disentangle(future_data[...,0].cpu(), self.wt, self.wl)
+            label_yl, _ = disentangle(future_data[...,0:1].cpu().numpy(), self.wt, self.wl)
             return torch.cat([hat_y, hat_y_l, label_yl.to(x.device)], -1)
         
         return hat_y
 
 
-def disentangle(data, w, j):
-    dwt = DWT1DForward(wave=w, J=j)
-    idwt = DWT1DInverse(wave=w)
-    torch_traffic = data.transpose(1,-1).reshape(data.shape[0]*data.shape[2], -1).unsqueeze(1)
-    torch_trafficl, torch_traffich = dwt(torch_traffic.float())
-    placeholderh = torch.zeros(torch_trafficl.shape)
-    placeholderl = []
-    for i in range(j):
-        placeholderl.append(torch.zeros(torch_traffich[i].shape))
-    torch_trafficl = idwt((torch_trafficl, placeholderl)).reshape(data.shape[0],data.shape[2],1,-1).squeeze(2).transpose(1,2)
-    torch_traffich = idwt((placeholderh, torch_traffich)).reshape(data.shape[0],data.shape[2],1,-1).squeeze(2).transpose(1,2)
-    return torch_trafficl.unsqueeze(-1), torch_traffich.unsqueeze(-1)
+def disentangle(x, w, j):
+    x = x.transpose(0,3,2,1) # [B,D,N,T]
+    coef = pywt.wavedec(x, w, level=j)
+    coefl = [coef[0]]
+    for i in range(len(coef)-1):
+        coefl.append(None)
+    coefh = [None]
+    for i in range(len(coef)-1):
+        coefh.append(coef[i+1])
+    xl = pywt.waverec(coefl, w).transpose(0,3,2,1)
+    xh = pywt.waverec(coefh, w).transpose(0,3,2,1)
+
+    return torch.from_numpy(xl), torch.from_numpy(xh)
