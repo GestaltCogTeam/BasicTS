@@ -25,5 +25,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "projectName": "BasicTS",
-  "projectOwner": "zezhishao"
+  "projectOwner": "zezhishao",
+  "linkToUsage": false
 }
