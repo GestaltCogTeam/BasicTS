@@ -175,53 +175,6 @@ BasicTS is built on PyTorch 1.9.1 or 1.10.0, while other versions have not been 
 
   [Example: Multi-Layer Perceptron (MLP)](baselines/MLP)
 
-## ❤️ Contributors
-
-Thanks to all contributors!
-
-<!--GAMFC_TABEL--><table><tr>
-  <td align="center">
-    <a href="https://github.com/zezhishao" title="Zezhi Shao">
-      <img src="https://avatars.githubusercontent.com/u/33691477?v=4" width="100;" alt="Zezhi Shao"/>
-    <br /><sub><b>S22</b></sub>
-    </a>
-  </td>
-    <td align="center">
-    <a href="https://github.com/LMissher" title="LMissher">
-      <img src="https://avatars.githubusercontent.com/u/37818979?v=4" width="100;" alt="LMissher"/>
-    <br /><sub><b>LMissher</b></sub>
-    </a>
-  </td>
-  </td>
-    <td align="center">
-    <a href="https://github.com/cnstark" title="CNStark">
-      <img src="https://avatars.githubusercontent.com/u/45590791?v=4" width="100;" alt="CNStark"/>
-    <br /><sub><b>CNStark</b></sub>
-    </a>
-  </td>
-  </td>
-    <td align="center">
-    <a href="https://github.com/Azusa-Yuan" title="Azusa">
-      <img src="https://avatars.githubusercontent.com/u/61765965?v=4" width="100;" alt="Azusa"/>
-    <br /><sub><b>Azusa</b></sub>
-    </a>
-  </td>
-  </td>
-    <td align="center">
-    <a href="https://github.com/ywoelker" title="Yannick Wölker">
-      <img src="https://avatars.githubusercontent.com/u/94364022?v=4" width="100;" alt="Yannick Wölker"/>
-    <br /><sub><b>Yannick Wölker</b></sub>
-    </a>
-  </td>
-  </td>
-    <td align="center">
-    <a href="https://github.com/hlhang9527" title="hlhang9527">
-      <img src="https://avatars.githubusercontent.com/u/77621248?v=4" width="100;" alt="hlhang9527"/>
-    <br /><sub><b>hlhang9527</b></sub>
-    </a>
-  </td>
-</tr></table><!--GAMFC_TABEL-END-->
-
 ## 📉 Main Results
 
 See the paper *[Exploring Progress in Multivariate Time Series Forecasting:
