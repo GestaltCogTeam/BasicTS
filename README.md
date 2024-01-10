@@ -1,7 +1,6 @@
 <div align="center">
-  <img src="assets/basicts_logo.png" height=200>
-  <!-- <h1><b> BasicTS </b></h1> -->
-  <!-- <h2><b> BasicTS </b></h2> -->
+  <img src="assets/basicts+_logo_light.png#gh-light-mode-only" height=200>
+  <img src="assets/basicts+_logo_dark.png#gh-dark-mode-only" height=200>
   <h3><b> A Standard and Fair Time Series Forecasting Benchmark and Toolkit. </b></h3>
 </div>
 
@@ -16,7 +15,8 @@
 
 </div>
 
-BasicTS (**Basic** **T**ime **S**eries) is a PyTorch-based benchmark and toolbox for **time series forecasting** (TSF).
+
+$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries **P**lus) is an enhanced benchmark and toolbox designed for time series forecasting. $\text{BasicTS}^{+}$ evolved from its predecessor, [BasicTS](https://github.com/zezhishao/BasicTS/tree/c3075025a5d20ef48da62fc85d05621f8f6b15ca), and now has robust support for spatial-temporal forecasting and long time-series forecasting as well as more general tasks, such as M4 competition. For brevity and consistency, we will interchangeably refer to this project as $\text{BasicTS}^{+}$ and $\text{BasicTS}$.
 
 On the one hand, BasicTS utilizes a ***unified and standard pipeline*** to give a ***fair and exhaustive*** reproduction and comparison of popular deep learning-based models. 
 
@@ -27,8 +27,6 @@ We are collecting **TODOs** and **HOWTOs**, if you need more features (*e.g.* mo
 If you find this repository useful for your work, please consider citing it as [such](./citation.bib).
 
 ## ✨ Highlighted Features
-
-BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch), an easy-to-use and powerful open-source neural network training framework.
 
 ### Fair Performance Review
 
@@ -70,7 +68,8 @@ BasicTS support a variety of datasets, including spatial-temporal forecasting, l
 
 ### Baselines
 
-BasicTS provides a wealth of built-in models, including both spatial-temporal forecasting models and long time-series forecasting models, e.g.,
+BasicTS implements a wealth of models, including classic models, spatial-temporal forecasting models, and long time-series forecasting model, e.g.,
+- HI, DeepAR, LightGBM, ...
 - DCRNN, Graph WaveNet, MTGNN, STID, D2STGNN, STEP, DGCRN, DGCRN, STNorm, AGCRN, GTS, StemGNN, MegaCRN, STGCN, STWave, STAEformer, GMSDR, ...
 - Informer, Autoformer, FEDformer, Pyraformer, DLinear, NLinear, Triformer, Crossformer, ...
 
