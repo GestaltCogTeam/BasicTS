@@ -6,7 +6,7 @@ import torch.fft
 from basicts.utils import data_transformation_4_xformer
 
 from .embed import DataEmbedding_wo_pos
-from .Conv_Blocks import Inception_Block_V1
+from .conv_block import Inception_Block_V1
 
 
 def FFT_for_Period(x, k=2):

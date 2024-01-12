@@ -21,7 +21,7 @@ CFG.DATASET_TYPE = "Electricity Consumption"
 CFG.DATASET_INPUT_LEN = 96
 CFG.DATASET_OUTPUT_LEN = 336
 CFG.GPU_NUM = 1
-CFG.RESCALE = False
+# CFG.RESCALE = False
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()

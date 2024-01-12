@@ -21,7 +21,7 @@ CFG.DATASET_TYPE = "Illness"
 CFG.DATASET_INPUT_LEN = 60
 CFG.DATASET_OUTPUT_LEN = 60
 CFG.GPU_NUM = 1
-CFG.RESCALE = False
+# CFG.RESCALE = False
 
 # ================= environment ================= #
 CFG.ENV = EasyDict()
