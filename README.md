@@ -192,6 +192,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Azusa-Yuan"><img src="https://avatars.githubusercontent.com/u/61765965?v=4?s=100" width="100px;" alt="Azusa"/><br /><sub><b>Azusa</b></sub></a><br /><a href="https://github.com/zezhishao/BasicTS/issues?q=author%3AAzusa-Yuan" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ywoelker"><img src="https://avatars.githubusercontent.com/u/94364022?v=4?s=100" width="100px;" alt="Yannick Wölker"/><br /><sub><b>Yannick Wölker</b></sub></a><br /><a href="https://github.com/zezhishao/BasicTS/issues?q=author%3Aywoelker" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/hlhang9527"><img src="https://avatars.githubusercontent.com/u/77621248?v=4?s=100" width="100px;" alt="hlhang9527"/><br /><sub><b>hlhang9527</b></sub></a><br /><a href="https://github.com/zezhishao/BasicTS/issues?q=author%3Ahlhang9527" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://scholar.google.com.hk/citations?user=G3vphfgAAAAJ&hl=zh-CN&oi=ao"><img src="https://avatars.githubusercontent.com/u/114470704?v=4?s=100" width="100px;" alt="Chengqing Yu"/><br /><sub><b>Chengqing Yu</b></sub></a><br /><a href="https://github.com/zezhishao/BasicTS/commits?author=ChengqingYu" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
