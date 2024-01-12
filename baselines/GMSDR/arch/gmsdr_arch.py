@@ -90,6 +90,11 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
 
 
 class GMSDR(nn.Module, Seq2SeqAttrs):
+    """
+        Paper: MSDR: Multi-Step Dependency Relation Networks for Spatial Temporal Forecasting
+        Link: https://dl.acm.org/doi/abs/10.1145/3534678.3539397
+        Reference Code: https://github.com/dcliu99/MSDR
+    """
     def __init__(self, adj_mx, **model_kwargs):
         super().__init__()
         Seq2SeqAttrs.__init__(self, adj_mx, **model_kwargs)
