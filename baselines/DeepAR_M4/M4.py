@@ -70,7 +70,7 @@ def get_cfg(seasonal_pattern):
     CFG.TRAIN.CLIP_GRAD_PARAM = {
         'max_norm': 5.0
     }
-    CFG.TRAIN.NUM_EPOCHS = 101
+    CFG.TRAIN.NUM_EPOCHS = 100
     CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
         "checkpoints",
         "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
