@@ -440,6 +440,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         returns_all = self.rescale_data({"prediction": prediction, "target": target, "inputs": inputs})
         # evaluate
         self.evaluate(returns_all)
+        return returns_all
 
     @master_only
     def on_validating_end(self, train_epoch: Optional[int]):
