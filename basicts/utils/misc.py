@@ -13,7 +13,7 @@ def scan_modules(work_dir: str, file_dir: str, exclude_files: List[str] = None, 
     overwrite easytorch.utils.scan_modeuls: automatically scan and import modules for registry, and exclude some files and dirs.
     """
     module_dir = os.path.dirname(os.path.abspath(file_dir))
-    import_prefix = module_dir[module_dir.find(work_dir) + len(work_dir) + 1:].replace('/', '.').replace('\\', '.')
+    import_prefix = module_dir[module_dir.find(work_dir) + len(work_dir) + 1:].replace("/", ".").replace("\\", ".")
 
     if exclude_files is None:
         exclude_files = []
@@ -22,17 +22,17 @@ def scan_modules(work_dir: str, file_dir: str, exclude_files: List[str] = None, 
 
     # get all file names, and remove the files in exclude_files
     model_file_names = [
-        v[:v.find('.py')].replace('/', '.').replace('\\', '.') \
-        for v in scan_dir(module_dir, suffix='py', recursive=True) if v not in exclude_files
+        v[:v.find(".py")].replace("/", ".").replace("\\", ".") \
+        for v in scan_dir(module_dir, suffix="py", recursive=True) if v not in exclude_files
     ]
 
     # remove the files in exclude_dirs. TODO: use os.path to check
     for exclude_dir in exclude_dirs:
-        exclude_dir = exclude_dir.replace('/', '.').replace('\\', '.')
+        exclude_dir = exclude_dir.replace("/", ".").replace("\\", ".")
         model_file_names = [file_name for file_name in model_file_names if exclude_dir not in file_name]
 
     # import all modules
-    return [importlib.import_module(f'{import_prefix}.{file_name}') for file_name in model_file_names]
+    return [importlib.import_module(f"{import_prefix}.{file_name}") for file_name in model_file_names]
 
 
 class partial_func(partial):
