@@ -11,7 +11,7 @@ class MultiLayerPerceptron(nn.Module):
         self.act = nn.ReLU()
 
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
-        """Feedforward function of AGCRN.
+        """Feedforward function of MLP.
 
         Args:
             history_data (torch.Tensor): inputs with shape [B, L, N, C].
