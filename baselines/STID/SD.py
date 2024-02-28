@@ -104,7 +104,7 @@ CFG.VAL.DATA.PIN_MEMORY = False
 
 # ================= test ================= #
 CFG.TEST = EasyDict()
-CFG.TEST.INTERVAL = 50
+CFG.TEST.INTERVAL = 1
 # test data
 CFG.TEST.DATA = EasyDict()
 # read data
@@ -118,5 +118,4 @@ CFG.TEST.DATA.PIN_MEMORY = False
 
 # ================= evaluate ================= #
 CFG.EVAL = EasyDict()
-CFG.EVAL.USE_GPU = False
 CFG.EVAL.HORIZONS = [3, 6, 12]
