@@ -110,9 +110,11 @@ def generate_data(args: argparse.Namespace):
     with open(output_dir + "/data_in_{0}_out_{1}_rescale_{2}.pkl".format(history_seq_len, future_seq_len, if_rescale), "wb") as f:
         pickle.dump(data, f)
    # copy adj
-    shutil.copyfile(graph_file_path, output_dir + "/adj_mx.pkl")
+    adj_mx = np.load(graph_file_path)
+    with open(output_dir + "/adj_mx.pkl", "wb") as f:
+        pickle.dump(adj_mx, f)
     # copy adj meta data
-    shutil.copyfile(graph_file_path, output_dir + "/adj_meta.pkl")
+    shutil.copyfile(graph_file_path, output_dir + "/adj_meta.csv")
 
 
 if __name__ == "__main__":
