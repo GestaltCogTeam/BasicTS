@@ -15,7 +15,6 @@
 
 </div>
 
-
 $\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries **P**lus) is an enhanced benchmark and toolbox designed for time series forecasting. $\text{BasicTS}^{+}$ evolved from its predecessor, [BasicTS](https://github.com/zezhishao/BasicTS/blob/v1/README.md), and now has robust support for spatial-temporal forecasting and long time-series forecasting as well as more general tasks, such as M4 competition. For brevity and consistency, we will interchangeably refer to this project as $\text{BasicTS}^{+}$ and $\text{BasicTS}$.
 
 On the one hand, BasicTS utilizes a ***unified and standard pipeline*** to give a ***fair and exhaustive*** reproduction and comparison of popular deep learning-based models. 
@@ -24,7 +23,16 @@ On the other hand, BasicTS provides users with ***easy-to-use and extensible int
 
 We are collecting **TODOs** and **HOWTOs**, if you need more features (*e.g.* more datasets or baselines) or have any questions, please feel free to create an issue or leave a comment [here](https://github.com/zezhishao/BasicTS/issues/95).
 
-If you find this repository useful for your work, please consider citing it as [such](./citation.bib).
+If you find this repository useful for your work, please cite it as [such](./citation.bib):
+
+```LaTeX
+@article{shao2023exploring,
+  title={Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis},
+  author={Shao, Zezhi and Wang, Fei and Xu, Yongjun and Wei, Wei and Yu, Chengqing and Zhang, Zhao and Yao, Di and Jin, Guangyin and Cao, Xin and Cong, Gao and others},
+  journal={arXiv preprint arXiv:2310.06119},
+  year={2023}
+}
+```
 
 ## ✨ Highlighted Features
 
