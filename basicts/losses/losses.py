@@ -36,10 +36,10 @@ def masked_mae(prediction: torch.Tensor, target: torch.Tensor, null_val: float =
         mask = ~torch.isclose(target, torch.tensor(null_val).expand_as(target).to(target.device), atol=eps, rtol=0.)
     mask = mask.float()
     mask /= torch.mean((mask))
-    mask = torch.where(torch.isnan(mask), torch.zeros_like(mask), mask)
+    mask = torch.nan_to_num(mask)
     loss = torch.abs(prediction-target)
     loss = loss * mask
-    loss = torch.where(torch.isnan(loss), torch.zeros_like(loss), loss)
+    loss = torch.nan_to_num(loss)
     return torch.mean(loss)
 
 
@@ -62,10 +62,10 @@ def masked_mse(prediction: torch.Tensor, target: torch.Tensor, null_val: float =
         mask = ~torch.isclose(target, torch.tensor(null_val).expand_as(target).to(target.device), atol=eps, rtol=0.)
     mask = mask.float()
     mask /= torch.mean((mask))
-    mask = torch.where(torch.isnan(mask), torch.zeros_like(mask), mask)
+    mask = torch.nan_to_num(mask)
     loss = (prediction-target)**2
     loss = loss * mask
-    loss = torch.where(torch.isnan(loss), torch.zeros_like(loss), loss)
+    loss = torch.nan_to_num(loss)
     return torch.mean(loss)
 
 
@@ -91,26 +91,28 @@ def masked_mape(prediction: torch.Tensor, target: torch.Tensor, null_val: float 
         prediction (torch.Tensor): predicted values
         target (torch.Tensor): labels
         null_val (float, optional): null value.
-                                    In the mape metric, null_val is set to 0.0 by all default.
+                                    In the mape metric, null_val is set to 0.0 and by all default.
                                     We keep this parameter for consistency, but we do not allow it to be changed.
 
     Returns:
         torch.Tensor: masked mean absolute percentage error
     """
-    # we do not allow null_val to be changed
-    null_val = 0.0
+    assert null_val == 0.0, "In the mape metric, null_val is set to 0.0 and by all default. \
+        This parameter is kept for consistency, but it is not allowed to be changed."
+
     # delete small values to avoid abnormal results
-    # TODO: support multiple null values
     target = torch.where(torch.abs(target) < 1e-4, torch.zeros_like(target), target)
-    if np.isnan(null_val):
-        mask = ~torch.isnan(target)
-    else:
-        eps = 5e-5
-        mask = ~torch.isclose(target, torch.tensor(null_val).expand_as(target).to(target.device), atol=eps, rtol=0.)
-    mask = mask.float()
+
+    # nan mask
+    nan_mask = ~torch.isnan(target)
+    # zero mask
+    eps = 5e-5
+    zero_mask = ~torch.isclose(target, torch.tensor(null_val).expand_as(target).to(target.device), atol=eps, rtol=0.)
+    
+    mask = (nan_mask & zero_mask).float()
     mask /= torch.mean((mask))
-    mask = torch.where(torch.isnan(mask), torch.zeros_like(mask), mask)
+    mask = torch.nan_to_num(mask)
     loss = torch.abs(torch.abs(prediction-target)/target)
     loss = loss * mask
-    loss = torch.where(torch.isnan(loss), torch.zeros_like(loss), loss)
+    loss = torch.nan_to_num(loss)
     return torch.mean(loss)

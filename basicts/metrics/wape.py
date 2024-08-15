@@ -21,5 +21,9 @@ def masked_wape(prediction: torch.Tensor, target: torch.Tensor, null_val: float 
         mask = ~torch.isclose(target, torch.tensor(null_val).expand_as(target).to(target.device), atol=eps, rtol=0.)
     mask = mask.float()
     prediction, target = prediction * mask, target * mask
+    
+    prediction = torch.nan_to_num(prediction)
+    target = torch.nan_to_num(target)
+
     loss =  torch.sum(torch.abs(prediction-target)) / (torch.sum(torch.abs(target)) + 5e-5)
     return torch.mean(loss)
