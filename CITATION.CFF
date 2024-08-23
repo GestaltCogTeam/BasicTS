@@ -1,0 +1,53 @@
+cff-version: 1.2.0
+message: If you use this software, please cite both the article from preferred-citation and the software itself.
+authors:
+  - family-names: Shao
+    given-names: Zezhi
+  - family-names: Wang
+    given-names: Fei
+  - family-names: Xu
+    given-names: Yongjun
+  - family-names: Wei
+    given-names: Wei
+  - family-names: Yu
+    given-names: Chengqing
+  - family-names: Zhang
+    given-names: Zhao
+  - family-names: Yao
+    given-names: Di
+  - family-names: Jin
+    given-names: Guangyin
+  - family-names: Cao
+    given-names: Xin
+  - family-names: Cong
+    given-names: Gao
+title: 'Exploring progress in multivariate time series forecasting: Comprehensive benchmarking and heterogeneity analysis'
+version: 1.0.0
+date-released: '2023-08-23'
+preferred-citation:
+  authors:
+    - family-names: Shao
+      given-names: Zezhi
+    - family-names: Wang
+      given-names: Fei
+    - family-names: Xu
+      given-names: Yongjun
+    - family-names: Wei
+      given-names: Wei
+    - family-names: Yu
+      given-names: Chengqing
+    - family-names: Zhang
+      given-names: Zhao
+    - family-names: Yao
+      given-names: Di
+    - family-names: Jin
+      given-names: Guangyin
+    - family-names: Cao
+      given-names: Xin
+    - family-names: Cong
+      given-names: Gao
+  title: 'Exploring progress in multivariate time series forecasting: Comprehensive benchmarking and heterogeneity analysis'
+  type: article
+  year: '2023'
+  conference: {}
+  publisher: {}
