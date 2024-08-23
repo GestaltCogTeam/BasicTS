@@ -18,7 +18,7 @@ def inference(cfg: dict, runner: BaseRunner, ckpt: str = None, batch_size: int =
     runner.load_model(ckpt_path=ckpt)
     # inference & speed
     t0 = time.perf_counter()
-    runner.test_process(cfg)
+    runner.test_pipline(cfg)
     elapsed = time.perf_counter() - t0
 
     print('##############################')

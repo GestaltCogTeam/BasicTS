@@ -118,7 +118,7 @@ class BaseRunner(Runner):
             self.validate(train_epoch=epoch)
         # test
         if self.test_data_loader is not None and epoch % self.test_interval == 0:
-            self.test_process(train_epoch=epoch)
+            self.test_pipeline(train_epoch=epoch)
         # save model
         self.save_model(epoch)
         # reset meters
@@ -126,7 +126,7 @@ class BaseRunner(Runner):
 
     @torch.no_grad()
     @master_only
-    def test_process(self, cfg: dict = None, train_epoch: int = None):
+    def test_pipeline(self, cfg: dict = None, train_epoch: int = None):
         """The whole test process.
 
         Args:
