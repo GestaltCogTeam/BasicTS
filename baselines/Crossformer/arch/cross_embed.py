@@ -18,5 +18,5 @@ class DSW_embedding(nn.Module):
         x_segment = rearrange(x, 'b (seg_num seg_len) d -> (b d seg_num) seg_len', seg_len = self.seg_len)
         x_embed = self.linear(x_segment)
         x_embed = rearrange(x_embed, '(b d seg_num) d_model -> b d seg_num d_model', b = batch, d = ts_dim)
-        
+    
         return x_embed

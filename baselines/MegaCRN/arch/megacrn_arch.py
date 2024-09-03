@@ -12,9 +12,9 @@ class AGCN(nn.Module):
         self.bias = nn.Parameter(torch.FloatTensor(dim_out))
         nn.init.xavier_normal_(self.weights)
         nn.init.constant_(self.bias, val=0)
-        
+    
     def forward(self, x, supports):
-        x_g = []        
+        x_g = []    
         support_set = []
         for support in supports:
             support_ks = [torch.eye(support.shape[0]).to(support.device), support]
@@ -26,7 +26,7 @@ class AGCN(nn.Module):
         x_g = torch.cat(x_g, dim=-1) # B, N, 2 * cheb_k * dim_in
         x_gconv = torch.einsum('bni,io->bno', x_g, self.weights) + self.bias  # b, N, dim_out
         return x_gconv
-    
+
 class AGCRNCell(nn.Module):
     def __init__(self, node_num, dim_in, dim_out, cheb_k):
         super(AGCRNCell, self).__init__()
@@ -49,7 +49,7 @@ class AGCRNCell(nn.Module):
 
     def init_hidden_state(self, batch_size):
         return torch.zeros(batch_size, self.node_num, self.hidden_dim)
-    
+
 class ADCRNN_Encoder(nn.Module):
     def __init__(self, node_num, dim_in, dim_out, cheb_k, num_layers):
         super(ADCRNN_Encoder, self).__init__()
@@ -81,7 +81,7 @@ class ADCRNN_Encoder(nn.Module):
         #output_hidden: the last state for each layer: (num_layers, B, N, hidden_dim)
         #return current_inputs, torch.stack(output_hidden, dim=0)
         return current_inputs, output_hidden
-    
+
     def init_hidden(self, batch_size):
         init_states = []
         for i in range(self.num_layers):
@@ -150,7 +150,7 @@ class MegaCRN(nn.Module):
         self.ycov_dim = ycov_dim
         self.cl_decay_steps = cl_decay_steps
         self.use_curriculum_learning = use_curriculum_learning
-        
+    
         # memory
         self.mem_num = mem_num
         self.mem_dim = mem_dim
@@ -158,14 +158,14 @@ class MegaCRN(nn.Module):
 
         # encoder
         self.encoder = ADCRNN_Encoder(self.num_nodes, self.input_dim, self.rnn_units, self.cheb_k, self.num_layers)
-        
+    
         # deocoder
         self.decoder_dim = self.rnn_units + self.mem_dim
         self.decoder = ADCRNN_Decoder(self.num_nodes, self.output_dim + self.ycov_dim, self.decoder_dim, self.cheb_k, self.num_layers)
 
         # output
         self.proj = nn.Sequential(nn.Linear(self.decoder_dim, self.output_dim, bias=True))
-    
+
     def compute_sampling_threshold(self, batches_seen):
         return self.cl_decay_steps / (self.cl_decay_steps + np.exp(batches_seen / self.cl_decay_steps))
 
@@ -178,7 +178,7 @@ class MegaCRN(nn.Module):
         for param in memory_dict.values():
             nn.init.xavier_normal_(param)
         return memory_dict
-    
+
     def query_memory(self, h_t:torch.Tensor):
         query = torch.matmul(h_t, self.memory['Wq'])     # (B, N, d)
         att_score = torch.softmax(torch.matmul(query, self.memory['Memory'].t()), dim=-1)         # alpha: (B, N, M)
@@ -187,7 +187,7 @@ class MegaCRN(nn.Module):
         pos = self.memory['Memory'][ind[:, :, 0]] # B, N, d
         neg = self.memory['Memory'][ind[:, :, 1]] # B, N, d
         return value, query, pos, neg
-            
+        
     def forward(self, history_data, future_data, batch_seen=None, epoch=None, **kwargs):
     # def forward(self, x, y_cov, labels=None, batches_seen=None):
         x = history_data[..., [0]]
@@ -201,11 +201,11 @@ class MegaCRN(nn.Module):
         supports = [g1, g2]
         init_state = self.encoder.init_hidden(x.shape[0])
         h_en, state_en = self.encoder(x, init_state, supports) # B, T, N, hidden
-        h_t = h_en[:, -1, :, :] # B, N, hidden (last state)        
-        
+        h_t = h_en[:, -1, :, :] # B, N, hidden (last state)    
+    
         h_att, query, pos, neg = self.query_memory(h_t)
         h_t = torch.cat([h_t, h_att], dim=-1)
-        
+    
         ht_list = [h_t]*self.num_layers
         go = torch.zeros((x.shape[0], self.num_nodes, self.output_dim), device=x.device)
         out = []
@@ -218,5 +218,5 @@ class MegaCRN(nn.Module):
                 if c < self.compute_sampling_threshold(batch_seen):
                     go = labels[:, t, ...]
         output = torch.stack(out, dim=1)
-        
+    
         return {'prediction': output, 'query': query, 'pos': pos, 'neg': neg}

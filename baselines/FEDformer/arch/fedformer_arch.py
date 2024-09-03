@@ -28,7 +28,7 @@ class FEDformer(nn.Module):
         self.pred_len = int(model_args["pred_len"])
         self.output_attention = model_args["output_attention"]
 
-        
+
         self.time_of_day_size = model_args.get("time_of_day_size", None)
         self.day_of_week_size = model_args.get("day_of_week_size", None)
         self.day_of_month_size = model_args.get("day_of_month_size", None)

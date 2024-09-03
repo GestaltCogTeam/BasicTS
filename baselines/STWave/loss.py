@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from basicts.losses import masked_mae
+from basicts.metrics import masked_mae
 
 
 def stwave_masked_mae(prediction: list, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:

@@ -36,7 +36,7 @@ class Crossformer(nn.Module):
         # Encoder
         self.encoder = Encoder(e_layers, win_size, d_model, n_heads, d_ff, block_depth = 1, \
                                     dropout = dropout,in_seg_num = (self.pad_in_len // seg_len), factor = factor)
-        
+    
         # Decoder
         self.dec_pos_embedding = nn.Parameter(torch.randn(1, data_dim, (self.pad_out_len // seg_len), d_model))
         self.decoder = Decoder(seg_len, e_layers + 1, d_model, n_heads, d_ff, dropout, \
@@ -55,7 +55,7 @@ class Crossformer(nn.Module):
         x_seq = self.enc_value_embedding(x_seq)
         x_seq += self.enc_pos_embedding
         x_seq = self.pre_norm(x_seq)
-        
+    
         enc_out = self.encoder(x_seq)
 
         dec_in = repeat(self.dec_pos_embedding, 'b ts_d l d -> (repeat b) ts_d l d', repeat = batch_size)

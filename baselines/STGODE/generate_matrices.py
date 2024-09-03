@@ -12,7 +12,7 @@ import numpy as np
 from tqdm import tqdm
 from fastdtw import fastdtw
 
-from basicts.utils.serialization import load_pkl
+from basicts.utils.serialization import load_pkl, load_dataset_data
 
 
 def get_normalized_adj(A):
@@ -29,7 +29,7 @@ def get_normalized_adj(A):
     return torch.from_numpy(A_reg.astype(np.float32))
 
 
-def generate_dtw_spa_matrix(dataset_name, in_len, out_len, sigma1=0.1, thres1=0.6, sigma2=10, thres2=0.5, re_scale=True):
+def generate_dtw_spa_matrix(dataset_name, sigma1=0.1, thres1=0.6, sigma2=10, thres2=0.5):
     """read data, generate spatial adjacency matrix and semantic adjacency matrix by dtw
 
     Args:
@@ -45,9 +45,7 @@ def generate_dtw_spa_matrix(dataset_name, in_len, out_len, sigma1=0.1, thres1=0.
     """
 
     # original STGODE use the full time series to generate the matrices, which is not reasonable since the test set is not available in real world
-    data_file = "./datasets/{0}/data_in_{1}_out_{2}_rescale_{3}.pkl".format(dataset_name, in_len, out_len, re_scale)
-    with open(data_file, 'rb') as f:
-        data = pickle.load(f)["processed_data"]
+    data = load_dataset_data(dataset_name=dataset_name)
     num_node = data.shape[1]
     if not os.path.exists('{0}/{1}_dtw_distance.npy'.format(os.path.abspath(__file__ + "/.."), dataset_name)):
         print("generate dtw distance matrix")
@@ -75,6 +73,7 @@ def generate_dtw_spa_matrix(dataset_name, in_len, out_len, sigma1=0.1, thres1=0.
     # STGODE provides the scripts to generate spatial matrix for PEMS03, PEMS04, PEMS07, PEMS08
     # For other datasets, we use the original spatial matrix.    
     if dataset_name in ["PEMS03", "PEMS04", "PEMS07", "PEMS08"]:
+        print("STGODE generate spatial matrix based on the raw data. Please ensure the raw data is placed in the correct path `datasets/raw_data/$DATASET_NAME/$DATASET_NAME.csv.")
         if not os.path.exists('{0}/{1}_spatial_distance.npy'.format(os.path.abspath(__file__ + "/.."), dataset_name)):
             graph_csv_file_path = "./datasets/raw_data/{0}/{0}.csv".format(dataset_name)
             with open(graph_csv_file_path, 'r') as fp:
@@ -111,4 +110,7 @@ def generate_dtw_spa_matrix(dataset_name, in_len, out_len, sigma1=0.1, thres1=0.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    generate_dtw_spa_matrix("PEMS04", 12, 12, re_scale=True)
+    # generate_dtw_spa_matrix("PEMS04")
+    # generate_dtw_spa_matrix("PEMS08")
+    generate_dtw_spa_matrix("PEMS-BAY")
+    generate_dtw_spa_matrix("METR-LA")

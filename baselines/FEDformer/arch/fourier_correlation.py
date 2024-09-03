@@ -31,7 +31,7 @@ class FourierBlock(nn.Module):
         print('fourier enhanced block used!')
         """
         1D Fourier block. It performs representation learning on frequency domain, 
-        it does FFT, linear transform, and Inverse FFT.    
+        it does FFT, linear transform, and Inverse FFT.
         """
         # get modes on frequency domain
         self.index = get_frequency_modes(
@@ -71,7 +71,7 @@ class FourierCrossAttention(nn.Module):
         super(FourierCrossAttention, self).__init__()
         print(' fourier enhanced cross attention used!')
         """
-        1D Fourier Cross Attention layer. It does FFT, linear transform, attention mechanism and Inverse FFT.    
+        1D Fourier Cross Attention layer. It does FFT, linear transform, attention mechanism and Inverse FFT.
         """
         self.activation = activation
         self.in_channels = in_channels

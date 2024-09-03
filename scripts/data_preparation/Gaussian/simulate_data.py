@@ -1,24 +1,24 @@
 import os
-import sys
+
+import torch
 import numpy as np
-import matplotlib.pyplot as plt
-PROJECT_DIR = os.path.abspath(__file__ + "/../../../..")
+
+PROJECT_DIR = os.path.abspath(__file__ + '/../../../..')
 os.chdir(PROJECT_DIR)
 
-
-def generate_gaussian_noise_sequence(duration):
-    time_points = np.arange(0, duration, 1)
-    gaussion_noise_sequence = np.random.normal(0, 1, duration)
-    return time_points, gaussion_noise_sequence
 
 # hyper parameterts
 duration = 10000  # time series length
 
+def generate_gaussian_noise_sequence():
+    x = np.arange(0, duration, 1)
+    y = np.random.normal(0, 1, duration)
+    return x, y
+
 # generate gaussian sequence
-time_points, gaussian_noise_sequence = generate_gaussian_noise_sequence(duration)
+time_points, gaussian_noise_sequence = generate_gaussian_noise_sequence()
 
 # save pulse sequence
-import torch
 data = torch.Tensor(gaussian_noise_sequence).unsqueeze(-1).unsqueeze(-1).numpy()
 # mkdir datasets/raw_data/Gaussian
 if not os.path.exists('datasets/raw_data/Gaussian'):

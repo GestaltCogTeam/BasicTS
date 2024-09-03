@@ -92,7 +92,7 @@ class NBeats(t.nn.Module):
             seasonality_layers = kwargs["seasonality_layers"]
             seasonality_layer_size = kwargs["seasonality_layer_size"]
             num_of_harmonics = kwargs["num_of_harmonics"]
-                
+            
             trend_block = NBeatsBlock(input_size=input_size,
                                     theta_size=2 * (degree_of_polynomial + 1),
                                     basis_function=TrendBasis(degree_of_polynomial=degree_of_polynomial,
@@ -115,9 +115,9 @@ class NBeats(t.nn.Module):
         B, L, N, C = history_data.shape
         history_data = history_data[..., [0]].transpose(1, 2)   # [B, N, L, 1]
         history_data = history_data.reshape(B*N, L, 1)
-        
+    
         x = history_data.squeeze()
-        
+    
         residuals = x.flip(dims=(1,))
         forecast = x[:, -1:]
         for i, block in enumerate(self.blocks):

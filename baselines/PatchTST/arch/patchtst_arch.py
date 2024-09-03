@@ -24,14 +24,14 @@ class PatchTST(nn.Module):
                  pre_norm:bool=False, store_attn:bool=False, pe:str='zeros',
                  learn_pe:bool=True, pretrain_head:bool=False, head_type = 'flatten',
                  verbose:bool=False, **kwargs):
-        
+    
         super().__init__()
 
         # load parameters
         c_in = enc_in
         context_window = seq_len
         target_window = pred_len
-        
+    
         n_layers = e_layers
         n_heads = n_heads
         d_model = d_model
@@ -39,21 +39,21 @@ class PatchTST(nn.Module):
         dropout = dropout
         fc_dropout = fc_dropout
         head_dropout = head_dropout
-        
-        individual = individual
     
+        individual = individual
+
         patch_len = patch_len
         stride = stride
         padding_patch = padding_patch
-        
+    
         revin = revin
         affine = affine
         subtract_last = subtract_last
-        
+    
         decomposition = decomposition
         kernel_size = kernel_size
-        
-        
+    
+    
         # model
         self.decomposition = decomposition
         if self.decomposition:
@@ -83,8 +83,8 @@ class PatchTST(nn.Module):
                                   pe=pe, learn_pe=learn_pe, fc_dropout=fc_dropout, head_dropout=head_dropout, padding_patch = padding_patch,
                                   pretrain_head=pretrain_head, head_type=head_type, individual=individual, revin=revin, affine=affine,
                                   subtract_last=subtract_last, verbose=verbose, **kwargs)
-    
-    
+
+
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
         """Feed forward of PatchTST.
 
@@ -96,7 +96,7 @@ class PatchTST(nn.Module):
         """
         assert history_data.shape[-1] == 1      # only use the target feature
         x = history_data[..., 0]     # B, L, N
-        
+    
         if self.decomposition:
             res_init, trend_init = self.decomp_module(x)
             res_init, trend_init = res_init.permute(0,2,1), trend_init.permute(0,2,1)  # x: [Batch, Channel, Input length]

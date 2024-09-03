@@ -53,22 +53,22 @@ class scale_block(nn.Module):
             self.merge_layer = SegMerging(d_model, win_size, nn.LayerNorm)
         else:
             self.merge_layer = None
-        
+    
         self.encode_layers = nn.ModuleList()
 
         for i in range(depth):
             self.encode_layers.append(TwoStageAttentionLayer(seg_num, factor, d_model, n_heads, \
                                                         d_ff, dropout))
-    
+
     def forward(self, x):
         _, ts_dim, _, _ = x.shape
 
         if self.merge_layer is not None:
             x = self.merge_layer(x)
-        
+    
         for layer in self.encode_layers:
-            x = layer(x)        
-        
+            x = layer(x)    
+    
         return x
 
 class Encoder(nn.Module):
@@ -89,7 +89,7 @@ class Encoder(nn.Module):
     def forward(self, x):
         encode_x = []
         encode_x.append(x)
-        
+    
         for block in self.encode_blocks:
             x = block(x)
             encode_x.append(x)
