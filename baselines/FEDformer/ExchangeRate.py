@@ -1,47 +1,36 @@
 import os
 import sys
-
-# TODO: remove it when basicts can be installed by pip
-sys.path.append(os.path.abspath(__file__ + "/../../.."))
 from easydict import EasyDict
-from basicts.runners import SimpleTimeSeriesForecastingRunner
+sys.path.append(os.path.abspath(__file__ + '/../../..'))
+
+from basicts.metrics import masked_mae, masked_mse
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.metrics import masked_mse, masked_mae
+from basicts.runners import SimpleTimeSeriesForecastingRunner
+from basicts.scaler import ZScoreScaler
+from basicts.utils import get_regular_settings
 
 from .arch import FEDformer
 
-CFG = EasyDict()
-
-# ================= general ================= #
-CFG.DESCRIPTION = "FEDformer model configuration"
-CFG.RUNNER = SimpleTimeSeriesForecastingRunner
-CFG.DATASET_CLS = TimeSeriesForecastingDataset
-CFG.DATASET_NAME = "ExchangeRate"
-CFG.DATASET_TYPE = "Exchange Rate"
-CFG.DATASET_INPUT_LEN = 96
-CFG.DATASET_OUTPUT_LEN = 336
-CFG.GPU_NUM = 1
-# CFG.RESCALE = False
-
-# ================= environment ================= #
-CFG.ENV = EasyDict()
-CFG.ENV.SEED = 0
-CFG.ENV.CUDNN = EasyDict()
-CFG.ENV.CUDNN.ENABLED = True
-
-# ================= model ================= #
-CFG.MODEL = EasyDict()
-CFG.MODEL.NAME = "FEDformer"
-CFG.MODEL.ARCH = FEDformer
+############################## Hot Parameters ##############################
+# Dataset & Metrics configuration
+DATA_NAME = 'ExchangeRate'  # Dataset name
+regular_settings = get_regular_settings(DATA_NAME)
+INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
+OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
+TRAIN_VAL_TEST_RATIO = regular_settings['TRAIN_VAL_TEST_RATIO']  # Train/Validation/Test split ratios
+NORM_EACH_CHANNEL = regular_settings['NORM_EACH_CHANNEL'] # Whether to normalize each channel of the data
+RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
+NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
+# Model architecture and parameters
+MODEL_ARCH = FEDformer
 NUM_NODES = 8
-CFG.MODEL.PARAM = EasyDict(
-    {
+MODEL_PARAM = {
     "enc_in": NUM_NODES,                              # num nodes
     "dec_in": NUM_NODES,
     "c_out": NUM_NODES,
-    "seq_len": CFG.DATASET_INPUT_LEN,           # input sequence length
-    "label_len": CFG.DATASET_INPUT_LEN/2,       # start token length used in decoder
-    "pred_len": CFG.DATASET_OUTPUT_LEN,         # prediction sequence length\
+    "seq_len": INPUT_LEN,           # input sequence length
+    "label_len": INPUT_LEN/2,       # start token length used in decoder
+    "pred_len": OUTPUT_LEN,         # prediction sequence length\
     "d_model": 512,
     "version": "Fourier",                       # for FEDformer, there are two versions to choose, options: [Fourier, Wavelets]
     "moving_avg": 24,                           # window size of moving average
@@ -59,69 +48,104 @@ CFG.MODEL.PARAM = EasyDict(
     "cross_activation": "tanh",                 # mwt cross atention activation function tanh or softmax
     "activation": "gelu",
     "num_time_features": 4,                     # number of used time features
-    "time_of_day_size": 96,
+    "time_of_day_size": 24*4,
     "day_of_week_size": 7,
     "day_of_month_size": 31,
     "day_of_year_size": 366
     }
-)
+NUM_EPOCHS = 100
+
+############################## General Configuration ##############################
+CFG = EasyDict()
+# General settings
+CFG.DESCRIPTION = 'An Example Config'
+CFG.GPU_NUM = 1 # Number of GPUs to use (0 for CPU mode)
+# Runner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
+
+############################## Dataset Configuration ##############################
+CFG.DATASET = EasyDict()
+# Dataset settings
+CFG.DATASET.NAME = DATA_NAME
+CFG.DATASET.TYPE = TimeSeriesForecastingDataset
+CFG.DATASET.PARAM = EasyDict({
+    'dataset_name': DATA_NAME,
+    'train_val_test_ratio': TRAIN_VAL_TEST_RATIO,
+    'input_len': INPUT_LEN,
+    'output_len': OUTPUT_LEN,
+    # 'mode' is automatically set by the runner
+})
+
+############################## Scaler Configuration ##############################
+CFG.SCALER = EasyDict()
+# Scaler settings
+CFG.SCALER.TYPE = ZScoreScaler # Scaler class
+CFG.SCALER.PARAM = EasyDict({
+    'dataset_name': DATA_NAME,
+    'train_ratio': TRAIN_VAL_TEST_RATIO[0],
+    'norm_each_channel': NORM_EACH_CHANNEL,
+    'rescale': RESCALE,
+})
+
+############################## Model Configuration ##############################
+CFG.MODEL = EasyDict()
+# Model settings
+CFG.MODEL.NAME = MODEL_ARCH.__name__
+CFG.MODEL.ARCH = MODEL_ARCH
+CFG.MODEL.PARAM = MODEL_PARAM
 CFG.MODEL.FORWARD_FEATURES = [0, 1, 2, 3, 4]
 CFG.MODEL.TARGET_FEATURES = [0]
 
-# ================= optim ================= #
+############################## Metrics Configuration ##############################
+
+CFG.METRICS = EasyDict()
+# Metrics settings
+CFG.METRICS.FUNCS = EasyDict({
+                                'MAE': masked_mae,
+                                'MSE': masked_mse
+                            })
+CFG.METRICS.TARGET = 'MAE'
+CFG.METRICS.NULL_VAL = NULL_VAL
+
+############################## Training Configuration ##############################
 CFG.TRAIN = EasyDict()
+CFG.TRAIN.NUM_EPOCHS = NUM_EPOCHS
+CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
+    'checkpoints',
+    MODEL_ARCH.__name__,
+    '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_EPOCHS), str(INPUT_LEN), str(OUTPUT_LEN)])
+)
 CFG.TRAIN.LOSS = masked_mae
+# Optimizer settings
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
     "lr": 0.0001
 }
-
-# ================= train ================= #
-CFG.TRAIN.NUM_EPOCHS = 50
-CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
-    "checkpoints",
-    "_".join([CFG.MODEL.NAME, str(CFG.TRAIN.NUM_EPOCHS)])
-)
-# train data
+CFG.TRAIN.CLIP_GRAD_PARAM = {
+    'max_norm': 5.0
+}
+# Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
-# read data
-CFG.TRAIN.DATA.DIR = "datasets/" + CFG.DATASET_NAME
-# dataloader args, optional
 CFG.TRAIN.DATA.BATCH_SIZE = 64
-CFG.TRAIN.DATA.PREFETCH = False
 CFG.TRAIN.DATA.SHUFFLE = True
-CFG.TRAIN.DATA.NUM_WORKERS = 10
-CFG.TRAIN.DATA.PIN_MEMORY = False
 
-# ================= validate ================= #
+############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()
 CFG.VAL.INTERVAL = 1
-# validating data
 CFG.VAL.DATA = EasyDict()
-# read data
-CFG.VAL.DATA.DIR = "datasets/" + CFG.DATASET_NAME
-# dataloader args, optional
 CFG.VAL.DATA.BATCH_SIZE = 64
-CFG.VAL.DATA.PREFETCH = False
-CFG.VAL.DATA.SHUFFLE = False
-CFG.VAL.DATA.NUM_WORKERS = 2
-CFG.VAL.DATA.PIN_MEMORY = False
 
-# ================= test ================= #
+############################## Test Configuration ##############################
 CFG.TEST = EasyDict()
 CFG.TEST.INTERVAL = 1
-# test data
 CFG.TEST.DATA = EasyDict()
-# read data
-CFG.TEST.DATA.DIR = "datasets/" + CFG.DATASET_NAME
-# dataloader args, optional
 CFG.TEST.DATA.BATCH_SIZE = 64
-CFG.TEST.DATA.PREFETCH = False
-CFG.TEST.DATA.SHUFFLE = False
-CFG.TEST.DATA.NUM_WORKERS = 2
-CFG.TEST.DATA.PIN_MEMORY = False
 
-# ================= evaluate ================= #
+############################## Evaluation Configuration ##############################
+
 CFG.EVAL = EasyDict()
+
+# Evaluation parameters
 CFG.EVAL.HORIZONS = [12, 24, 48, 96, 192, 288, 336]
+CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True

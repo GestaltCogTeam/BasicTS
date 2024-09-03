@@ -14,7 +14,7 @@ class FullAttention(nn.Module):
         super(FullAttention, self).__init__()
         self.scale = scale
         self.dropout = nn.Dropout(attention_dropout)
-        
+    
     def forward(self, queries, keys, values):
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
@@ -23,7 +23,7 @@ class FullAttention(nn.Module):
         scores = torch.einsum("blhe,bshe->bhls", queries, keys)
         A = self.dropout(torch.softmax(scale * scores, dim=-1))
         V = torch.einsum("bhls,bshd->blhd", A, values)
-        
+    
         return V.contiguous()
 
 
@@ -77,7 +77,7 @@ class TwoStageAttentionLayer(nn.Module):
         self.dim_sender = AttentionLayer(d_model, n_heads, dropout = dropout)
         self.dim_receiver = AttentionLayer(d_model, n_heads, dropout = dropout)
         self.router = nn.Parameter(torch.randn(seg_num, factor, d_model))
-        
+    
         self.dropout = nn.Dropout(dropout)
 
         self.norm1 = nn.LayerNorm(d_model)

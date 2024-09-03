@@ -1,10 +1,11 @@
-from .serialization import load_adj, load_pkl, dump_pkl, load_node2vec_emb
-from .misc import clock, check_nan_inf, remove_nan_inf
-from .misc import partial_func as partial
-from .m4 import m4_summary
 from .xformer import data_transformation_4_xformer
+from .serialization import load_adj, load_pkl, dump_pkl, \
+        load_dataset_data, get_regular_settings, load_dataset_desc
+from .misc import clock, check_nan_inf, remove_nan_inf, \
+        partial_func as partial
 
-__all__ = ["load_adj", "load_pkl", "dump_pkl",
-           "load_node2vec_emb", "clock", "check_nan_inf",
-           "remove_nan_inf", "data_transformation_4_xformer",
-           "partial", "m4_summary"]
+__all__ = ['load_adj', 'load_pkl', 'dump_pkl',
+           'clock', 'check_nan_inf',
+           'remove_nan_inf', 'data_transformation_4_xformer',
+           'partial', 'get_regular_settings',
+           'load_dataset_data', 'load_dataset_desc']

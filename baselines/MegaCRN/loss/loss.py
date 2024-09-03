@@ -1,5 +1,5 @@
 from torch import nn
-from basicts.losses import masked_mae
+from basicts.metrics import masked_mae
 
 
 def megacrn_loss(prediction, target, query, pos, neg, null_val):

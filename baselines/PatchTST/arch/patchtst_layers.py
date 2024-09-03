@@ -10,14 +10,14 @@ class Transpose(nn.Module):
         if self.contiguous: return x.transpose(*self.dims).contiguous()
         else: return x.transpose(*self.dims)
 
-    
+
 def get_activation_fn(activation):
     if callable(activation): return activation()
     elif activation.lower() == "relu": return nn.ReLU()
     elif activation.lower() == "gelu": return nn.GELU()
     raise ValueError(f'{activation} is not available. You can use "relu", "gelu", or a callable') 
-    
-    
+
+
 # decomposition
 
 class moving_avg(nn.Module):
@@ -51,9 +51,9 @@ class series_decomp(nn.Module):
         moving_mean = self.moving_avg(x)
         res = x - moving_mean
         return res, moving_mean
-    
-    
-    
+
+
+
 # pos_encoding
 
 def PositionalEncoding(q_len, d_model, normalize=True):

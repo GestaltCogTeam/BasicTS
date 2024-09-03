@@ -35,7 +35,7 @@ class NHiTS(nn.Module):
                 dropout: float=0.0, activation: str="ReLU", initialization: str="lecun_normal",
                 batch_normalization: bool=False, shared_weights: bool=False, naive_level: bool=True):
         super().__init__()
-        
+    
         self.prediction_length = prediction_length
         self.context_length = context_length
         self.output_size = output_size

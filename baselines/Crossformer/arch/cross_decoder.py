@@ -11,7 +11,7 @@ class DecoderLayer(nn.Module):
     def __init__(self, seg_len, d_model, n_heads, d_ff=None, dropout=0.1, out_seg_num = 10, factor = 10):
         super(DecoderLayer, self).__init__()
         self.self_attention = TwoStageAttentionLayer(out_seg_num, factor, d_model, n_heads, \
-                                d_ff, dropout)    
+                                d_ff, dropout)
         self.cross_attention = AttentionLayer(d_model, n_heads, dropout = dropout)
         self.norm1 = nn.LayerNorm(d_model)
         self.norm2 = nn.LayerNorm(d_model)
@@ -30,7 +30,7 @@ class DecoderLayer(nn.Module):
         batch = x.shape[0]
         x = self.self_attention(x)
         x = rearrange(x, 'b ts_d out_seg_num d_model -> (b ts_d) out_seg_num d_model')
-        
+    
         cross = rearrange(cross, 'b ts_d in_seg_num d_model -> (b ts_d) in_seg_num d_model')
         tmp = self.cross_attention(
             x, cross, cross,
@@ -39,7 +39,7 @@ class DecoderLayer(nn.Module):
         y = x = self.norm1(x)
         y = self.MLP1(y)
         dec_output = self.norm2(x+y)
-        
+    
         dec_output = rearrange(dec_output, '(b ts_d) seg_dec_num d_model -> b ts_d seg_dec_num d_model', b = batch)
         layer_predict = self.linear_pred(dec_output)
         layer_predict = rearrange(layer_predict, 'b out_d seg_num seg_len -> b (out_d seg_num) seg_len')
@@ -73,7 +73,7 @@ class Decoder(nn.Module):
             else:
                 final_predict = final_predict + layer_predict
             i += 1
-        
+    
         final_predict = rearrange(final_predict, 'b (out_d seg_num) seg_len -> b (seg_num seg_len) out_d', out_d = ts_d)
 
         return final_predict

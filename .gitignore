@@ -2,7 +2,7 @@
 __pycache__/
 .vscode/
 checkpoints/
-datasets/raw_data
+datasets/
 todo.md
 gpu_task.py
 cmd.sh
@@ -14,11 +14,11 @@ cmd.sh
 *.pkl
 *.h5
 *.pt
-core*
 *.p
 *.pickle
 *.pyc
 *.txt
+*.core
 
 *.py[cod]
 *$py.class

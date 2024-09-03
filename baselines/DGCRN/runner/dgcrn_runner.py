@@ -20,7 +20,7 @@ class DGCRNRunner(SimpleTimeSeriesForecastingRunner):
         """
 
         # preprocess
-        future_data, history_data = data
+        future_data, history_data = data['target'], data['inputs']
         history_data = self.to_running_device(history_data)      # B, L, N, C
         future_data = self.to_running_device(future_data)       # B, L, N, C
         batch_size, length, num_nodes, _ = future_data.shape

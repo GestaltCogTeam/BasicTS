@@ -177,7 +177,7 @@ class temporalConvNet(nn.Module):
 
             layers += [nn.Sequential(self.conv, self.chomp, self.relu, self.dropout)]
         self.tcn = nn.Sequential(*layers)
-    
+
     def forward(self, xh):
         xh = self.tcn(xh.transpose(1,3)).transpose(1,3)
         return xh
@@ -208,7 +208,7 @@ class adaptiveFusion(nn.Module):
         valueh = torch.relu(self.vhfc(xh)).permute(0,2,1,3)
 
         attentionh = torch.matmul(query, keyh) # [B,N,T,T]
-        
+    
         if Mask:
             batch_size = xl.shape[0]
             num_steps = xl.shape[1]
@@ -237,26 +237,26 @@ class dualEncoder(nn.Module):
         super(dualEncoder, self).__init__()
         self.tcn = temporalConvNet(hidden_size)
         self.tatt = temporalAttention(hidden_size)
-        
+
         self.ssal = sparseSpatialAttention(hidden_size, log_samples)
         self.ssah = sparseSpatialAttention(hidden_size, log_samples)
-        
+    
         eigvalue = torch.from_numpy(graphwave[0].astype(np.float32))
         self.eigvalue = nn.Parameter(eigvalue, requires_grad=True)
         self.eigvec = torch.from_numpy(graphwave[1].astype(np.float32)).transpose(0,1).unsqueeze(-1)
         self.adj = torch.from_numpy(adj_gat)
-        
+    
     def forward(self, xl, xh, te):
         xl = self.tatt(xl, te)
         xh = self.tcn(xh)
-        
+    
         spa_statesl = self.ssal(xl, self.adj.to(xl.device), self.eigvec.to(xl.device), self.eigvalue.to(xl.device))
         spa_statesh = self.ssah(xh, self.adj.to(xl.device), self.eigvec.to(xl.device), self.eigvalue.to(xl.device))
         xl = spa_statesl + xl
         xh = spa_statesh + xh
-        
-        return xl, xh
     
+        return xl, xh
+
 class STWave(nn.Module):
     """
     Paper: When Spatio-Temporal Meet Wavelets: Disentangled Traffic Forecasting via Efficient Spectral Graph Attention Networks
@@ -272,10 +272,10 @@ class STWave(nn.Module):
 
         self.dual_encoder = nn.ModuleList([dualEncoder(hidden_size, log_samples, adj_gat, graphwave) for i in range(layers)])
         self.adaptive_fusion = adaptiveFusion(hidden_size)
-        
+    
         self.pre_l = nn.Conv2d(seq_len, horizon, (1,1))
         self.pre_h = nn.Conv2d(seq_len, horizon, (1,1))
-        
+    
         self.end_emb = FeedForward([hidden_size, hidden_size, input_dim])
         self.end_emb_l = FeedForward([hidden_size, hidden_size, input_dim])
 
@@ -304,17 +304,17 @@ class STWave(nn.Module):
 
         for enc in self.dual_encoder:
             xl, xh = enc(xl, xh, TE[:,:xl.shape[1],:,:])
-        
+    
         hat_y_l = self.pre_l(xl)
         hat_y_h = self.pre_h(xh)
 
         hat_y = self.adaptive_fusion(hat_y_l, hat_y_h, TE[:,xl.shape[1]:,:,:])
         hat_y, hat_y_l = self.end_emb(hat_y), self.end_emb_l(hat_y_l)
-        
+    
         if self.training:
             label_yl, _ = disentangle(future_data[...,0:1].cpu().numpy(), self.wt, self.wl)
             return torch.cat([hat_y, hat_y_l, label_yl.to(x.device)], -1)
-        
+    
         return hat_y
 
 

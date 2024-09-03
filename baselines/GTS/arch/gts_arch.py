@@ -243,7 +243,7 @@ class GTS(nn.Module, Seq2SeqAttrs):
         :param batch_seen: batches seen till now
         :return: output: (self.horizon, batch_size, self.num_nodes * self.output_dim)
         """
-        
+    
         # reshape data
         batch_size, length, num_nodes, channels = history_data.shape
         history_data = history_data.reshape(batch_size, length, num_nodes * channels)      # [B, L, N*C]
@@ -253,7 +253,7 @@ class GTS(nn.Module, Seq2SeqAttrs):
             batch_size, length, num_nodes, channels = future_data.shape
             future_data = future_data.reshape(batch_size, length, num_nodes * channels)      # [B, L, N*C]
             future_data = future_data.transpose(0, 1)         # [L, B, N*C]
-        
+    
         # GTS
         inputs = history_data
         labels = future_data

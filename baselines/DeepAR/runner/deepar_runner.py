@@ -1,6 +1,10 @@
-from typing import Dict
+import os
+import json
+from typing import Dict, Optional
+
 import torch
-from basicts.data.registry import SCALER_REGISTRY
+import numpy as np
+from tqdm import tqdm
 from easytorch.utils.dist import master_only
 
 from basicts.runners import BaseTimeSeriesForecastingRunner
@@ -11,7 +15,7 @@ class DeepARRunner(BaseTimeSeriesForecastingRunner):
         super().__init__(cfg)
         self.forward_features = cfg["MODEL"].get("FORWARD_FEATURES", None)
         self.target_features = cfg["MODEL"].get("TARGET_FEATURES", None)
-        self.output_seq_len = cfg["DATASET_OUTPUT_LEN"]
+        self.output_seq_len = cfg["DATASET"]["PARAM"]["output_len"]
 
     def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
         """Select input features and reshape data to fit the target model.
@@ -42,55 +46,75 @@ class DeepARRunner(BaseTimeSeriesForecastingRunner):
         data = data[:, :, :, self.target_features]
         return data
 
-    def rescale_data(self, input_data: Dict) -> Dict:
-        """Rescale data.
+    def postprocessing(self, input_data: Dict) -> Dict:
+        """Postprocess data.
 
         Args:
-            data (Dict): Dict of data to be re-scaled.
+            input_data (Dict): Dictionary containing data to be processed.
 
         Returns:
-            Dict: Dict re-scaled data.
+            Dict: Processed data.
         """
 
-        if self.if_rescale:
-            input_data["inputs"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["inputs"], **self.scaler["args"])
-            input_data["prediction"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["prediction"], **self.scaler["args"])
-            input_data["target"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["target"], **self.scaler["args"])
+        if self.scaler is not None and self.scaler.rescale:
+            input_data['prediction'] = self.scaler.inverse_transform(input_data['prediction'])
+            input_data['target'] = self.scaler.inverse_transform(input_data['target'])
+            input_data['inputs'] = self.scaler.inverse_transform(input_data['inputs'])
             if "mus" in input_data.keys():
-                input_data["mus"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["mus"], **self.scaler["args"])
+                input_data['mus'] = self.scaler.inverse_transform(input_data['mus'])
             if "sigmas" in input_data.keys():
-                input_data["sigmas"] = SCALER_REGISTRY.get(self.scaler["func"])(input_data["sigmas"], **self.scaler["args"])
+                input_data['sigmas'] = self.scaler.inverse_transform(input_data['sigmas'])
+        # TODO: add more postprocessing steps as needed.
         return input_data
 
     @torch.no_grad()
     @master_only
-    def test(self):
-        """Evaluate the model.
-
+    def test(self, train_epoch: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> Dict:
+        """Test process.
+        
         Args:
-            train_epoch (int, optional): current epoch if in training process.
+            train_epoch (Optional[int]): Current epoch if in training process.
+            save_metrics (bool): Save the test metrics. Defaults to False.
+            save_results (bool): Save the test results. Defaults to False.
         """
 
-        # test loop
-        prediction =[]
-        target = []
-        inputs = []
-        for _, data in enumerate(self.test_data_loader):
+        prediction, target, inputs = [], [], []
+
+        for data in tqdm(self.test_data_loader):
+            data = self.preprocessing(data)
             forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
+            forward_return = self.postprocessing(forward_return)
+
             if not self.if_evaluate_on_gpu:
-                forward_return["prediction"] = forward_return["prediction"].detach().cpu()
-                forward_return["target"] = forward_return["target"].detach().cpu()
-                forward_return["inputs"] = forward_return["inputs"].detach().cpu()
-            prediction.append(forward_return["prediction"])
-            target.append(forward_return["target"])
-            inputs.append(forward_return["inputs"])
+                forward_return['prediction'] = forward_return['prediction'].detach().cpu()
+                forward_return['target'] = forward_return['target'].detach().cpu()
+                forward_return['inputs'] = forward_return['inputs'].detach().cpu()
+
+            prediction.append(forward_return['prediction'])
+            target.append(forward_return['target'])
+            inputs.append(forward_return['inputs'])
+
         prediction = torch.cat(prediction, dim=0)
         target = torch.cat(target, dim=0)
         inputs = torch.cat(inputs, dim=0)
-        # re-scale data
-        returns_all = self.rescale_data({"prediction": prediction[:, -self.output_seq_len:, :, :], "target": target[:, -self.output_seq_len:, :, :], "inputs": inputs})
-        # evaluate
-        self.evaluate(returns_all)
+
+        returns_all = {'prediction': prediction[:, -self.output_seq_len:, :, :],
+                        'target': target[:, -self.output_seq_len:, :, :],
+                        'inputs': inputs}
+        metrics_results = self.compute_evaluation_metrics(returns_all)
+
+        # save
+        if save_results:
+            # save returns_all to self.ckpt_save_dir/test_results.npz
+            test_results = {k: v.cpu().numpy() for k, v in returns_all.items()}
+            np.savez(os.path.join(self.ckpt_save_dir, 'test_results.npz'), **test_results)
+
+        if save_metrics:
+            # save metrics_results to self.ckpt_save_dir/test_metrics.json
+            with open(os.path.join(self.ckpt_save_dir, 'test_metrics.json'), 'w') as f:
+                json.dump(metrics_results, f, indent=4)
+
+        return returns_all
 
     def forward(self, data: tuple, epoch:int = None, iter_num: int = None, train:bool = True, **kwargs) -> tuple:
         """feed forward process for train, val, and test. Note that the outputs are NOT re-scaled.
@@ -105,16 +129,18 @@ class DeepARRunner(BaseTimeSeriesForecastingRunner):
             dict: keys that must be included: inputs, prediction, target
         """
 
-        # preprocess
-        future_data, history_data = data
-        history_data    = self.to_running_device(history_data)      # B, L, N, C
-        future_data     = self.to_running_device(future_data)       # B, L, N, C
-        
+        # Preprocess input data
+        future_data, history_data = data['target'], data['inputs']
+        history_data = self.to_running_device(history_data)  # Shape: [B, L, N, C]
+        future_data = self.to_running_device(future_data)    # Shape: [B, L, N, C]
+
+        # Select input features
         history_data = self.select_input_features(history_data)
         future_data_4_dec = self.select_input_features(future_data)
 
-        # model forward
-        model_return = self.model(history_data=history_data, future_data=future_data_4_dec, batch_seen=iter_num, epoch=epoch, train=train)
+        # Forward pass through the model
+        model_return = self.model(history_data=history_data, future_data=future_data_4_dec, 
+                                  batch_seen=iter_num, epoch=epoch, train=train)
 
         # parse model return
         if isinstance(model_return, torch.Tensor): model_return = {"prediction": model_return}

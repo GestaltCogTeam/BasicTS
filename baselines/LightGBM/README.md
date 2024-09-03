@@ -1,5 +1,0 @@
-Requirements:
-
-```
-pip install lightgbm
-```
