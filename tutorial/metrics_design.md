@@ -9,7 +9,8 @@ A well-defined metric function should include the following parameters:
 - **target**: The actual ground truth values
 - **null_val**: An optional parameter to handle missing values
 
-The `prediction` and `target` parameters are mandatory, while the `null_val` parameter is optional but strongly recommended for handling missing values, which are common in time series data. At the very least, set it to `np.nan`.
+The `prediction` and `target` parameters are mandatory, while the `null_val` parameter is optional but strongly recommended for handling missing values, which are common in time series data. 
+The `null_val` is automatically set based on the `CFG.NULL_VAL` value in the configuration file, which defaults to `np.nan`.
 
 Metric functions can also accept additional parameters, which are extracted from the model's return values and passed to the metric function. 
 

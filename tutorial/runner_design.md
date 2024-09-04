@@ -2,7 +2,7 @@
 
 ## 💿 Overview
 
-The Runner is the core component of BasicTS, responsible for managing the entire training and evaluation process. It integrates various subcomponents, such as the Dataset, Scaler, Model, Metrics, and Config, to create a fair and standardized training workflow. The Runner provides several advanced features, including but not limited to:
+The Runner is the core component of BasicTS, responsible for managing the entire training and evaluation process. It integrates various subcomponents, such as the Dataset, Scaler, Model, Metrics, and Config, to create a fair and scalable training&evaluation pipeline. The Runner provides several advanced features, including but not limited to:
 
 - Early stopping
 - Curriculum learning

@@ -25,7 +25,7 @@ An example can be found in the [Multi-Layer Perceptron (MLP) model](../examples/
 BasicTS provides a variety of built-in models. You can find them in [baselines](../baselines/) folder. To run a baseline model, use the following command:
 
 ```bash
-python experiments/train.py -c baselines/${MODEL_NAME}/${DATASET_NAME}.py --gpus '{GPU_IDs}'
+python experiments/train.py -c baselines/${MODEL_NAME}/${DATASET_NAME}.py -g '{GPU_IDs}'
 ```
 
 ## 🧑‍💻 Explore Further
