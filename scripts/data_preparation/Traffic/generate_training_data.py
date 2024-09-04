@@ -31,7 +31,7 @@ regular_settings = {
 def load_and_preprocess_data():
     '''Load and preprocess raw data, selecting the specified channel(s).'''
     df = pd.read_csv(data_file_path)
-    df_index = pd.to_datetime(df['date'].values, format='%Y-%m-%d %H:%M').to_numpy()
+    df_index = pd.to_datetime(df['date'].values, format='%Y-%m-%d %H:%M:%S').to_numpy()
     df = df[df.columns[1:]]
     df.index = df_index
     data = np.expand_dims(df.values, axis=-1)
