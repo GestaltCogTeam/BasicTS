@@ -97,7 +97,7 @@ def load_adj(file_path: str, adj_type: str):
 
     Args:
         file_path (str): Path to the file containing the adjacency matrix.
-        adj_type (str): Type of adjacency matrix preprocessing.
+        adj_type (str): Type of adjacency matrix preprocessing. Options: 'scalap', 'normlap', 'symnadj', 'transition', 'doubletransition', 'identity', 'original'.
 
     Returns:
         list: List of processed adjacency matrices.
