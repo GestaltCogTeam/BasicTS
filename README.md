@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="assets/basicts+_logo_light.png#gh-light-mode-only" height=200>
-  <img src="assets/basicts+_logo_dark.png#gh-dark-mode-only" height=200>
+  <img src="assets/Basic-TS-logo-for-white.png#gh-light-mode-only" height=200>
+  <img src="assets/Basic-TS-logo-for-black.png#gh-dark-mode-only" height=200>
   <h3><b> A Fair and Scalable Time Series Forecasting Benchmark and Toolkit. </b></h3>
 </div>
 
