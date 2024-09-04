@@ -2,9 +2,7 @@
 
 ## Datasets Downloading
 
-The raw data can be downloaded at this [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp) or [Baidu Yun](https://pan.baidu.com/s/11d_am76_orMTV2vNejmuyg?pwd=v3ii)(password: v3ii), and should be unzipped to datasets/raw_data/.
-
-The `raw_data (with large-scale datasets).zip` in the link is the full version with all datasets, including large-scale datasets. If you don't need these large-scale datasets, you can download `raw_data.zip`.
+See the [Getting Started](../tutorial/getting_started.md) tutorial or [Dataset Design](../tutorial/dataset_design.md) tutorial for details.
 
 ## Datasets Description
 
