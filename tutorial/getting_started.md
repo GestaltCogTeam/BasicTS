@@ -68,14 +68,14 @@ pip install torch==1.10.0+cu111 torchvision==0.11.0+cu111 torchaudio==0.10.0 -f 
 pip install -r requirements.txt
 ```
 
-#### Example 2: Python 3.11 + PyTorch 2.3.1 + CUDA 11.8
+#### Example 2: Python 3.11 + PyTorch 2.3.1 + CUDA 12.1
 
 ```bash
 # Install Python
 conda create -n BasicTS python=3.11
 conda activate BasicTS
 # Install PyTorch
-pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu118
+pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
 # Install other dependencies
 pip install -r requirements.txt
 ```
