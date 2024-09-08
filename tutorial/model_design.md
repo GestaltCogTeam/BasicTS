@@ -16,7 +16,7 @@ BasicTS will pass the following arguments to the `forward` function of your mode
 
 The output of the `forward` function can be a `torch.Tensor` representing the predicted values with shape `[B, L, N, C]`, where typically `C=1`.
 
-Alternatively, the model can return a dictionary that must include the key `prediction`, which contains the predicted values as described above. This dictionary can also include additional custom keys that correspond to arguments for the loss and metrics functions.
+Alternatively, the model can return a dictionary that must include the key `prediction`, which contains the predicted values as described above. This dictionary can also include additional custom keys that correspond to arguments for the loss and metrics functions. More details can be found in the [Metrics](./metrics_design.md) section.
 
 An example can be found in the [Multi-Layer Perceptron (MLP) model](../examples/arch.py).
 

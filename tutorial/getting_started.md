@@ -12,14 +12,14 @@ Before diving in, let’s take a moment to introduce BasicTS.
 ***Who Should Use BasicTS?***
 
 > [!IMPORTANT]  
-> BasicTS is perfect for beginners looking to enter the world of time series forecasting. Its simplicity allows you to quickly grasp the basic pipeline and build your own forecasting model. For experts, BasicTS offers a robust platform for rigorous model comparison, ensuring precise research and development.
+> BasicTS is perfect for both beginners and experts. For beginners looking to enter the world of time series forecasting, BasicTS allows you to quickly grasp the basic pipeline and build your own forecasting model. For experts, BasicTS offers a robust platform for rigorous model comparison, ensuring precise research and development.
 
 ***Core Features***
 
 > [!IMPORTANT]  
 > Two key features define BasicTS: **fairness** and **scalability**. All models are trained and evaluated under the same conditions, eliminating biases introduced by external factors. This ensures trustworthy comparisons. Additionally, BasicTS is highly scalable, allowing customization of datasets, model structures, and metrics according to your needs. For example, to add a learning rate scheduler, simply specify `CFG.TRAIN.LR_SCHEDULER.TYPE = 'MultiStepLR'` in the configuration file.
 
-Now, let’s begin our journey and explore how BasicTS can enhance your time series forecasting projects!
+Now, let’s begin our journey and explore how to implement your time series forecasting projects with BasicTS!
 
 ## ⏬ Cloning the Repository
 

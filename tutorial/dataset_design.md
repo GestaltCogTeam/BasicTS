@@ -29,7 +29,7 @@ Each dataset contains at least two essential files: `data.dat` and `desc.json`:
     - Number of time slices
     - Number of nodes (i.e., the number of time series)
     - Feature descriptions
-    - Presence of prior graph structures (if any)
+    - Presence of prior graph structures
     - Regular settings:
         - Input and output lengths
         - Ratios for training, validation, and test sets

@@ -14,7 +14,7 @@ In a time series forecasting pipeline, the following key components are typicall
 
 BasicTS includes a comprehensive and extensible set of components, enabling users to complete most tasks simply by providing a model structure.
 
-To streamline the configuration of training strategies and centralize all options for easy and fair comparisons, BasicTS follows an **everything-based-on-config** design philosophy.
+To streamline the configuration of training strategies and centralize all options for easy and fair comparisons, BasicTS follows an **config-driven** design philosophy.
 
 Users can easily configure models, datasets, scaling methods, evaluation metrics, optimizers, learning rates, and other hyperparameters by modifying the configuration file—**as simple as filling out a form**.
 
