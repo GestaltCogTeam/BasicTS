@@ -4,6 +4,13 @@
   <h3><b> A Fair and Scalable Time Series Forecasting Benchmark and Toolkit. </b></h3>
 </div>
 
+<div align="center">
+
+[**English**](./README.md) **|** 
+[**简体中文**](./README_CN.md)
+
+</div>
+
 ---
 
 <div align="center">
@@ -30,17 +37,17 @@
 
 </div>
 
+$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series forecasting. It now supports a wide range of tasks and datasets, including spatial-temporal forecasting and long time series forecasting. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series forecasting models.
 
-$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries **P**lus) is an enhanced benchmark and toolbox designed for time series forecasting. $\text{BasicTS}^{+}$ evolved from its predecessor, [BasicTS](https://github.com/zezhishao/BasicTS/blob/v1/README.md), and now has robust support for spatial-temporal forecasting and long time-series forecasting as well as more general tasks. For brevity and consistency, we will interchangeably refer to this project as $\text{BasicTS}^{+}$ and $\text{BasicTS}$.
+On one hand, BasicTS provides a **unified and standardized pipeline**, offering a **fair and comprehensive** platform for reproducing and comparing popular models.
 
-On the one hand, BasicTS utilizes a ***unified and standard pipeline*** to give a ***fair and exhaustive*** reproduction and comparison of popular deep learning-based models. 
+On the other hand, BasicTS offers a **user-friendly and easily extensible** interface, enabling quick design and evaluation of new models. Users can simply define their model structure and easily perform basic operations.
 
-On the other hand, BasicTS provides users with ***easy-to-use and extensible interfaces*** to facilitate the quick design and evaluation of new models. At a minimum, users only need to define the model architecture.
+You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md). Additionally, we are collecting **ToDo** and **HowTo** items. If you need more features (e.g., additional datasets or benchmark models) or tutorials, feel free to open an issue or leave a comment [here](https://github.com/zezhishao/BasicTS/issues/95).
 
-We are collecting **TODOs** and **HOWTOs**, if you need more features (*e.g.* more datasets or baselines) or have any questions, please feel free to create an issue or leave a comment [here](https://github.com/zezhishao/BasicTS/issues/95).
 
 > [!IMPORTANT]  
-> If you find this repository useful for your work, please cite it as [such](./citation.bib):
+> If you find this repository useful for your work, please cite it as such:
 > ```LaTeX
 > @article{shao2023exploring,
 >    title={Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis},
