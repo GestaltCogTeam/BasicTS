@@ -58,12 +58,12 @@ CFG.ENV = EasyDict() # Environment settings. Default: None
 
 # GPU and random seed settings
 CFG.ENV.TF32 = False # Whether to use TensorFloat-32 in GPU. Default: False. See https://pytorch.org/docs/stable/notes/cuda.html#tf32-on-ampere.
-CFG.ENV.SEED = 42 # Random seed. Default: 42
-CFG.ENV.DETERMINISTIC = False # Whether to set the random seed to get deterministic results. Default: True
+CFG.ENV.SEED = 42 # Random seed. Default: None
+CFG.ENV.DETERMINISTIC = False # Whether to set the random seed to get deterministic results. Default: False
 CFG.ENV.CUDNN = EasyDict()
-CFG.ENV.CUDNN.ENABLED = True # Whether to enable cuDNN. Default: False
-CFG.ENV.CUDNN.BENCHMARK = True# Whether to enable cuDNN benchmark. Default: False
-CFG.ENV.CUDNN.DETERMINISTIC = False # Whether to set cuDNN to deterministic mode. Default: True
+CFG.ENV.CUDNN.ENABLED = True # Whether to enable cuDNN. Default: True
+CFG.ENV.CUDNN.BENCHMARK = True# Whether to enable cuDNN benchmark. Default: True
+CFG.ENV.CUDNN.DETERMINISTIC = False # Whether to set cuDNN to deterministic mode. Default: False
 
 ############################## Dataset Configuration ##############################
 
@@ -158,7 +158,7 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 CFG.TRAIN.EARLY_STOPPING_PATIENCE = None # Early stopping patience. Default: None. If not specified, the early stopping will not be used.
 
 # gradient clip settings
-CFG.TRAIN.CLIP_GRAD_PARAM = None # Gradient clipping parameters. Default: None. If not specified, the gradient clipping will not be used.
+CFG.TRAIN.CLIP_GRAD_PARAM = None # Gradient clipping parameters (torch.nn.utils.clip_grad_norm_). Default: None. If not specified, the gradient clipping will not be used.
 
 # Curriculum learning settings
 CFG.TRAIN.CL = EasyDict() # Curriculum learning settings. Default: None. If not specified, the curriculum learning will not be used.
