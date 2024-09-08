@@ -25,7 +25,7 @@ BasicTS 的设计理念是完全基于配置。我们的目标是让用户专注
     - **常规**: 包括测试频率 `INTERVAL`。
     - **数据**: 指定设置如 `BATCH_SIZE`、`NUM_WORKERS`、`PIN_MEMORY` 等。
 
-有关所有配置选项和示例的完整指南，请参阅 [examples/complete_config.py](../examples/complete_config_cn.py)。
+有关所有配置选项和示例的完整指南，请参阅 [examples/complete_config_cn.py](../examples/complete_config_cn.py)。
 ## 🧑‍💻 进一步探索
 
 - **🎉 [快速上手](./getting_started_cn.md)**
