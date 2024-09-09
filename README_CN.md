@@ -45,7 +45,7 @@ BasicTS 一方面通过 **统一且标准化的流程**，为热门的深度学�
 
 另一方面，BasicTS 提供了用户 **友好且易于扩展** 的接口，帮助快速设计和评估新模型。用户只需定义模型结构，便可轻松完成基本操作。
 
-你可以在[快速上手](./tutorial/getting_started.md)找到详细的教程。另外，我们正在收集 **ToDo** 和 **HowTo**，如果您需要更多功能（例如：更多数据集或基准模型）或教程，欢迎提出 issue 或在[此处](https://github.com/zezhishao/BasicTS/issues/95)留言。
+你可以在[快速上手](./tutorial/getting_started_cn.md)找到详细的教程。另外，我们正在收集 **ToDo** 和 **HowTo**，如果您需要更多功能（例如：更多数据集或基准模型）或教程，欢迎提出 issue 或在[此处](https://github.com/zezhishao/BasicTS/issues/95)留言。
 
 > [!IMPORTANT]  
 > 如果本项目对您有用，请引用如下文献:
@@ -107,7 +107,7 @@ BasicTS 实现了多种经典模型、时空预测模型和长序列预测模型
 
 ## 🚀 安装和快速上手
 
-详细的安装步骤请参考 [快速上手](./tutorial/getting_started.md) 教程。
+详细的安装步骤请参考 [快速上手](./tutorial/getting_started_cn.md) 教程。
 
 ## 📉 主要结果
 

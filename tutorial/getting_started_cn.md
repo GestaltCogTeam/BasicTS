@@ -1,4 +1,4 @@
-# 🎉 快速开始
+# 🎉 快速上手
 
 欢迎使用 BasicTS 教程！本指南将带您逐步完成使用 BasicTS 训练和评估模型的过程。
 
@@ -120,7 +120,7 @@ BasicTS 提供了一个统一的标准化流程，位于 `basicts.runner.BaseTim
 所有流程细节和超参数都可以在 `.py` 文件中配置。该配置文件允许您导入模型和执行器，并设置所有选项，如模型、执行器、数据集、数据缩放器、优化器、损失函数和其他超参数。`MLP` 模型在 `PEMS08` 数据集上的配置示例可在 [examples/regular_config.py](../examples/regular_config.py) 中找到。
 
 > [!NOTE]  
-> 配置文件是 BasicTS 中训练和评估的核心。[`Examples/complete_config.py`](../examples/complete_config.py) 列出了所有可配置的选项。
+> 配置文件是 BasicTS 中训练和评估的核心。[`Examples/complete_config.py`](../examples/complete_config_cn.py) 列出了所有可配置的选项。
 
 ## 🥳 运行它！
 
