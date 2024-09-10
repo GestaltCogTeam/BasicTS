@@ -85,7 +85,7 @@ pip install -r requirements.txt
 You can download the `all_data.zip` file from [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe). Unzip the files to the `datasets/` directory:
 
 ```bash
-cd /path/to/BasicTS
+cd /path/to/BasicTS # not BasicTS/basicts
 unzip /path/to/all_data.zip -d datasets/
 ```
 
