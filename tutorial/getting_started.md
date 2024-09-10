@@ -87,8 +87,6 @@ You can download the `all_data.zip` file from [Google Drive](https://drive.googl
 ```bash
 cd /path/to/BasicTS
 unzip /path/to/all_data.zip -d datasets/
-mv datasets/all_data/* datasets/
-rmdir datasets/all_data
 ```
 
 These datasets have been preprocessed and are ready for use.
