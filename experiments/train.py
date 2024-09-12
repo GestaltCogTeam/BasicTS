@@ -15,8 +15,9 @@ torch.set_num_threads(4) # aviod high cpu avg usage
 
 def parse_args():
     parser = ArgumentParser(description="Run time series forecasting model in BasicTS framework!")
-    # parser.add_argument("-c", "--cfg", default="baselines/STID/METR-LA.py", help="training config")
-    parser.add_argument("-c", "--cfg", default="baselines/STEP/STEP_METR-LA2.py", help="training config")
+    parser.add_argument("-c", "--cfg", default="baselines/STID/METR-LA.py", help="training config")
+    # parser.add_argument("-c", "--cfg", default="baselines/STEP/TSFormer_METR-LA.py", help="training config")
+    # parser.add_argument("-c", "--cfg", default="baselines/STEP/STEP_METR-LA.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="baselines/DGCRN/PEMS-BAY.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="baselines/DGCRN/example.py", help="training config")
     # parser.add_argument("-c", "--cfg", default="examples/complete_config.py", help="training config")

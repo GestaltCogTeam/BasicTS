@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-from timm.models.vision_transformer import trunc_normal_
 
 from .patch import PatchEmbedding
 from .mask import MaskGenerator
@@ -66,6 +65,8 @@ class TSFormer(nn.Module):
         # positional encoding
         nn.init.uniform_(self.positional_encoding.position_embedding, -.02, .02)
         # mask token
+        # import here to fix bugs related to set visible device
+        from timm.models.vision_transformer import trunc_normal_
         trunc_normal_(self.mask_token, std=.02)
 
     def encoding(self, long_term_history, mask=True):

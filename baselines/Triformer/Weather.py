@@ -23,7 +23,7 @@ RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
 NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
 # Model architecture and parameters
 MODEL_ARCH = Triformer
-NUM_NODES = 21
+NUM_NODES = 8
 MODEL_PARAM = {
     "num_nodes": NUM_NODES,
     "lag": INPUT_LEN,

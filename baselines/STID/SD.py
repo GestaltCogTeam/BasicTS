@@ -123,10 +123,8 @@ CFG.TRAIN.CLIP_GRAD_PARAM = {
 }
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.DATA.BATCH_SIZE = 64
+CFG.TRAIN.DATA.BATCH_SIZE = 32
 CFG.TRAIN.DATA.SHUFFLE = True
-# Early stopping
-CFG.TRAIN.EARLY_STOPPING_PATIENCE = 10 # Early stopping patience. Default: None. If not specified, the early stopping will not be used.
 
 ############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()

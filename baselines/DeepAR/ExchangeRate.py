@@ -25,7 +25,6 @@ RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
 NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
 # Model architecture and parameters
 MODEL_ARCH = DeepAR
-NUM_NODES = 8
 MODEL_PARAM = {
     'cov_feat_size' : 2,
     'embedding_size' : 32,
@@ -33,7 +32,7 @@ MODEL_PARAM = {
     'num_layers': 3,
     'use_ts_id'   : True,
     'id_feat_size': 32,
-    'num_nodes': 7
+    'num_nodes': 8
     }
 NUM_EPOCHS = 100
 

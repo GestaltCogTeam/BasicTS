@@ -1,6 +1,5 @@
 import os
 import sys
-import torch
 from easydict import EasyDict
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
 
