@@ -1,5 +1,6 @@
 from typing import List
 from dataclasses import dataclass
+
 import numpy as np
 from torch.utils.data import Dataset
 
@@ -29,7 +30,7 @@ class BaseDataset(Dataset):
     mode: str
     input_len: int
     output_len: int
-    overlap: bool = True
+    overlap: bool = False
 
     def _load_description(self) -> dict:
         """

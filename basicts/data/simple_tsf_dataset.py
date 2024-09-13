@@ -1,4 +1,6 @@
 import json
+import inspect
+import logging
 from typing import List
 
 import numpy as np
@@ -22,7 +24,8 @@ class TimeSeriesForecastingDataset(BaseDataset):
         description (dict): Metadata about the dataset, such as shape and other properties.
     """
 
-    def __init__(self, dataset_name: str, train_val_test_ratio: List[float], mode: str, input_len: int, output_len: int, overlap: bool = True) -> None:
+    def __init__(self, dataset_name: str, train_val_test_ratio: List[float], mode: str, input_len: int, output_len: int, \
+        overlap: bool = False, logger: logging.Logger = None) -> None:
         """
         Initializes the TimeSeriesForecastingDataset by setting up paths, loading data, and 
         preparing it according to the specified configurations.
@@ -36,12 +39,14 @@ class TimeSeriesForecastingDataset(BaseDataset):
             output_len (int): The length of the output sequence (number of future points to predict).
             overlap (bool): Flag to determine if training/validation/test splits should overlap.
                 Defaults to True. Set to False for strictly non-overlapping periods.
+            logger (logging.Logger): logger.
 
         Raises:
             AssertionError: If `mode` is not one of ['train', 'valid', 'test'].
         """
         assert mode in ['train', 'valid', 'test'], f"Invalid mode: {mode}. Must be one of ['train', 'valid', 'test']."
         super().__init__(dataset_name, train_val_test_ratio, mode, input_len, output_len, overlap)
+        self.logger = logger
 
         self.data_file_path = f'datasets/{dataset_name}/data.dat'
         self.description_file_path = f'datasets/{dataset_name}/desc.json'
@@ -85,8 +90,22 @@ class TimeSeriesForecastingDataset(BaseDataset):
             raise ValueError(f'Error loading data file: {self.data_file_path}') from e
 
         total_len = len(data)
-        train_len = int(total_len * self.train_val_test_ratio[0])
         valid_len = int(total_len * self.train_val_test_ratio[1])
+        test_len = int(total_len * self.train_val_test_ratio[2])
+        train_len = total_len - valid_len - test_len
+
+        # Automatically configure the overlap parameter
+        minimal_len = self.input_len + self.output_len
+        if minimal_len > {'train': train_len, 'valid': valid_len, 'test': test_len}[self.mode]:
+            self.overlap = True  # Enable overlap when the train, validation, or test set is too short
+            current_frame = inspect.currentframe()
+            file_name = inspect.getfile(current_frame)
+            line_number = current_frame.f_lineno - 7
+            dataset = {'train': 'Training', 'valid': 'Validation', 'test': 'Test'}[self.mode]
+            if self.logger is not None:
+                self.logger.info(f'{dataset} dataset is too short, enabling overlap. See details in {file_name} at line {line_number}.')
+            else:
+                print(f'{dataset} dataset is too short, enabling overlap. See details in {file_name} at line {line_number}.')
 
         if self.mode == 'train':
             offset = self.output_len if self.overlap else 0

@@ -203,15 +203,14 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             batch_size = cfg['TRAIN']['DATA']['BATCH_SIZE']
             self.iter_per_epoch = math.ceil(len(dataset) / batch_size)
         else:
-            dataset = cfg['DATASET']['TYPE'](mode='train', **cfg['DATASET']['PARAM'])
+            dataset = cfg['DATASET']['TYPE'](mode='train', logger=self.logger, **cfg['DATASET']['PARAM'])
             self.logger.info(f'Train dataset length: {len(dataset)}')
             batch_size = cfg['TRAIN']['DATA']['BATCH_SIZE']
             self.iter_per_epoch = math.ceil(len(dataset) / batch_size)
 
         return dataset
 
-    @staticmethod
-    def build_val_dataset(cfg: Dict):
+    def build_val_dataset(self, cfg: Dict):
         """Build the validation dataset.
 
         Args:
@@ -224,15 +223,14 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         if 'DATASET' not in cfg:
             # TODO: support building different datasets for training, validation, and test. (not tested)
             dataset = cfg['VAL']['DATA']['DATASET']['TYPE'](**cfg['VAL']['DATA']['DATASET']['PARAM'])
-            print(f'VAlidation dataset length: {len(dataset)}')
+            self.logger.info(f'Validation dataset length: {len(dataset)}')
         else:
-            dataset = cfg['DATASET']['TYPE'](mode='valid', **cfg['DATASET']['PARAM'])
-            print(f'Validation dataset length: {len(dataset)}')
+            dataset = cfg['DATASET']['TYPE'](mode='valid', logger=self.logger, **cfg['DATASET']['PARAM'])
+            self.logger.info(f'Validation dataset length: {len(dataset)}')
 
         return dataset
 
-    @staticmethod
-    def build_test_dataset(cfg: Dict):
+    def build_test_dataset(self, cfg: Dict):
         """Build the test dataset.
 
         Args:
@@ -245,10 +243,10 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         if 'DATASET' not in cfg:
             # TODO: support building different datasets for training, validation, and test. (not tested)
             dataset = cfg['TEST']['DATA']['DATASET']['TYPE'](**cfg['TEST']['DATA']['DATASET']['PARAM'])
-            print(f'Test dataset length: {len(dataset)}')
+            self.logger.info(f'Test dataset length: {len(dataset)}')
         else:
-            dataset = cfg['DATASET']['TYPE'](mode='test', **cfg['DATASET']['PARAM'])
-            print(f'Test dataset length: {len(dataset)}')
+            dataset = cfg['DATASET']['TYPE'](mode='test', logger=self.logger, **cfg['DATASET']['PARAM'])
+            self.logger.info(f'Test dataset length: {len(dataset)}')
 
         return dataset
 

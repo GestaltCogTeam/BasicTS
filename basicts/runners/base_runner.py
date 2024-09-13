@@ -1,11 +1,12 @@
 import os
 import time
+from abc import abstractmethod
 from typing import Dict, Optional
 
 import torch
 import setproctitle
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from easytorch import Runner
 from easytorch.utils import master_only
@@ -49,8 +50,7 @@ class BaseRunner(Runner):
         proctitle_name = f"{cfg['MODEL'].get('NAME')}({cfg.get('DATASET', {}).get('NAME', 'Unknown Dataset')})"
         setproctitle.setproctitle(f'{proctitle_name}@BasicTS')
 
-    @staticmethod
-    def define_model(cfg: Dict) -> nn.Module:
+    def define_model(self, cfg: Dict) -> nn.Module:
         """
         Define the model architecture based on the configuration.
 
@@ -88,22 +88,32 @@ class BaseRunner(Runner):
         self.test_data_loader = self.build_test_data_loader(cfg)
         self.register_epoch_meter('test_time', 'test', '{:.2f} (s)', plt=False)
 
-    def build_test_data_loader(self, cfg: Dict) -> DataLoader:
-        """
-        Build the test data loader.
+    @abstractmethod
+    def build_train_dataset(self, cfg: Dict) -> Dataset:
+        """It must be implement to build dataset for training.
 
         Args:
-            cfg (Dict): Configuration dictionary.
+            cfg (Dict): config
 
         Returns:
-            DataLoader: The test data loader.
+            train dataset (Dataset)
         """
 
-        dataset = self.build_test_dataset(cfg)
-        return build_data_loader(dataset, cfg['TEST']['DATA'])
+        pass
 
-    @staticmethod
-    def build_test_dataset(cfg: Dict):
+    def build_val_dataset(self, cfg: Dict) -> Dataset:
+        """It can be implement to build dataset for validation (not necessary).
+
+        Args:
+            cfg (Dict): config
+
+        Returns:
+            val dataset (Dataset)
+        """
+
+        raise NotImplementedError()
+
+    def build_test_dataset(self, cfg: Dict) -> Dataset:
         """
         Build the test dataset.
 
@@ -118,6 +128,20 @@ class BaseRunner(Runner):
         """
 
         raise NotImplementedError('build_test_dataset method must be implemented.')
+
+    def build_test_data_loader(self, cfg: Dict) -> DataLoader:
+        """
+        Build the test data loader.
+
+        Args:
+            cfg (Dict): Configuration dictionary.
+
+        Returns:
+            DataLoader: The test data loader.
+        """
+
+        dataset = self.build_test_dataset(cfg)
+        return build_data_loader(dataset, cfg['TEST']['DATA'])
 
     def on_epoch_end(self, epoch: int) -> None:
         """
