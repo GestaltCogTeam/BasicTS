@@ -2,7 +2,7 @@
 
 ## 🧐 What is a Scaler and Why Do We Need It?
 
-A scaler is a class designed to handle the normalization and denormalization of data. In time series analysis, raw data often exhibits significant variations in scale. As a result, models—especially deep learning models—typically do not operate directly on the raw data. Instead, a scaler is used to normalize the data within a specific range, making it more suitable for modeling. When calculating loss functions or evaluation metrics, the data is often denormalized back to its original scale to ensure accurate comparison.
+A scaler is a class designed to handle the normalization and denormalization of data. In time series analysis, raw data often exhibits significant variations in scale. As a result, models—especially deep learning models—typically do not operate directly on the raw data. Instead, a scaler is used to normalize the data within a specific range, making it more suitable for modeling. When calculating loss functions or evaluation metrics, the data may be denormalized back to its original scale to ensure accurate comparison.
 
 This makes the scaler an essential component in the time series analysis workflow.
 

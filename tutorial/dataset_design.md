@@ -5,10 +5,8 @@
 To get started with the datasets, download the `all_data.zip` file from either [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe). After downloading, unzip the files into the `datasets/` directory:
 
 ```bash
-cd /path/to/BasicTS
+cd /path/to/BasicTS # not BasicTS/basicts
 unzip /path/to/all_data.zip -d datasets/
-mv datasets/all_data/* datasets/
-rmdir datasets/all_data
 ```
 
 These datasets are preprocessed and ready for immediate use.

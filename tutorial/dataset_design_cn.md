@@ -5,10 +5,8 @@
 要开始使用数据集，请从 [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing) 或 [百度网盘](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe) 下载 `all_data.zip` 文件。下载后，将文件解压至 `datasets/` 目录：
 
 ```bash
-cd /path/to/BasicTS
+cd /path/to/BasicTS # not BasicTS/basicts
 unzip /path/to/all_data.zip -d datasets/
-mv datasets/all_data/* datasets/
-rmdir datasets/all_data
 ```
 
 这些数据集已经过预处理，可以直接使用。
