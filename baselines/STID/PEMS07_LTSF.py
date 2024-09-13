@@ -4,20 +4,22 @@ import torch
 from easydict import EasyDict
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
 
-from basicts.metrics import masked_mae, masked_mse
+from basicts.metrics import masked_mae, masked_mape, masked_rmse
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.scaler import ZScoreScaler
-from basicts.utils import get_regular_settings
+from basicts.utils import get_regular_settings, load_adj
 
 from .arch import STID
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
-DATA_NAME = 'Traffic'  # Dataset name
+DATA_NAME = 'PEMS07'  # Dataset name
 regular_settings = get_regular_settings(DATA_NAME)
-INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
-OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
+# INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
+# OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
+INPUT_LEN = 336 # LTSF
+OUTPUT_LEN = 336 # LTSF
 TRAIN_VAL_TEST_RATIO = regular_settings['TRAIN_VAL_TEST_RATIO']  # Train/Validation/Test split ratios
 NORM_EACH_CHANNEL = regular_settings['NORM_EACH_CHANNEL'] # Whether to normalize each channel of the data
 RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
@@ -25,19 +27,19 @@ NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
 # Model architecture and parameters
 MODEL_ARCH = STID
 MODEL_PARAM = {
-    "num_nodes": 862,
+    "num_nodes": 883,
     "input_len": INPUT_LEN,
-    "input_dim": 1,
-    "embed_dim": 2048,
+    "input_dim": 3,
+    "embed_dim": 32,
     "output_len": OUTPUT_LEN,
-    "num_layer": 1,
+    "num_layer": 3,
     "if_node": True,
     "node_dim": 32,
     "if_T_i_D": True,
     "if_D_i_W": True,
-    "temp_dim_tid": 8,
-    "temp_dim_diw": 8,
-    "time_of_day_size": 24,
+    "temp_dim_tid": 32,
+    "temp_dim_diw": 32,
+    "time_of_day_size": 288,
     "day_of_week_size": 7
 }
 NUM_EPOCHS = 100
@@ -89,7 +91,8 @@ CFG.METRICS = EasyDict()
 # Metrics settings
 CFG.METRICS.FUNCS = EasyDict({
                                 'MAE': masked_mae,
-                                'MSE': masked_mse
+                                'MAPE': masked_mape,
+                                'RMSE': masked_rmse,
                             })
 CFG.METRICS.TARGET = 'MAE'
 CFG.METRICS.NULL_VAL = NULL_VAL
@@ -107,15 +110,15 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.0005,
-    "weight_decay": 0.0005,
+    "lr": 0.002,
+    "weight_decay": 0.0001,
 }
 # Learning rate scheduler settings
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones": [1, 3, 5],
-    "gamma": 0.1
+    "milestones": [1, 50, 80],
+    "gamma": 0.5
 }
 CFG.TRAIN.CLIP_GRAD_PARAM = {
     'max_norm': 5.0
@@ -143,4 +146,4 @@ CFG.EVAL = EasyDict()
 
 # Evaluation parameters
 CFG.EVAL.HORIZONS = [12, 24, 48, 96, 192, 288, 336]
-CFG.EVAL.USE_GPU = False # Whether to use GPU for evaluation. Default: True
+CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True
