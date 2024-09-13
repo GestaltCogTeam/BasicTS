@@ -73,11 +73,11 @@ def generate_dtw_spa_matrix(dataset_name, sigma1=0.1, thres1=0.6, sigma2=10, thr
     # STGODE provides the scripts to generate spatial matrix for PEMS03, PEMS04, PEMS07, PEMS08
     # For other datasets, we use the original spatial matrix.    
     if dataset_name in ["PEMS03", "PEMS04", "PEMS07", "PEMS08"]:
-        print("STGODE generate spatial matrix based on the raw data. Please ensure the raw data is placed in the correct path `datasets/raw_data/$DATASET_NAME/$DATASET_NAME.csv.")
+        print(f"STGODE generate spatial matrix based on the raw data. Please ensure the raw data is placed in the correct path `datasets/raw_data/{dataset_name}/{dataset_name}.csv.")
         if not os.path.exists('{0}/{1}_spatial_distance.npy'.format(os.path.abspath(__file__ + "/.."), dataset_name)):
             graph_csv_file_path = "./datasets/raw_data/{0}/{0}.csv".format(dataset_name)
             with open(graph_csv_file_path, 'r') as fp:
-                dist_matrix = np.zeros((num_node, num_node)) + np.float('inf')
+                dist_matrix = np.zeros((num_node, num_node)) + float('inf')
                 file = csv.reader(fp)
                 for line in file:
                     break
@@ -90,8 +90,8 @@ def generate_dtw_spa_matrix(dataset_name, sigma1=0.1, thres1=0.6, sigma2=10, thr
 
         dist_matrix = np.load('{0}/{1}_spatial_distance.npy'.format(os.path.abspath(__file__ + "/.."), dataset_name))
         # normalization
-        std = np.std(dist_matrix[dist_matrix != np.float('inf')])
-        mean = np.mean(dist_matrix[dist_matrix != np.float('inf')])
+        std = np.std(dist_matrix[dist_matrix != float('inf')])
+        mean = np.mean(dist_matrix[dist_matrix != float('inf')])
         dist_matrix = (dist_matrix - mean) / std
         sigma = sigma2
         sp_matrix = np.exp(- dist_matrix**2 / sigma**2)
