@@ -21,8 +21,8 @@ class BaseDataset(Dataset):
         mode (str): Operational mode of the dataset. Valid values are "train", "valid", or "test".
         input_len (int): The length of the input sequence, i.e., the number of historical data points used.
         output_len (int): The length of the output sequence, i.e., the number of future data points predicted.
-        overlap (bool): Flag to indicate whether the splits between training, validation, and testing can overlap.
-            Defaults to True but can be set to False to enforce non-overlapping data in different sets.
+        overlap (bool): Flag to indicate whether the splits between training, validation, and testing can overlap. 
+            Defaults to False to enforce non-overlapping data in different sets, but can be set to True to allow overlap.
     """
 
     dataset_name: str

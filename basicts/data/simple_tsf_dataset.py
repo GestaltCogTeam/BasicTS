@@ -37,8 +37,8 @@ class TimeSeriesForecastingDataset(BaseDataset):
             mode (str): The operation mode of the dataset. Valid values are 'train', 'valid', or 'test'.
             input_len (int): The length of the input sequence (number of historical points).
             output_len (int): The length of the output sequence (number of future points to predict).
-            overlap (bool): Flag to determine if training/validation/test splits should overlap.
-                Defaults to True. Set to False for strictly non-overlapping periods.
+            overlap (bool): Flag to determine if training/validation/test splits should overlap. 
+                Defaults to False for strictly non-overlapping periods. Set to True to allow overlap.
             logger (logging.Logger): logger.
 
         Raises:
