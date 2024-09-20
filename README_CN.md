@@ -19,6 +19,7 @@
 [![EasyTorch](https://img.shields.io/badge/Developing%20with-EasyTorch-2077ff.svg)](https://github.com/cnstark/easytorch)
 [![LICENSE](https://img.shields.io/github/license/zezhishao/BasicTS.svg)](https://github.com/zezhishao/BasicTS/blob/master/LICENSE)
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.10.0-orange)](https://pytorch.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.3.1-orange)](https://pytorch.org/)
 [![python lint](https://github.com/zezhishao/BasicTS/actions/workflows/pylint.yml/badge.svg)](https://github.com/zezhishao/BasicTS/blob/master/.github/workflows/pylint.yml)
 
 </div>
@@ -40,6 +41,8 @@
 </div>
 
 $\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) 是一个面向时间序列预测的基准库和工具箱，现已支持时空预测、长序列预测等多种任务与数据集，涵盖统计模型、机器学习模型、深度学习模型等多类算法，为开发和评估时间序列预测模型提供了理想的工具。
+
+如果你觉得这个项目对你有帮助，别忘了给个⭐Star支持一下，非常感谢！
 
 BasicTS 一方面通过 **统一且标准化的流程**，为热门的深度学习模型提供了 **公平且全面** 的复现与对比平台。
 
