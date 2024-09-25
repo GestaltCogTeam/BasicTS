@@ -72,6 +72,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Reborn14",
+      "name": "Reborn14",
+      "avatar_url": "https://avatars.githubusercontent.com/u/74488779?v=4",
+      "profile": "https://github.com/Reborn14",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
@@ -79,6 +88,6 @@
   "repoType": "github",
   "repoHost": "https://github.com",
   "projectName": "BasicTS",
-  "projectOwner": "zezhishao",
+  "projectOwner": "GestaltCogTeam",
   "linkToUsage": false
 }
