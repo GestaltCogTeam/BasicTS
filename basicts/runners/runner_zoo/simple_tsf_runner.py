@@ -17,16 +17,17 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         super().__init__(cfg)
         self.forward_features = cfg['MODEL'].get('FORWARD_FEATURES', None)
         self.target_features = cfg['MODEL'].get('TARGET_FEATURES', None)
+        self.target_time_series = cfg['MODEL'].get('TARGET_TIME_SERIES', None)
 
     def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
         """
         Selects input features based on the forward features specified in the configuration.
 
         Args:
-            data (torch.Tensor): Input history data with shape [B, L, N, C].
+            data (torch.Tensor): Input history data with shape [B, L, N, C1].
 
         Returns:
-            torch.Tensor: Data with selected features.
+            torch.Tensor: Data with selected features with shape [B, L, N, C2].
         """
 
         if self.forward_features is not None:
@@ -38,13 +39,27 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         Selects target features based on the target features specified in the configuration.
 
         Args:
-            data (torch.Tensor): Model prediction data with arbitrary shape.
+            data (torch.Tensor): Model prediction data with shape [B, L, N, C1].
 
         Returns:
-            torch.Tensor: Data with selected target features and shape [B, L, N, C].
+            torch.Tensor: Data with selected target features and shape [B, L, N, C2].
         """
 
         data = data[:, :, :, self.target_features]
+        return data
+
+    def select_target_time_series(self, data: torch.Tensor) -> torch.Tensor:
+        """
+        Select target time series based on the target time series specified in the configuration.
+
+        Args:
+            data (torch.Tensor): Model prediction data with shape [B, L, N1, C].
+
+        Returns:
+            torch.Tensor: Data with selected target time series and shape [B, L, N2, C].
+        """
+
+        data = data[:, :, self.target_time_series, :]
         return data
 
     def forward(self, data: Dict, epoch: int = None, iter_num: int = None, train: bool = True, **kwargs) -> Dict:
@@ -93,8 +108,12 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         if 'target' not in model_return:
             model_return['target'] = self.select_target_features(future_data)
 
+        if self.target_time_series is not None:
+            model_return['target'] = self.select_target_time_series(model_return['target'])
+            model_return['prediction'] = self.select_target_time_series(model_return['prediction'])
+
         # Ensure the output shape is correct
-        assert list(model_return['prediction'].shape)[:3] == [batch_size, length, num_nodes], \
+        assert list(model_return['prediction'].shape)[:3] == [batch_size, length, num_nodes if self.target_time_series is None else len(self.target_time_series)], \
             "The shape of the output is incorrect. Ensure it matches [B, L, N, C]."
 
         return model_return

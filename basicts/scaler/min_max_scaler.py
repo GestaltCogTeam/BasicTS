@@ -52,11 +52,12 @@ class MinMaxScaler(BaseScaler):
 
         # compute minimum and maximum values for normalization
         if norm_each_channel:
-            self.min = np.min(train_data, axis=0, keepdims=True)
-            self.max = np.max(train_data, axis=0, keepdims=True)
+            self.min = torch.tensor(np.min(train_data, axis=0, keepdims=True))
+            self.max = torch.tensor(np.max(train_data, axis=0, keepdims=True))
         else:
             self.min = np.min(train_data)
             self.max = np.max(train_data)
+        self.min, self.max = torch.tensor(self.min), torch.tensor(self.max)
 
     def transform(self, input_data: torch.Tensor) -> torch.Tensor:
         """
@@ -71,8 +72,10 @@ class MinMaxScaler(BaseScaler):
         Returns:
             torch.Tensor: The normalized data with the same shape as the input.
         """
-
-        input_data[..., self.target_channel] = (input_data[..., self.target_channel] - self.min) / (self.max - self.min)
+        
+        _min = self.min.to(input_data.device)
+        _max = self.max.to(input_data.device)
+        input_data[..., self.target_channel] = (input_data[..., self.target_channel] - _min) / (_max - _min)
         return input_data
 
     def inverse_transform(self, input_data: torch.Tensor) -> torch.Tensor:
@@ -90,5 +93,7 @@ class MinMaxScaler(BaseScaler):
             torch.Tensor: The data transformed back to its original scale.
         """
 
-        input_data[..., self.target_channel] = input_data[..., self.target_channel] * (self.max - self.min) + self.min
+        _min = self.min.to(input_data.device)
+        _max = self.max.to(input_data.device)
+        input_data[..., self.target_channel] = input_data[..., self.target_channel] * (_max - _min) + _min
         return input_data
