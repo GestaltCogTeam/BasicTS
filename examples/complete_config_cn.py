@@ -104,6 +104,7 @@ CFG.MODEL.ARCH = MODEL_ARCH # 模型架构，必须指定。
 CFG.MODEL.PARAM = MODEL_PARAM # 模型参数，必须指定。
 CFG.MODEL.FORWARD_FEATURES = [0, 1, 2] # 作为输入使用的特征。输入数据的大小通常为 [B, L, N, C]，此参数指定最后一个维度的索引，即 history_data[:, :, :, CFG.MODEL.FORWARD_FEATURES]。
 CFG.MODEL.TARGET_FEATURES = [0] # 作为输出使用的特征。目标数据的大小通常为 [B, L, N, C]，此参数指定最后一个维度的索引，即 future_data[:, :, :, CFG.MODEL.TARGET_FEATURES]。
+CFG.MODEL.TARGET_TIME_SERIES = None # 待预测的时间序列索引，默认为None。该参数在多变量到单变量预测（Multivariate-to-Univariate）的场景下特别有用。例如，当输入7条时间序列时，若需要预测最后两条序列，可以通过设置`CFG.MODEL.TARGET_TIME_SERIES=[5, 6]`来实现。
 CFG.MODEL.SETUP_GRAPH = False # 是否设置计算图。默认值：False。许多论文的实现（如 DCRNN，GTS）类似于 TensorFlow，需要第一次前向传播时建立计算图并创建参数。
 CFG.MODEL.DDP_FIND_UNUSED_PARAMETERS = False # 控制 torch.nn.parallel.DistributedDataParallel 的 `find_unused_parameters` 参数。在分布式计算中，如果前向传播过程中存在未使用的参数，PyTorch 通常会抛出 RuntimeError。在这种情况下，应将此参数设置为 True。
 
