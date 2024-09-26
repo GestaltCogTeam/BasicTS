@@ -209,5 +209,5 @@ CFG.TEST.DATA.PIN_MEMORY = False
 CFG.EVAL = EasyDict()
 
 # Evaluation parameters
-CFG.EVAL.HORIZONS = [3, 6, 12] # Prediction horizons for evaluation. Default: []
+CFG.EVAL.HORIZONS = [3, 6, 12]  # The prediction horizons for evaluation. Default value: []. NOTE: HORIZONS[i] refers to testing **on the i-th** time step, representing the loss for that specific time step. This is a common setting in spatiotemporal forecasting. For long-sequence predictions, it is recommended to keep HORIZONS set to the default value [] to avoid confusion.
 CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True

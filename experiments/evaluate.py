@@ -6,6 +6,8 @@ from argparse import ArgumentParser
 
 import basicts
 
+os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 def parse_args():
     parser = ArgumentParser(description="Evaluate time series forecasting model in BasicTS framework!")
     parser.add_argument("-cfg", "--config", default="baselines/STID/PEMS08_LTSF.py", help="training config") # enter your config file path

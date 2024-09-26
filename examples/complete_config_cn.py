@@ -212,5 +212,5 @@ CFG.TEST.DATA.PIN_MEMORY = False
 CFG.EVAL = EasyDict()
 
 # 评估参数
-CFG.EVAL.HORIZONS = [3, 6, 12] # 评估的预测时间范围。默认值：[]
+CFG.EVAL.HORIZONS = [3, 6, 12]  # 评估时的预测时间范围。默认值为 []。注意：HORIZONS[i] 指的是在 ”第 i 个时间片“ 上进行测试，表示该时间片的损失（Loss）。这是时空预测中的常见配置。对于长序列预测，建议将 HORIZONS 保持为默认值 []，以避免引发误解。
 CFG.EVAL.USE_GPU = True # 是否在评估时使用 GPU。默认值：True
