@@ -17,7 +17,6 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         super().__init__(cfg)
         self.forward_features = cfg['MODEL'].get('FORWARD_FEATURES', None)
         self.target_features = cfg['MODEL'].get('TARGET_FEATURES', None)
-        self.target_time_series = cfg['MODEL'].get('TARGET_TIME_SERIES', None)
 
     def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
         """
@@ -108,12 +107,8 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         if 'target' not in model_return:
             model_return['target'] = self.select_target_features(future_data)
 
-        if self.target_time_series is not None:
-            model_return['target'] = self.select_target_time_series(model_return['target'])
-            model_return['prediction'] = self.select_target_time_series(model_return['prediction'])
-
         # Ensure the output shape is correct
-        assert list(model_return['prediction'].shape)[:3] == [batch_size, length, num_nodes if self.target_time_series is None else len(self.target_time_series)], \
+        assert list(model_return['prediction'].shape)[:3] == [batch_size, length, num_nodes], \
             "The shape of the output is incorrect. Ensure it matches [B, L, N, C]."
 
         return model_return
