@@ -104,6 +104,8 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             self.prediction_length = cfg['TRAIN'].CL.get('PREDICTION_LENGTH')
             self.cl_step_size = cfg['TRAIN'].CL.get('STEP_SIZE', 1)
 
+        self.target_time_series = cfg['MODEL'].get('TARGET_TIME_SERIES', None)
+
         # Eealuation settings
         self.if_evaluate_on_gpu = cfg.get('EVAL', EasyDict()).get('USE_GPU', True)
         self.evaluation_horizons = [_ - 1 for _ in cfg.get('EVAL', EasyDict()).get('HORIZONS', [])]
@@ -421,10 +423,17 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             Dict: Processed data.
         """
 
+        # rescale data
         if self.scaler is not None and self.scaler.rescale:
             input_data['prediction'] = self.scaler.inverse_transform(input_data['prediction'])
             input_data['target'] = self.scaler.inverse_transform(input_data['target'])
             input_data['inputs'] = self.scaler.inverse_transform(input_data['inputs'])
+
+        # subset forecasting
+        if self.target_time_series is not None:
+            input_data['target'] = input_data['target'][:, :, self.target_time_series, :]
+            input_data['prediction'] = input_data['prediction'][:, :, self.target_time_series, :]
+
         # TODO: add more postprocessing steps as needed.
         return input_data
 

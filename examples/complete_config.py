@@ -103,6 +103,7 @@ CFG.MODEL.ARCH = MODEL_ARCH # Model architecture, must be specified.
 CFG.MODEL.PARAM = MODEL_PARAM # Model parameters
 CFG.MODEL.FORWARD_FEATURES = [0, 1, 2] # Features used as input. The size of input data `history_data` is usually [B, L, N, C], this parameter specifies the index of the last dimension, i.e., history_data[:, :, :, CFG.MODEL.FORWARD_FEATURES].
 CFG.MODEL.TARGET_FEATURES = [0] # Features used as output. The size of target data `future_data` is usually [B, L, N, C], this parameter specifies the index of the last dimension, i.e., future_data[:, :, :, CFG.MODEL.TARGET_FEATURES].
+CFG.MODEL.TARGET_TIME_SERIES = [5, 6] # The index of the time series to be predicted, default is None. This setting is particularly useful in a Multivariate-to-Univariate setup. For example, if 7 time series are input and the last two need to be predicted, you can set `CFG.MODEL.TARGET_TIME_SERIES=[5, 6]` to achieve this.
 CFG.MODEL.SETUP_GRAPH = False # Whether to set up the computation graph. Default: False. Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
 CFG.MODEL.DDP_FIND_UNUSED_PARAMETERS = False # Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`. In distributed computing, if there are unused parameters in the forward process, PyTorch usually raises a RuntimeError. In such cases, this parameter should be set to True.
 

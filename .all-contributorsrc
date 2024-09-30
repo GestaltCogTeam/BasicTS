@@ -1,6 +1,7 @@
 {
   "files": [
-    "README.md"
+    "README.md",
+    "README_CN.md"
   ],
   "imageSize": 100,
   "commit": false,
@@ -16,6 +17,15 @@
         "maintenance",
         "code",
         "bug"
+      ]
+    },
+    {
+      "login": "blisky-li",
+      "name": "blisky-li",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66107694?v=4",
+      "profile": "https://github.com/blisky-li",
+      "contributions": [
+        "code"
       ]
     },
     {
@@ -81,6 +91,15 @@
       "contributions": [
         "doc",
         "code"
+      ]
+    },
+    {
+      "login": "TensorPulse",
+      "name": "TensorPulse",
+      "avatar_url": "https://avatars.githubusercontent.com/u/94754159?v=4",
+      "profile": "https://github.com/TensorPulse",
+      "contributions": [
+        "bug"
       ]
     }
   ],

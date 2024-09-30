@@ -12,6 +12,7 @@ from easytorch import Runner
 from easytorch.utils import master_only
 from easytorch.core.data_loader import build_data_loader
 
+from ..utils import get_dataset_name
 
 class BaseRunner(Runner):
     """
@@ -47,7 +48,7 @@ class BaseRunner(Runner):
             self.to_running_device = to_device
 
         # set process title
-        proctitle_name = f"{cfg['MODEL'].get('NAME')}({cfg.get('DATASET', {}).get('NAME', 'Unknown Dataset')})"
+        proctitle_name = f"{cfg['MODEL'].get('NAME')}({get_dataset_name(cfg)})"
         setproctitle.setproctitle(f'{proctitle_name}@BasicTS')
 
     def define_model(self, cfg: Dict) -> nn.Module:
