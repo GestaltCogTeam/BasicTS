@@ -38,9 +38,10 @@ class Projector(nn.Module):
 
 class Nonstationary_Transformer(nn.Module):
     """
-    Non-stationary Transformer
+    Paper: Non-stationary Transformers: Exploring the Stationarity in Time Series Forecasting
+    Official Code: https://github.com/thuml/Nonstationary_Transformers
+    Link: https://arxiv.org/abs/2205.14415
     """
-
     def __init__(self, **model_args):
         super(Nonstationary_Transformer, self).__init__()
         self.pred_len = model_args['pred_len']

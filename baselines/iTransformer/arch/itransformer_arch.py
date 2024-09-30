@@ -9,9 +9,10 @@ from basicts.utils import data_transformation_4_xformer
 
 class iTransformer(nn.Module):
     """
-    Paper link: https://arxiv.org/abs/2310.06625
+    Paper: iTransformer: Inverted Transformers Are Effective for Time Series Forecasting
+    Official Code: https://github.com/thuml/iTransformer
+    Link: https://arxiv.org/abs/2310.06625
     """
-
     def __init__(self, **model_args):
         super(iTransformer, self).__init__()
         self.pred_len = model_args['pred_len']

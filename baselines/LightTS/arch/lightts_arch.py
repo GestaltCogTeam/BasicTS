@@ -38,7 +38,9 @@ class IEBlock(nn.Module):
 
 class LightTS(nn.Module):
     """
-    Paper link: https://arxiv.org/abs/2207.01186
+    Paper: Less Is More: Fast Multivariate Time Series Forecasting with Light Sampling-oriented MLP
+    UnOfficial Code: https://github.com/thuml/Time-Series-Library/blob/main/models/LightTS.py
+    Link: https://arxiv.org/abs/2207.01186
     """
 
     def __init__(self, **model_args):

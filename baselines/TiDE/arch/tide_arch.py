@@ -39,7 +39,9 @@ class ResBlock(nn.Module):
 # TiDE
 class TiDE(nn.Module):
     """
-    paper: https://arxiv.org/pdf/2304.08424.pdf
+    Paper: Long-term Forecasting with TiDE: Time-series Dense Encoder
+    Official Code: https://github.com/lich99/TiDE
+    Link: https://arxiv.org/abs/2304.08424
     """
 
     def __init__(self,  **model_args):

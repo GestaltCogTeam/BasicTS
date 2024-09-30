@@ -26,11 +26,13 @@ class Transform:
 
 
 class ETSformer(nn.Module):
-
+    """
+    Paper: ETSformer: Exponential Smoothing Transformers for Time-series Forecasting
+    Official Code: https://github.com/salesforce/ETSformer
+    Link: https://arxiv.org/abs/2202.01381
+    """
     def __init__(self,  **model_args):
         super().__init__()
-
-
         self.seq_len = model_args['seq_len']
         self.pred_len = model_args['pred_len']
         self.e_layers = model_args['e_layers']

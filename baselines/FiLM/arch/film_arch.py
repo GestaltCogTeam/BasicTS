@@ -90,7 +90,9 @@ class SpectralConv1d(nn.Module):
 
 class FiLM(nn.Module):
     """
-    Paper link: https://arxiv.org/abs/2205.08897
+    Paper: FiLM: Frequency improved Legendre Memory Model for Long-term Time Series Forecasting
+    Official Code: https://github.com/tianzhou2011/FiLM
+    Link: https://arxiv.org/abs/2205.08897
     """
     def __init__(self, **model_args):
         super(FiLM, self).__init__()

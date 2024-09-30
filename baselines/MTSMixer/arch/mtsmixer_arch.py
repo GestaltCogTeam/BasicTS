@@ -78,6 +78,11 @@ class MixerBlock(nn.Module):
 
 
 class MTSMixer(nn.Module):
+    """
+    Paper: MTS-Mixers: Multivariate Time Series Forecasting via Factorized Temporal and Channel Mixing
+    Official Code: https://github.com/plumprc/MTS-Mixers
+    Link: https://arxiv.org/abs/2302.04501
+    """
     def __init__(self,  **model_args):
         super(MTSMixer, self).__init__()
         self.pred_len = model_args['pred_len']

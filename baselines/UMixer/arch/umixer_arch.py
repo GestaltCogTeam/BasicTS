@@ -148,6 +148,11 @@ class tempolMix_CI_pat(nn.Module):
 
 
 class UMixer(nn.Module):
+    """
+    Paper: U-Mixer: An Unet-Mixer Architecture with Stationarity Correction for Time Series Forecasting
+    Official Code: https://github.com/XiangMa-Shaun/U-Mixer
+    Link: https://arxiv.org/abs/2401.02236
+    """
     def __init__(self,  **model_args):
         super(UMixer, self).__init__()
         self.pred_len = model_args['pred_len']
