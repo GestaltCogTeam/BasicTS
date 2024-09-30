@@ -234,9 +234,11 @@ class TimeInvKP(nn.Module):
 
 
 class Koopa(nn.Module):
-    '''
-    Koopman Forecasting Model
-    '''
+    """
+    Paper: Koopa: Learning Non-stationary Time Series Dynamics with Koopman Predictors
+    Official Code: https://github.com/thuml/Koopa
+    Link: https://arxiv.org/abs/2305.18803
+    """
     def __init__(self, **model_args):
         super(Koopa, self).__init__()
         self.mask_spectrum = None  # 初始化为None
