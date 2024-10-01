@@ -7,7 +7,14 @@ from .distributions import Gaussian
 
 class DeepAR(nn.Module):
     """
-    Paper: DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks; Link: https://arxiv.org/abs/1704.04110; Ref Code: https://github.com/jingw2/demand_forecast, https://github.com/husnejahan/DeepAR-pytorch, https://github.com/arrigonialberto86/deepar.
+    Paper: DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks;
+    Link: https://arxiv.org/abs/1704.04110;
+    Ref Code:
+        https://github.com/jingw2/demand_forecast
+        https://github.com/husnejahan/DeepAR-pytorch
+        https://github.com/arrigonialberto86/deepar
+    Venue: International Journal of Forecasting 2020
+    Task: Probabilistic Time Series Forecasting
     """
 
     def __init__(self, cov_feat_size, embedding_size, hidden_size, num_layers, use_ts_id, id_feat_size=0, num_nodes=0) -> None:

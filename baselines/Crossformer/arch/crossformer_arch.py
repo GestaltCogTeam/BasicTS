@@ -10,6 +10,13 @@ from .cross_embed import DSW_embedding
 
 
 class Crossformer(nn.Module):
+    """
+        Paper: Crossformer: Transformer Utilizing Cross-Dimension Dependency for Multivariate Time Series Forecasting
+        Link: https://openreview.net/forum?id=vSVLM2j9eie
+        Official Code: https://github.com/Thinklab-SJTU/Crossformer
+        Venue: ICLR 2023
+        Task: Long-term Time Series Forecasting
+    """
     def __init__(self, data_dim, in_len, out_len, seg_len, win_size = 4,
                 factor=10, d_model=512, d_ff = 1024, n_heads=8, e_layers=3, 
                 dropout=0.0, baseline = False):

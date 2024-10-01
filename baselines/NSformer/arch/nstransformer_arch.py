@@ -41,6 +41,8 @@ class Nonstationary_Transformer(nn.Module):
     Paper: Non-stationary Transformers: Exploring the Stationarity in Time Series Forecasting
     Official Code: https://github.com/thuml/Nonstationary_Transformers
     Link: https://arxiv.org/abs/2205.14415
+    Venue: NeurIPS 2022
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, **model_args):
         super(Nonstationary_Transformer, self).__init__()

@@ -110,9 +110,11 @@ class Encoder(nn.Module):
 
 class Pyraformer(nn.Module):
     """
-        Paper: Pyraformer: Low complexity pyramidal Attention For Long-range Time Series Modeling and Forecasting
-        Official Code: https://github.com/ant-research/Pyraformer
-        Link: https://openreview.net/forum?id=0EXmFzUn5I
+    Paper: Pyraformer: Low complexity pyramidal Attention For Long-range Time Series Modeling and Forecasting
+    Official Code: https://github.com/ant-research/Pyraformer
+    Link: https://openreview.net/forum?id=0EXmFzUn5I
+    Venue: ICLR 2022
+    Task: Long-term Time Series Forecasting
     """
 
     def __init__(self, **model_args):

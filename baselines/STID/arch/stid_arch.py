@@ -9,6 +9,8 @@ class STID(nn.Module):
     Paper: Spatial-Temporal Identity: A Simple yet Effective Baseline for Multivariate Time Series Forecasting
     Link: https://arxiv.org/abs/2208.05233
     Official Code: https://github.com/zezhishao/STID
+    Venue: CIKM 2022
+    Task: Spatial-Temporal Forecasting
     """
 
     def __init__(self, **model_args):

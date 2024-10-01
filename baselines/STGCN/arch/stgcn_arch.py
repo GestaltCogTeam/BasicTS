@@ -9,6 +9,8 @@ class STGCNChebGraphConv(nn.Module):
     Paper: Spatio-Temporal Graph Convolutional Networks: A Deep Learning Framework for Trafﬁc Forecasting
     Official Code: https://github.com/VeritasYin/STGCN_IJCAI-18 (tensorflow)
     Ref Code: https://github.com/hazdzz/STGCN
+    Venue: IJCAI 2018
+    Task: Spatial-Temporal Forecasting
     Note:  
         https://github.com/hazdzz/STGCN/issues/9
     Link: https://arxiv.org/abs/1709.04875

@@ -57,7 +57,9 @@ class GraphWaveNet(nn.Module):
     """
     Paper: Graph WaveNet for Deep Spatial-Temporal Graph Modeling
     Link: https://arxiv.org/abs/1906.00121
-    Ref Official Code: https://github.com/nnzhan/Graph-WaveNet/blob/master/model.py
+    Official Code: https://github.com/nnzhan/Graph-WaveNet/blob/master/model.py
+    Venue: IJCAI 2019
+    Task: Spatial-Temporal Forecasting
     """
 
     def __init__(self, num_nodes, dropout=0.3, supports=None,

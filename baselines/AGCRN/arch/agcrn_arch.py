@@ -53,6 +53,8 @@ class AGCRN(nn.Module):
     Paper: Adaptive Graph Convolutional Recurrent Network for Trafﬁc Forecasting
     Official Code: https://github.com/LeiBAI/AGCRN
     Link: https://arxiv.org/abs/2007.02842
+    Venue: NeurIPS 2020
+    Task: Spatial-Temporal Forecasting
     """
 
     def __init__(self, num_nodes, input_dim, rnn_units, output_dim, horizon, num_layers, default_graph, embed_dim, cheb_k):

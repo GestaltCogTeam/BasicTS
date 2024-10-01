@@ -16,8 +16,9 @@ class FEDformer(nn.Module):
     Paper: FEDformer: Frequency Enhanced Decomposed Transformer for Long-term Series Forecasting
     Link: https://arxiv.org/abs/2201.12740v3
     Ref Official Code: https://github.com/MAZiqing/FEDformer
+    Venue: ICML 2022
+    Task: Long-term Time Series Forecasting
     """
-
     def __init__(self, **model_args):
         super(FEDformer, self).__init__()
         self.version = model_args["version"]

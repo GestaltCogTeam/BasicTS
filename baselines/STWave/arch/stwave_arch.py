@@ -262,6 +262,8 @@ class STWave(nn.Module):
     Paper: When Spatio-Temporal Meet Wavelets: Disentangled Traffic Forecasting via Efficient Spectral Graph Attention Networks
     Link: https://ieeexplore.ieee.org/document/10184591
     Ref Official Code: https://github.com/LMissher/STWave
+    Venue: ICDE 2023
+    Task: Spatial-Temporal Forecasting
     Hints: PyWavelets and pytorch_wavelets packages are needed
     """
     def __init__(self, input_dim, hidden_size, layers, seq_len, horizon, log_samples, adj_gat, graphwave, time_in_day_size, day_in_week_size, wave_type, wave_levels):

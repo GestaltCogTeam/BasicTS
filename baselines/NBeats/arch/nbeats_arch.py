@@ -64,8 +64,9 @@ class NBeats(t.nn.Module):
     Official Code:
         https://github.com/ServiceNow/N-BEATS
         https://github.com/philipperemy/n-beats
+    Venue: ICLR 2019
+    Task: Time Series Forecasting
     """
-
     def __init__(self, input_size: int, type: str, output_size: int, **kwargs):
         super().__init__()
         assert type in ["generic", "interpretable"], "Unknown type of N-Beats model"

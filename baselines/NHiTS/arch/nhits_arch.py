@@ -28,6 +28,8 @@ class NHiTS(nn.Module):
     Paper: N-HiTS: Neural Hierarchical Interpolation for Time Series Forecasting
     Link: https://arxiv.org/abs/2201.12886
     Official code: https://github.com/cchallu/n-hits
+    Venue: AAAI 2023
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, context_length: int, prediction_length: int, output_size: int,
                 n_blocks: list, n_layers: list, hidden_size: list, pooling_sizes: list,

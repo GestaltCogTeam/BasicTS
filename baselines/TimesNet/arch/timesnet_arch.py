@@ -73,11 +73,11 @@ class TimesBlock(nn.Module):
 
 class TimesNet(nn.Module):
     """
-    Paper:
-        TimesNet: Temporal 2D-Variation Modeling for General Time Series Analysis, ICLR 2023.
+    Paper: TimesNet: Temporal 2D-Variation Modeling for General Time Series Analysis, ICLR 2023.
     Link: https://openreview.net/pdf?id=ju_Uqw384Oq
-    Ref Official Code:
-        https://github.com/thuml/TimesNet
+    Official Code: https://github.com/thuml/TimesNet
+    Venue: ICLR 2023
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, seq_len, label_len, pred_len, enc_in, c_out, top_k, d_model, d_ff, num_kernels, e_layers, embed, dropout, num_time_features, time_of_day_size,day_of_week_size,day_of_month_size,day_of_year_size):
         super(TimesNet, self).__init__()

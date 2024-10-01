@@ -1,1 +1,1 @@
-from .nbeats import NBeats
+from .nbeats_arch import NBeats

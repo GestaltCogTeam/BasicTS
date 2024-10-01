@@ -8,16 +8,17 @@ from .revin import RevIN
 
 
 class DSFormer(nn.Module):
+    """
+    Paper: DSformer: A Double Sampling Transformer for Multivariate Time Series Long-term Prediction.
+    Link: https://arxiv.org/abs/2308.03274
+    Official Code: https://github.com/ChengqingYu/DSformer
+    Venue: CIKM 2023
+    Task: Long-term Time Series Forecasting
+    Note:
+        The authors have optimized the source codes of DSformer, and the current version can achieve better performance on some datasets,
+            e.g., Traffic, Weather, and Electricity.
+    """
     def __init__(self, Input_len, out_len, num_id, num_layer, dropout, muti_head, num_samp, IF_node,IF_REVIN):
-        """
-        Paper:
-            DSformer: A Double Sampling Transformer for Multivariate Time Series Long-term Prediction, CIKM 2023.
-        Link: https://arxiv.org/abs/2308.03274
-        Ref Official Code:
-            https://github.com/ChengqingYu/DSformer
-        Note:
-            The authors have optimized the source codes of DSformer, and the current version can achieve better performance on some datasets, e.g., Traffic, Weather, and Electricity.
-        """
         super(DSFormer, self).__init__()
 
         if IF_node:

@@ -93,6 +93,8 @@ class FiLM(nn.Module):
     Paper: FiLM: Frequency improved Legendre Memory Model for Long-term Time Series Forecasting
     Official Code: https://github.com/tianzhou2011/FiLM
     Link: https://arxiv.org/abs/2205.08897
+    Venue: NeurIPS 2022
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, **model_args):
         super(FiLM, self).__init__()

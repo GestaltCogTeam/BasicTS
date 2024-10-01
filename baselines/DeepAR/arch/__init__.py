@@ -1,1 +1,1 @@
-from .deepar import DeepAR
+from .deepar_arch import DeepAR

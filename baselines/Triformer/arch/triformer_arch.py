@@ -6,6 +6,13 @@ from torch.nn import init
 
 
 class Triformer(nn.Module):
+    """
+    Paper: Triformer: Triangular, Variable-Specific Attentions for Long Sequence Multivariate Time Series Forecasting
+    Link: https://arxiv.org/abs/2204.13767
+    Official Code: https://github.com/razvanc92/triformer
+    Venue: IJCAI 2022
+    Task: Long-term Time Series Forecasting
+    """
     def __init__(self, num_nodes, lag, horizon, input_dim, channels=32, patch_sizes=[8, 4, 3, 3], mem_dim=5):
         super(Triformer, self).__init__()
         self.factorized = True

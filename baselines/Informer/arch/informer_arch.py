@@ -13,7 +13,9 @@ class Informer(nn.Module):
     """
     Paper: Informer: Beyond Efﬁcient Transformer for Long Sequence Time-Series Forecasting
     Link: https://arxiv.org/abs/2012.07436
-    Ref Official Code: https://github.com/zhouhaoyi/Informer2020
+    Official Code: https://github.com/zhouhaoyi/Informer2020
+    Venue: AAAI 2021
+    Task: Long-term Time Series Forecasting
     """
 
     def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, out_len, 

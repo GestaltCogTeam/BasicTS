@@ -36,11 +36,12 @@ class series_decomp(nn.Module):
 
 class DLinear(nn.Module):
     """
-    Paper: Are Transformers Effective for Time Series Forecasting?
-    Link: https://arxiv.org/abs/2205.13504
-    Official Code: https://github.com/cure-lab/DLinear
+        Paper: Are Transformers Effective for Time Series Forecasting?
+        Link: https://arxiv.org/abs/2205.13504
+        Official Code: https://github.com/cure-lab/DLinear
+        Venue: AAAI 2023
+        Task: Long-term Time Series Forecasting
     """
-
     def __init__(self, **model_args):
         super(DLinear, self).__init__()
         self.seq_len = model_args["seq_len"]

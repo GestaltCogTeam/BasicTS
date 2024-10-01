@@ -47,6 +47,8 @@ class D2STGNN(nn.Module):
     Paper: Decoupled Dynamic Spatial-Temporal Graph Neural Network for Traffic Forecasting
     Link: https://arxiv.org/abs/2206.09112
     Official Code: https://github.com/zezhishao/D2STGNN
+    Venue: VLDB 2022
+    Task: Spatial-Temporal Forecasting
     """
     def __init__(self, **model_args):
         super().__init__()

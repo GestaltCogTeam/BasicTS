@@ -76,9 +76,11 @@ class DCRNN(nn.Module, Seq2SeqAttrs):
     """
     Paper: Diffusion Convolutional Recurrent Neural Network: Data-Driven Traffic Forecasting
     Link: https://arxiv.org/abs/1707.01926
-    Codes are modified from the official repo:
+    Official Code:
         https://github.com/chnsh/DCRNN_PyTorch/blob/pytorch_scratch/model/pytorch/dcrnn_cell.py,
         https://github.com/chnsh/DCRNN_PyTorch/blob/pytorch_scratch/model/pytorch/dcrnn_model.py
+    Venue: ICLR 2018
+    Task: Spatial-Temporal Forecasting
     """
 
     def __init__(self, adj_mx, **model_kwargs):

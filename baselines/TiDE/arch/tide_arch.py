@@ -42,6 +42,8 @@ class TiDE(nn.Module):
     Paper: Long-term Forecasting with TiDE: Time-series Dense Encoder
     Official Code: https://github.com/lich99/TiDE
     Link: https://arxiv.org/abs/2304.08424
+    Venue: TMLR 2023
+    Task: Long-term Time Series Forecasting
     """
 
     def __init__(self,  **model_args):

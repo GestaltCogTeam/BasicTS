@@ -112,6 +112,8 @@ class STAEformer(nn.Module):
     Paper: STAEformer: Spatio-Temporal Adaptive Embedding Makes Vanilla Transformer SOTA for Traffic Forecasting
     Link: https://arxiv.org/abs/2308.10425
     Official Code: https://github.com/XDZhelheim/STAEformer
+    Venue: CIKM 2023
+    Task: Spatial-Temporal Forecasting
     """
     def __init__(
         self,

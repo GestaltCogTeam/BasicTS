@@ -82,6 +82,8 @@ class MTSMixer(nn.Module):
     Paper: MTS-Mixers: Multivariate Time Series Forecasting via Factorized Temporal and Channel Mixing
     Official Code: https://github.com/plumprc/MTS-Mixers
     Link: https://arxiv.org/abs/2302.04501
+    Venue: arXiv
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self,  **model_args):
         super(MTSMixer, self).__init__()

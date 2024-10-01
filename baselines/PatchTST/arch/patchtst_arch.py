@@ -13,6 +13,8 @@ class PatchTST(nn.Module):
     Paper: A Time Series is Worth 64 Words: Long-term Forecasting with Transformers
     Link: https://arxiv.org/abs/2211.14730
     Official Code: https://github.com/yuqinie98/PatchTST
+    Venue: ICLR 2023
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, enc_in, seq_len, pred_len, e_layers, n_heads, d_model, d_ff,
                  dropout, fc_dropout, head_dropout, patch_len, stride, individual,

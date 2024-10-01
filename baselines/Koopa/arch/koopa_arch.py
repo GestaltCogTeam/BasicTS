@@ -238,6 +238,8 @@ class Koopa(nn.Module):
     Paper: Koopa: Learning Non-stationary Time Series Dynamics with Koopman Predictors
     Official Code: https://github.com/thuml/Koopa
     Link: https://arxiv.org/abs/2305.18803
+    Venue: NeurIPS 2024
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, **model_args):
         super(Koopa, self).__init__()

@@ -200,6 +200,8 @@ class TimeMixer(nn.Module):
     Paper: TimeMixer: Decomposable Multiscale Mixing for Time Series Forecasting
     Official Code: https://github.com/kwuking/TimeMixer
     Link: https://arxiv.org/html/2405.14616v1
+    Venue: ICLR 2024
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, **model_args):
         super(TimeMixer, self).__init__()

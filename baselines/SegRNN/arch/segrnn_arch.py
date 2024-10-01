@@ -9,6 +9,8 @@ class SegRNN(nn.Module):
     Paper: SegRNN: Segment Recurrent Neural Network for Long-Term Time Series Forecasting
     Official Code: https://github.com/lss-1138/SegRNN
     Link: https://arxiv.org/abs/2308.11200
+    Venue: arXiv
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, **model_args):
         super(SegRNN, self).__init__()

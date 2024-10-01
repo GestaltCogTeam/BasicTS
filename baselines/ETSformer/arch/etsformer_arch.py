@@ -30,6 +30,8 @@ class ETSformer(nn.Module):
     Paper: ETSformer: Exponential Smoothing Transformers for Time-series Forecasting
     Official Code: https://github.com/salesforce/ETSformer
     Link: https://arxiv.org/abs/2202.01381
+    Venue: arXiv
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self,  **model_args):
         super().__init__()

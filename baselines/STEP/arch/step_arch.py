@@ -7,7 +7,13 @@ from .discrete_graph_learning import DiscreteGraphLearning
 
 
 class STEP(nn.Module):
-    """Pre-training Enhanced Spatial-temporal Graph Neural Network for Multivariate Time Series Forecasting"""
+    """
+    Paper: Pretraining Enhanced Spatial-temporal Graph Neural Network for Multivariate Time Series Forecasting
+    Link: https://arxiv.org/abs/2206.09113
+    Official Code: https://github.com/GestaltCogTeam/STEP?tab=readme-ov-file
+    Venue: SIGKDD 2022
+    Task: Spatial-Temporal Forecasting
+    """
 
     def __init__(self, dataset_name, pre_trained_tsformer_path, short_term_len, long_term_len, tsformer_args, backend_args, dgl_args):
         super().__init__()

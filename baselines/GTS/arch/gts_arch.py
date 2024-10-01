@@ -118,11 +118,11 @@ class DecoderModel(nn.Module, Seq2SeqAttrs):
 
 class GTS(nn.Module, Seq2SeqAttrs):
     """
-    Paper: 
-        Discrete Graph Structure Learning for Forecasting Multiple Time Series, ICLR 2021.
+    Paper: Discrete Graph Structure Learning for Forecasting Multiple Time Series.
     Link: https://arxiv.org/abs/2101.06861
-    Ref Official Code: 
-        https://github.com/chaoshangcs/GTS
+    Official Code: https://github.com/chaoshangcs/GTS
+    Venue: ICLR 2021
+    Task: Spatial-Temporal Forecasting
     Note: 
         Kindly note that the results of GTS may have some gaps with the original paper, 
         because it calculates the evaluation metrics in a slightly different manner. 

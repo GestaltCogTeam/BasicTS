@@ -115,7 +115,9 @@ class ODEGCN(nn.Module):
     """
     Paper: Spatial-Temporal Graph ODE Networks for Traffic Flow Forecasting
     Link: https://arxiv.org/abs/2106.12931
-    Official Codes: https://github.com/square-coder/STGODE
+    Official Code: https://github.com/square-coder/STGODE
+    Venue: SIGKDD 2021
+    Task: Spatial-Temporal Forecasting
     """
     def __init__(self, num_nodes, num_features, num_timesteps_input,
                  num_timesteps_output, A_sp_hat, A_se_hat):

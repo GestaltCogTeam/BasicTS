@@ -1,1 +1,1 @@
-from .dlinear import DLinear
+from .dlinear_arch import DLinear

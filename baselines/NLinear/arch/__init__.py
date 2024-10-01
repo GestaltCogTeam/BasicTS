@@ -1,1 +1,1 @@
-from .nlinear import NLinear
+from .nlinear_arch import NLinear

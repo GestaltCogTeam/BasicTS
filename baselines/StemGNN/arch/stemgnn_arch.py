@@ -99,7 +99,9 @@ class StemGNN(nn.Module):
     """
     Paper: Spectral Temporal Graph Neural Network for Multivariate Time-series Forecasting
     Link: https://arxiv.org/abs/2103.07719
-    Ref Official Code: https://github.com/microsoft/StemGNN
+    Official Code: https://github.com/microsoft/StemGNN
+    Venue: NeurIPS 2020
+    Task: Spatial-Temporal Forecasting
     Note:  
         There are some difference in implementation described in the paper as well as the source code. 
         Details can be found in [here](https://github.com/microsoft/StemGNN/issues/12)

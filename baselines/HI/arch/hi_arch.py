@@ -9,6 +9,9 @@ class HINetwork(nn.Module):
     """
     Paper: Historical Inertia: A Neglected but Powerful Baseline for Long Sequence Time-series Forecasting
     Link: https://arxiv.org/abs/2103.16349
+    Official code: None
+    Venue: CIKM 2021
+    Task: Long-term Time Series Forecasting
     """
 
     def __init__(self, input_length: int, output_length: int, channel=None, reverse=False):

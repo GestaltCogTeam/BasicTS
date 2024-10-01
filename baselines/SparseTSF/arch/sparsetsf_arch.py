@@ -7,6 +7,8 @@ class SparseTSF(nn.Module):
     Paper: SparseTSF: Modeling Long-term Time Series Forecasting with 1k Parameters
     Official Code: https://github.com/lss-1138/SparseTSF
     Link: https://arxiv.org/abs/2405.00946
+    Venue: ICML 2024
+    Task: Long-term Time Series Forecasting
     """
     def __init__(self, **model_args):
         super(SparseTSF, self).__init__()

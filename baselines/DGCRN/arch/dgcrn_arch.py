@@ -14,6 +14,8 @@ class DGCRN(nn.Module):
     Paper: Dynamic Graph Convolutional Recurrent Network for Trafﬁc Prediction: Benchmark and Solution
     Official Code: https://github.com/tsinghua-fib-lab/Traffic-Benchmark
     Link: https://arxiv.org/abs/2104.14917
+    Venue: ACM TKDD 2023
+    Task: Spatial-Temporal Forecasting
     """
     def __init__(self, gcn_depth, num_nodes, predefined_A=None, dropout=0.3, subgraph_size=20, node_dim=40, middle_dim=2, seq_length=12, in_dim=2, list_weight=[0.05, 0.95, 0.95], tanhalpha=3, cl_decay_steps=4000, rnn_size=64, hyperGNN_dim=16):
         super(DGCRN, self).__init__()

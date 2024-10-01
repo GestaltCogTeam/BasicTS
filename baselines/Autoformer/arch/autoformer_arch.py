@@ -11,8 +11,10 @@ from .enc_dec import Encoder, Decoder, EncoderLayer, DecoderLayer, my_Layernorm,
 class Autoformer(nn.Module):
     """
     Paper: Autoformer: Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting
-    Link: https://arxiv.org/abs/2206.09112
+    Link: https://arxiv.org/abs/2106.13008
     Ref Official Code: https://github.com/thuml/Autoformer
+    Venue: NeurIPS 2021
+    Task: Long-term Time Series Forecasting
     """
 
     def __init__(self, **model_args):
