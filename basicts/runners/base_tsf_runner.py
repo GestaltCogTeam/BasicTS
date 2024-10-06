@@ -200,6 +200,10 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
 
         if 'DATASET' not in cfg:
             # TODO: support building different datasets for training, validation, and test. (not tested)
+            if 'logger' in inspect.signature(cfg['TRAIN']['DATA']['DATASET']['TYPE'].__init__).parameters:
+                cfg['TRAIN']['DATA']['DATASET']['PARAM']['logger'] = self.logger
+            if 'mode' in inspect.signature(cfg['TRAIN']['DATA']['DATASET']['TYPE'].__init__).parameters:
+                cfg['TRAIN']['DATA']['DATASET']['PARAM']['mode'] = 'train'
             dataset = cfg['TRAIN']['DATA']['DATASET']['TYPE'](**cfg['TRAIN']['DATA']['DATASET']['PARAM'])
             self.logger.info(f'Train dataset length: {len(dataset)}')
             batch_size = cfg['TRAIN']['DATA']['BATCH_SIZE']
@@ -224,6 +228,10 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
 
         if 'DATASET' not in cfg:
             # TODO: support building different datasets for training, validation, and test. (not tested)
+            if 'logger' in inspect.signature(cfg['VAL']['DATA']['DATASET']['TYPE'].__init__).parameters:
+                cfg['VAL']['DATA']['DATASET']['PARAM']['logger'] = self.logger
+            if 'mode' in inspect.signature(cfg['VAL']['DATA']['DATASET']['TYPE'].__init__).parameters:
+                cfg['VAL']['DATA']['DATASET']['PARAM']['mode'] = 'valid'
             dataset = cfg['VAL']['DATA']['DATASET']['TYPE'](**cfg['VAL']['DATA']['DATASET']['PARAM'])
             self.logger.info(f'Validation dataset length: {len(dataset)}')
         else:
@@ -244,6 +252,10 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
 
         if 'DATASET' not in cfg:
             # TODO: support building different datasets for training, validation, and test. (not tested)
+            if 'logger' in inspect.signature(cfg['TEST']['DATA']['DATASET']['TYPE'].__init__).parameters:
+                cfg['TEST']['DATA']['DATASET']['PARAM']['logger'] = self.logger
+            if 'mode' in inspect.signature(cfg['TEST']['DATA']['DATASET']['TYPE'].__init__).parameters:
+                cfg['TEST']['DATA']['DATASET']['PARAM']['mode'] = 'test'
             dataset = cfg['TEST']['DATA']['DATASET']['TYPE'](**cfg['TEST']['DATA']['DATASET']['PARAM'])
             self.logger.info(f'Test dataset length: {len(dataset)}')
         else:
