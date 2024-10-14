@@ -1,7 +1,6 @@
 import os
 import json
 import math
-import time
 import inspect
 import functools
 from typing import Tuple, Union, Optional, Dict
@@ -10,16 +9,13 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from easydict import EasyDict
-from easytorch.core.checkpoint import save_ckpt
-from easytorch.utils.data_prefetcher import DevicePrefetcher
-from easytorch.utils import TimePredictor, get_local_rank, is_master, master_only
-from torch.nn.parallel import DistributedDataParallel as DDP
+from easytorch.utils import master_only
 
-from .base_runner import BaseRunner
+from .base_epoch_runner import BaseEpochRunner
 from ..metrics import masked_mae, masked_mape, masked_rmse, masked_wape, masked_mse
 
 
-class BaseTimeSeriesForecastingRunner(BaseRunner):
+class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
     """
     Runner for multivariate time series forecasting tasks.
 
@@ -80,21 +76,12 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
                                                             'WAPE': masked_wape, 
                                                             'MSE': masked_mse
                                                         })
-        self.target_metrics = cfg.get('METRICS', {}).get('TARGET', 'MAE')
+        self.target_metrics = cfg.get('METRICS', {}).get('TARGET', 'loss')
         self.metrics_best = cfg.get('METRICS', {}).get('BEST', 'min')
         assert self.target_metrics in self.metrics, f'Target metric {self.target_metrics} not found in metrics.'
         assert self.metrics_best in ['min', 'max'], f'Invalid best metric {self.metrics_best}.'
         # handle null values in datasets, e.g., 0.0 or np.nan.
         self.null_val = cfg.get('METRICS', {}).get('NULL_VAL', np.nan)
-
-        # support early stopping
-        # NOTE: If the project has been stopped early and its configuration is rerun,
-        #           training will resume from the last saved checkpoint.
-        #       This feature is designed primarily for the convenience of users,
-        #           allowing them to continue training seamlessly after an interruption.
-        self.early_stopping_patience = cfg.get('TRAIN', {}).get('EARLY_STOPPING_PATIENCE', None)
-        self.current_patience = self.early_stopping_patience
-        assert self.early_stopping_patience is None or self.early_stopping_patience > 0, 'Early stopping patience must be a positive integer.'
 
         # curriculum learning setup
         self.cl_param = cfg['TRAIN'].get('CL', None)
@@ -159,8 +146,9 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         super().init_training(cfg)
         self.count_parameters()
 
+        self.register_epoch_meter('train/loss', 'train', '{:.4f}')
         for key in self.metrics:
-            self.register_epoch_meter(f'train_{key}', 'train', '{:.4f}')
+            self.register_epoch_meter(f'train/{key}', 'train', '{:.4f}')
 
     def init_validation(self, cfg: Dict):
         """Initialize validation components, including meters.
@@ -170,8 +158,9 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         """
 
         super().init_validation(cfg)
+        self.register_epoch_meter('val/loss', 'val', '{:.4f}')
         for key in self.metrics:
-            self.register_epoch_meter(f'val_{key}', 'val', '{:.4f}')
+            self.register_epoch_meter(f'val/{key}', 'val', '{:.4f}')
 
     def init_test(self, cfg: Dict):
         """Initialize test components, including meters.
@@ -185,8 +174,9 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             self.need_setup_graph = False
 
         super().init_test(cfg)
+        self.register_epoch_meter('test/loss', 'test', '{:.4f}')
         for key in self.metrics:
-            self.register_epoch_meter(f'test_{key}', 'test', '{:.4f}')
+            self.register_epoch_meter(f'test/{key}', 'test', '{:.4f}')
 
     def build_train_dataset(self, cfg: Dict):
         """Build the training dataset.
@@ -199,7 +189,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         """
 
         if 'DATASET' not in cfg:
-            # TODO: support building different datasets for training, validation, and test. (not tested)
+            # TODO: support building different datasets for training, validation, and test.
             if 'logger' in inspect.signature(cfg['TRAIN']['DATA']['DATASET']['TYPE'].__init__).parameters:
                 cfg['TRAIN']['DATA']['DATASET']['PARAM']['logger'] = self.logger
             if 'mode' in inspect.signature(cfg['TRAIN']['DATA']['DATASET']['TYPE'].__init__).parameters:
@@ -227,7 +217,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         """
 
         if 'DATASET' not in cfg:
-            # TODO: support building different datasets for training, validation, and test. (not tested)
+            # TODO: support building different datasets for training, validation, and test.
             if 'logger' in inspect.signature(cfg['VAL']['DATA']['DATASET']['TYPE'].__init__).parameters:
                 cfg['VAL']['DATA']['DATASET']['PARAM']['logger'] = self.logger
             if 'mode' in inspect.signature(cfg['VAL']['DATA']['DATASET']['TYPE'].__init__).parameters:
@@ -251,7 +241,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         """
 
         if 'DATASET' not in cfg:
-            # TODO: support building different datasets for training, validation, and test. (not tested)
+            # TODO: support building different datasets for training, validation, and test.
             if 'logger' in inspect.signature(cfg['TEST']['DATA']['DATASET']['TYPE'].__init__).parameters:
                 cfg['TEST']['DATA']['DATASET']['PARAM']['logger'] = self.logger
             if 'mode' in inspect.signature(cfg['TEST']['DATA']['DATASET']['TYPE'].__init__).parameters:
@@ -263,80 +253,6 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
             self.logger.info(f'Test dataset length: {len(dataset)}')
 
         return dataset
-
-    def train(self, cfg: Dict):
-        """Train model.
-
-        Train process:
-        [init_training]
-        for in train_epoch
-            [on_epoch_start]
-            for in train iters
-                [train_iters]
-            [on_epoch_end] ------> Epoch Val: val every n epoch
-                                    [on_validating_start]
-                                    for in val iters
-                                        val iter
-                                    [on_validating_end]
-        [on_training_end]
-
-        Args:
-            cfg (Dict): config
-        """
-
-        self.init_training(cfg)
-
-        # train time predictor
-        train_time_predictor = TimePredictor(self.start_epoch, self.num_epochs)
-
-        # training loop
-        epoch_index = 0
-        for epoch_index in range(self.start_epoch, self.num_epochs):
-            # early stopping
-            if self.early_stopping_patience is not None and self.current_patience <= 0:
-                self.logger.info('Early stopping.')
-                break
-
-            epoch = epoch_index + 1
-            self.on_epoch_start(epoch)
-            epoch_start_time = time.time()
-            # start training
-            self.model.train()
-
-            # tqdm process bar
-            if cfg.get('TRAIN.DATA.DEVICE_PREFETCH', False):
-                data_loader = DevicePrefetcher(self.train_data_loader)
-            else:
-                data_loader = self.train_data_loader
-            data_loader = tqdm(data_loader) if get_local_rank() == 0 else data_loader
-
-            # data loop
-            for iter_index, data in enumerate(data_loader):
-                loss = self.train_iters(epoch, iter_index, data)
-                if loss is not None:
-                    self.backward(loss)
-            # update lr_scheduler
-            if self.scheduler is not None:
-                self.scheduler.step()
-
-            epoch_end_time = time.time()
-            # epoch time
-            self.update_epoch_meter('train_time', epoch_end_time - epoch_start_time)
-            self.on_epoch_end(epoch)
-
-            expected_end_time = train_time_predictor.get_expected_end_time(epoch)
-
-            # estimate training finish time
-            if epoch < self.num_epochs:
-                self.logger.info('The estimated training finish time is {}'.format(
-                    time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(expected_end_time))))
-
-        # log training finish time
-        self.logger.info('The training finished at {}'.format(
-            time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        ))
-
-        self.on_training_end(cfg=cfg, train_epoch=epoch_index + 1)
 
     def curriculum_learning(self, epoch: int = None) -> int:
         """Calculate task level for curriculum learning.
@@ -474,7 +390,7 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
-            self.update_epoch_meter(f'train_{metric_name}', metric_item.item())
+            self.update_epoch_meter(f'train/{metric_name}', metric_item.item())
         return loss
 
     def val_iters(self, iter_index: int, data: Union[torch.Tensor, Tuple]):
@@ -488,10 +404,12 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         data = self.preprocessing(data)
         forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
         forward_return = self.postprocessing(forward_return)
+        loss = self.metric_forward(self.loss, forward_return)
+        self.update_epoch_meter('val/loss', loss)
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
-            self.update_epoch_meter(f'val_{metric_name}', metric_item.item())
+            self.update_epoch_meter(f'val/{metric_name}', metric_item.item())
 
     def compute_evaluation_metrics(self, returns_all: Dict):
         """Compute metrics for evaluating model performance during the test process.
@@ -515,10 +433,13 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
                 metrics_results[f'horizon_{i + 1}'][metric_name] = metric_item.item()
             self.logger.info(f'Evaluate best model on test data for horizon {i + 1}{metric_repr}')
 
+        loss = self.metric_forward(self.loss, returns_all)
+        self.update_epoch_meter('test/loss', loss.item())
+
         metrics_results['overall'] = {}
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, returns_all)
-            self.update_epoch_meter(f'test_{metric_name}', metric_item.item())
+            self.update_epoch_meter(f'test/{metric_name}', metric_item.item())
             metrics_results['overall'][metric_name] = metric_item.item()
 
         return metrics_results
@@ -579,63 +500,4 @@ class BaseTimeSeriesForecastingRunner(BaseRunner):
         """
         greater_best = not self.metrics_best == 'min'
         if train_epoch is not None:
-            self.save_best_model(train_epoch, 'val_' + self.target_metrics, greater_best=greater_best)
-
-    @master_only
-    def save_best_model(self, epoch: int, metric_name: str, greater_best: bool = True):
-        """Save the best model while training.
-
-        Examples:
-            >>> def on_validating_end(self, train_epoch: Optional[int]):
-            >>>     if train_epoch is not None:
-            >>>         self.save_best_model(train_epoch, 'val/loss', greater_best=False)
-
-        Args:
-            epoch (int): current epoch.
-            metric_name (str): metric name used to measure the model, must be registered in `epoch_meter`.
-            greater_best (bool, optional): `True` means greater value is best, such as `acc`
-                `False` means lower value is best, such as `loss`. Defaults to True.
-        """
-
-        metric = self.meter_pool.get_avg(metric_name)
-        best_metric = self.best_metrics.get(metric_name)
-        if best_metric is None or (metric > best_metric if greater_best else metric < best_metric):
-            self.best_metrics[metric_name] = metric
-            model = self.model.module if isinstance(self.model, DDP) else self.model
-            ckpt_dict = {
-                'epoch': epoch,
-                'model_state_dict': model.state_dict(),
-                'optim_state_dict': self.optim.state_dict(),
-                'best_metrics': self.best_metrics
-            }
-            ckpt_path = os.path.join(
-                self.ckpt_save_dir,
-                '{}_best_{}.pt'.format(self.model_name, metric_name.replace('/', '_'))
-            )
-            save_ckpt(ckpt_dict, ckpt_path, self.logger)
-            self.current_patience = self.early_stopping_patience # reset patience
-        else:
-            if self.early_stopping_patience is not None:
-                self.current_patience -= 1
-
-    def on_training_end(self, cfg: Dict, train_epoch: Optional[int] = None):
-        """Callback at the end of the training process.
-        
-        Args:
-            cfg (Dict): Configuration.
-            train_epoch (Optional[int]): End epoch if in training process.
-        """
-
-        if is_master():
-            # close tensorboard writer
-            self.tensorboard_writer.close()
-
-        if hasattr(cfg, 'TEST'):
-            # evaluate the best model on the test set
-            best_model_path = os.path.join(
-                self.ckpt_save_dir,
-                '{}_best_val_{}.pt'.format(self.model_name, self.target_metrics.replace('/', '_'))
-            )
-            self.logger.info('Evaluating the best model on the test set.')
-            self.load_model(ckpt_path=best_model_path, strict=True)
-            self.test_pipeline(cfg=cfg, train_epoch=train_epoch, save_metrics=True, save_results=True)
+            self.save_best_model(train_epoch, 'val/' + self.target_metrics, greater_best=greater_best)

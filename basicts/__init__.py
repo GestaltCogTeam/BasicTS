@@ -1,6 +1,6 @@
 from .launcher import launch_training, launch_evaluation
-from .runners import BaseRunner
+from .runners import BaseEpochRunner
 
-__version__ = '0.4.3.2'
+__version__ = '0.4.4'
 
-__all__ = ['__version__', 'launch_training', 'launch_evaluation', 'BaseRunner']
+__all__ = ['__version__', 'launch_training', 'launch_evaluation', 'BaseEpochRunner']
