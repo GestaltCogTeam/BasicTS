@@ -248,9 +248,13 @@ class single_scale_gnn(nn.Module):
         return x[:,:self.init_seq_len,:] # [Batch, init_seq_len(96), variables]
 
 class CrossGNN(nn.Module):
-    '''
-    CrossGNN
-    '''
+    """
+        Paper: CrossGNN: Confronting Noisy Multivariate Time Series Via Cross Interaction Refinement
+        Link: https://openreview.net/pdf?id=xOzlW2vUYc
+        Official Code: https://github.com/hqh0728/CrossGNN
+        Venue: NeurIPS 2023
+        Task: Long-term Time Series Forecasting
+    """
     def __init__(self,  **kwargs):
         super(CrossGNN, self).__init__()
 
@@ -263,7 +267,6 @@ class CrossGNN(nn.Module):
         for i in range(self.enc_layers):
             self.graph_encs.append(single_scale_gnn(configs=configs))
         self.Linear = nn.Linear(self.seq_len, self.pred_len)
-
 
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
 

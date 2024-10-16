@@ -433,9 +433,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
                 metrics_results[f'horizon_{i + 1}'][metric_name] = metric_item.item()
             self.logger.info(f'Evaluate best model on test data for horizon {i + 1}{metric_repr}')
 
-        loss = self.metric_forward(self.loss, returns_all)
-        self.update_epoch_meter('test/loss', loss.item())
-
         metrics_results['overall'] = {}
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, returns_all)
@@ -461,6 +458,9 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             data = self.preprocessing(data)
             forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
             forward_return = self.postprocessing(forward_return)
+
+            loss = self.metric_forward(self.loss, forward_return)
+            self.update_epoch_meter('test/loss', loss.item())
 
             if not self.if_evaluate_on_gpu:
                 forward_return['prediction'] = forward_return['prediction'].detach().cpu()
