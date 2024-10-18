@@ -6,7 +6,7 @@ from easytorch.utils.dist import master_only
 from basicts.runners import BaseTimeSeriesForecastingRunner
 
 
-class TSFormerRunner(BaseTimeSeriesForecastingRunner):
+class MaskRunner(BaseTimeSeriesForecastingRunner):
     def __init__(self, cfg: dict):
         super().__init__(cfg)
         self.forward_features = cfg["MODEL"].get("FORWARD_FEATURES", None)

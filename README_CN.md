@@ -51,7 +51,7 @@ BasicTS 一方面通过 **统一且标准化的流程**，为热门的深度学�
 你可以在[快速上手](./tutorial/getting_started_cn.md)找到详细的教程。另外，我们正在收集 **ToDo** 和 **HowTo**，如果您需要更多功能（例如：更多数据集或基准模型）或教程，欢迎提出 issue 或在[此处](https://github.com/zezhishao/BasicTS/issues/95)留言。
 
 > [!IMPORTANT]  
-> 如果本项目对您有用，请引用如下文献:
+> If you find this repository helpful for your work, please consider citing the following benchmarking paper:
 > ```LaTeX
 > @article{shao2023exploring,
 >    title={Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis},
@@ -60,6 +60,7 @@ BasicTS 一方面通过 **统一且标准化的流程**，为热门的深度学�
 >    year={2023}
 >  }
 >  ```
+> 🔥🔥🔥 **The paper has been accepted by IEEE TKDE! You can check it out [here](https://arxiv.org/abs/2310.06119)**
 
 ## ✨ 主要功能亮点
 
@@ -97,6 +98,10 @@ BasicTS 提供 `logging` 日志系统和 `Tensorboard` 支持，并统一封装�
 
 BasicTS 实现了丰富的基线模型，包括经典模型、时空预测模型和长序列预测模型等。
 
+这些模型的代码实现可在 [baselines](./baselines) 目录中找到。
+
+下表中的代码链接（💻Code） 指向了相关论文的官方实现，感谢各位作者对代码的开源贡献！
+
 <details open>
   <summary><h3>时空预测</h3></summary>
 
@@ -119,6 +124,8 @@ BasicTS 实现了丰富的基线模型，包括经典模型、时空预测模型
 | MegaCRN      | Spatio-Temporal Meta-Graph Learning for Traffic Forecasting                                                          | [Link](https://aps.arxiv.org/abs/2212.05989)           | [Link](https://github.com/deepkashiwa20/MegaCRN)                                                                                                                                                    | AAAI'23     | STF      |
 | STAEformer   | Spatio-Temporal Adaptive Embedding Makes Vanilla Transformer SOTA for Traffic Forecasting                            | [Link](https://arxiv.org/abs/2308.10425)               | [Link](https://github.com/XDZhelheim/STAEformer)                                                                                                                                                    | CIKM'23     | STF      |
 | STWave       | When Spatio-Temporal Meet Wavelets: Disentangled Traffic Forecasting via Efficient Spectral Graph Attention Networks | [Link](https://ieeexplore.ieee.org/document/10184591)  | [Link](https://github.com/LMissher/STWave)                                                                                                                                                          | ICDE'23     | STF      |
+| STDMAE       | Spatio-Temporal-Decoupled Masked Pre-training for Traffic Forecasting                                                | [Link](https://arxiv.org/abs/2312.00516)  | [Link](https://github.com/Jimmy-7664/STD-MAE)                                                                                                                                                          | IJCAI'24     | STF      |
+
 </details>
 
 <details open>

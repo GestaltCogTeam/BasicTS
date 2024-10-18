@@ -50,7 +50,7 @@ You can find detailed tutorials in [Getting Started](./tutorial/getting_started.
 
 
 > [!IMPORTANT]  
-> If you find this repository useful for your work, please cite it as such:
+> If you find this repository helpful for your work, please consider citing the following benchmarking paper:
 > ```LaTeX
 > @article{shao2023exploring,
 >    title={Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis},
@@ -59,6 +59,8 @@ You can find detailed tutorials in [Getting Started](./tutorial/getting_started.
 >    year={2023}
 >  }
 >  ```
+> 🔥🔥🔥 The paper has been accepted by IEEE TKDE! You can check it out [here](https://arxiv.org/abs/2310.06119)
+
 
 ## ✨ Highlighted Features
 
@@ -96,6 +98,10 @@ For detailed instructions, please refer to the [Getting Started](./tutorial/gett
 
 BasicTS implements a wealth of models, including ***classic models***, ***spatial-temporal forecasting*** models, and ***long-term time series forecasting*** model:
 
+You can find the implementation of these models in the baselines directory.
+
+The code links (💻Code) in the table below point to the official implementations from these papers. Many thanks to the authors for open-sourcing their work!
+
 <details open>
   <summary><h3>Spatial-Temporal Forecasting</h3></summary>
 
@@ -118,6 +124,7 @@ BasicTS implements a wealth of models, including ***classic models***, ***spatia
 | MegaCRN      | Spatio-Temporal Meta-Graph Learning for Traffic Forecasting                                                          | [Link](https://aps.arxiv.org/abs/2212.05989)           | [Link](https://github.com/deepkashiwa20/MegaCRN)                                                                                                                                                    | AAAI'23     | STF      |
 | STAEformer   | Spatio-Temporal Adaptive Embedding Makes Vanilla Transformer SOTA for Traffic Forecasting                            | [Link](https://arxiv.org/abs/2308.10425)               | [Link](https://github.com/XDZhelheim/STAEformer)                                                                                                                                                    | CIKM'23     | STF      |
 | STWave       | When Spatio-Temporal Meet Wavelets: Disentangled Traffic Forecasting via Efficient Spectral Graph Attention Networks | [Link](https://ieeexplore.ieee.org/document/10184591)  | [Link](https://github.com/LMissher/STWave)                                                                                                                                                          | ICDE'23     | STF      |
+| STDMAE       | Spatio-Temporal-Decoupled Masked Pre-training for Traffic Forecasting                                                | [Link](https://arxiv.org/abs/2312.00516)  | [Link](https://github.com/Jimmy-7664/STD-MAE)                                                                                                                                                          | IJCAI'24     | STF      |
 </details>
 
 <details open>
