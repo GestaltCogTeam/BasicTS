@@ -15,7 +15,9 @@ class TransformerLayers(nn.Module):
         src = src * math.sqrt(self.d_model)
         src=src.contiguous()
         src = src.view(B*N, L, D)
-        src = src.transpose(0, 1)
+        # src = src.transpose(0, 1)
+        # output = self.transformer_encoder(src, mask=None)
+        # output = output.transpose(0, 1).view(B, N, L, D)
         output = self.transformer_encoder(src, mask=None)
-        output = output.transpose(0, 1).view(B, N, L, D)
+        output = output.view(B, N, L, D)
         return output

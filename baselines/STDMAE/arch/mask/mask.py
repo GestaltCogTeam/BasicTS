@@ -217,30 +217,7 @@ class Mask(nn.Module):
             # for subsequent loss computing
             reconstruction_masked_tokens, label_masked_tokens = self.get_reconstructed_masked_tokens(reconstruction_full, history_data, unmasked_token_index, masked_token_index)
 
-            return reconstruction_masked_tokens, label_masked_tokens
+            return reconstruction_masked_tokens.unsqueeze(-1), label_masked_tokens.unsqueeze(-1)
         else:
             hidden_states_full, _, _ = self.encoding(history_data, mask=False)
             return hidden_states_full
-
-def main():
-    import sys
-    from torchsummary import summary
-    GPU = sys.argv[-1] if len(sys.argv) == 2 else '2'
-    device = torch.device("cuda:{}".format(GPU)) if torch.cuda.is_available() else torch.device("cpu")
-    model = Mask(
-    patch_size=12,
-    in_channel=1,
-    embed_dim=96,
-    num_heads=4,
-    mlp_ratio=4,
-    dropout=0.1,
-    mask_ratio=0.75,
-    encoder_depth=4,
-    decoder_depth=1,
-    mode="pre-train"
-).to(device)
-    summary(model, (288*7, 307, 1), device=device)
-
-
-if __name__ == '__main__':
-    main()

@@ -98,7 +98,7 @@ For detailed instructions, please refer to the [Getting Started](./tutorial/gett
 
 BasicTS implements a wealth of models, including ***classic models***, ***spatial-temporal forecasting*** models, and ***long-term time series forecasting*** model:
 
-You can find the implementation of these models in the baselines directory.
+You can find the implementation of these models in the [baselines](./baselines) directory.
 
 The code links (💻Code) in the table below point to the official implementations from these papers. Many thanks to the authors for open-sourcing their work!
 

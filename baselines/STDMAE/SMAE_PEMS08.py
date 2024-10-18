@@ -34,7 +34,7 @@ MODEL_PARAM = {
     "mask_ratio":0.25,
     "encoder_depth":4,
     "decoder_depth":1,
-    "spatial":False,
+    "spatial":True,
     "mode":"pre-train"
 }
 NUM_EPOCHS = 100
