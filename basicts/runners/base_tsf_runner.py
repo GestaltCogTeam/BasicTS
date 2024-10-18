@@ -78,7 +78,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
                                                         })
         self.target_metrics = cfg.get('METRICS', {}).get('TARGET', 'loss')
         self.metrics_best = cfg.get('METRICS', {}).get('BEST', 'min')
-        assert self.target_metrics in self.metrics, f'Target metric {self.target_metrics} not found in metrics.'
+        assert self.target_metrics in self.metrics or self.target_metrics == 'loss', f'Target metric {self.target_metrics} not found in metrics.'
         assert self.metrics_best in ['min', 'max'], f'Invalid best metric {self.metrics_best}.'
         # handle null values in datasets, e.g., 0.0 or np.nan.
         self.null_val = cfg.get('METRICS', {}).get('NULL_VAL', np.nan)
@@ -387,6 +387,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             forward_return['prediction'] = forward_return['prediction'][:, :cl_length, :, :]
             forward_return['target'] = forward_return['target'][:, :cl_length, :, :]
         loss = self.metric_forward(self.loss, forward_return)
+        self.update_epoch_meter(f'train/loss', loss.item())
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
@@ -405,7 +406,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
         forward_return = self.postprocessing(forward_return)
         loss = self.metric_forward(self.loss, forward_return)
-        self.update_epoch_meter('val/loss', loss)
+        self.update_epoch_meter('val/loss', loss.item())
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
