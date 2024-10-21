@@ -8,7 +8,7 @@ import pdb
 
 class BigST(nn.Module):
     def __init__(self, seq_num, in_dim, out_dim, hid_dim, num_nodes, tau, random_feature_dim, node_emb_dim, time_emb_dim, \
-                 use_residual, use_bn, use_spatial, use_long, dropout, supports=None, edge_indices=None):
+                 use_residual, use_bn, use_spatial, use_long, dropout, time_of_day_size, day_of_week_size, supports=None, edge_indices=None):
         super(BigST, self).__init__()
         self.tau = tau
         self.layer_num = 3
@@ -24,8 +24,8 @@ class BigST(nn.Module):
         self.activation = nn.ReLU()
         self.supports = supports
         
-        self.time_num = 288
-        self.week_num = 7
+        self.time_num = time_of_day_size
+        self.week_num = day_of_week_size
         
         # node embedding layer
         self.node_emb_layer = nn.Parameter(torch.empty(num_nodes, node_emb_dim))
@@ -55,9 +55,9 @@ class BigST(nn.Module):
             self.bn.append(nn.LayerNorm(hid_dim*4))
         
         if self.use_long:
-            self.regression_layer = nn.Conv2d(hid_dim*4*2+hid_dim+seq_num, 12, kernel_size=(1, 1), bias=True)
+            self.regression_layer = nn.Conv2d(hid_dim*4*2+hid_dim+seq_num, out_dim, kernel_size=(1, 1), bias=True)
         else:
-            self.regression_layer = nn.Conv2d(hid_dim*4*2, 12, kernel_size=(1, 1), bias=True)
+            self.regression_layer = nn.Conv2d(hid_dim*4*2, out_dim, kernel_size=(1, 1), bias=True)
 
     # def forward(self, x, feat=None):
     def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:

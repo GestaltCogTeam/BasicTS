@@ -17,10 +17,8 @@ from .loss import bigst_loss
 # Dataset & Metrics configuration
 DATA_NAME = 'PEMS04'  # Dataset name
 regular_settings = get_regular_settings(DATA_NAME)
-# INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
-# OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
-INPUT_LEN = 12  # Length of input sequence
-OUTPUT_LEN = 12  # Length of output sequence
+INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
+OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
 TRAIN_VAL_TEST_RATIO = regular_settings['TRAIN_VAL_TEST_RATIO']  # Train/Validation/Test split ratios
 NORM_EACH_CHANNEL = regular_settings['NORM_EACH_CHANNEL'] # Whether to normalize each channel of the data
 RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
@@ -33,7 +31,7 @@ MODEL_PARAM = {
     "num_nodes": 307,
     "seq_num": INPUT_LEN,
     "in_dim": 3,
-    "out_dim": OUTPUT_LEN, #  源代码固定成12了 
+    "out_dim": OUTPUT_LEN, 
     "hid_dim": 32,
     "tau" : 0.25,
     "random_feature_dim": 64,
@@ -45,6 +43,8 @@ MODEL_PARAM = {
     "use_long": False,
     "dropout": 0.3,
     "supports": [torch.tensor(i) for i in adj_mx],
+    "time_of_day_size": 288, 
+    "day_of_week_size": 7,
 }
 
 NUM_EPOCHS = 100
