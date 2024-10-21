@@ -255,6 +255,7 @@ class CrossGNN(nn.Module):
         Venue: NeurIPS 2023
         Task: Long-term Time Series Forecasting
     """
+
     def __init__(self,  **kwargs):
         super(CrossGNN, self).__init__()
 
