@@ -51,7 +51,7 @@ BasicTS 一方面通过 **统一且标准化的流程**，为热门的深度学�
 你可以在[快速上手](./tutorial/getting_started_cn.md)找到详细的教程。另外，我们正在收集 **ToDo** 和 **HowTo**，如果您需要更多功能（例如：更多数据集或基准模型）或教程，欢迎提出 issue 或在[此处](https://github.com/zezhishao/BasicTS/issues/95)留言。
 
 > [!IMPORTANT]  
-> 如果本项目对您有用，请引用如下文献:
+> If you find this repository helpful for your work, please consider citing the following benchmarking paper:
 > ```LaTeX
 > @article{shao2023exploring,
 >    title={Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis},
@@ -60,6 +60,7 @@ BasicTS 一方面通过 **统一且标准化的流程**，为热门的深度学�
 >    year={2023}
 >  }
 >  ```
+> 🔥🔥🔥 **The paper has been accepted by IEEE TKDE! You can check it out [here](https://arxiv.org/abs/2310.06119)**
 
 ## ✨ 主要功能亮点
 
@@ -97,6 +98,10 @@ BasicTS 提供 `logging` 日志系统和 `Tensorboard` 支持，并统一封装�
 
 BasicTS 实现了丰富的基线模型，包括经典模型、时空预测模型和长序列预测模型等。
 
+这些模型的代码实现可在 [baselines](./baselines) 目录中找到。
+
+下表中的代码链接（💻Code） 指向了相关论文的官方实现，感谢各位作者对代码的开源贡献！
+
 <details open>
   <summary><h3>时空预测</h3></summary>
 
@@ -119,6 +124,8 @@ BasicTS 实现了丰富的基线模型，包括经典模型、时空预测模型
 | MegaCRN      | Spatio-Temporal Meta-Graph Learning for Traffic Forecasting                                                          | [Link](https://aps.arxiv.org/abs/2212.05989)           | [Link](https://github.com/deepkashiwa20/MegaCRN)                                                                                                                                                    | AAAI'23     | STF      |
 | STAEformer   | Spatio-Temporal Adaptive Embedding Makes Vanilla Transformer SOTA for Traffic Forecasting                            | [Link](https://arxiv.org/abs/2308.10425)               | [Link](https://github.com/XDZhelheim/STAEformer)                                                                                                                                                    | CIKM'23     | STF      |
 | STWave       | When Spatio-Temporal Meet Wavelets: Disentangled Traffic Forecasting via Efficient Spectral Graph Attention Networks | [Link](https://ieeexplore.ieee.org/document/10184591)  | [Link](https://github.com/LMissher/STWave)                                                                                                                                                          | ICDE'23     | STF      |
+| STDMAE       | Spatio-Temporal-Decoupled Masked Pre-training for Traffic Forecasting                                                | [Link](https://arxiv.org/abs/2312.00516)  | [Link](https://github.com/Jimmy-7664/STD-MAE)                                                                                                                                                          | IJCAI'24     | STF      |
+
 </details>
 
 <details open>
@@ -128,7 +135,7 @@ BasicTS 实现了丰富的基线模型，包括经典模型、时空预测模型
 |:--------------|:------------------------------------------------------------------------------------------------|:----------------------------------------------------|:---------------------------------------------------------------------------------|:-----------|:---------|
 | Informer      | Beyond Efficient Transformer for Long Sequence Time-Series Forecasting                          | [Link](https://arxiv.org/abs/2012.07436)            | [Link](https://github.com/zhouhaoyi/Informer2020)                                | AAAI'21    | LTSF     |
 | Autoformer    | Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting               | [Link](https://arxiv.org/abs/2106.13008)            | [Link](https://github.com/thuml/Autoformer)                                      | NeurIPS'21 | LTSF     |
-| HI           | Historical Inertia: A Powerful Baseline for Long Sequence Time-series Forecasting | [Link](https://arxiv.org/abs/2103.16349)  | None | CIKM'21   | LTSF |
+| HI           | Historical Inertia: A Powerful Baseline for Long Sequence Time-series Forecasting                | [Link](https://arxiv.org/abs/2103.16349)            | None                                                                             | CIKM'21    | LTSF     |
 | Pyraformer    | Low complexity pyramidal Attention For Long-range Time Series Modeling and Forecasting          | [Link](https://openreview.net/forum?id=0EXmFzUn5I)  | [Link](https://github.com/ant-research/Pyraformer)                               | ICLR'22    | LTSF     |
 | FEDformer     | Frequency Enhanced Decomposed Transformer for Long-term Series Forecasting                      | [Link](https://arxiv.org/abs/2201.12740v3)          | [Link](https://github.com/MAZiqing/FEDformer)                                    | ICML'22    | LTSF     |
 | FiLM          | Frequency improved Legendre Memory Model for LTSF                                               | [Link](https://arxiv.org/abs/2205.08897)            | [Link](https://github.com/tianzhou2011/FiLM)                                     | NeurIPS'22 | LTSF     |
@@ -136,12 +143,13 @@ BasicTS 实现了丰富的基线模型，包括经典模型、时空预测模型
 | Triformer     | Triangular, Variable-Specific Attentions for Long Sequence Multivariate Time Series Forecasting | [Link](https://arxiv.org/abs/2204.13767)            | [Link](https://github.com/razvanc92/triformer)                                   | IJCAI'22   | LTSF     |
 | TimesNet      | Temporal 2D-Variation Modeling for General Time Series Analysis                                 | [Link](https://openreview.net/pdf?id=ju_Uqw384Oq)   | [Link](https://github.com/thuml/TimesNet)                                        | ICLR'23    | LTSF     |
 | TiDE          | Long-term Forecasting with TiDE: Time-series Dense Encoder                                      | [Link](https://arxiv.org/abs/2304.08424)            | [Link](https://github.com/lich99/TiDE)                                           | TMLR'23    | LTSF     |
-| PatchTST        | A Time Series is Worth 64 Words: Long-term Forecasting with Transformers                        | [Link](https://arxiv.org/abs/2211.14730)            | [Link](https://github.com/yuqinie98/PatchTST)                                    | ICLR'23    | LTSF     |
+| PatchTST        | A Time Series is Worth 64 Words: Long-term Forecasting with Transformers                        | [Link](https://arxiv.org/abs/2211.14730)            | [Link](https://github.com/yuqinie98/PatchTST)                                  | ICLR'23    | LTSF     |
 | NHiTS         | Neural Hierarchical Interpolation for Time Series Forecasting                                   | [Link](https://arxiv.org/abs/2201.12886)            | [Link](https://github.com/cchallu/n-hits)                                        | AAAI'23    | LTSF     |
 | DSformer      | A Double Sampling Transformer for Multivariate Time Series Long-term Prediction                 | [Link](https://arxiv.org/abs/2308.03274)            | [Link](https://github.com/ChengqingYu/DSformer)                                  | CIKM'23    | LTSF     |
 | DLinear       | Are Transformers Effective for Time Series Forecasting?                                         | [Link](https://arxiv.org/abs/2205.13504)            | [Link](https://github.com/cure-lab/DLinear)                                      | AAAI'23    | LTSF     |
 | Crossformer   | Transformer Utilizing Cross-Dimension Dependency for Multivariate Time Series Forecasting       | [Link](https://openreview.net/forum?id=vSVLM2j9eie) | [Link](https://github.com/Thinklab-SJTU/Crossformer)                             | ICLR'23    | LTSF     |
 | NLinear       | Are Transformers Effective for Time Series Forecasting?                                         | [Link](https://arxiv.org/abs/2205.13504)            | [Link](https://github.com/cure-lab/DLinear)                                      | AAAI'23    | LTSF     |
+| CrossGNN      | CrossGNN: Confronting Noisy Multivariate Time Series Via Cross Interaction Refinement           | [Link](https://openreview.net/pdf?id=xOzlW2vUYc)    | [Link](https://github.com/hqh0728/CrossGNN)                                      | NeurIPS'23 | LTSF     |
 | Koopa         | Learning Non-stationary Time Series Dynamics with Koopman Predictors                            | [Link](https://arxiv.org/abs/2305.18803)            | [Link](https://github.com/thuml/Koopa)                                           | NeurIPS'24 | LTSF     |
 | iTrainsformer | Inverted Transformers Are Effective for Time Series Forecasting                                 | [Link](https://arxiv.org/abs/2310.06625)            | [Link](https://github.com/thuml/iTransformer)                                    | ICLR'24    | LTSF     |
 | SparseTSF     | Modeling LTSF with 1k Parameters                                                                | [Link](https://arxiv.org/abs/2405.00946)            | [Link](https://github.com/lss-1138/SparseTSF)                                    | ICML'24    | LTSF     |
@@ -228,17 +236,18 @@ BasicTS 支持多种类型的数据集，涵盖时空预测、长序列预测及
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/zezhishao"><img src="https://avatars.githubusercontent.com/u/33691477?v=4?s=100" width="100px;" alt="S22"/><br /><sub><b>S22</b></sub></a><br /><a href="#maintenance-zezhishao" title="Maintenance">🚧</a> <a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=zezhishao" title="Code">💻</a> <a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Azezhishao" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/blisky-li"><img src="https://avatars.githubusercontent.com/u/66107694?v=4?s=100" width="100px;" alt="blisky-li"/><br /><sub><b>blisky-li</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=blisky-li" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/LMissher"><img src="https://avatars.githubusercontent.com/u/37818979?v=4?s=100" width="100px;" alt="LMissher"/><br /><sub><b>LMissher</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=LMissher" title="Code">💻</a> <a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3ALMissher" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/cnstark"><img src="https://avatars.githubusercontent.com/u/45590791?v=4?s=100" width="100px;" alt="CNStark"/><br /><sub><b>CNStark</b></sub></a><br /><a href="#infra-cnstark" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Azusa-Yuan"><img src="https://avatars.githubusercontent.com/u/61765965?v=4?s=100" width="100px;" alt="Azusa"/><br /><sub><b>Azusa</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3AAzusa-Yuan" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ywoelker"><img src="https://avatars.githubusercontent.com/u/94364022?v=4?s=100" width="100px;" alt="Yannick Wölker"/><br /><sub><b>Yannick Wölker</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Aywoelker" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/hlhang9527"><img src="https://avatars.githubusercontent.com/u/77621248?v=4?s=100" width="100px;" alt="hlhang9527"/><br /><sub><b>hlhang9527</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Ahlhang9527" title="Bug reports">🐛</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ChengqingYu"><img src="https://avatars.githubusercontent.com/u/114470704?v=4?s=100" width="100px;" alt="Chengqing Yu"/><br /><sub><b>Chengqing Yu</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=ChengqingYu" title="Code">💻</a></td>
     </tr>
     <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ChengqingYu"><img src="https://avatars.githubusercontent.com/u/114470704?v=4?s=100" width="100px;" alt="Chengqing Yu"/><br /><sub><b>Chengqing Yu</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=ChengqingYu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Reborn14"><img src="https://avatars.githubusercontent.com/u/74488779?v=4?s=100" width="100px;" alt="Reborn14"/><br /><sub><b>Reborn14</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=Reborn14" title="Documentation">📖</a> <a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=Reborn14" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/blisky-li"><img src="https://avatars.githubusercontent.com/u/66107694?v=4?s=100" width="100px;" alt="blisky-li"/><br /><sub><b>blisky-li</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=blisky-li" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/TensorPulse"><img src="https://avatars.githubusercontent.com/u/94754159?v=4?s=100" width="100px;" alt="TensorPulse"/><br /><sub><b>TensorPulse</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3ATensorPulse" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/superarthurlx"><img src="https://avatars.githubusercontent.com/u/40826115?v=4?s=100" width="100px;" alt="superarthurlx"/><br /><sub><b>superarthurlx</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=superarthurlx" title="Code">💻</a> <a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Asuperarthurlx" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>

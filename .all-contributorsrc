@@ -101,6 +101,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "superarthurlx",
+      "name": "superarthurlx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/40826115?v=4",
+      "profile": "https://github.com/superarthurlx",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
