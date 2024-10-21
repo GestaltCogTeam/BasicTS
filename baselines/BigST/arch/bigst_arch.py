@@ -7,6 +7,13 @@ from torch.autograd import Variable
 import pdb
 
 class BigST(nn.Module):
+    """
+    Paper: BigST: Linear Complexity Spatio-Temporal Graph Neural Network for Traffic Forecasting on Large-Scale Road Networks
+    Link: https://dl.acm.org/doi/10.14778/3641204.3641217
+    Official Code: https://github.com/usail-hkust/BigST?tab=readme-ov-file
+    Venue: VLDB 2024
+    Task: Spatial-Temporal Forecasting
+    """
     def __init__(self, seq_num, in_dim, out_dim, hid_dim, num_nodes, tau, random_feature_dim, node_emb_dim, time_emb_dim, \
                  use_residual, use_bn, use_spatial, use_long, dropout, time_of_day_size, day_of_week_size, supports=None, edge_indices=None):
         super(BigST, self).__init__()
