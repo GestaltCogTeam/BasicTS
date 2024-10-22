@@ -28,7 +28,13 @@ class FlattenHead(nn.Module):
 
 
 class TimeLLM(nn.Module):
-
+    """
+        Paper: Time-LLM: Time Series Forecasting by Reprogramming Large Language Models
+        Link: https://arxiv.org/abs/2310.01728
+        Ref Official Code: https://github.com/KimMeen/Time-LLM
+        Venue: ICLR 2024
+        Task: Long-term Time Series Forecasting
+    """
     def __init__(self, **model_args):
         super(TimeLLM, self).__init__()
         self.task_name = model_args['task_name']
