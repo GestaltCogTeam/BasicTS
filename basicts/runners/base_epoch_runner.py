@@ -428,8 +428,6 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
             # data loop
             for iter_index, data in enumerate(data_loader):
-                if iter_index == 1:
-                    break
                 loss = self.train_iters(epoch, iter_index, data)
                 if loss is not None:
                     self.backward(loss)
