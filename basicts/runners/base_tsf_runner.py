@@ -325,46 +325,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             raise TypeError(f'Unknown metric type: {type(metric_func)}')
         return metric_item
 
-    def preprocessing(self, input_data: Dict) -> Dict:
-        """Preprocess data.
-
-        Args:
-            input_data (Dict): Dictionary containing data to be processed.
-
-        Returns:
-            Dict: Processed data.
-        """
-
-        if self.scaler is not None:
-            input_data['target'] = self.scaler.transform(input_data['target'])
-            input_data['inputs'] = self.scaler.transform(input_data['inputs'])
-        # TODO: add more preprocessing steps as needed.
-        return input_data
-
-    def postprocessing(self, input_data: Dict) -> Dict:
-        """Postprocess data.
-
-        Args:
-            input_data (Dict): Dictionary containing data to be processed.
-
-        Returns:
-            Dict: Processed data.
-        """
-
-        # rescale data
-        if self.scaler is not None and self.scaler.rescale:
-            input_data['prediction'] = self.scaler.inverse_transform(input_data['prediction'])
-            input_data['target'] = self.scaler.inverse_transform(input_data['target'])
-            input_data['inputs'] = self.scaler.inverse_transform(input_data['inputs'])
-
-        # subset forecasting
-        if self.target_time_series is not None:
-            input_data['target'] = input_data['target'][:, :, self.target_time_series, :]
-            input_data['prediction'] = input_data['prediction'][:, :, self.target_time_series, :]
-
-        # TODO: add more postprocessing steps as needed.
-        return input_data
-
     def train_iters(self, epoch: int, iter_index: int, data: Union[torch.Tensor, Tuple]) -> torch.Tensor:
         """Training iteration process.
 
@@ -378,9 +338,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         """
 
         iter_num = (epoch - 1) * self.iter_per_epoch + iter_index
-        data = self.preprocessing(data)
         forward_return = self.forward(data=data, epoch=epoch, iter_num=iter_num, train=True)
-        forward_return = self.postprocessing(forward_return)
 
         if self.cl_param:
             cl_length = self.curriculum_learning(epoch=epoch)
@@ -402,9 +360,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             data (Union[torch.Tensor, Tuple]): Data provided by DataLoader.
         """
 
-        data = self.preprocessing(data)
         forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
-        forward_return = self.postprocessing(forward_return)
         loss = self.metric_forward(self.loss, forward_return)
         self.update_epoch_meter('val/loss', loss.item())
 
@@ -456,9 +412,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         prediction, target, inputs = [], [], []
 
         for data in tqdm(self.test_data_loader):
-            data = self.preprocessing(data)
             forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
-            forward_return = self.postprocessing(forward_return)
 
             loss = self.metric_forward(self.loss, forward_return)
             self.update_epoch_meter('test/loss', loss.item())

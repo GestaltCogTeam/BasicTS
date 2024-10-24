@@ -15,10 +15,10 @@ from .arch import STDMAE
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
-DATA_NAME = 'PEMS08'  # Dataset name
+DATA_NAME = 'PEMS03'  # Dataset name
 regular_settings = get_regular_settings(DATA_NAME)
 # INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
-INPUT_LEN = 288 * 7
+INPUT_LEN = 288 * 3
 OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
 TRAIN_VAL_TEST_RATIO = regular_settings['TRAIN_VAL_TEST_RATIO']  # Train/Validation/Test split ratios
 NORM_EACH_CHANNEL = regular_settings['NORM_EACH_CHANNEL'] # Whether to normalize each channel of the data
@@ -29,8 +29,8 @@ MODEL_ARCH = STDMAE
 adj_mx, _ = load_adj("datasets/" + DATA_NAME + "/adj_mx.pkl", "doubletransition")
 MODEL_PARAM = {
     "dataset_name": DATA_NAME,
-    "pre_trained_tmae_path": "baselines/STDMAE/mask_save/TMAE_PEMS08_2016.pt",
-    "pre_trained_smae_path": "baselines/STDMAE/mask_save/SMAE_PEMS08_2016.pt",
+    "pre_trained_tmae_path": "baselines/STDMAE/mask_save/TMAE_PEMS03_864.pt",
+    "pre_trained_smae_path": "baselines/STDMAE/mask_save/SMAE_PEMS03_864.pt",
     "mask_args": {
                     "patch_size":12,
                     "in_channel":1,
@@ -44,7 +44,7 @@ MODEL_PARAM = {
                     "mode":"forecasting"
     },
     "backend_args": {
-    "num_nodes": 170,
+    "num_nodes": 358,
     "supports": [torch.tensor(i) for i in adj_mx],
     "dropout": 0.3,
     "gcn_bool": True,

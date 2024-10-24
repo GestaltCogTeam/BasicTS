@@ -2,73 +2,56 @@ import os
 import sys
 from easydict import EasyDict
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
-
-import torch
-
-from basicts.metrics import masked_mae, masked_mape, masked_rmse
+from basicts.metrics import masked_mae, masked_mse
+from basicts.data import TimeSeriesForecastingDataset
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.scaler import ZScoreScaler
-from basicts.data import TimeSeriesForecastingDataset
-from basicts.utils import get_regular_settings, load_adj
+from basicts.utils import get_regular_settings
 
-from .arch import STDMAE
+from .arch import TimeLLM
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
-DATA_NAME = 'PEMS08'  # Dataset name
+DATA_NAME = 'ETTh1'  # Dataset name
 regular_settings = get_regular_settings(DATA_NAME)
-# INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
-INPUT_LEN = 288 * 7
+INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
 OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
 TRAIN_VAL_TEST_RATIO = regular_settings['TRAIN_VAL_TEST_RATIO']  # Train/Validation/Test split ratios
 NORM_EACH_CHANNEL = regular_settings['NORM_EACH_CHANNEL'] # Whether to normalize each channel of the data
 RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
 NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
 # Model architecture and parameters
-MODEL_ARCH = STDMAE
-adj_mx, _ = load_adj("datasets/" + DATA_NAME + "/adj_mx.pkl", "doubletransition")
+MODEL_ARCH = TimeLLM
+NUM_NODES = 7
 MODEL_PARAM = {
-    "dataset_name": DATA_NAME,
-    "pre_trained_tmae_path": "baselines/STDMAE/mask_save/TMAE_PEMS08_2016.pt",
-    "pre_trained_smae_path": "baselines/STDMAE/mask_save/SMAE_PEMS08_2016.pt",
-    "mask_args": {
-                    "patch_size":12,
-                    "in_channel":1,
-                    "embed_dim":96,
-                    "num_heads":4,
-                    "mlp_ratio":4,
-                    "dropout":0.1,
-                    "mask_ratio":0.25,
-                    "encoder_depth":4,
-                    "decoder_depth":1,
-                    "mode":"forecasting"
-    },
-    "backend_args": {
-    "num_nodes": 170,
-    "supports": [torch.tensor(i) for i in adj_mx],
-    "dropout": 0.3,
-    "gcn_bool": True,
-    "addaptadj": True,
-    "aptinit": None,
-    "in_dim": 2,
-    "out_dim": 12,
-    "residual_channels": 32,
-    "dilation_channels": 32,
-    "skip_channels": 256,
-    "end_channels": 512,
-    "kernel_size": 2,
-    "blocks": 4,
-    "layers": 2
-    },
-    "short_term_len": OUTPUT_LEN
-}
-NUM_EPOCHS = 300
+    "task_name": 'long_term_forecast',
+    "enc_in": NUM_NODES,                        # num nodes
+    "dec_in": NUM_NODES,
+    "c_out": NUM_NODES,
+    "seq_len": INPUT_LEN,
+    "pred_len": OUTPUT_LEN,         # prediction sequence length
+    "d_model": 16,
+    "n_heads": 8,
+    "d_ff": 32,
+    "dropout": 0.1,
+    "freq": 'h',
+    "patch_len": 16,
+    "stride": 8,
+    "prompt_domain": 0,
+    "llm_model": 'GPT2',# LLAMA, GPT2, BERT
+    "llm_dim": 768,# LLama7b:4096; GPT2-small:768; BERT-base:768
+    "llm_layers": 32,
+    "output_attention": False,
+    "embed": "timeF",                           # [timeF, fixed, learned]
+    "content": "The Electricity Transformer Temperature (ETT) is a crucial indicator in the electric power long-term deployment. This dataset consists of 2 years data from two separated counties in China. To explore the granularity on the Long sequence time-series forecasting (LSTF) problem, different subsets are created, {ETTh1, ETTh2} for 1-hour-level and ETTm1 for 15-minutes-level. Each data point consists of the target value ”oil temperature” and 6 power load features. The train/val/test is 12/4/4 months."
+    }
+NUM_EPOCHS = 100
 
 ############################## General Configuration ##############################
 CFG = EasyDict()
 # General settings
 CFG.DESCRIPTION = 'An Example Config'
-CFG.GPU_NUM = 2 # Number of GPUs to use (0 for CPU mode)
+CFG.GPU_NUM = 8 # Number of GPUs to use (0 for CPU mode)
 # Runner
 CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 
@@ -102,9 +85,8 @@ CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = MODEL_ARCH.__name__
 CFG.MODEL.ARCH = MODEL_ARCH
 CFG.MODEL.PARAM = MODEL_PARAM
-CFG.MODEL.FORWARD_FEATURES = [0, 1]
+CFG.MODEL.FORWARD_FEATURES = [0]
 CFG.MODEL.TARGET_FEATURES = [0]
-CFG.MODEL.DDP_FIND_UNUSED_PARAMETERS = True
 
 ############################## Metrics Configuration ##############################
 
@@ -112,8 +94,7 @@ CFG.METRICS = EasyDict()
 # Metrics settings
 CFG.METRICS.FUNCS = EasyDict({
                                 'MAE': masked_mae,
-                                'MAPE': masked_mape,
-                                'RMSE': masked_rmse,
+                                'MSE': masked_mse
                             })
 CFG.METRICS.TARGET = 'MAE'
 CFG.METRICS.NULL_VAL = NULL_VAL
@@ -123,7 +104,7 @@ CFG.TRAIN = EasyDict()
 CFG.TRAIN.NUM_EPOCHS = NUM_EPOCHS
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
-    CFG.MODEL.NAME,
+    MODEL_ARCH.__name__,
     '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_EPOCHS), str(INPUT_LEN), str(OUTPUT_LEN)])
 )
 CFG.TRAIN.LOSS = masked_mae
@@ -131,52 +112,40 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr":0.002,
-    "weight_decay":1.0e-5,
-    "eps":1.0e-8,
+    "lr": 0.001,
 }
 # Learning rate scheduler settings
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones":[1, 18, 36, 54, 72],
-    "gamma":0.5
+    "milestones": [1, 25, 50],
+    "gamma": 0.5
+}
+CFG.TRAIN.CLIP_GRAD_PARAM = {
+    'max_norm': 5.0
 }
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.DATA.BATCH_SIZE = 8
+CFG.TRAIN.DATA.BATCH_SIZE = 2
 CFG.TRAIN.DATA.SHUFFLE = True
-CFG.TRAIN.DATA.NUM_WORKERS = 2
-CFG.TRAIN.DATA.PIN_MEMORY = True
-CFG.TRAIN.CLIP_GRAD_PARAM = {
-    "max_norm": 3.0
-}
-# curriculum learning
-CFG.TRAIN.CL = EasyDict()
-CFG.TRAIN.CL.WARM_EPOCHS = 0
-CFG.TRAIN.CL.CL_EPOCHS = 6
-CFG.TRAIN.CL.PREDICTION_LENGTH = 12
+CFG.TRAIN.EARLY_STOPPING_PATIENCE = 10
 
 ############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()
 CFG.VAL.INTERVAL = 1
 CFG.VAL.DATA = EasyDict()
-CFG.VAL.DATA.BATCH_SIZE = 8
-CFG.VAL.DATA.NUM_WORKERS = 2
-CFG.VAL.DATA.PIN_MEMORY = True
+CFG.VAL.DATA.BATCH_SIZE = 2
 
 ############################## Test Configuration ##############################
 CFG.TEST = EasyDict()
 CFG.TEST.INTERVAL = 1
 CFG.TEST.DATA = EasyDict()
-CFG.TEST.DATA.BATCH_SIZE = 8
-CFG.TEST.DATA.NUM_WORKERS = 2
-CFG.TEST.DATA.PIN_MEMORY = True
+CFG.TEST.DATA.BATCH_SIZE = 2
 
 ############################## Evaluation Configuration ##############################
 
 CFG.EVAL = EasyDict()
 
 # Evaluation parameters
-CFG.EVAL.HORIZONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] # Prediction horizons for evaluation. Default: []
+CFG.EVAL.HORIZONS = [12, 24, 48, 96, 192, 288, 336]
 CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True
