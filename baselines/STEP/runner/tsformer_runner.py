@@ -36,7 +36,7 @@ class TSFormerRunner(SimpleTimeSeriesForecastingRunner):
         # feed forward
         reconstruction_masked_tokens, label_masked_tokens = self.model(history_data=history_data, future_data=None, batch_seen=iter_num, epoch=epoch)
         results = {'prediction': reconstruction_masked_tokens, 'target': label_masked_tokens, 'inputs': history_data}
-        model_return = self.postprocessing(model_return)
+        results = self.postprocessing(results)
         return results 
 
     @torch.no_grad()
