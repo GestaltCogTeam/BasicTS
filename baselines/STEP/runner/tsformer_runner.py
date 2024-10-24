@@ -44,10 +44,7 @@ class TSFormerRunner(SimpleTimeSeriesForecastingRunner):
     def test(self, train_epoch: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> Dict:
 
         for data in tqdm(self.test_data_loader):
-            data = self.preprocessing(data)
             forward_return = self.forward(data=data, epoch=None, iter_num=None, train=False)
-            # re-scale data
-            forward_return = self.postprocessing(forward_return)
             # metrics
             if not self.if_evaluate_on_gpu:
                 forward_return['target'] = forward_return['target'].detach().cpu()
