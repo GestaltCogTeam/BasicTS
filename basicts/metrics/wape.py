@@ -31,6 +31,6 @@ def masked_wape(prediction: torch.Tensor, target: torch.Tensor, null_val: float 
     prediction = torch.nan_to_num(prediction)
     target = torch.nan_to_num(target)
 
-    loss = torch.sum(torch.abs(prediction - target)) / (torch.sum(torch.abs(target)) + 5e-5)
+    loss = torch.sum(torch.abs(prediction - target), dim=1) / (torch.sum(torch.abs(target), dim=1) + 5e-5)
 
-    return loss
+    return torch.mean(loss)
