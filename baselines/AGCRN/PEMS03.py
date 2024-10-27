@@ -28,7 +28,7 @@ MODEL_PARAM = {
     "input_dim" : 1,
     "rnn_units" : 64,
     "output_dim": 1,
-    "horizon"   : 12,
+    "horizon"   : OUTPUT_LEN,
     "num_layers": 2,
     "default_graph": True,
     "embed_dim" : 10,
