@@ -120,6 +120,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "DiamonJoy",
+      "name": "Xubin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11327242?v=4",
+      "profile": "https://github.com/DiamonJoy",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
