@@ -263,6 +263,10 @@ BasicTS 支持多种类型的数据集，涵盖时空预测、长序列预测及
 
 此项目遵循 [all-contributors](https://github.com/all-contributors/all-contributors) 规范。欢迎任何形式的贡献！
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=GestaltCogTeam/BasicTS&type=Date)](https://star-history.com/#GestaltCogTeam/BasicTS&Date)
+
 ## 🔗 致谢
 
 BasicTS 是基于 [EasyTorch](https://github.com/cnstark/easytorch) 开发的，这是一个易于使用且功能强大的开源神经网络训练框架。
