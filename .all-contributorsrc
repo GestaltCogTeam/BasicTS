@@ -129,6 +129,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "duyifanict",
+      "name": "DU YIFAN",
+      "avatar_url": "https://avatars.githubusercontent.com/u/171222220?v=4",
+      "profile": "https://github.com/duyifanict",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
