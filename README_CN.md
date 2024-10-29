@@ -253,6 +253,7 @@ BasicTS 支持多种类型的数据集，涵盖时空预测、长序列预测及
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/superarthurlx"><img src="https://avatars.githubusercontent.com/u/40826115?v=4?s=100" width="100px;" alt="superarthurlx"/><br /><sub><b>superarthurlx</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=superarthurlx" title="Code">💻</a> <a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Asuperarthurlx" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yisongfu"><img src="https://avatars.githubusercontent.com/u/139831104?v=4?s=100" width="100px;" alt="Yisong Fu"/><br /><sub><b>Yisong Fu</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=yisongfu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/DiamonJoy"><img src="https://avatars.githubusercontent.com/u/11327242?v=4?s=100" width="100px;" alt="Xubin"/><br /><sub><b>Xubin</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=DiamonJoy" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/duyifanict"><img src="https://avatars.githubusercontent.com/u/171222220?v=4?s=100" width="100px;" alt="DU YIFAN"/><br /><sub><b>DU YIFAN</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=duyifanict" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
