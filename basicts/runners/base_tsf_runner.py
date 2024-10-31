@@ -91,8 +91,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             self.prediction_length = cfg['TRAIN'].CL.get('PREDICTION_LENGTH')
             self.cl_step_size = cfg['TRAIN'].CL.get('STEP_SIZE', 1)
 
-        self.target_time_series = cfg['MODEL'].get('TARGET_TIME_SERIES', None)
-
         # Eealuation settings
         self.if_evaluate_on_gpu = cfg.get('EVAL', EasyDict()).get('USE_GPU', True)
         self.evaluation_horizons = [_ - 1 for _ in cfg.get('EVAL', EasyDict()).get('HORIZONS', [])]

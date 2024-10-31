@@ -17,6 +17,7 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         super().__init__(cfg)
         self.forward_features = cfg['MODEL'].get('FORWARD_FEATURES', None)
         self.target_features = cfg['MODEL'].get('TARGET_FEATURES', None)
+        self.target_time_series = cfg['MODEL'].get('TARGET_TIME_SERIES', None)
 
     def preprocessing(self, input_data: Dict) -> Dict:
         """Preprocess data.

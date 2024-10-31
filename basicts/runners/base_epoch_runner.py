@@ -18,11 +18,11 @@ from torch.utils.data.distributed import DistributedSampler
 from easytorch.core.meter_pool import MeterPool
 from easytorch.core.checkpoint import load_ckpt, save_ckpt, backup_last_ckpt, clear_ckpt
 from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
-from easytorch.core.optimizer_builder import build_optim, build_lr_scheduler
 from easytorch.config import get_ckpt_save_dir
 from easytorch.utils import TimePredictor, get_logger, get_local_rank, is_master, master_only, set_env
 from easytorch.device import to_device
 
+from .optim import build_optim, build_lr_scheduler
 from ..utils import get_dataset_name
 
 class BaseEpochRunner(metaclass=ABCMeta):
