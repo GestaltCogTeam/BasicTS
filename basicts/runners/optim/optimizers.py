@@ -9,12 +9,15 @@ from torch.optim import AdamW
 from torch.optim.optimizer import ParamsT
 
 from easytorch.device import _DEVICE_TYPE
+from easytorch.utils import get_world_size, get_local_rank
 
 
-__all__ = ['AdamW_nanoGPT', 'Muon']
+__all__ = ['AdamWnanoGPT', 'Muon']
 
-class AdamW_nanoGPT(AdamW):
-    
+class AdamWnanoGPT(AdamW):
+    """
+    https://github.com/karpathy/nanoGPT/blob/9755682b981a45507f6eb9b11eadef8cb83cebd5/model.py#L263
+    """
     def __init__(self,
         params: ParamsT,
         lr: Union[float, Tensor] = 1e-3,
@@ -72,17 +75,18 @@ class Muon(torch.optim.Optimizer):
         backend: The chosen backend for the orthogonalization step. (recommended: 'newtonschulz5')
         backend_steps: The number of iteration steps to use in the backend, if it is iterative.
     """
-    def __init__(self, params, lr=0.02, momentum=0.95, nesterov=True, backend='newtonschulz5', backend_steps=5):
-        defaults = dict(lr=lr, momentum=momentum, nesterov=nesterov, backend=backend, backend_steps=backend_steps)
-        super().__init__(params, defaults)
-        self.zeropower_backends = dict(svd=self._zeropower_via_svd, newtonschulz5=self._zeropower_via_newtonschulz5)
 
-    def _zeropower_via_svd(self, G, steps=None):
-        U, S, V = G.svd()
+    def __init__(self, params, lr=0.02, momentum=0.95, nesterov=True, backend='newtonschulz5', backend_steps=5):
+        defaults = {'lr': lr, 'momentum': momentum, 'nesterov': nesterov, 'backend': backend, 'backend_steps': backend_steps}
+        super().__init__(params, defaults)
+        self.zeropower_backends = {'svd': self._zeropower_via_svd, 'newtonschulz5': self._zeropower_via_newtonschulz5}
+
+    def _zeropower_via_svd(self, G):
+        U, _, V = G.svd()
         return U @ V.T
 
     def _zeropower_via_newtonschulz5(self, G, steps=10, eps=1e-7):
-        """
+        r"""
         Newton-Schulz iteration to compute the zeroth power / orthogonalization of G. We opt to use a
         quintic iteration whose coefficients are selected to maximize the slope at zero. For the purpose
         of minimizing steps, it turns out to be empirically effective to keep increasing the slope at
@@ -119,7 +123,7 @@ class Muon(torch.optim.Optimizer):
             curr_idx = 0
             for i, p in enumerate(group['params']):
                 # luckily this will perfectly distribute a transformer with multiple of 4 layers to 8 GPUs
-                if i % int(os.environ['WORLD_SIZE']) == int(os.environ['RANK']):
+                if i % get_world_size() == get_local_rank():
                     g = p.grad
                     assert g is not None
                     state = self.state[p]

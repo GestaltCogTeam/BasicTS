@@ -6,7 +6,7 @@ from functools import partial
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LambdaLR
 
-__all__ = ['CosineWarmup', 'CosineWarmupRestart']
+__all__ = ['CosineWarmup', 'CosineWarmupRestarts']
 
 
 class CosineWarmup(LambdaLR):
