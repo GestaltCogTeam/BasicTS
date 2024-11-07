@@ -39,8 +39,8 @@ class series_decomp(nn.Module):
 class DLinear_GLAFF(nn.Module):
     """
         Paper: Rethinking the Power of Timestamps for Robust Time Series Forecasting: A Global-Local Fusion Perspective
-        Link: 
-        Official Code: 
+        Link: https://arxiv.org/pdf/2409.18696
+        Official Code: https://github.com/ForestsKing/GLAFF
         Venue: NIPS 2024
         Task: Long-term Time Series Forecasting
     """
