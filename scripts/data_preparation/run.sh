@@ -18,6 +18,7 @@ python scripts/data_preparation/ExchangeRate/generate_training_data.py
 python scripts/data_preparation/Illness/generate_training_data.py
 python scripts/data_preparation/Traffic/generate_training_data.py
 
+# large-scale mts forecasting
 python scripts/data_preparation/CA/generate_training_data.py
 python scripts/data_preparation/GBA/generate_training_data.py
 python scripts/data_preparation/GLA/generate_training_data.py
