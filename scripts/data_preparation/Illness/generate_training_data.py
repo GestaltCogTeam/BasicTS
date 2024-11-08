@@ -17,7 +17,7 @@ add_day_of_year = True  # Add day of the year as a feature
 steps_per_day = 1/7  # Number of time steps per day
 frequency = 1440 // steps_per_day
 domain = 'illness data'
-feature_description = [domain, 'time of day', 'day of week', 'day of week', 'day of year']
+feature_description = [domain, 'time of day', 'day of week', 'day of month', 'day of year']
 regular_settings = {
     'INPUT_LEN': 96,
     'OUTPUT_LEN': 48,
