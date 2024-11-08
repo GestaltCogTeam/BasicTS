@@ -19,6 +19,7 @@ class DGCRNRunner(SimpleTimeSeriesForecastingRunner):
             dict: keys that must be included: inputs, prediction, target
         """
 
+        data = self.preprocessing(data)
         # preprocess
         future_data, history_data = data['target'], data['inputs']
         history_data = self.to_running_device(history_data)      # B, L, N, C
@@ -42,4 +43,5 @@ class DGCRNRunner(SimpleTimeSeriesForecastingRunner):
         model_return["target"] = self.select_target_features(future_data)
         assert list(model_return["prediction"].shape)[:3] == [batch_size, length, num_nodes], \
             "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
+        model_return = self.postprocessing(model_return)
         return model_return
