@@ -14,6 +14,7 @@ add_time_of_day = True  # Add time of day as a feature
 add_day_of_week = True  # Add day of the week as a feature
 add_day_of_month = True  # Add day of the month as a feature
 add_day_of_year = True  # Add day of the year as a feature
+add_time_index = True  # Add time index
 steps_per_day = 144  # Number of time steps per day
 frequency = 1440 // steps_per_day
 domain = 'weather'
@@ -25,7 +26,8 @@ regular_settings = {
     'NORM_EACH_CHANNEL': True,
     'RESCALE': False,
     'METRICS': ['MAE', 'MSE'],
-    'NULL_VAL': np.nan
+    'NULL_VAL': np.nan,
+    'SEED': 0,
 }
 
 def load_and_preprocess_data():
@@ -70,7 +72,11 @@ def add_temporal_features(data, df):
         feature_list.append(doy_tiled)
 
     data_with_features = np.concatenate(feature_list, axis=-1)  # L x N x C
-    return data_with_features
+    if add_time_index:
+        # t_index = np.tile(df.index, [1, n, 1]).transpose((2, 1, 0))
+        t_index = df.index
+
+    return data_with_features, t_index
 
 def save_data(data):
     '''Save the preprocessed data to a binary file.'''
@@ -83,12 +89,21 @@ def save_data(data):
     del fp
     print(f'Data saved to {file_path}')
 
-def save_description(data):
+def save_time(data):
+    '''Save the preprocessed data to a binary file.'''
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    file_path = os.path.join(output_dir, 'time.npy')
+    np.save(file_path, data)
+    print(f'Data saved to {file_path}')
+
+def save_description(data, time_index):
     '''Save a description of the dataset to a JSON file.'''
     description = {
         'name': dataset_name,
         'domain': domain,
         'shape': data.shape,
+        't_shape': time_index.shape,
         'num_time_steps': data.shape[0],
         'num_nodes': data.shape[1],
         'num_features': data.shape[2],
@@ -108,13 +123,14 @@ def main():
     data, df = load_and_preprocess_data()
 
     # Add temporal features
-    data_with_features = add_temporal_features(data, df)
+    data_with_features, time_index = add_temporal_features(data, df)
 
     # Save processed data
     save_data(data_with_features)
+    save_time(time_index)
 
     # Save dataset description
-    save_description(data_with_features)
+    save_description(data_with_features, time_index)
 
 if __name__ == '__main__':
     main()
