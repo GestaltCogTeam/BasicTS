@@ -10,6 +10,7 @@ from basicts.scaler import ZScoreScaler
 from basicts.utils import get_regular_settings
 
 from .arch import DLinear_GLAFF
+from .loss import glaff_loss
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
@@ -35,11 +36,7 @@ MODEL_PARAM = {
     "head_num": 8,
     "dropout": 0.1,
     "layer_num": 2,
-    "num_time_features": 3,                     # number of used time features
     "time_of_day_size": 96,
-    "day_of_week_size": 7,
-    "day_of_month_size": 31,
-    "day_of_year_size": 366
 }
 NUM_EPOCHS = 100
 
@@ -81,7 +78,7 @@ CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = MODEL_ARCH.__name__
 CFG.MODEL.ARCH = MODEL_ARCH
 CFG.MODEL.PARAM = MODEL_PARAM
-CFG.MODEL.FORWARD_FEATURES = [0, 1, 2, 3]
+CFG.MODEL.FORWARD_FEATURES = [0, 1, 2, 3, 4]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 ############################## Metrics Configuration ##############################
@@ -105,7 +102,7 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     MODEL_ARCH.__name__,
     '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_EPOCHS), str(INPUT_LEN), str(OUTPUT_LEN)])
 )
-CFG.TRAIN.LOSS = masked_mae
+CFG.TRAIN.LOSS = glaff_loss
 # Optimizer settings
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
@@ -125,25 +122,24 @@ CFG.TRAIN.CLIP_GRAD_PARAM = {
 }
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.DATA.BATCH_SIZE = 64
+CFG.TRAIN.DATA.BATCH_SIZE = 32
 CFG.TRAIN.DATA.SHUFFLE = True
 
 ############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()
 CFG.VAL.INTERVAL = 1
 CFG.VAL.DATA = EasyDict()
-CFG.VAL.DATA.BATCH_SIZE = 64
+CFG.VAL.DATA.BATCH_SIZE = 32
 
 ############################## Test Configuration ##############################
 CFG.TEST = EasyDict()
 CFG.TEST.INTERVAL = 1
 CFG.TEST.DATA = EasyDict()
-CFG.TEST.DATA.BATCH_SIZE = 64
+CFG.TEST.DATA.BATCH_SIZE = 32
 
 ############################## Evaluation Configuration ##############################
 
 CFG.EVAL = EasyDict()
 
 # Evaluation parameters
-CFG.EVAL.HORIZONS = [12, 24, 48, 96]
 CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True

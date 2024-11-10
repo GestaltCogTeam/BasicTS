@@ -1,6 +1,8 @@
+from argparse import Namespace
+
 import torch
 from torch import nn
-from argparse import Namespace
+
 
 class Plugin(nn.Module):
     def __init__(self, **model_args):
