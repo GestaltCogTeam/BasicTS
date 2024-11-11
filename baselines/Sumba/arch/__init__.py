@@ -1,1 +1,0 @@
-from .sumba_arch import Sumba
