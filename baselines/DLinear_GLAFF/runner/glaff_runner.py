@@ -52,7 +52,6 @@ class GLAFFRunner(SimpleTimeSeriesForecastingRunner):
         # Forward pass through the model
         model_return = self.model(history_data=history_data, history_time=history_t_index, future_data=future_data_4_dec, future_time=future_t_index,
                                   batch_seen=iter_num, epoch=epoch, train=train)
-        # model_return = self.model(history_data=history_data, history_t_index=history_t_index)
 
         # Parse model return
         if isinstance(model_return, torch.Tensor):
