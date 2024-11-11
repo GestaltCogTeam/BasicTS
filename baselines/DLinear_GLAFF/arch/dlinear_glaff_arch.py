@@ -90,7 +90,7 @@ class DLinear_GLAFF(nn.Module):
         time = torch.cat([month, day, weekday, hour, minute, second], dim=-1)
         return time
 
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
+    def forward(self, history_data: torch.Tensor, history_time:torch.Tensor, future_data: torch.Tensor, future_time: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
         """Feed forward of DLinear.
 
         Args:
@@ -120,8 +120,8 @@ class DLinear_GLAFF(nn.Module):
         prediction = seasonal_output + trend_output
 
         if self.glaff:
-            x_time = self.get_time_feature(history_data[..., 1:])
-            y_time = self.get_time_feature(future_data[..., 1:])
+            x_time = history_time.float()
+            y_time = future_time.float()
             label_len = self.hist_len // 2
             map1 = prediction.clone().transpose(1, 2)
             x_enc_copy = x.clone()

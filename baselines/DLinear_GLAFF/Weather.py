@@ -4,12 +4,15 @@ from easydict import EasyDict
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
 
 from basicts.metrics import masked_mae, masked_mse, masked_mape, masked_rmse
-from basicts.data import TimeSeriesForecastingDataset
-from basicts.runners import SimpleTimeSeriesForecastingRunner
+# from basicts.data import TimeSeriesForecastingDataset
+# from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.scaler import ZScoreScaler
 from basicts.utils import get_regular_settings
 
 from .arch import DLinear_GLAFF
+from .runner import GLAFFRunner
+from .data import GLAFFTimeSeriesForecastingDataset
+
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
@@ -49,13 +52,13 @@ CFG = EasyDict()
 CFG.DESCRIPTION = 'An Example Config'
 CFG.GPU_NUM = 1 # Number of GPUs to use (0 for CPU mode)
 # Runner
-CFG.RUNNER = SimpleTimeSeriesForecastingRunner
+CFG.RUNNER = GLAFFRunner
 
 ############################## Dataset Configuration ##############################
 CFG.DATASET = EasyDict()
 # Dataset settings
 CFG.DATASET.NAME = DATA_NAME
-CFG.DATASET.TYPE = TimeSeriesForecastingDataset
+CFG.DATASET.TYPE = GLAFFTimeSeriesForecastingDataset
 CFG.DATASET.PARAM = EasyDict({
     'dataset_name': DATA_NAME,
     'train_val_test_ratio': TRAIN_VAL_TEST_RATIO,
