@@ -89,7 +89,13 @@ class Block(nn.ModuleList):
 
 
 class Sumba(nn.Module):
-
+    '''
+    Paper: Structured Matrix Basis for Multivariate Time Series Forecasting with Interpretable Dynamics
+    Official Code: https://github.com/chenxiaodanhit/Sumba/
+    Link: https://xiucheng.org/assets/pdfs/nips24-sumba.pdf
+    Venue: NeurIPS 2024
+    Task: Long-term Time Series Forecasting
+    '''
     def __init__(self, **model_args):
         super(Sumba, self).__init__()
         config = Namespace(**model_args)
