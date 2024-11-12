@@ -25,8 +25,7 @@ regular_settings = {
     'NORM_EACH_CHANNEL': True,
     'RESCALE': False,
     'METRICS': ['MAE', 'MSE'],
-    'NULL_VAL': np.nan,
-    'SEED': 0,
+    'NULL_VAL': np.nan
 }
 
 def load_and_preprocess_data():
