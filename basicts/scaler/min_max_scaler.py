@@ -52,8 +52,8 @@ class MinMaxScaler(BaseScaler):
 
         # compute minimum and maximum values for normalization
         if norm_each_channel:
-            self.min = torch.tensor(np.min(train_data, axis=0, keepdims=True))
-            self.max = torch.tensor(np.max(train_data, axis=0, keepdims=True))
+            self.min = np.min(train_data, axis=0, keepdims=True)
+            self.max = np.max(train_data, axis=0, keepdims=True)
         else:
             self.min = np.min(train_data)
             self.max = np.max(train_data)
