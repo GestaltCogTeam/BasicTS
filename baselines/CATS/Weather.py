@@ -16,8 +16,10 @@ from .arch import CATS
 # Dataset & Metrics configuration
 DATA_NAME = 'Weather'  # Dataset name
 regular_settings = get_regular_settings(DATA_NAME)
-INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
-OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
+# INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
+# OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
+INPUT_LEN = 96
+OUTPUT_LEN = 96
 TRAIN_VAL_TEST_RATIO = regular_settings['TRAIN_VAL_TEST_RATIO']  # Train/Validation/Test split ratios
 NORM_EACH_CHANNEL = regular_settings['NORM_EACH_CHANNEL'] # Whether to normalize each channel of the data
 RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
@@ -38,7 +40,7 @@ MODEL_PARAM = {
     "stride": 24,
     "padding_patch": 'end',
     "QAM_start":0.1,
-    "QAM_end": 0.5,
+    "QAM_end": 0.2,
     "store_attn": False
 }   
 NUM_EPOCHS = 100
@@ -114,22 +116,14 @@ CFG.TRAIN.LOSS = masked_mae
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.01
+    "lr": 0.001
 }
 # Learning rate scheduler settings
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
-# CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
-# CFG.TRAIN.LR_SCHEDULER.PARAM = {
-#     "milestones": [1, 25, 50],
-#     "gamma": 0.5
-# }
-desc = load_dataset_desc(DATA_NAME)
-train_steps = math.ceil(desc["num_time_steps"] * TRAIN_VAL_TEST_RATIO[0])
 CFG.TRAIN.LR_SCHEDULER.TYPE = "OneCycleLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
     "pct_start": 0.3,
-    "epochs": NUM_EPOCHS,
-    "steps_per_epoch": train_steps,
+    "total_steps": NUM_EPOCHS,
     "max_lr": CFG.TRAIN.OPTIM.PARAM["lr"]
 }
 CFG.TRAIN.CLIP_GRAD_PARAM = {
@@ -137,7 +131,7 @@ CFG.TRAIN.CLIP_GRAD_PARAM = {
 }
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.DATA.BATCH_SIZE = 256
+CFG.TRAIN.DATA.BATCH_SIZE = 32
 CFG.TRAIN.DATA.SHUFFLE = True
 
 ############################## Validation Configuration ##############################
