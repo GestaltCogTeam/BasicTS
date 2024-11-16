@@ -20,6 +20,16 @@
       ]
     },
     {
+      "login": "finleywang",
+      "name": "finleywang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5022944?v=4",
+      "profile": "https://github.com/finleywang",
+      "contributions": [
+        "maintenance",
+        "code"
+      ]
+    },
+    {
       "login": "blisky-li",
       "name": "blisky-li",
       "avatar_url": "https://avatars.githubusercontent.com/u/66107694?v=4",
@@ -136,16 +146,6 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/171222220?v=4",
       "profile": "https://github.com/duyifanict",
       "contributions": [
-        "code"
-      ]
-    },
-    {
-      "login": "finleywang",
-      "name": "finleywang",
-      "avatar_url": "https://avatars.githubusercontent.com/u/5022944?v=4",
-      "profile": "https://github.com/finleywang",
-      "contributions": [
-        "maintenance",
         "code"
       ]
     }
