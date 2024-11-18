@@ -6,7 +6,6 @@ from typing import Union, Tuple, Optional
 import torch
 from torch import Tensor
 from torch.optim import AdamW
-from torch.optim.optimizer import ParamsT
 
 from easytorch.device import _DEVICE_TYPE
 from easytorch.utils import get_world_size, get_local_rank
@@ -19,7 +18,7 @@ class AdamWnanoGPT(AdamW):
     https://github.com/karpathy/nanoGPT/blob/9755682b981a45507f6eb9b11eadef8cb83cebd5/model.py#L263
     """
     def __init__(self,
-        params: ParamsT,
+        params,
         lr: Union[float, Tensor] = 1e-3,
         betas: Tuple[float, float] = (0.9, 0.999),
         eps: float = 1e-8,
