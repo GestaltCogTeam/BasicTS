@@ -53,12 +53,13 @@ BasicTS 一方面通过 **统一且标准化的流程**，为热门的深度学�
 > 如果本项目对您有用，请考虑引用下面的论文:
 >
 > ```LaTeX
-> @article{shao2023exploring,
->    title={Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis},
->    author={Shao, Zezhi and Wang, Fei and Xu, Yongjun and Wei, Wei and Yu, Chengqing and Zhang, Zhao and Yao, Di and Jin, Guangyin and Cao, Xin and Cong, Gao and others},
->    journal={arXiv preprint arXiv:2310.06119},
->    year={2023}
->  }
+> @article{shao2024exploring,
+>  title={Exploring progress in multivariate time series forecasting: Comprehensive benchmarking and heterogeneity analysis},
+>  author={Shao, Zezhi and Wang, Fei and Xu, Yongjun and Wei, Wei and Yu, Chengqing and Zhang, Zhao and Yao, Di and Sun, Tao and Jin, Guangyin and Cao, Xin and others},
+>  journal={IEEE Transactions on Knowledge and Data Engineering},
+>  year={2024},
+>  publisher={IEEE}
+> }
 > ```
 >
 > 🔥🔥🔥 ***该论文已被IEEE TKDE录用！你可以在这里[查看论文](https://arxiv.org/abs/2310.06119)。*** 🔥🔥🔥
@@ -233,7 +234,7 @@ BasicTS 支持多种类型的数据集，涵盖时空预测、长序列预测及
 
 请参阅论文 *[多变量时间序列预测进展探索：全面基准评测和异质性分析](https://arxiv.org/pdf/2310.06119.pdf)*。
 
-## 贡献者 ✨
+## ✨ 贡献者
 
 感谢这些优秀的贡献者们 ([表情符号指南](https://allcontributors.org/docs/en/emoji-key))：
 
@@ -283,10 +284,10 @@ BasicTS 是基于 [EasyTorch](https://github.com/cnstark/easytorch) 开发的，
 
 ## 📧 联系我们
 
-官方Discord Server:
-
-https://discord.gg/jkjGf9Hz
+欢迎加入我们的官方社区，在这里您可以获取更多技术支持，与志同道合的伙伴交流，共同探讨领域内的最新研究进展。
 
 官方微信群:
 
 ![wechat](assets/BasicTS-wechat-cn.jpg)
+
+官方Discord频道: [点击加入我们的 Discord 社区](https://discord.gg/jkjGf9Hz)
