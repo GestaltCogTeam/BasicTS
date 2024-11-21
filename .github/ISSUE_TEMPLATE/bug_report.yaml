@@ -1,0 +1,102 @@
+name: 🐞 Bug
+description: 提交错误报告 | File a bug/issue
+title: "[BUG] <title>"
+labels: []
+body:
+  - type: checkboxes
+    attributes:
+      label: 是否已有关于该错误的issue或讨论？ | Is there an existing issue / discussion for this?
+      description: |
+        请先搜索您遇到的错误是否在已有的issues或讨论中提到过。
+        Please search to see if an issue / discussion already exists for the bug you encountered.
+        [Issues](https://github.com/GestaltCogTeam/BasicTS/issues)
+      options:
+        - label: 我已经搜索过已有的issues和讨论 | I have searched the existing issues / discussions
+          required: true
+  - type: checkboxes
+    attributes:
+      label: 该问题是否在教程中有解答？ | Is there an existing answer for this in tutorial?
+      description: |
+        请先搜索您遇到的错误是否已在tutorial中有相关解答。
+        Please search to see if an answer already exists in tutorial for the bug you encountered.
+        [tutorial-en](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/getting_started.md)
+        [tutorial-zh](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/getting_started_cn.md)
+      options:
+        - label: 我已经搜索过tutorial | I have searched tutorial
+          required: true
+  - type: textarea
+    attributes:
+      label: 当前行为 | Current Behavior
+      description: |
+        准确描述遇到的行为。
+        A concise description of what you're experiencing.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 期望行为 | Expected Behavior
+      description: |
+        准确描述预期的行为。
+        A concise description of what you expected to happen.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 运行环境 | Environment
+      description: |
+        examples:
+          - **OS**: Ubuntu 22.04.2
+          - **DEVICE**: NVIDIA GeForce RTX 4090
+          - **NVIDIA Driver**: 550.120
+          - **CUDA**: 12.4
+          - **NVIDIA GPU Memory**: 24GB
+          - **PyTorch**: 2.3.1+cu121
+      value: |
+        - OS:
+        - DEVICE:
+        - NVIDIA Driver:
+        - CUDA:
+        - NVIDIA GPU Memory:
+        - PyTorch:
+      render: Markdown
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: BasicTS日志 | BasicTS logs
+      description: |
+        在checkpoints下找到training_log_xxx.log，把关键信息粘贴到这里。
+        Find the training_log_xxx.log file in the directory of checkpoints and paste the key information here.
+      placeholder: |
+        把training_log_xxx.log的关键内容贴到这里
+        paste training_log_xxx.log key content here.
+    validations:
+      required: false
+  
+  - type: textarea
+    attributes:
+      label: 复现方法 | Steps To Reproduce
+      description: |
+        复现当前行为的详细步骤。
+        Steps to reproduce the behavior.
+      placeholder: |
+        1. In this environment...
+        2. With this config...
+        3. Run '...'
+        4. See error...
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: 备注 | Anything else?
+      description: |
+        您可以在这里补充其他关于该问题背景信息的描述、链接或引用等。
+        
+        您可以通过点击高亮此区域然后拖动文件的方式上传图片或日志文件。
+        
+        Links? References? Anything that will give us more context about the issue you are encountering!
+        
+        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+    validations:
+      required: false
