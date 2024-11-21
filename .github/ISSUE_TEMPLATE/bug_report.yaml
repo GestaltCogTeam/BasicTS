@@ -1,48 +1,50 @@
-name: 🐞 Bug
-description: 提交错误报告 | File a bug/issue
-title: "[BUG] <title>"
-labels: []
+name: 🐞 Bug report
+description: Report errors or unexpected behavior | 提交Bug或求助信息
+title: "[🐞] <title>"
+labels: 
+- bug
+- needs-triaged
 body:
   - type: checkboxes
     attributes:
-      label: 是否已有关于该错误的issue或讨论？ | Is there an existing issue / discussion for this?
+      label: Is there an existing issue / discussion for this? | 是否已有关于该错误的issue或讨论？
       description: |
-        请先搜索您遇到的错误是否在已有的issues或讨论中提到过。
         Please search to see if an issue / discussion already exists for the bug you encountered.
+        请先搜索您遇到的错误是否在已有的issues或讨论中提到过。
         [Issues](https://github.com/GestaltCogTeam/BasicTS/issues)
       options:
-        - label: 我已经搜索过已有的issues和讨论 | I have searched the existing issues / discussions
+        - label: I have searched the existing issues / discussions | 我已经搜索过已有的issues和讨论
           required: true
   - type: checkboxes
     attributes:
-      label: 该问题是否在教程中有解答？ | Is there an existing answer for this in tutorial?
+      label: Is there an existing answer for this in tutorial? | 该问题是否在教程中有解答？
       description: |
-        请先搜索您遇到的错误是否已在tutorial中有相关解答。
         Please search to see if an answer already exists in tutorial for the bug you encountered.
+        请先搜索您遇到的错误是否已在tutorial中有相关解答。
         [tutorial-en](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/getting_started.md)
         [tutorial-zh](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/getting_started_cn.md)
       options:
-        - label: 我已经搜索过tutorial | I have searched tutorial
+        - label: I have searched tutorial | 我已经搜索过tutorial
           required: true
   - type: textarea
     attributes:
-      label: 当前行为 | Current Behavior
+      label: Current Behavior | 当前行为
       description: |
-        准确描述遇到的行为。
         A concise description of what you're experiencing.
+        准确描述遇到的行为。
     validations:
       required: false
   - type: textarea
     attributes:
-      label: 期望行为 | Expected Behavior
+      label: Expected Behavior | 期望行为
       description: |
-        准确描述预期的行为。
         A concise description of what you expected to happen.
+        准确描述预期的行为。
     validations:
       required: false
   - type: textarea
     attributes:
-      label: 运行环境 | Environment
+      label: Environment | 运行环境
       description: |
         examples:
           - **OS**: Ubuntu 22.04.2
@@ -63,22 +65,22 @@ body:
       required: false
   - type: textarea
     attributes:
-      label: BasicTS日志 | BasicTS logs
+      label: BasicTS logs | BasicTS日志
       description: |
-        在checkpoints下找到training_log_xxx.log，把关键信息粘贴到这里。
         Find the training_log_xxx.log file in the directory of checkpoints and paste the key information here.
+        在checkpoints下找到training_log_xxx.log，把关键信息粘贴到这里。
       placeholder: |
-        把training_log_xxx.log的关键内容贴到这里
         paste training_log_xxx.log key content here.
+        把training_log_xxx.log的关键内容贴到这里
     validations:
       required: false
   
   - type: textarea
     attributes:
-      label: 复现方法 | Steps To Reproduce
+      label: Steps To Reproduce | 复现方法
       description: |
-        复现当前行为的详细步骤。
         Steps to reproduce the behavior.
+        复现当前行为的详细步骤。
       placeholder: |
         1. In this environment...
         2. With this config...
@@ -89,14 +91,15 @@ body:
 
   - type: textarea
     attributes:
-      label: 备注 | Anything else?
+      label: Anything else? | 备注
       description: |
+        Links? References? Anything that will give us more context about the issue you are encountering!
+        
+        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+
         您可以在这里补充其他关于该问题背景信息的描述、链接或引用等。
         
         您可以通过点击高亮此区域然后拖动文件的方式上传图片或日志文件。
         
-        Links? References? Anything that will give us more context about the issue you are encountering!
-        
-        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
     validations:
       required: false
