@@ -136,7 +136,6 @@ CFG.TRAIN.CLIP_GRAD_PARAM = {
 CFG.TRAIN.DATA = EasyDict()
 CFG.TRAIN.DATA.BATCH_SIZE = 64
 CFG.TRAIN.DATA.SHUFFLE = True
-CFG.TRAIN.EARLY_STOPPING_PATIENCE = 1 # 提前停止的耐心值。默认值：None。如果未指定，则不会使用提前停止。
 
 ############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()
