@@ -1,0 +1,28 @@
+name: "⭐ Feature or enhancement request"
+description: Propose something new | 提出新需求
+title: "[⭐] <title>"
+labels:
+- needs-triaged
+- enhancement
+body:
+- type: textarea
+  attributes: 
+    label: Description of the new feature / enhancement | 您所需的新功能或能力
+    placeholder: What is the expected behavior of the proposed feature? | 请描述下您所需的新功能或能力的预期行为
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Scenario when this would be used? | 使用场景
+    placeholder: What is the scenario this would be used? | 请描述下您的应用场景
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Supporting information | 附加信息
+    placeholder: "Having additional logs, papers, projects, ... anything is extremely helpful. | 附加信息，例如日志、相关论文和项目等"
+  validations:
+    required: false
+- type: markdown
+  attributes:
+    value: Please limit one request per issue. |  请每个请求提交一个issue

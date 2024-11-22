@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "\U0001F4DA BaiscTS user documentation"
+    url: https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/getting_started.md
+    about: Documentation for users of BaiscTS

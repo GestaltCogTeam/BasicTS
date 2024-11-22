@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: If you use this software, please cite both the article from preferred-citation and the software itself.
+message: "If you use this work, please cite it as below."
 authors:
   - family-names: Shao
     given-names: Zezhi
@@ -15,15 +15,19 @@ authors:
     given-names: Zhao
   - family-names: Yao
     given-names: Di
+  - family-names: Sun
+    given-names: Tao
   - family-names: Jin
     given-names: Guangyin
   - family-names: Cao
     given-names: Xin
-  - family-names: Cong
-    given-names: Gao
-title: 'Exploring progress in multivariate time series forecasting: Comprehensive benchmarking and heterogeneity analysis'
-version: 1.0.0
-date-released: '2023-08-23'
+  - family-names: Gao
+    given-names: Cong
+  - family-names: Jensen
+    given-names: Christian S.
+  - family-names: Cheng
+    given-names: Xueqi
+title: 'Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis'
 preferred-citation:
   authors:
     - family-names: Shao
@@ -40,14 +44,22 @@ preferred-citation:
       given-names: Zhao
     - family-names: Yao
       given-names: Di
+    - family-names: Sun
+      given-names: Tao
     - family-names: Jin
       given-names: Guangyin
     - family-names: Cao
       given-names: Xin
-    - family-names: Cong
-      given-names: Gao
-  title: 'Exploring progress in multivariate time series forecasting: Comprehensive benchmarking and heterogeneity analysis'
+    - family-names: Gao
+      given-names: Cong
+    - family-names: Jensen
+      given-names: Christian S.
+    - family-names: Cheng
+      given-names: Xueqi
+  title: 'Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis'
   type: article
-  year: '2023'
-  conference: {}
-  publisher: {}
+  year: '2024'
+  doi: "10.1109/TKDE.2024.3484454"
+  url: "https://ieeexplore.ieee.org/document/10726722"
+  publisher: "IEEE"
+  journal: "IEEE Transactions on Knowledge and Data Engineering"

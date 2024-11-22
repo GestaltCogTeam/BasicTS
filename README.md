@@ -52,12 +52,13 @@ You can find detailed tutorials in [Getting Started](./tutorial/getting_started.
 > If you find this repository helpful for your work, please consider citing the following benchmarking paper:
 >
 > ```LaTeX
-> @article{shao2023exploring,
->    title={Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis},
->    author={Shao, Zezhi and Wang, Fei and Xu, Yongjun and Wei, Wei and Yu, Chengqing and Zhang, Zhao and Yao, Di and Jin, Guangyin and Cao, Xin and Cong, Gao and others},
->    journal={arXiv preprint arXiv:2310.06119},
->    year={2023}
->  }
+> @article{shao2024exploring,
+>  title={Exploring progress in multivariate time series forecasting: Comprehensive benchmarking and heterogeneity analysis},
+>  author={Shao, Zezhi and Wang, Fei and Xu, Yongjun and Wei, Wei and Yu, Chengqing and Zhang, Zhao and Yao, Di and Sun, Tao and Jin, Guangyin and Cao, Xin and others},
+>  journal={IEEE Transactions on Knowledge and Data Engineering},
+>  year={2024},
+>  publisher={IEEE}
+> }
 > ```
 >
 > 🔥🔥🔥 ***The paper has been accepted by IEEE TKDE! You can check it out [here](https://arxiv.org/abs/2310.06119).***  🔥🔥🔥
@@ -233,7 +234,7 @@ BasicTS support a variety of datasets, including ***spatial-temporal forecasting
 See the paper *[Exploring Progress in Multivariate Time Series Forecasting:
 Comprehensive Benchmarking and Heterogeneity Analysis](https://arxiv.org/pdf/2310.06119.pdf).*
 
-## Contributors ✨
+## ✨ Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
@@ -283,9 +284,9 @@ BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch),
 
 ## 📧 Contact
 
-Official Discord Server:
+We invite you to join our official community to access comprehensive technical support.
 
-https://discord.gg/jkjGf9Hz
+Official Discord Server: [Click here to join our Discord community](https://discord.gg/jkjGf9Hz)
 
 Official WeChat Group:
 
