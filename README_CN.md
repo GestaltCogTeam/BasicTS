@@ -290,4 +290,4 @@ BasicTS 是基于 [EasyTorch](https://github.com/cnstark/easytorch) 开发的，
 
 ![wechat](assets/BasicTS-wechat-cn.jpg)
 
-官方Discord频道: [点击加入我们的 Discord 社区](https://discord.gg/jkjGf9Hz)
+官方Discord频道: [点击加入我们的 Discord 社区](https://discord.gg/chxdaxG4)
