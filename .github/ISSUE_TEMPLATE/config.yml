@@ -3,3 +3,9 @@ contact_links:
   - name: "\U0001F4DA BaiscTS user documentation"
     url: https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/getting_started.md
     about: Documentation for users of BaiscTS
+  - name: Discord Server
+    url: https://discord.gg/chxdaxG4
+    about: Please ask questions and discuss your problems here
+  - name: Frequently Asked Questions
+    url: https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/faq.md
+    about: Please check if your question isn't mentioned here
