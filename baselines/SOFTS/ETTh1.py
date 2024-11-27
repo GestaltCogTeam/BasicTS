@@ -12,7 +12,7 @@ from .arch import SOFTS
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
-DATA_NAME = 'Weather'  # Dataset name
+DATA_NAME = 'ETTh1'  # Dataset name
 regular_settings = get_regular_settings(DATA_NAME)
 INPUT_LEN = regular_settings['INPUT_LEN']  # 336, better performance
 OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
@@ -22,22 +22,22 @@ RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
 NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
 # Model architecture and parameters
 MODEL_ARCH = SOFTS
-NUM_NODES = 21
+NUM_NODES = 7
 MODEL_PARAM = {
     "enc_in": NUM_NODES,                        # num nodes
     "dec_in": NUM_NODES,
     "c_out": NUM_NODES,
     "seq_len": INPUT_LEN,
     "pred_len": OUTPUT_LEN,         # prediction sequence length
-    "e_layers": 3,                              # num of encoder layers
-    "d_model": 512,
-    "d_core": 128,
+    "e_layers": 2,                              # num of encoder layers
+    "d_model": 256,
+    "d_core": 256,
     "d_ff": 512,
     "dropout": 0.0,
     "use_norm" : True,
     "activation": "gelu",
     "num_time_features": 4,                     # number of used time features
-    "time_of_day_size": 144,
+    "time_of_day_size": 24,
     "day_of_week_size": 7,
     "day_of_month_size": 31,
     "day_of_year_size": 366
@@ -127,6 +127,7 @@ CFG.TRAIN.CLIP_GRAD_PARAM = {
 CFG.TRAIN.DATA = EasyDict()
 CFG.TRAIN.DATA.BATCH_SIZE = 64
 CFG.TRAIN.DATA.SHUFFLE = True
+CFG.TRAIN.EARLY_STOPPING_PATIENCE = 10
 
 ############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()
