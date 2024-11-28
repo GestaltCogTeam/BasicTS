@@ -43,7 +43,7 @@ MODEL_PARAM = {
     "sigma" : 0.2,
     "dropout": 0.1,
     "freq": 'h',
-    "use_norm" : False,
+    "use_norm" : True,
     "output_attention": False,
     "embed": "timeF",                           # [timeF, fixed, learned]
     "activation": "gelu",

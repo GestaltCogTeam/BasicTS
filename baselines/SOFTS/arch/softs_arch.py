@@ -54,7 +54,7 @@ class SOFTS(nn.Module):
     '''
     Paper: SOFTS: Efficient Multivariate Time Series Forecasting with Series-Core Fusion
     Official Code: https://github.com/Secilia-Cxy/SOFTS
-    Link: https://xiucheng.org/assets/pdfs/nips24-sumba.pdf
+    Link: https://arxiv.org/pdf/2404.14197
     Venue: NeurIPS 2024
     Task: Long-term Time Series Forecasting
     '''
@@ -119,7 +119,7 @@ class SOFTS(nn.Module):
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
 
-        # change MinuteOfDay to MinuteOfHour
+        # change TimeOfDay to MinuteOfHour
         history_data[..., 1] = history_data[..., 1] * self.time_of_day_size // (self.time_of_day_size / 24) / 23.0
         x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data,
                                                                              future_data=future_data,
@@ -127,10 +127,3 @@ class SOFTS(nn.Module):
         #print(x_mark_enc.shape, x_mark_dec.shape)
         prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc)
         return prediction.unsqueeze(-1)
-
-    
-
-
-
-
-
