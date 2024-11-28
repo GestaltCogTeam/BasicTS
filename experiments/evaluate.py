@@ -1,3 +1,4 @@
+# pylint: disable=wrong-import-position
 import os
 import sys
 from argparse import ArgumentParser

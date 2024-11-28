@@ -1,14 +1,12 @@
-import os
-import sys
-from easydict import EasyDict
-sys.path.append(os.path.abspath(__file__ + '/../../..'))
-
 from basicts.metrics import masked_mae, masked_mape, masked_rmse
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.scaler import ZScoreScaler
 from basicts.utils import get_regular_settings
 from .arch import MultiLayerPerceptron as MLP
+
+import os
+from easydict import EasyDict
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration

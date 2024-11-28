@@ -4,6 +4,9 @@ import numpy as np
 from basicts.metrics.mae import masked_mae
 
 class TestMaskedMAE(unittest.TestCase):
+    """
+    Test the masked_mae function from basicts.metrics.mae.
+    """
 
     def test_masked_mae_no_nulls(self):
         prediction = torch.tensor([1.0, 2.0, 3.0])
@@ -40,5 +43,5 @@ class TestMaskedMAE(unittest.TestCase):
         expected = torch.tensor(0.0)  # Since all are nulls, the MAE should be zero
         self.assertTrue(torch.allclose(result, expected), f"Expected {expected}, but got {result}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

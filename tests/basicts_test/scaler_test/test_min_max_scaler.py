@@ -7,6 +7,9 @@ from basicts.scaler.min_max_scaler import MinMaxScaler
 import os
 
 class TestMinMaxScaler(unittest.TestCase):
+    """
+    Test the MinMaxScaler class.
+    """
 
     def setUp(self):
         # Mock dataset description and data

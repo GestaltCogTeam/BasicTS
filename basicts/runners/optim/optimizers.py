@@ -1,5 +1,4 @@
 # define more optimizers here
-import os
 import inspect
 from typing import Union, Tuple, Optional
 

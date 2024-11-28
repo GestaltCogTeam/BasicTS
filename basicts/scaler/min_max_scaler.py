@@ -72,7 +72,7 @@ class MinMaxScaler(BaseScaler):
         Returns:
             torch.Tensor: The normalized data with the same shape as the input.
         """
-        
+
         _min = self.min.to(input_data.device)
         _max = self.max.to(input_data.device)
         input_data[..., self.target_channel] = (input_data[..., self.target_channel] - _min) / (_max - _min)

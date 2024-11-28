@@ -8,11 +8,11 @@
 [MASTER]
 
 # Files or directories to be skipped. They should be base names, not paths.
-ignore=third_party
+ignore=baselines,assets
 
 # Files or directories matching the regex patterns are skipped. The regex
 # matches against base names, not paths.
-ignore-patterns=
+ignore-patterns=^\.|^_|^.*\.md|^.*\.txt|^.*\.CFF|^LICENSE
 
 # Pickle collected data for later comparisons.
 persistent=no
@@ -85,6 +85,7 @@ disable=abstract-method,
         input-builtin,
         intern-builtin,
         invalid-str-codec,
+        invalid-name,
         locally-disabled,
         logging-format-interpolation,
         logging-fstring-interpolation,
@@ -433,3 +434,7 @@ valid-metaclass-classmethod-first-arg=mcs
 overgeneral-exceptions=builtins.StandardError,
                        builtins.Exception,
                        builtins.BaseException
+
+[DESIGN]
+# https://pylint.pycqa.org/en/latest/user_guide/messages/refactor/too-many-positional-arguments.html
+max-positional-arguments=10

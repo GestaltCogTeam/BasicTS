@@ -1,4 +1,5 @@
 # Run a baseline model in BasicTS framework.
+# pylint: disable=wrong-import-position
 import os
 import sys
 from argparse import ArgumentParser
@@ -23,5 +24,5 @@ def main():
     basicts.launch_training(args.cfg, args.gpus, node_rank=0)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
