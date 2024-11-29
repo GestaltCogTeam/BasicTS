@@ -8,6 +8,7 @@ os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import basicts
 
+
 def parse_args():
     parser = ArgumentParser(description='Evaluate time series forecasting model in BasicTS framework!')
     # enter your config file path

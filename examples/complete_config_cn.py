@@ -1,20 +1,21 @@
 ############################## 导入依赖 ##############################
-# 导入指标和损失函数
-from basicts.metrics import masked_mae, masked_mape, masked_rmse
+import os
+
+from easydict import EasyDict
+
 # 导入数据集类
 from basicts.data import TimeSeriesForecastingDataset
+# 导入指标和损失函数
+from basicts.metrics import masked_mae, masked_mape, masked_rmse
 # 导入执行器类
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 # 导入缩放器类
 from basicts.scaler import ZScoreScaler
 # 导入数据集配置
 from basicts.utils import get_regular_settings
+
 # 导入模型架构
 from .arch import MultiLayerPerceptron as MLP
-
-
-import os
-from easydict import EasyDict
 
 ############################## 热门参数 ##############################
 

@@ -1,10 +1,13 @@
-import unittest
-import torch
-import json
 import copy
-import numpy as np
-from basicts.scaler.min_max_scaler import MinMaxScaler
+import json
 import os
+import unittest
+
+import numpy as np
+import torch
+
+from basicts.scaler.min_max_scaler import MinMaxScaler
+
 
 class TestMinMaxScaler(unittest.TestCase):
     """

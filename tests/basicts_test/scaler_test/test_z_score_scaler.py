@@ -1,9 +1,12 @@
-import unittest
-import torch
-import numpy as np
-import os
 import json
+import os
+import unittest
+
+import numpy as np
+import torch
+
 from basicts.scaler.z_score_scaler import ZScoreScaler
+
 
 class TestZScoreScaler(unittest.TestCase):
     """

@@ -1,5 +1,6 @@
-import torch
 import numpy as np
+import torch
+
 
 def masked_mape(prediction: torch.Tensor, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
     """

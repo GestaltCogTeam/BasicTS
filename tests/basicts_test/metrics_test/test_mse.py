@@ -1,7 +1,10 @@
-import torch
-import numpy as np
 import unittest
+
+import numpy as np
+import torch
+
 from basicts.metrics.mse import masked_mse
+
 
 class TestMaskedMSE(unittest.TestCase):
     """

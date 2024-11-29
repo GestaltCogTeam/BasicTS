@@ -1,7 +1,10 @@
 import unittest
-import torch
+
 import numpy as np
+import torch
+
 from basicts.metrics.mae import masked_mae
+
 
 class TestMaskedMAE(unittest.TestCase):
     """

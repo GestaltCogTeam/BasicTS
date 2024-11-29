@@ -1,4 +1,4 @@
-from .launcher import launch_training, launch_evaluation
+from .launcher import launch_evaluation, launch_training
 from .runners import BaseEpochRunner
 
 __version__ = '0.4.6.2'

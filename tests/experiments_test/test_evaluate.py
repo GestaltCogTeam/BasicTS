@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import patch
+
 from experiments.evaluate import parse_args
+
 
 class TestEvaluate(unittest.TestCase):
     """

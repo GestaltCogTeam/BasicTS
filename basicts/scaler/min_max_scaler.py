@@ -1,7 +1,7 @@
 import json
 
-import torch
 import numpy as np
+import torch
 
 from .base_scaler import BaseScaler
 

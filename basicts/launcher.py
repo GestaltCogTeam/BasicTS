@@ -1,10 +1,12 @@
 import os
-from typing import Dict, Union, Optional
 import traceback
+from typing import Dict, Optional, Union
+
 import easytorch
-from easytorch.utils import get_logger, set_visible_devices
 from easytorch.config import init_cfg
 from easytorch.device import set_device_type
+from easytorch.utils import get_logger, set_visible_devices
+
 
 def evaluation_func(cfg: Dict,
                     ckpt_path: str = None,

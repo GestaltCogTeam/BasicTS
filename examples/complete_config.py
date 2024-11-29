@@ -1,20 +1,21 @@
 ############################## Import Dependencies ##############################
-# Import metrics & loss functions
-from basicts.metrics import masked_mae, masked_mape, masked_rmse
+import os
+
+from easydict import EasyDict
+
 # Import dataset class
 from basicts.data import TimeSeriesForecastingDataset
+# Import metrics & loss functions
+from basicts.metrics import masked_mae, masked_mape, masked_rmse
 # Import runner class
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 # Import scaler class
 from basicts.scaler import ZScoreScaler
 # Import dataset settings
 from basicts.utils import get_regular_settings
+
 # Import model architecture
 from .arch import MultiLayerPerceptron as MLP
-
-
-import os
-from easydict import EasyDict
 
 ############################## Hot Parameters ##############################
 

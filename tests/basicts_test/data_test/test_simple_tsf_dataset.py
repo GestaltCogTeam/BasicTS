@@ -1,9 +1,12 @@
 # pylint: disable=unused-argument
-import unittest
-import numpy as np
 import json
-from unittest.mock import patch, mock_open
+import unittest
+from unittest.mock import mock_open, patch
+
+import numpy as np
+
 from basicts.data.simple_tsf_dataset import TimeSeriesForecastingDataset
+
 
 class TestTimeSeriesForecastingDataset(unittest.TestCase):
     """

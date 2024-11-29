@@ -1,7 +1,9 @@
 from typing import Dict
 
 import torch
+
 from ..base_tsf_runner import BaseTimeSeriesForecastingRunner
+
 
 class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
     """

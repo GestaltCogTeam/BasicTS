@@ -1,12 +1,14 @@
-from basicts.metrics import masked_mae, masked_mape, masked_rmse
+import os
+
+from easydict import EasyDict
+
 from basicts.data import TimeSeriesForecastingDataset
+from basicts.metrics import masked_mae, masked_mape, masked_rmse
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.scaler import ZScoreScaler
 from basicts.utils import get_regular_settings
-from .arch import MultiLayerPerceptron as MLP
 
-import os
-from easydict import EasyDict
+from .arch import MultiLayerPerceptron as MLP
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration

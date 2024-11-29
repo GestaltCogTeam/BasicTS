@@ -1,9 +1,9 @@
+import os
+import sys
 import unittest
 from unittest.mock import patch
-import sys
-import os
-from experiments.train import parse_args
-from experiments.train import main
+
+from experiments.train import main, parse_args
 
 # Add the path to the train.py file
 sys.path.append(os.path.abspath(__file__ + '/../..'))

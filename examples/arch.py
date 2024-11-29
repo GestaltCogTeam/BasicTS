@@ -2,6 +2,7 @@
 import torch
 from torch import nn
 
+
 class MultiLayerPerceptron(nn.Module):
     """
     A simple Multi-Layer Perceptron (MLP) model with two fully connected layers.

@@ -1,18 +1,19 @@
-import os
+import functools
+import inspect
 import json
 import math
-import inspect
-import functools
-from typing import Tuple, Union, Optional, Dict
+import os
+from typing import Dict, Optional, Tuple, Union
 
-import torch
 import numpy as np
-from tqdm import tqdm
+import torch
 from easydict import EasyDict
 from easytorch.utils import master_only
+from tqdm import tqdm
 
+from ..metrics import (masked_mae, masked_mape, masked_mse, masked_rmse,
+                       masked_wape)
 from .base_epoch_runner import BaseEpochRunner
-from ..metrics import masked_mae, masked_mape, masked_rmse, masked_wape, masked_mse
 
 
 class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
