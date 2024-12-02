@@ -1,25 +1,21 @@
-
 ############################## 导入依赖 ##############################
-
 import os
-import sys
+
 from easydict import EasyDict
 
-# TODO: 当 basicts 可以通过 pip 安装时，移除这行代码
-sys.path.append(os.path.abspath(__file__ + '/../../..'))
-
-# 导入指标和损失函数
-from basicts.metrics import masked_mae, masked_mape, masked_rmse
 # 导入数据集类
 from basicts.data import TimeSeriesForecastingDataset
+# 导入指标和损失函数
+from basicts.metrics import masked_mae, masked_mape, masked_rmse
 # 导入执行器类
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 # 导入缩放器类
 from basicts.scaler import ZScoreScaler
+# 导入数据集配置
+from basicts.utils import get_regular_settings
+
 # 导入模型架构
 from .arch import MultiLayerPerceptron as MLP
-
-from basicts.utils import get_regular_settings
 
 ############################## 热门参数 ##############################
 
@@ -102,11 +98,19 @@ CFG.MODEL = EasyDict() # 模型设置，必须指定。
 CFG.MODEL.NAME = MODEL_ARCH.__name__ # 模型名称，必须指定，用于保存检查点和设置进程标题。
 CFG.MODEL.ARCH = MODEL_ARCH # 模型架构，必须指定。
 CFG.MODEL.PARAM = MODEL_PARAM # 模型参数，必须指定。
-CFG.MODEL.FORWARD_FEATURES = [0, 1, 2] # 作为输入使用的特征。输入数据的大小通常为 [B, L, N, C]，此参数指定最后一个维度的索引，即 history_data[:, :, :, CFG.MODEL.FORWARD_FEATURES]。
-CFG.MODEL.TARGET_FEATURES = [0] # 作为输出使用的特征。目标数据的大小通常为 [B, L, N, C]，此参数指定最后一个维度的索引，即 future_data[:, :, :, CFG.MODEL.TARGET_FEATURES]。
-CFG.MODEL.TARGET_TIME_SERIES = None # 待预测的时间序列索引，默认为None。该参数在多变量到单变量预测（Multivariate-to-Univariate）的场景下特别有用。例如，当输入7条时间序列时，若需要预测最后两条序列，可以通过设置`CFG.MODEL.TARGET_TIME_SERIES=[5, 6]`来实现。
-CFG.MODEL.SETUP_GRAPH = False # 是否设置计算图。默认值：False。许多论文的实现（如 DCRNN，GTS）类似于 TensorFlow，需要第一次前向传播时建立计算图并创建参数。
-CFG.MODEL.DDP_FIND_UNUSED_PARAMETERS = False # 控制 torch.nn.parallel.DistributedDataParallel 的 `find_unused_parameters` 参数。在分布式计算中，如果前向传播过程中存在未使用的参数，PyTorch 通常会抛出 RuntimeError。在这种情况下，应将此参数设置为 True。
+# 作为输入使用的特征。输入数据的大小通常为 [B, L, N, C]，
+# 此参数指定最后一个维度的索引，即 history_data[:, :, :, CFG.MODEL.FORWARD_FEATURES]。
+CFG.MODEL.FORWARD_FEATURES = [0, 1, 2]
+# 作为输出使用的特征。目标数据的大小通常为 [B, L, N, C]，此参数指定最后一个维度的索引，即 future_data[:, :, :, CFG.MODEL.TARGET_FEATURES]。
+CFG.MODEL.TARGET_FEATURES = [0]
+# 待预测的时间序列索引，默认为None。该参数在多变量到单变量预测（Multivariate-to-Univariate）的场景下特别有用。
+# 例如，当输入7条时间序列时，若需要预测最后两条序列，可以通过设置`CFG.MODEL.TARGET_TIME_SERIES=[5, 6]`来实现。
+CFG.MODEL.TARGET_TIME_SERIES = None
+# 是否设置计算图。默认值：False。许多论文的实现（如 DCRNN，GTS）类似于 TensorFlow，需要第一次前向传播时建立计算图并创建参数。
+CFG.MODEL.SETUP_GRAPH = False
+# 控制 torch.nn.parallel.DistributedDataParallel 的 `find_unused_parameters` 参数。
+# 在分布式计算中，如果前向传播过程中存在未使用的参数，PyTorch 通常会抛出 RuntimeError。在这种情况下，应将此参数设置为 True。
+CFG.MODEL.DDP_FIND_UNUSED_PARAMETERS = False
 
 ############################## 指标配置 ##############################
 
@@ -128,12 +132,17 @@ CFG.TRAIN = EasyDict() # 训练设置，必须为训练指定。
 
 # 训练参数
 CFG.TRAIN.NUM_EPOCHS = NUM_EPOCHS
+ # 保存检查点的目录。默认值：'checkpoints/{MODEL_NAME}/{DATASET_NAME}_{NUM_EPOCHS}_{INPUT_LEN}_{OUTPUT_LEN}'
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     MODEL_ARCH.__name__,
     '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_EPOCHS), str(INPUT_LEN), str(OUTPUT_LEN)])
-) # 保存检查点的目录。默认值：'checkpoints/{MODEL_NAME}/{DATASET_NAME}_{NUM_EPOCHS}_{INPUT_LEN}_{OUTPUT_LEN}'
-CFG.TRAIN.CKPT_SAVE_STRATEGY = None # 检查点保存策略。`CFG.TRAIN.CKPT_SAVE_STRATEGY` 可以是 None、整数值、列表或元组。默认值：None。None：每个 epoch 移除最后一个检查点文件。整数：每隔 `CFG.TRAIN.CKPT_SAVE_STRATEGY` 个 epoch 保存一次检查点。列表或元组：当 epoch 在 `CFG.TRAIN.CKPT_SAVE_STRATEGY` 中时保存检查点，当 last_epoch 不在 ckpt_save_strategy 中时移除最后一个检查点文件。“移除”操作是将最后一个检查点文件重命名为 .bak 文件，BasicTS会每个10个epoch清空一次.bak文件。
+)
+# 检查点保存策略。`CFG.TRAIN.CKPT_SAVE_STRATEGY` 可以是 None、整数值、列表或元组。默认值：None。
+# None：每个 epoch 移除最后一个检查点文件。整数：每隔 `CFG.TRAIN.CKPT_SAVE_STRATEGY` 个 epoch 保存一次检查点。
+# 列表或元组：当 epoch 在 `CFG.TRAIN.CKPT_SAVE_STRATEGY` 中时保存检查点，当 last_epoch 不在 ckpt_save_strategy 中时移除最后一个检查点文件。
+# “移除”操作是将最后一个检查点文件重命名为 .bak 文件，BasicTS会每个10个epoch清空一次.bak文件。
+CFG.TRAIN.CKPT_SAVE_STRATEGY = None
 CFG.TRAIN.FINETUNE_FROM = None # 微调的检查点路径。默认值：None。如果未指定，模型将从头开始训练。
 CFG.TRAIN.STRICT_LOAD = True # 是否严格加载检查点。默认值：True。
 
@@ -213,5 +222,7 @@ CFG.TEST.DATA.PIN_MEMORY = False
 CFG.EVAL = EasyDict()
 
 # 评估参数
-CFG.EVAL.HORIZONS = [3, 6, 12]  # 评估时的预测时间范围。默认值为 []。注意：HORIZONS[i] 指的是在 ”第 i 个时间片“ 上进行测试，表示该时间片的损失（Loss）。这是时空预测中的常见配置。对于长序列预测，建议将 HORIZONS 保持为默认值 []，以避免引发误解。
+# 评估时的预测时间范围。默认值为 []。注意：HORIZONS[i] 指的是在 ”第 i 个时间片“ 上进行测试，表示该时间片的损失（Loss）。
+# 这是时空预测中的常见配置。对于长序列预测，建议将 HORIZONS 保持为默认值 []，以避免引发误解。
+CFG.EVAL.HORIZONS = []
 CFG.EVAL.USE_GPU = True # 是否在评估时使用 GPU。默认值：True

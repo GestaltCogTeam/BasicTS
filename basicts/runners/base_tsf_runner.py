@@ -1,18 +1,19 @@
-import os
+import functools
+import inspect
 import json
 import math
-import inspect
-import functools
-from typing import Tuple, Union, Optional, Dict
+import os
+from typing import Dict, Optional, Tuple, Union
 
-import torch
 import numpy as np
-from tqdm import tqdm
+import torch
 from easydict import EasyDict
 from easytorch.utils import master_only
+from tqdm import tqdm
 
+from ..metrics import (masked_mae, masked_mape, masked_mse, masked_rmse,
+                       masked_wape)
 from .base_epoch_runner import BaseEpochRunner
-from ..metrics import masked_mae, masked_mape, masked_rmse, masked_wape, masked_mse
 
 
 class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
@@ -343,7 +344,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             forward_return['prediction'] = forward_return['prediction'][:, :cl_length, :, :]
             forward_return['target'] = forward_return['target'][:, :cl_length, :, :]
         loss = self.metric_forward(self.loss, forward_return)
-        self.update_epoch_meter(f'train/loss', loss.item())
+        self.update_epoch_meter('train/loss', loss.item())
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)

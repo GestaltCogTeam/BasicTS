@@ -1,9 +1,15 @@
 import unittest
-import torch
+
 import numpy as np
+import torch
+
 from basicts.metrics.mape import masked_mape
 
+
 class TestMaskedMAPE(unittest.TestCase):
+    """
+    Test the masked MAPE function.
+    """
 
     def test_basic_functionality(self):
         prediction = torch.tensor([2.0, 3.0, 3.0])
@@ -40,5 +46,5 @@ class TestMaskedMAPE(unittest.TestCase):
         expected = torch.tensor(0.0)  # No valid entries, should return 0
         self.assertTrue(torch.allclose(result, expected), f"Expected {expected}, but got {result}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

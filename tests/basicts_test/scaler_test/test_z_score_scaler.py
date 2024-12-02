@@ -1,11 +1,17 @@
-import unittest
-import torch
-import numpy as np
-import os
 import json
+import os
+import unittest
+
+import numpy as np
+import torch
+
 from basicts.scaler.z_score_scaler import ZScoreScaler
 
+
 class TestZScoreScaler(unittest.TestCase):
+    """
+    Test the ZScoreScaler class.
+    """
 
     def setUp(self):
         # Create a mock dataset description and data
@@ -64,7 +70,7 @@ class TestZScoreScaler(unittest.TestCase):
 
         # Check if the inverse transformed data is approximately equal to the original data
         self.assertTrue(torch.allclose(inverse_transformed_data, raw_data, atol=1e-6))
-    
+
     def tearDown(self):
         # Remove the mock dataset directory
         os.remove(f'datasets/{self.dataset_name}/desc.json')

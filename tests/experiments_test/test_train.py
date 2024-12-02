@@ -1,15 +1,19 @@
-import unittest
-from unittest.mock import patch, call
-import sys
 import os
-from experiments.train import parse_args
-from experiments.train import main
+import sys
+import unittest
+from unittest.mock import patch
+
+from experiments.train import main, parse_args
 
 # Add the path to the train.py file
-sys.path.append(os.path.abspath(__file__ + "/../.."))
+sys.path.append(os.path.abspath(__file__ + '/../..'))
 
 
 class TestTrain(unittest.TestCase):
+    """
+    Test the train.py script.
+    """
+
     @patch('experiments.train.basicts.launch_training')
     @patch('sys.argv', ['train.py', '-c', 'baselines/STID/PEMS04.py', '-g', '0'])
     def test_launch_training_called_with_correct_args(self, mock_launch_training):

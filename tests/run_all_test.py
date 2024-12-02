@@ -1,5 +1,5 @@
-import unittest
 import os
+import unittest
 
 # find all test files
 test_loader = unittest.defaultTestLoader

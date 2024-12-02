@@ -1,9 +1,15 @@
 import unittest
-import torch
+
 import numpy as np
+import torch
+
 from basicts.metrics.wape import masked_wape
 
+
 class TestMaskedWape(unittest.TestCase):
+    """
+    Test the masked WAPE function.
+    """
 
     def test_masked_wape_basic(self):
         prediction = torch.tensor([[2.0, 2.0, 3.0], [6.0, 5.0, 7.0]])
@@ -33,5 +39,5 @@ class TestMaskedWape(unittest.TestCase):
         expected = torch.tensor(0.0) # No valid entries, should return 0
         self.assertTrue(torch.allclose(result, expected), f"Expected {expected}, but got {result}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

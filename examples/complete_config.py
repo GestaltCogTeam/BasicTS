@@ -1,24 +1,21 @@
 ############################## Import Dependencies ##############################
-
 import os
-import sys
+
 from easydict import EasyDict
 
-# TODO: Remove this when basicts can be installed via pip
-sys.path.append(os.path.abspath(__file__ + '/../../..'))
-
-# Import metrics & loss functions
-from basicts.metrics import masked_mae, masked_mape, masked_rmse
 # Import dataset class
 from basicts.data import TimeSeriesForecastingDataset
+# Import metrics & loss functions
+from basicts.metrics import masked_mae, masked_mape, masked_rmse
 # Import runner class
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 # Import scaler class
 from basicts.scaler import ZScoreScaler
+# Import dataset settings
+from basicts.utils import get_regular_settings
+
 # Import model architecture
 from .arch import MultiLayerPerceptron as MLP
-
-from basicts.utils import get_regular_settings
 
 ############################## Hot Parameters ##############################
 
@@ -82,7 +79,9 @@ CFG.DATASET.PARAM = EasyDict({
 
 ############################## Scaler Configuration ##############################
 
-CFG.SCALER = EasyDict() # Scaler settings. Default: None. If not specified, the data will not be normalized, i.e., the data will be used directly for training, validation, and test.
+# Scaler settings. Default: None.
+# If not specified, the data will not be normalized, i.e., the data will be used directly for training, validation, and test.
+CFG.SCALER = EasyDict()
 
 # Scaler settings
 CFG.SCALER.TYPE = ZScoreScaler # Scaler class
@@ -101,11 +100,22 @@ CFG.MODEL = EasyDict() # Model settings, must be specified.
 CFG.MODEL.NAME = MODEL_ARCH.__name__ # Model name, must be specified, used for saving checkpoints and set the process title.
 CFG.MODEL.ARCH = MODEL_ARCH # Model architecture, must be specified.
 CFG.MODEL.PARAM = MODEL_PARAM # Model parameters
-CFG.MODEL.FORWARD_FEATURES = [0, 1, 2] # Features used as input. The size of input data `history_data` is usually [B, L, N, C], this parameter specifies the index of the last dimension, i.e., history_data[:, :, :, CFG.MODEL.FORWARD_FEATURES].
-CFG.MODEL.TARGET_FEATURES = [0] # Features used as output. The size of target data `future_data` is usually [B, L, N, C], this parameter specifies the index of the last dimension, i.e., future_data[:, :, :, CFG.MODEL.TARGET_FEATURES].
-CFG.MODEL.TARGET_TIME_SERIES = [5, 6] # The index of the time series to be predicted, default is None. This setting is particularly useful in a Multivariate-to-Univariate setup. For example, if 7 time series are input and the last two need to be predicted, you can set `CFG.MODEL.TARGET_TIME_SERIES=[5, 6]` to achieve this.
-CFG.MODEL.SETUP_GRAPH = False # Whether to set up the computation graph. Default: False. Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
-CFG.MODEL.DDP_FIND_UNUSED_PARAMETERS = False # Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`. In distributed computing, if there are unused parameters in the forward process, PyTorch usually raises a RuntimeError. In such cases, this parameter should be set to True.
+# Features used as input. The size of input data `history_data` is usually [B, L, N, C],
+# this parameter specifies the index of the last dimension, i.e., history_data[:, :, :, CFG.MODEL.FORWARD_FEATURES].
+CFG.MODEL.FORWARD_FEATURES = [0, 1, 2]
+# Features used as output. The size of target data `future_data` is usually [B, L, N, C],
+# this parameter specifies the index of the last dimension, i.e., future_data[:, :, :, CFG.MODEL.TARGET_FEATURES].
+CFG.MODEL.TARGET_FEATURES = [0]
+# The index of the time series to be predicted, default is None. This setting is particularly useful in a Multivariate-to-Univariate setup.
+# For example, if 7 time series are input and the last two need to be predicted, you can set `CFG.MODEL.TARGET_TIME_SERIES=[5, 6]` to achieve this.
+CFG.MODEL.TARGET_TIME_SERIES = [5, 6]
+# Whether to set up the computation graph. Default: False.
+# Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
+CFG.MODEL.SETUP_GRAPH = False
+# Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`.
+# In distributed computing, if there are unused parameters in the forward process, PyTorch usually raises a RuntimeError.
+# In such cases, this parameter should be set to True.
+CFG.MODEL.DDP_FIND_UNUSED_PARAMETERS = False
 
 ############################## Metrics Configuration ##############################
 
@@ -132,7 +142,12 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     MODEL_ARCH.__name__,
     '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_EPOCHS), str(INPUT_LEN), str(OUTPUT_LEN)])
 ) # Directory to save checkpoints. Default: 'checkpoints/{MODEL_NAME}/{DATASET_NAME}_{NUM_EPOCHS}_{INPUT_LEN}_{OUTPUT_LEN}'
-CFG.TRAIN.CKPT_SAVE_STRATEGY = None # Checkpoint save strategy. `CFG.TRAIN.CKPT_SAVE_STRATEGY` should be None, an int value, a list or a tuple. None: remove last checkpoint file every epoch. Default: None. Int: save checkpoint every `CFG.TRAIN.CKPT_SAVE_STRATEGY` epoch.  List or Tuple: save checkpoint when epoch in `CFG.TRAIN.CKPT_SAVE_STRATEGY, remove last checkpoint file when last_epoch not in ckpt_save_strategy
+# Checkpoint save strategy. `CFG.TRAIN.CKPT_SAVE_STRATEGY` should be None, an int value, a list or a tuple.
+# Default: None.
+# None: remove last checkpoint file every epoch.
+# Int: save checkpoint every `CFG.TRAIN.CKPT_SAVE_STRATEGY` epoch.
+# List or Tuple: save checkpoint when epoch in `CFG.TRAIN.CKPT_SAVE_STRATEGY, remove last checkpoint file when last_epoch not in ckpt_save_strategy
+CFG.TRAIN.CKPT_SAVE_STRATEGY = None
 CFG.TRAIN.FINETUNE_FROM = None # Checkpoint path for fine-tuning. Default: None. If not specified, the model will be trained from scratch.
 CFG.TRAIN.STRICT_LOAD = True # Whether to strictly load the checkpoint. Default: True.
 
@@ -205,10 +220,12 @@ CFG.TEST.DATA.COLLATE_FN = None
 CFG.TEST.DATA.NUM_WORKERS = 0
 CFG.TEST.DATA.PIN_MEMORY = False
 
-############################## Evaluation Configuration ##############################
-
+########################### Evaluation Configuration ##########################
 CFG.EVAL = EasyDict()
 
 # Evaluation parameters
-CFG.EVAL.HORIZONS = [3, 6, 12]  # The prediction horizons for evaluation. Default value: []. NOTE: HORIZONS[i] refers to testing **on the i-th** time step, representing the loss for that specific time step. This is a common setting in spatiotemporal forecasting. For long-sequence predictions, it is recommended to keep HORIZONS set to the default value [] to avoid confusion.
+# The prediction horizons for evaluation. Default value: [].
+# NOTE: HORIZONS[i] refers to testing **on the i-th** time step, representing the loss for that specific time step.
+# This is a common setting in spatiotemporal forecasting. For long-sequence predictions, it is recommended to keep HORIZONS set to the default value [] to avoid confusion.
+CFG.EVAL.HORIZONS = []
 CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True

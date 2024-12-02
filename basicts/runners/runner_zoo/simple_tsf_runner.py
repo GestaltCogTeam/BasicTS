@@ -1,7 +1,9 @@
 from typing import Dict
 
 import torch
+
 from ..base_tsf_runner import BaseTimeSeriesForecastingRunner
+
 
 class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
     """
@@ -90,13 +92,13 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         # Select input features
         history_data = self.select_input_features(history_data)
         future_data_4_dec = self.select_input_features(future_data)
-        
+
         if not train:
             # For non-training phases, use only temporal features
             future_data_4_dec[..., 0] = torch.empty_like(future_data_4_dec[..., 0])
 
         # Forward pass through the model
-        model_return = self.model(history_data=history_data, future_data=future_data_4_dec, 
+        model_return = self.model(history_data=history_data, future_data=future_data_4_dec,
                                   batch_seen=iter_num, epoch=epoch, train=train)
 
         # Parse model return

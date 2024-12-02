@@ -1,15 +1,12 @@
 # define more optimizers here
-import os
 import inspect
-from typing import Union, Tuple, Optional
+from typing import Optional, Tuple, Union
 
 import torch
+from easytorch.device import _DEVICE_TYPE
+from easytorch.utils import get_local_rank, get_world_size
 from torch import Tensor
 from torch.optim import AdamW
-
-from easytorch.device import _DEVICE_TYPE
-from easytorch.utils import get_world_size, get_local_rank
-
 
 __all__ = ['AdamWnanoGPT', 'Muon']
 
