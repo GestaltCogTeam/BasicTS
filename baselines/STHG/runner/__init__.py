@@ -1,1 +1,0 @@
-from .sthg_runner import STHGRunner
