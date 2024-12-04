@@ -31,8 +31,8 @@
 1. 在提交代码变更之前，请先在[issues](https://github.com/GestaltCogTeam/BasicTS/issues)中充分讨论您的想法，以确保其必要性和可行性。
 2. Fork 此仓库并为您的工作创建一个新分支。
 3. 进行开发时，请添加清晰的代码注释以解释您的方法，并尽量遵循现有的代码约定。
-4. 请遵循以下的[代码格式检查](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/contribution_guidelines_cn.md#代码格式检查)指南。
-5. 提交一个指向 `main` 分支的 PR（Pull Request），并关联与之相关的issue。请提供详细背景信息，并遵循以下的[PR格式指南](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/contribution_guidelines_cn.md#PR格式指南)。
+4. 请遵循以下的[代码格式检查](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/contribution_guideline_cn.md#%E4%BB%A3%E7%A0%81%E6%A0%BC%E5%BC%8F%E6%A3%80%E6%9F%A5)指南。
+5. 提交一个指向 `main` 分支的 PR（Pull Request），并关联与之相关的issue。请提供详细背景信息，并遵循以下的[PR格式指南](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/contribution_guideline_cn.md#%E4%BB%A3%E7%A0%81%E6%A0%BC%E5%BC%8F%E6%A3%80%E6%9F%A5)。
 
 我们会尽快评估 PR，并与您协作整合您的贡献。请耐心等待，因为评估PR需要时间。一旦通过，您的代码将被合并！
 
