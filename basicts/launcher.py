@@ -88,6 +88,13 @@ def launch_evaluation(cfg: Union[Dict, str],
     logger = get_logger('easytorch-launcher')
     logger.info('Launching EasyTorch evaluation.')
 
+    # check params
+    # cfg path which start with dot will crash the easytorch, just remove dot
+    while isinstance(cfg, str) and cfg.startswith(('./','.\\')):
+        cfg = cfg[2:]
+    while ckpt_path.startswith(('./','.\\')):
+        ckpt_path = ckpt_path[2:]
+
     # initialize the configuration
     cfg = init_cfg(cfg, save=True)
 
@@ -114,7 +121,10 @@ def launch_training(cfg: Union[Dict, str],
     """
 
     # placeholder for potential pre-processing steps (e.g., model registration, config validation)
-    pass
+
+    # cfg path which start with dot will crash the easytorch, just remove dot
+    while isinstance(cfg, str) and cfg.startswith(('./','.\\')):
+        cfg = cfg[2:]
 
     # launch the training process
     easytorch.launch_training(cfg=cfg, devices=gpus, node_rank=node_rank)
