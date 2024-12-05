@@ -10,41 +10,32 @@ from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.scaler import ZScoreScaler
 from basicts.utils import get_regular_settings, load_adj
 
-from .arch import BigST
-from .loss import bigst_loss
+from .arch import BigSTPreprocess
+from .runner import BigSTPreprocessRunner
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
-DATA_NAME = 'PEMS04'  # Dataset name
+DATA_NAME = 'PEMS08'  # Dataset name
 regular_settings = get_regular_settings(DATA_NAME)
-INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
-OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
+INPUT_LEN = 2016 
+OUTPUT_LEN = 12
 TRAIN_VAL_TEST_RATIO = regular_settings['TRAIN_VAL_TEST_RATIO']  # Train/Validation/Test split ratios
 NORM_EACH_CHANNEL = regular_settings['NORM_EACH_CHANNEL'] # Whether to normalize each channel of the data
 RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
 NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
 # Model architecture and parameters
-MODEL_ARCH = BigST
+MODEL_ARCH = BigSTPreprocess
 adj_mx, _ = load_adj("datasets/" + DATA_NAME +
                      "/adj_mx.pkl", "doubletransition")
 MODEL_PARAM = {
-    "num_nodes": 307,
-    "seq_num": INPUT_LEN,
+    "num_nodes": 170,
     "in_dim": 3,
-    "out_dim": OUTPUT_LEN, 
-    "hid_dim": 32,
-    "tau" : 0.25,
-    "random_feature_dim": 64,
-    "node_emb_dim": 32,
-    "time_emb_dim": 32,
-    "use_residual": True,
-    "use_bn": True,
-    "use_spatial": True,
-    "use_long": False,
     "dropout": 0.3,
-    "supports": [torch.tensor(i) for i in adj_mx],
-    "time_of_day_size": 288, 
-    "day_of_week_size": 7,
+    "input_length": INPUT_LEN,
+    "output_length": OUTPUT_LEN,
+    "nhid": 32,
+    "tiny_batch_size": 64,
+
 }
 
 NUM_EPOCHS = 100
@@ -55,7 +46,7 @@ CFG = EasyDict()
 CFG.DESCRIPTION = 'An Example Config'
 CFG.GPU_NUM = 1 # Number of GPUs to use (0 for CPU mode)
 # Runner
-CFG.RUNNER = SimpleTimeSeriesForecastingRunner
+CFG.RUNNER = BigSTPreprocessRunner
 
 ############################## Environment Configuration ##############################
 
@@ -115,7 +106,7 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     MODEL_ARCH.__name__,
     '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_EPOCHS), str(INPUT_LEN), str(OUTPUT_LEN)])
 )
-CFG.TRAIN.LOSS = bigst_loss
+CFG.TRAIN.LOSS = masked_mae
 # Optimizer settings
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "AdamW"
@@ -132,7 +123,7 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 }
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.DATA.BATCH_SIZE = 64
+CFG.TRAIN.DATA.BATCH_SIZE = 1
 CFG.TRAIN.DATA.SHUFFLE = True
 # Gradient clipping settings
 CFG.TRAIN.CLIP_GRAD_PARAM = {
@@ -143,13 +134,13 @@ CFG.TRAIN.CLIP_GRAD_PARAM = {
 CFG.VAL = EasyDict()
 CFG.VAL.INTERVAL = 1
 CFG.VAL.DATA = EasyDict()
-CFG.VAL.DATA.BATCH_SIZE = 64
+CFG.VAL.DATA.BATCH_SIZE = 1
 
 ############################## Test Configuration ##############################
 CFG.TEST = EasyDict()
 CFG.TEST.INTERVAL = 1
 CFG.TEST.DATA = EasyDict()
-CFG.TEST.DATA.BATCH_SIZE = 64
+CFG.TEST.DATA.BATCH_SIZE = 1
 
 ############################## Evaluation Configuration ##############################
 
