@@ -1,7 +1,7 @@
 name: Pylint
 
 env:
-  FAIL_UNDER: "9.5"
+  FAIL_UNDER: "10.0"
   
 on: [push, pull_request]
 
@@ -24,4 +24,5 @@ jobs:
         pip install coverage
     - name: Analysing the code with pylint
       run: |
-        pylint --fail-under=${FAIL_UNDER} basicts scripts
+        pylint --fail-under=${FAIL_UNDER} basicts scripts tests
+        isort -c basicts scripts tests
