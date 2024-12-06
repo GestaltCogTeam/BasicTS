@@ -9,6 +9,9 @@ from basicts.launcher import (evaluation_func, launch_evaluation,
 
 
 class TestLauncher(unittest.TestCase):
+    """
+    Test cases for the launcher.
+    """
 
     @patch('basicts.launcher.get_logger')
     @patch('basicts.launcher.os.path.exists')
