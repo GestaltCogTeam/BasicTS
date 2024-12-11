@@ -36,9 +36,9 @@ def masked_r2(prediction: torch.Tensor, target: torch.Tensor, null_val: float = 
 
     ss_res = torch.sum(torch.pow((target - prediction), 2), dim=1)  # 残差平方和
     ss_tot = torch.sum(torch.pow(target - torch.mean(target, dim=1, keepdim=True), 2), dim=1)  # 总平方和
-    
+
     # 计算 R^2
     loss = 1 - (ss_res / (ss_tot + eps))
-    
+
     loss = torch.nan_to_num(loss)  # Replace any NaNs in the loss with zero
     return torch.mean(loss)
