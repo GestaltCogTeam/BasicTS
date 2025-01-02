@@ -5,7 +5,7 @@ from .rmse import masked_rmse
 from .wape import masked_wape
 from .smape import masked_smape
 from .corr import masked_corr
-from r_square import masked_r2
+from .r_square import masked_r2
 
 ALL_METRICS = {
             'MAE': masked_mae,
