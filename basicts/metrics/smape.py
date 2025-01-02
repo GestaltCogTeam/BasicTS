@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+
 def masked_smape(prediction: torch.Tensor, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
     """
     Calculate the Masked Symmetric Mean Absolute Percentage Error (SMAPE) between predicted and target values,
