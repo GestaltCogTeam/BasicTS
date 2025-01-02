@@ -287,7 +287,7 @@ BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch),
 
 We invite you to join our official community to access comprehensive technical support.
 
-Official Discord Server: [Click here to join our Discord community](https://discord.gg/chxdaxG4)
+Official Discord Server: [Click here to join our Discord community](https://discord.gg/UWFP7b3b7H)
 
 Official WeChat Group:
 
