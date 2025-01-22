@@ -12,7 +12,7 @@ ignore=baselines,assets,checkpoints
 
 # Files or directories matching the regex patterns are skipped. The regex
 # matches against base names, not paths.
-ignore-patterns=^\.|^_|^.*\.md|^.*\.txt|^.*\.CFF|^LICENSE
+ignore-patterns=^\.|^_|^.*\.md|^.*\.txt|^.*\.csv|^.*\.CFF|^LICENSE
 
 # Pickle collected data for later comparisons.
 persistent=no
