@@ -40,6 +40,10 @@ def evaluation_func(cfg: Dict,
     # initialize the logger for the runner
     runner.init_logger(logger_name='easytorch-evaluation', log_file_name='evaluation_log')
 
+    # setup the graph if needed
+    if runner.need_setup_graph:
+        runner.setup_graph(cfg=cfg, train=False)
+
     try:
         # set batch size if provided
         if batch_size is not None:
