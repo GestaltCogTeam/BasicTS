@@ -15,6 +15,8 @@ from ..loss import fake_loss
 # Dataset & Metrics configuration
 # Model architecture and parameters
 
+pretrained = False  # Whether to use a pretrained model
+
 MODEL_ARCH = TimeMoE
 
 MODEL_PARAM = {
@@ -109,4 +111,9 @@ CFG.DATASET.NAME = DATA_NAME
 CFG.DATASET.TYPE = BLASTDatasetMixUp
 CFG.DATASET.PARAM = EasyDict({
     'num_valid_samples': 1000
+})
+############################## Inference Configuration ##############################
+CFG.INFERENCE = EasyDict()
+CFG.INFERENCE.GENERATION_PARAMS = EasyDict({
+    'normalize': not pretrained
 })

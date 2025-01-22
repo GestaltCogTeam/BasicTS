@@ -108,3 +108,8 @@ CFG.DATASET.PARAM = EasyDict({
     'target_length': predict_length,
     'num_valid_samples': 1000
 })
+
+############################## Inference Configuration ##############################
+CFG.INFERENCE = EasyDict()
+CFG.INFERENCE.GENERATION_PARAMS = EasyDict({
+})
