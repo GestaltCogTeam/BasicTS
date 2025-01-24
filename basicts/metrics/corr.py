@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+
 def masked_corr(prediction: torch.Tensor, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
     """
     Calculate the Masked Pearson Correlation Coefficient between the predicted and target values,
