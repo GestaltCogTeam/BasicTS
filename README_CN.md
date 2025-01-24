@@ -58,6 +58,9 @@ BasicTS 一方面通过 **统一且标准化的流程**，为热门的深度学�
 >  author={Shao, Zezhi and Wang, Fei and Xu, Yongjun and Wei, Wei and Yu, Chengqing and Zhang, Zhao and Yao, Di and Sun, Tao and Jin, Guangyin and Cao, Xin and others},
 >  journal={IEEE Transactions on Knowledge and Data Engineering},
 >  year={2024},
+>  volume={37},
+>  number={1},
+>  pages={291-305},
 >  publisher={IEEE}
 > }
 > ```
