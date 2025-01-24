@@ -22,6 +22,10 @@ def masked_r2(prediction: torch.Tensor, target: torch.Tensor, null_val: float = 
 
     """
 
+    if len(prediction.shape) == 4: # (Bs, L, N, 1) else (Bs, N, 1)
+        prediction = torch.mean(prediction, dim=1)
+        target = torch.mean(target, dim=1)
+
     eps = 5e-5
     if np.isnan(null_val):
         mask = ~torch.isnan(target)
@@ -34,8 +38,8 @@ def masked_r2(prediction: torch.Tensor, target: torch.Tensor, null_val: float = 
     prediction = torch.nan_to_num(prediction)
     target = torch.nan_to_num(target)
 
-    ss_res = torch.sum(torch.pow((target - prediction), 2), dim=1)  # 残差平方和
-    ss_tot = torch.sum(torch.pow(target - torch.mean(target, dim=1, keepdim=True), 2), dim=1)  # 总平方和
+    ss_res = torch.sum(torch.pow((target - prediction), 2), dim=0)  # 残差平方和
+    ss_tot = torch.sum(torch.pow(target - torch.mean(target, dim=0, keepdim=True), 2), dim=0)  # 总平方和
 
     # 计算 R^2
     loss = 1 - (ss_res / (ss_tot + eps))
