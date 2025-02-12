@@ -3,9 +3,9 @@ import sys
 from easydict import EasyDict
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
 
-from basicts.metrics import masked_mae, masked_mse, masked_mape, masked_rmse, masked_smape
+from basicts.metrics import masked_mae, masked_mse
 from basicts.data import TimeSeriesForecastingDataset
-from basicts.runners import SimpleTimeSeriesForecastingRunner, MyTimeSeriesForecastingRunner
+from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.scaler import ZScoreScaler
 from basicts.utils import get_regular_settings
 
@@ -40,7 +40,7 @@ CFG = EasyDict()
 CFG.DESCRIPTION = 'An Example Config'
 CFG.GPU_NUM = 1 # Number of GPUs to use (0 for CPU mode)
 # Runner
-CFG.RUNNER = MyTimeSeriesForecastingRunner
+CFG.RUNNER = SimpleTimeSeriesForecastingRunner
 
 ############################## Dataset Configuration ##############################
 CFG.DATASET = EasyDict()
@@ -81,10 +81,7 @@ CFG.METRICS = EasyDict()
 # Metrics settings
 CFG.METRICS.FUNCS = EasyDict({
                                 'MAE': masked_mae,
-                                'MSE': masked_mse,
-                                'RMSE': masked_rmse,
-                                'MAPE': masked_mape,
-                                'SMAPE': masked_smape
+                                'MSE': masked_mse
                             })
 CFG.METRICS.TARGET = 'MSE'
 CFG.METRICS.NULL_VAL = NULL_VAL
