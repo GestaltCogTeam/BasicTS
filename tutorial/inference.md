@@ -1,133 +1,243 @@
 # Inference (Experimental)
 
-This tutorial introduces how to inference in BasicTS.
+This tutorial introduces inference procedures in BasicTS.
 
 ## 🗒 Inference Script
 
-Using the inference script, you can read input data from a specified file, perform inference with a specified model, and save the output results to a file.
+The inference script enables loading context data from a specified file, executing inference with a designated model, and saving predictions to an output file.
 
 ### Model Preparation
 
-Before using the inference feature, you need to train a model first. Model training can be referenced in the [Quick Start](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/getting_started.md) section.
+Before inference, train your model following the [Quick Start](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/getting_started.md) guide.
 
 ### Data Preparation
 
-Input data should be in CSV format, UTF-8 encoded, and comma-separated.  
-The first column is the timestamp in the format `Year-Month-Day Hour:Minute:Second`.  
-Subsequent columns are data columns.
+Context data must be:
 
-Example input data:
+- CSV format with UTF-8 encoding
+- Comma-separated values
+- First column: Timestamp in `Year-Month-Day Hour:Minute:Second` format
+- Subsequent columns: Data values
 
-```csv
-2024-01-01 00:00:00,1,2,3,4,5,6,7
-2024-01-01 00:05:00,1,2,3,4,5,6,7
-2024-01-01 00:10:00,1,2,3,4,5,6,7
-2024-01-01 00:15:00,1,2,3,4,5,6,7
-2024-01-01 00:20:00,1,2,3,4,5,6,7
-2024-01-01 00:25:00,1,2,3,4,5,6,7
-2024-01-01 00:30:00,1,2,3,4,5,6,7
-```
-
-### Using the Inference Script
-
-The following parameters are required for inference:
-
-- Model checkpoint path
-- Configuration file path
-- Input data path
-- Output data path
-- Available GPU list (optional)
-
-For UTFS models (e.g., TimeMoe), additional parameters are required:
-
-- Context length
-- Prediction length
-
-The inference script is located at `experiments/inference.py`. 
-
-Start it with the following command:
-
-```bash
-python experiments/inference.py -cfg <config_path> -ckpt <checkpoint_path> -i <input_path> -o <output_path>
-``` 
-
-For UTFS models, include context and prediction lengths:
-
-```bash
-python experiments/inference.py -cfg <config_path> -ckpt <checkpoint_path> -i <input_path> -o <output_path> -ctx <context_length> -pred <prediction_length>
-``` 
-
-### Examples
-
-1.Using STID on ETTh1 dataset:
-
-```bash
-python experiments/inference.py -cfg "baselines/STID/ETTh1.py" -ckpt "/checkpoints/STID/ETTh1_100_336_336/587c21xxxx/STID_best_val_MAE.pt" -i "./in_etth1.csv" -o "out.csv"
-```
-
-Input data:
+**Example input:**
 
 ```csv
 2024-01-01 00:00:00,1,2,3,4,5,6,7
 2024-01-01 00:05:00,1,2,3,4,5,6,7
 2024-01-01 00:10:00,1,2,3,4,5,6,7
-2024-01-01 00:15:00,1,2,3,4,5,6,7
-2024-01-01 00:20:00,1,2,3,4,5,6,7
-2024-01-01 00:25:00,1,2,3,4,5,6,7
 ...
 ```
 
-Results:
+### Execution
+
+**Required parameters:**
+
+- Configuration file path (`-cfg`)
+- Model checkpoint path (`-ckpt`)
+- Context data path (`-i`)
+- Output data path (`-o`)
+- GPU list (optional) (`-g`)
+
+**For UTFS models (e.g., TimeMoe) add:**
+
+- Context length (`-ctx`)
+- Prediction length (`-pred`)
+
+**Command structure:**
+```bash
+# Standard models
+python experiments/inference.py -cfg <config_path> -ckpt <checkpoint_path> -i <context_path> -o <output_path>
+
+# UTFS models
+python experiments/inference.py -cfg <config_path> -ckpt <checkpoint_path> -i <context_path> -o <output_path> -ctx <context_length> -pred <prediction_length>
+```
+
+### Examples
+
+1. **STID on ETTh1 dataset:**
+
+```bash
+python experiments/inference.py -cfg "baselines/STID/ETTh1.py" -ckpt "checkpoints/STID/ETTh1_100_336_336/587c21xxxx/STID_best_val_MAE.pt" -i "./in_etth1.csv" -o "out.csv"
+```
+
+
+**Output example:**
 
 ```csv
 2024-01-03 13:00:00,-1.1436124,-0.0042671096,-0.35258546,1.7036028,2.1393495,8.280911,-1.0798432
 2024-01-03 14:00:00,-1.1344103,-0.0021482962,-0.3535639,1.71777,2.1475496,8.356691,-1.0723352
-2024-01-03 15:00:00,-1.1335654,0.004845081,-0.34263217,1.7284462,2.1487343,8.307554,-1.0726832
-2024-01-03 16:00:00,-1.136602,-0.0066127134,-0.35953742,1.7203176,2.1453576,8.329743,-1.0784494
-2024-01-03 17:00:00,-1.139412,0.0039077974,-0.35144827,1.7184068,2.1413972,8.300636,-1.074183
 ...
 ```
 
-1. Using Chronos:
+2. **Chronos model:**
 
 ```bash
 python experiments/inference.py -cfg "baselines/ChronosBolt/config/chronos_base.py" -ckpt "ckpts_release/ChronosBolt-base-BLAST.pt" -i "./in_etth1.csv" -o "out.csv" -ctx 72 -pred 36
 ```
 
-Input data:
-
-```csv
-2024-01-01 00:00:00,1,2,3,4,5,6,7
-2024-01-01 00:05:00,1,2,3,4,5,6,7
-2024-01-01 00:10:00,1,2,3,4,5,6,7
-2024-01-01 00:15:00,1,2,3,4,5,6,7
-2024-01-01 00:20:00,1,2,3,4,5,6,7
-2024-01-01 00:25:00,1,2,3,4,5,6,7
-...
-```
-
-Results:
+**Output example:**
 
 ```csv
 2024-01-03 12:05:00,1.0,2.0,3.0,4.0,5.0,6.0,7.0
 2024-01-03 12:10:00,1.0,2.0,3.0,4.0,5.0,6.0,7.0
-2024-01-03 12:15:00,1.0,2.0,3.0,4.0,5.0,6.0,7.0
-2024-01-03 12:20:00,1.0,2.0,3.0,4.0,5.0,6.0,7.0
-2024-01-03 12:25:00,1.0,2.0,3.0,4.0,5.0,6.0,7.0
 ...
 ```
 
+---
 
-## 🌐 Web Page (Coming Soon)
+## 🌐 Web Interface
 
-A visual inference interface via web page.
+BasicTS provides a visual web interface for inference operations.
 
-## 🖥 API Service (Coming Soon)
+### Setup
 
-HTTP-based inference API service.
+1. Install dependencies:
+
+```bash
+pip install -r server/web_requirements.txt
+```
+
+2. Launch service:
+
+```bash
+streamlit run server/web_inference.py
+```
+If everything works, the page will be automatically opened in the browser.
+
+You can also access via `http://host-ip-or-localhost:8501`.
+
+### Workflow
+
+#### Model Loading
+
+- **Select configuration file**  
+
+   ![load_config](figures/load_config.png)
+- **Choose checkpoint**  
+
+  > [!NOTE]  
+  > Checkpoint files must reside within the project directory.
+
+
+   ![select_checkpoint](figures/select_checkpoint.png)
+
+
+- **Configure other parameters and load model**  
+   ![load_model](figures/load_model.png)
+
+#### Loading Context Data
+
+- **Upload context data:**  
+  ![upload_data](figures/upload_data.png)
+- **Preview:**  
+  ![table_in](figures/table_in.png)  
+  ![figure_in](figures/figure_in.png)
+
+#### Inference Execution
+
+- **Generate results:**  
+  ![inference](figures/inference.png)
+- **Preview results:**  
+  ![table_out](figures/table_out.png)  
+  ![figure_out](figures/figure_out.png)
+- **Export in CSV format:**  
+  ![download](figures/download.png)
+
+---
+
+## 🖥 API Service
+
+BasicTS provides an HTTP-based inference API.
+
 > [!NOTE]  
-> The API service is not optimized for high-concurrency scenarios. Do not use it directly in the production environment.
+> The API service is not optimized for high concurrency scenarios and should not be used directly in production.
 
+### Setup
+
+- **Install dependencies:**
+
+```bash
+pip install -r server/http_requirements.txt
+```
+
+- **Configure `server/http_server_config.py`:**
+
+```python
+class ServerConfig(BasicConfig):
+    host: str = '0.0.0.0'
+    port: int = 8502
+
+class ModelConfig(BasicConfig):
+    cfg_path: str = 'baselines/ChronosBolt/config/chronos_base.py' 
+    ckpt_path: str = 'utsf_ckpt/ChronosBolt-base-BLAST.pt'
+    device_type: str = 'gpu'
+    gpus: Optional[str] = '0'
+    context_length: int = 72
+    prediction_length: int = 24
+```
+
+- **Start service:**
+
+```bash
+python server/http_server.py
+```
+
+### API Usage
+
+- **Endpoint:** `http://host-ip:8501/inference`
+- **Method:** PUT
+- **Content-Type:** application/json
+
+**Request:**
+
+```json
+{
+  "data": 
+  [
+    ["2024-01-01 00:00:00",1,2,3,4,5,6,7],
+    ["2024-01-01 00:05:00",1,2,3,4,5,6,7],
+    ...
+    ["2024-01-03 11:55:00",1,2,3,4,5,6,7],
+    ["2024-01-03 12:00:00",1,2,3,4,5,6,7]
+  ]
+}
+```
+
+**Response:**
+
+```json
+{
+  "result":
+  [
+    ["2024-01-03 12:05:00",1,2,3,4,5,6,7],
+    ["2024-01-03 12:10:00",1,2,3,4,5,6,7],
+    ...
+    ["2024-01-03 13:55:00",1,2,3,4,5,6,7],
+    ["2024-01-03 14:00:00",1,2,3,4,5,6,7]
+  ]
+}
+```
+
+**CURL Example:**
+
+```bash
+curl -X 'PUT' \
+  'http://host-ip:8502/inference' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "data": [
+    ["2024-01-01 00:00:00",1,2,3,4,5,6,7],
+    ["2024-01-01 00:05:00",1,2,3,4,5,6,7],
+    ["2024-01-01 00:10:00",1,2,3,4,5,6,7],
+    ......
+    ["2024-01-03 11:55:00",1,2,3,4,5,6,7],
+    ["2024-01-03 12:00:00",1,2,3,4,5,6,7]
+  ]
+}'
+```
+
+---
 
 ## 🧑‍💻 Explore Further
 

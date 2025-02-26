@@ -19,8 +19,8 @@ def parse_args():
     parser.add_argument('-o', '--output_data_file_path', default='./out.csv')
     parser.add_argument('-g', '--gpus', default='0')
     parser.add_argument('-d', '--device_type', default='cpu')
-    parser.add_argument('-ctx', '--context_length', type=int, default=72, help='context length for inference, only used for utfs models')
-    parser.add_argument('-pred', '--prediction_length', type=int, default=24, help='prediction length for inference, only used for utfs models')
+    parser.add_argument('-ctx', '--context_length', type=int, default=72, help='context length for inference, only used for utsf models')
+    parser.add_argument('-pred', '--prediction_length', type=int, default=24, help='prediction length for inference, only used for utsf models')
 
     return parser.parse_args()
 

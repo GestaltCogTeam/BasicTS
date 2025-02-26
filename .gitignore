@@ -24,6 +24,8 @@ ckpt/
 *.py[cod]
 *$py.class
 
+.DS_Store
+
 # C extensions
 # *.so
 
@@ -181,3 +183,6 @@ cython_debug/
 
 # MacOS
 .DS_Store
+
+# not ignore requirements.txt
+!*requirements.txt
