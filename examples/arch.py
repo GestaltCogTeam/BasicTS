@@ -1,5 +1,7 @@
+# pylint: disable=unused-argument
 import torch
 from torch import nn
+
 
 class MultiLayerPerceptron(nn.Module):
     """

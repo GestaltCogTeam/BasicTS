@@ -1,5 +1,4 @@
 import time
-from typing import Dict
 from functools import partial
 
 import torch

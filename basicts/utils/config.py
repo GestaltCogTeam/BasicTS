@@ -1,5 +1,6 @@
 from typing import Dict
 
+
 def get_dataset_name(cfg: Dict) -> str:
     """
     Extract the dataset name from the configuration dictionary.

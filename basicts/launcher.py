@@ -1,10 +1,12 @@
 import os
-from typing import Dict, Union, Optional
 import traceback
+from typing import Dict, Optional, Union
+
 import easytorch
-from easytorch.utils import get_logger, set_visible_devices
 from easytorch.config import init_cfg
 from easytorch.device import set_device_type
+from easytorch.utils import get_logger, set_visible_devices
+
 
 def evaluation_func(cfg: Dict,
                     ckpt_path: str = None,
@@ -37,6 +39,10 @@ def evaluation_func(cfg: Dict,
 
     # initialize the logger for the runner
     runner.init_logger(logger_name='easytorch-evaluation', log_file_name='evaluation_log')
+
+    # setup the graph if needed
+    if runner.need_setup_graph:
+        runner.setup_graph(cfg=cfg, train=False)
 
     try:
         # set batch size if provided
@@ -86,6 +92,13 @@ def launch_evaluation(cfg: Union[Dict, str],
     logger = get_logger('easytorch-launcher')
     logger.info('Launching EasyTorch evaluation.')
 
+    # check params
+    # cfg path which start with dot will crash the easytorch, just remove dot
+    while isinstance(cfg, str) and cfg.startswith(('./','.\\')):
+        cfg = cfg[2:]
+    while ckpt_path.startswith(('./','.\\')):
+        ckpt_path = ckpt_path[2:]
+
     # initialize the configuration
     cfg = init_cfg(cfg, save=True)
 
@@ -112,7 +125,10 @@ def launch_training(cfg: Union[Dict, str],
     """
 
     # placeholder for potential pre-processing steps (e.g., model registration, config validation)
-    pass
+
+    # cfg path which start with dot will crash the easytorch, just remove dot
+    while isinstance(cfg, str) and cfg.startswith(('./','.\\')):
+        cfg = cfg[2:]
 
     # launch the training process
     easytorch.launch_training(cfg=cfg, devices=gpus, node_rank=node_rank)

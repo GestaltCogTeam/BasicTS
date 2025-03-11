@@ -26,7 +26,22 @@ NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
 MODEL_ARCH = STAEformer
 
 MODEL_PARAM = {
-    "num_nodes" : 325
+    "num_nodes" : 325,
+    "in_steps": INPUT_LEN,
+    "out_steps": OUTPUT_LEN,
+    "steps_per_day": 288, # number of time steps per day
+    "input_dim": 3, # the C in [B, L, N, C]
+    "output_dim": 1,
+    "input_embedding_dim": 24,
+    "tod_embedding_dim": 24,
+    "dow_embedding_dim": 24,
+    "spatial_embedding_dim": 0,
+    "adaptive_embedding_dim": 80,
+    "feed_forward_dim": 256,
+    "num_heads": 4,
+    "num_layers": 3,
+    "dropout": 0.1,
+    "use_mixed_proj": True,
 }
 NUM_EPOCHS = 100
 

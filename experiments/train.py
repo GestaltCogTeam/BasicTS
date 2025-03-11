@@ -1,4 +1,5 @@
 # Run a baseline model in BasicTS framework.
+# pylint: disable=wrong-import-position
 import os
 import sys
 from argparse import ArgumentParser
@@ -18,7 +19,10 @@ def parse_args():
     parser.add_argument('-g', '--gpus', default='0', help='visible gpus')
     return parser.parse_args()
 
-if __name__ == '__main__':
+def main():
     args = parse_args()
-
     basicts.launch_training(args.cfg, args.gpus, node_rank=0)
+
+
+if __name__ == '__main__':
+    main()

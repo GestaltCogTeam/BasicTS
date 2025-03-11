@@ -7,4 +7,3 @@ class NoBPRunner(SimpleTimeSeriesForecastingRunner):
 
     def backward(self, loss: torch.Tensor):
         pass
-        return

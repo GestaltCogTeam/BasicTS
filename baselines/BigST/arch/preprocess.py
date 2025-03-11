@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 import sys
+import numpy as np 
+import pdb
 
 def create_projection_matrix(m, d, seed=0, scaling=0, struct_mode=False):
     nb_full_blocks = int(m/d)
@@ -147,9 +149,17 @@ class linearized_attention(nn.Module):
         
         return x
 
-class linear_transformer(nn.Module):
-    def __init__(self, input_length, output_length, in_dim, num_nodes, nhid, dropout=0.3):
-        super(linear_transformer, self).__init__()
+
+class BigSTPreprocess(nn.Module):
+    """
+    Paper: BigST: Linear Complexity Spatio-Temporal Graph Neural Network for Traffic Forecasting on Large-Scale Road Networks
+    Link: https://dl.acm.org/doi/10.14778/3641204.3641217
+    Official Code: https://github.com/usail-hkust/BigST?tab=readme-ov-file
+    Venue: VLDB 2024
+    Task: Spatial-Temporal Forecasting
+    """
+    def __init__(self, input_length, output_length, in_dim, num_nodes, nhid, tiny_batch_size, dropout=0.3):
+        super(BigSTPreprocess, self).__init__()
         self.tau = 1.0
         self.layer_num = 3
         self.random_feature_dim = nhid*2
@@ -175,7 +185,10 @@ class linear_transformer(nn.Module):
         
         self.regression_layer = nn.Linear(nhid, output_length)
 
-    def forward(self, x):
+        self.tiny_batch_size = tiny_batch_size
+
+    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
+        x = history_data
         # input: (1, 9638, 2016, 3) (B, N, T, D)
         B, N, T, D = x.size()
         pe = self.temporal_embedding.unsqueeze(0).expand(B*N, -1, -1) # (B*N, T/12, nhid)
@@ -203,4 +216,4 @@ class linear_transformer(nn.Module):
         # x = torch.sum(x, dim=1) # (B*N, nhid)
         feat = x.view(B, N, -1) # (B, N, nhid)
         x = self.regression_layer(feat) # (B, N, output_length)
-        return x, feat
+        return {'prediction': x.transpose(1,2).unsqueeze(-1), 'feat':feat}

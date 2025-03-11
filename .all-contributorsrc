@@ -20,6 +20,15 @@
       ]
     },
     {
+      "login": "finleywang",
+      "name": "finleywang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5022944?v=4",
+      "profile": "https://github.com/finleywang",
+      "contributions": [
+        "mentoring"
+      ]
+    },
+    {
       "login": "blisky-li",
       "name": "blisky-li",
       "avatar_url": "https://avatars.githubusercontent.com/u/66107694?v=4",
@@ -110,6 +119,33 @@
       "contributions": [
         "code",
         "bug"
+      ]
+    },
+    {
+      "login": "yisongfu",
+      "name": "Yisong Fu",
+      "avatar_url": "https://avatars.githubusercontent.com/u/139831104?v=4",
+      "profile": "https://github.com/yisongfu",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "DiamonJoy",
+      "name": "Xubin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11327242?v=4",
+      "profile": "https://github.com/DiamonJoy",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "duyifanict",
+      "name": "DU YIFAN",
+      "avatar_url": "https://avatars.githubusercontent.com/u/171222220?v=4",
+      "profile": "https://github.com/duyifanict",
+      "contributions": [
+        "code"
       ]
     }
   ],

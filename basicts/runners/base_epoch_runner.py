@@ -1,29 +1,30 @@
+import logging
 import os
 import time
-import logging
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union, Optional, Dict
+from typing import Dict, Optional, Tuple, Union
 
 import setproctitle
-from tqdm import tqdm
-from packaging import version
 import torch
-from torch import nn
-from torch import optim
-from torch.utils.data import Dataset, DataLoader
-from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.tensorboard import SummaryWriter
-from torch.utils.data.distributed import DistributedSampler
-
-from easytorch.core.meter_pool import MeterPool
-from easytorch.core.checkpoint import load_ckpt, save_ckpt, backup_last_ckpt, clear_ckpt
-from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
-from easytorch.core.optimizer_builder import build_optim, build_lr_scheduler
 from easytorch.config import get_ckpt_save_dir
-from easytorch.utils import TimePredictor, get_logger, get_local_rank, is_master, master_only, set_env
+from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
+                                       save_ckpt)
+from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
+from easytorch.core.meter_pool import MeterPool
 from easytorch.device import to_device
+from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
+                             is_master, master_only, set_env)
+from packaging import version
+from torch import nn
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data import DataLoader, Dataset
+from torch.utils.data.distributed import DistributedSampler
+from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
 
 from ..utils import get_dataset_name
+from . import optim
+
 
 class BaseEpochRunner(metaclass=ABCMeta):
     """
@@ -186,7 +187,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         """
 
         # TODO: support other optimizers here
-        return build_optim(optim_cfg, model)
+        return optim.build_optim(optim_cfg, model)
 
     def build_lr_scheduler(self, cfg: Dict) -> None:
         """
@@ -197,7 +198,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         """
         # create lr_scheduler
         if cfg.has('TRAIN.LR_SCHEDULER'):
-            self.scheduler = build_lr_scheduler(cfg['TRAIN.LR_SCHEDULER'], self.optim)
+            self.scheduler = optim.build_lr_scheduler(cfg['TRAIN.LR_SCHEDULER'], self.optim)
             self.logger.info('Set lr_scheduler: {}'.format(self.scheduler))
             self.register_epoch_meter('train/lr', 'train', '{:.2e}')
 

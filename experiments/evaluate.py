@@ -1,3 +1,4 @@
+# pylint: disable=wrong-import-position
 import os
 import sys
 from argparse import ArgumentParser
@@ -6,6 +7,7 @@ sys.path.append(os.path.abspath(__file__ + '/../..'))
 os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import basicts
+
 
 def parse_args():
     parser = ArgumentParser(description='Evaluate time series forecasting model in BasicTS framework!')

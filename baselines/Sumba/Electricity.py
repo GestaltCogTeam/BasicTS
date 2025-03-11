@@ -1,21 +1,19 @@
 import os
 import sys
-import torch
 from easydict import EasyDict
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
 
-from basicts.metrics import masked_mae, masked_mape, masked_rmse
+from basicts.metrics import masked_mae, masked_mse, masked_mape, masked_rmse
 from basicts.data import TimeSeriesForecastingDataset
 from basicts.runners import SimpleTimeSeriesForecastingRunner
 from basicts.scaler import ZScoreScaler
-from basicts.utils import get_regular_settings, load_adj
+from basicts.utils import get_regular_settings
 
-from .arch import BigST
-from .loss import bigst_loss
+from .arch import Sumba
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
-DATA_NAME = 'PEMS04'  # Dataset name
+DATA_NAME = 'Electricity'  # Dataset name
 regular_settings = get_regular_settings(DATA_NAME)
 INPUT_LEN = regular_settings['INPUT_LEN']  # Length of input sequence
 OUTPUT_LEN = regular_settings['OUTPUT_LEN']  # Length of output sequence
@@ -24,29 +22,38 @@ NORM_EACH_CHANNEL = regular_settings['NORM_EACH_CHANNEL'] # Whether to normalize
 RESCALE = regular_settings['RESCALE'] # Whether to rescale the data
 NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
 # Model architecture and parameters
-MODEL_ARCH = BigST
-adj_mx, _ = load_adj("datasets/" + DATA_NAME +
-                     "/adj_mx.pkl", "doubletransition")
+MODEL_ARCH = Sumba
 MODEL_PARAM = {
-    "num_nodes": 307,
-    "seq_num": INPUT_LEN,
-    "in_dim": 3,
-    "out_dim": OUTPUT_LEN, 
-    "hid_dim": 32,
-    "tau" : 0.25,
-    "random_feature_dim": 64,
-    "node_emb_dim": 32,
-    "time_emb_dim": 32,
-    "use_residual": True,
-    "use_bn": True,
-    "use_spatial": True,
-    "use_long": False,
-    "dropout": 0.3,
-    "supports": [torch.tensor(i) for i in adj_mx],
-    "time_of_day_size": 288, 
-    "day_of_week_size": 7,
-}
+    "seq_len": INPUT_LEN,
+    "pred_len": OUTPUT_LEN,
+    "individual": False,
+    "num_nodes": 321, 
+    "dropout_MTGNN": 0.3,
+    "propalpha": 0.05,
+    "gcn_true": True,
+    "M": 5,
+    "LowRank": 30,
+    "input_dim": 1,
+    "residual_channels": 32,
+    "dilation_exponential": 1,
+    "layers": 3,
+    "kernel_set": [2,3,6,7],
+    "sumba_layers": 3,
+    "conv_channels": 32,
+    "gcn_depth": 2,
+    "dimension": 32,
+    "skip_channels": 64,
+    "layer_norm_affline": True,
+    "D": 256,                             # number of hidden layers in projector
+    "end_channels": 128,
+    "output_dim": 1,
+    # "num_time_features": 4,
+    "time_of_day_size": 24,
+    # "day_of_week_size": 7,
+    # "day_of_month_size": 31,
+    # "day_of_year_size": 366
 
+}
 NUM_EPOCHS = 100
 
 ############################## General Configuration ##############################
@@ -56,11 +63,6 @@ CFG.DESCRIPTION = 'An Example Config'
 CFG.GPU_NUM = 1 # Number of GPUs to use (0 for CPU mode)
 # Runner
 CFG.RUNNER = SimpleTimeSeriesForecastingRunner
-
-############################## Environment Configuration ##############################
-
-CFG.ENV = EasyDict() # Environment settings. Default: None
-CFG.ENV.SEED = 0 # Random seed. Default: None
 
 ############################## Dataset Configuration ##############################
 CFG.DATASET = EasyDict()
@@ -92,7 +94,7 @@ CFG.MODEL = EasyDict()
 CFG.MODEL.NAME = MODEL_ARCH.__name__
 CFG.MODEL.ARCH = MODEL_ARCH
 CFG.MODEL.PARAM = MODEL_PARAM
-CFG.MODEL.FORWARD_FEATURES = [0, 1, 2]
+CFG.MODEL.FORWARD_FEATURES = [0, 1, 2, 3, 4]
 CFG.MODEL.TARGET_FEATURES = [0]
 
 ############################## Metrics Configuration ##############################
@@ -101,8 +103,9 @@ CFG.METRICS = EasyDict()
 # Metrics settings
 CFG.METRICS.FUNCS = EasyDict({
                                 'MAE': masked_mae,
-                                'MAPE': masked_mape,
+                                'MSE': masked_mse,
                                 'RMSE': masked_rmse,
+                                'MAPE': masked_mape
                             })
 CFG.METRICS.TARGET = 'MAE'
 CFG.METRICS.NULL_VAL = NULL_VAL
@@ -115,29 +118,28 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     MODEL_ARCH.__name__,
     '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_EPOCHS), str(INPUT_LEN), str(OUTPUT_LEN)])
 )
-CFG.TRAIN.LOSS = bigst_loss
+CFG.TRAIN.LOSS = masked_mae
 # Optimizer settings
 CFG.TRAIN.OPTIM = EasyDict()
-CFG.TRAIN.OPTIM.TYPE = "AdamW"
+CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.002,
+    "lr": 0.0003,
     "weight_decay": 0.0001,
 }
 # Learning rate scheduler settings
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones": [1, 50],
+    "milestones": [1, 25],
     "gamma": 0.5
+}
+CFG.TRAIN.CLIP_GRAD_PARAM = {
+    'max_norm': 5.0
 }
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
 CFG.TRAIN.DATA.BATCH_SIZE = 64
 CFG.TRAIN.DATA.SHUFFLE = True
-# Gradient clipping settings
-CFG.TRAIN.CLIP_GRAD_PARAM = {
-    "max_norm": 5.0
-}
 
 ############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()
@@ -156,7 +158,4 @@ CFG.TEST.DATA.BATCH_SIZE = 64
 CFG.EVAL = EasyDict()
 
 # Evaluation parameters
-CFG.EVAL.HORIZONS = [3, 6, 12] # Prediction horizons for evaluation. Default: []
 CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True
-
-
