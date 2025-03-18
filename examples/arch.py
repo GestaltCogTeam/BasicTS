@@ -3,10 +3,8 @@ from typing import Any, List, Optional
 import numpy as np
 import torch
 from torch import nn
-import lightning.pytorch as pl
 
 from basicts.model import BasicTimeSeriesForecastingModule
-from basicts.scaler import BaseScaler
 
 
 class MultiLayerPerceptron(BasicTimeSeriesForecastingModule):

@@ -1,7 +1,6 @@
 from typing import List
 
 from basicts.utils import get_regular_settings
-from .base_dataset import BaseDataset
 import lightning.pytorch as pl
 from importlib import import_module
 from torch.utils.data import DataLoader
@@ -44,7 +43,6 @@ class TimeSeriesForecastingModule(pl.LightningDataModule):
         self.shuffle = shuffle
         self.prefetch = prefetch
         self.regular_settings = get_regular_settings(dataset_name)
-
 
         # self.train_set = TimeSeriesForecastingDataset()
 

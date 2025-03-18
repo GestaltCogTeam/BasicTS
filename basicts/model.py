@@ -1,15 +1,12 @@
-from functools import wraps
 import functools
 import inspect
-import sched
 import lightning.pytorch as pl
-from typing import Any, Callable, Dict, Optional, Union, List
+from typing import Any, Callable, Dict, Optional, List
 
 import numpy as np
 import torch
 
 from basicts.metrics import ALL_METRICS, masked_mae
-from basicts.scaler import BaseScaler
 
 
 class BasicTimeSeriesForecastingModule(pl.LightningModule):
