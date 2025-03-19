@@ -1,37 +1,34 @@
 # Run a baseline model in BasicTS framework.
 # pylint: disable=wrong-import-position
-import os
 import sys
 from pathlib import Path
 
 FILE_PATH = Path(__file__).resolve()
-PROJECT_DIR = FILE_PATH.parent  # PROJECT_DIR
-BASICTS_DIR = PROJECT_DIR / "basicts"  # BASICTS_DIR
+PROJECT_DIR = FILE_PATH.parents[1]  # PROJECT_DIR: BasicTS
+BASICTS_DIR = PROJECT_DIR / "basicts"  # BASICTS_DIR: BasicTS/basicts
 sys.path.append(PROJECT_DIR.as_posix())
 sys.path.append(BASICTS_DIR.as_posix())
-# os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from lightning.pytorch.cli import LightningCLI
 
-from basicts.data.tsf_datamodule import TimeSeriesForecastingModule
-from basicts.model import BasicTimeSeriesForecastingModule
-# from .baselines
-
+# from basicts.data.tsf_datamodule import TimeSeriesForecastingModule
+# from basicts.model import BasicTimeSeriesForecastingModule
 
 class BasicTSCLI(LightningCLI):
     def add_arguments_to_parser(self, parser):
         super().add_arguments_to_parser(parser)
 
-        # parser.link_arguments("model.init_args.null_val", "data.regular_settings[NULL_VAL]")
-        # parser.link_arguments("model.init_args.history_len", "data.init_args.input_len")
-        # parser.link_arguments("data.init_args.prediction_len", "data.init_args.output_len")
+        parser.link_arguments("data.init_args.dataset_name", "model.init_args.dataset_name")
 
 
 def run():
     cli = BasicTSCLI(
         run=True,
         trainer_defaults={},
-        parser_kwargs={"parser_mode": "omegaconf"},  # pip install omegaconf
+        
+        parser_kwargs={"parser_mode": "omegaconf",
+            "default_config_files": [(BASICTS_DIR/"configs"/"default.yaml").as_posix()],
+        },
         save_config_kwargs={"overwrite": True, "save_to_log_dir": True},
     )
     if cli.subcommand in ("fit", "validate") and not cli.trainer.fast_dev_run:

@@ -7,6 +7,7 @@ import numpy as np
 import torch
 
 from basicts.metrics import ALL_METRICS, masked_mae
+from basicts.utils import load_dataset_desc
 
 
 class BasicTimeSeriesForecastingModule(pl.LightningModule):
@@ -22,6 +23,8 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
         target_time_series: Optional[List[int]] = None,
         scaler: Any = None,
         null_val: Any = np.nan,
+        dataset_name: str = None,
+        evaluation_horizons: Optional[List[int]] = None,
     ):
         super().__init__()
         self.lr = lr
@@ -33,7 +36,14 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
         self.target_time_series = target_time_series
         self.scaler = scaler
         self.null_val = null_val
+        self.dataset_name = dataset_name
 
+        if evaluation_horizons is None:
+            evaluation_horizons = [3, 6, 12]
+        self.evaluation_horizons = evaluation_horizons
+        assert len(self.evaluation_horizons) == 0 or min(self.evaluation_horizons) >= 1, 'The horizon should start counting from 1.'
+
+        self.dataset_desc = load_dataset_desc(dataset_name) if self.dataset_name else None
         self.metric_func_dict = self.init_metrics(metrics)
         if "loss" not in self.metric_func_dict:
             if hasattr(self, "loss_func"):
@@ -161,13 +171,16 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         forward_return = self.basicts_forward(batch)
-        metrics = {}
-        for metric_name, metric_func in self.metric_func_dict.items():
-            metric_item = self.metric_forward(metric_func, forward_return)
-            metrics[f"test/{metric_name}"] = metric_item
-        self.log_dict(metrics, on_step=False, on_epoch=True)
-        return metrics["test/loss"]
 
+        # returns_all = {'prediction': prediction, 'target': target, 'inputs': inputs}
+        metrics_results = self.compute_evaluation_metrics(forward_return)
+
+        metrics = {}
+        for metric_name, metric_value in metrics_results.items():
+            metrics[f"test/{metric_name}"] = metric_value
+        self.log_dict(metrics, on_step=False, on_epoch=True)
+        return forward_return, metrics_results
+    
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
             self.parameters(), lr=self.lr, weight_decay=self.weight_decay
@@ -272,3 +285,36 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
 
         data = data[:, :, self.target_time_series, :]
         return data
+
+    def compute_evaluation_metrics(self, returns_all: Dict):
+        """Compute metrics for evaluating model performance during the test process.
+
+        Args:
+            returns_all (Dict): Must contain keys: inputs, prediction, target.
+        """
+
+        metrics_results = {}
+        for i in self.evaluation_horizons:
+            pred = returns_all['prediction'][:, i - 1, :, :]
+            real = returns_all['target'][:, i - 1, :, :]
+
+            # metrics_results[f'horizon_{i + 1}'] = {}
+            # metric_repr = ''
+            for metric_name, metric_func in self.metric_func_dict.items():
+                if metric_name.lower() == 'mase':
+                    continue # MASE needs to be calculated after all horizons
+                if metric_name.lower() == 'loss':
+                    continue
+                metric_item = self.metric_forward(metric_func, {'prediction': pred, 'target': real})
+                # metric_repr += f', Test {metric_name}: {metric_item.item():.4f}'
+                metrics_results[f'{metric_name}/{i}'] = metric_item.item()
+            # self.logger.info(f'Evaluate best model on test data for horizon {i + 1}{metric_repr}')
+
+        # metrics_results['overall'] = {}
+        for metric_name, metric_func in self.metric_func_dict.items():
+            if metric_name.lower() == 'loss':
+                continue
+            metric_item = self.metric_forward(metric_func, returns_all)
+            metrics_results[f'{metric_name}/overall'] = metric_item.item()
+
+        return metrics_results
