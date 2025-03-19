@@ -38,8 +38,8 @@ fit:
     log_every_n_steps: 10
     callbacks:
       # Use rich for better progress bar and model summary (pip install rich)
-      # - class_path: lightning.pytorch.callbacks.RichProgressBar
-      # - class_path: lightning.pytorch.callbacks.RichModelSummary
+      - class_path: lightning.pytorch.callbacks.RichProgressBar
+      - class_path: lightning.pytorch.callbacks.RichModelSummary
       - class_path: lightning.pytorch.callbacks.EarlyStopping
         init_args:
           monitor: val/loss

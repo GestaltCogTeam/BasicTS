@@ -22,7 +22,7 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
         target_features: Optional[List[int]] = None,
         target_time_series: Optional[List[int]] = None,
         scaler: Any = None,
-        null_val: Any = np.nan,
+        null_val: Any = None,
         dataset_name: str = None,
         evaluation_horizons: Optional[List[int]] = None,
     ):
@@ -35,15 +35,17 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
         self.target_features = target_features
         self.target_time_series = target_time_series
         self.scaler = scaler
-        self.null_val = null_val
         self.dataset_name = dataset_name
-
+        self.save_hyperparameters()
         if evaluation_horizons is None:
             evaluation_horizons = [3, 6, 12]
         self.evaluation_horizons = evaluation_horizons
         assert len(self.evaluation_horizons) == 0 or min(self.evaluation_horizons) >= 1, 'The horizon should start counting from 1.'
 
         self.dataset_desc = load_dataset_desc(dataset_name) if self.dataset_name else None
+        if null_val is None and self.dataset_desc is not None:
+            null_val = self.dataset_desc['regular_settings'].get('NULL_VAL', np.nan)
+        self.null_val = null_val
         self.metric_func_dict = self.init_metrics(metrics)
         if "loss" not in self.metric_func_dict:
             if hasattr(self, "loss_func"):

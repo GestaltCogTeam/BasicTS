@@ -31,6 +31,16 @@ def run():
         },
         save_config_kwargs={"overwrite": True, "save_to_log_dir": True},
     )
+    logger = cli.trainer.logger
+
+    # Log hyperparameters
+    trainer_hparam_names = ['max_epochs', 'min_epochs', 'precision', 'overfit_batches', 'gradient_clip_val', 'gradient_clip_algorithm', 'accelerator', 'strategy', 'limit_train_batches', 'limit_val_batches', 'limit_test_batches']
+    trainer_hparams = {k: cli.config_dump['trainer'][k] for k in trainer_hparam_names}
+    logger.log_hyperparams(cli.datamodule.hparams)
+    logger.log_hyperparams(cli.model.hparams)
+    logger.log_hyperparams(trainer_hparams)
+
+
     if cli.subcommand in ("fit", "validate") and not cli.trainer.fast_dev_run:
         # 被动执行了 fit 或者 validate，追加一个 test
         cli.trainer.test(datamodule=cli.datamodule, ckpt_path="best")

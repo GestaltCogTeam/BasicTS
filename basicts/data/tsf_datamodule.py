@@ -43,7 +43,7 @@ class TimeSeriesForecastingModule(pl.LightningDataModule):
         self.shuffle = shuffle
         self.prefetch = prefetch
         self.regular_settings = get_regular_settings(dataset_name)
-
+        self.save_hyperparameters()
         # self.train_set = TimeSeriesForecastingDataset()
 
     @property
