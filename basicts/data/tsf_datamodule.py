@@ -18,7 +18,7 @@ class TimeSeriesForecastingModule(pl.LightningDataModule):
         batch_size: int = 32,
         num_workers: int = 0,
         pin_memory: bool = False,
-        shuffle: bool = False,
+        shuffle: bool = True,
         prefetch: bool = False,
     ):
         super().__init__()

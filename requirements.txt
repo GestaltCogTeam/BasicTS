@@ -1,4 +1,4 @@
-# easy-torch
+easy-torch
 easydict
 packaging
 setproctitle
@@ -8,7 +8,7 @@ tables
 sympy
 openpyxl
 rich
-lightning[pytorch-extra]
+lightning[pytorch-extra]==2.5.0.post0
 # omegaconf
 # setuptools==59.5.0
 # numpy==1.24.4

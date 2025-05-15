@@ -159,7 +159,9 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
         for metric_name, metric_func in self.metric_func_dict.items():
             metric_item = self.metric_forward(metric_func, forward_return)
             metrics[f"train/{metric_name}"] = metric_item
-        self.log_dict(metrics, on_step=True)
+            self.log(f"train/{metric_name}", metric_item, on_step=True, prog_bar=metric_name == "loss")
+            
+        # self.log_dict(metrics, on_step=True)
         return metrics["train/loss"]
 
     def validation_step(self, batch, batch_idx):
@@ -168,8 +170,9 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
         for metric_name, metric_func in self.metric_func_dict.items():
             metric_item = self.metric_forward(metric_func, forward_return)
             metrics[f"val/{metric_name}"] = metric_item
-        self.log_dict(metrics, on_step=False, on_epoch=True)
-        return metrics["val/loss"]
+            self.log(f"val/{metric_name}", metric_item, on_step=False, on_epoch=True, prog_bar=metric_name == "loss")
+        # self.log_dict(metrics, on_step=False, on_epoch=True)
+        return forward_return, metrics
 
     def test_step(self, batch, batch_idx):
         forward_return = self.basicts_forward(batch)
@@ -180,14 +183,15 @@ class BasicTimeSeriesForecastingModule(pl.LightningModule):
         metrics = {}
         for metric_name, metric_value in metrics_results.items():
             metrics[f"test/{metric_name}"] = metric_value
-        self.log_dict(metrics, on_step=False, on_epoch=True)
+            self.log(f"test/{metric_name}", metric_value, on_step=False, on_epoch=True, prog_bar=metric_name == "loss")
+        # self.log_dict(metrics, on_step=False, on_epoch=True)
         return forward_return, metrics_results
     
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(
             self.parameters(), lr=self.lr, weight_decay=self.weight_decay
         )
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.9)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, self.trainer.max_epochs)
         return [optimizer], [scheduler]
 
     def preprocessing(self, input_data: Dict, scale_keys=["target", "inputs"]) -> Dict:
