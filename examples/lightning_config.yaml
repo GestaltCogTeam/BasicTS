@@ -1,0 +1,67 @@
+fit:
+  model: 
+    class_path: examples.arch.MultiLayerPerceptron
+    init_args:
+      lr: 2e-3
+      weight_decay: 1e-4
+      history_len: 12
+      horizon_len: 12
+      hidden_dim: 64
+      forward_features: [0, 1, 2]
+      target_features: [0]
+      metrics: 
+        - MAE
+        - MAPE
+        - RMSE
+      scaler:
+        class_path: basicts.scaler.ZScoreScaler
+        init_args:
+          dataset_name: ${fit.data.init_args.dataset_name}
+          train_ratio: ${fit.data.init_args.train_val_test_ratio[0]}
+          norm_each_channel: False
+          rescale: True
+  data:
+    class_path: basicts.data.TimeSeriesForecastingModule
+    init_args:
+      dataset_class: basicts.data.TimeSeriesForecastingDataset
+      dataset_name: PEMS08
+      train_val_test_ratio: [0.6, 0.2, 0.2]
+      # input_len: 12
+      # output_len: 12
+      # To enable variable interpolation, first install omegaconf (pip install omegaconf)
+      input_len: ${fit.model.init_args.history_len}
+      output_len: ${fit.model.init_args.horizon_len}
+      overlap: False
+  trainer:
+    max_epochs: 10
+    devices: auto
+    log_every_n_steps: 10
+    callbacks:
+      # Use rich for better progress bar and model summary (pip install rich)
+      - class_path: lightning.pytorch.callbacks.RichProgressBar
+      - class_path: lightning.pytorch.callbacks.RichModelSummary
+      - class_path: lightning.pytorch.callbacks.EarlyStopping
+        init_args:
+          monitor: val/loss
+          patience: 10
+          mode: min
+      - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+        init_args:
+          monitor: val/loss
+          mode: min
+          save_top_k: 1
+          dirpath: ${fit.trainer.logger.init_args.save_dir}/${fit.trainer.logger.init_args.name}
+          filename: best
+    logger:
+      class_path: lightning.pytorch.loggers.TensorBoardLogger
+      init_args:
+        save_dir: examples/lightning_logs
+        name: ${fit.data.init_args.dataset_name}
+
+test:
+  data: ${fit.data}
+  model: ${fit.model}
+  trainer: ${fit.trainer}
+  # Specify the checkpoint path to test, it is recommended to speicify in the command line, e.g., --ckpt_path=examples/lightning_logs/best.ckpt
+  # ckpt_path: examples/lightning_logs/best.ckpt  
+  
