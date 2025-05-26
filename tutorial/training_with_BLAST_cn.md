@@ -66,11 +66,11 @@ BasicTS 当前支持使用 BLAST 训练TimeMoE和ChronosBolt两种模型。
 
    huggingface-cli download autogluon/chronos-bolt-base \
      --repo-type model \
-     --local-dir ./baselines/ChronosBolt/ckpt/ChronosBolt-base/
+     --local-dir ./baselines/ChronosBolt/ckpt/chronos-bolt-base/
 
    huggingface-cli download autogluon/chronos-bolt-small \
      --repo-type model \
-     --local-dir ./baselines/ChronosBolt/ckpt/ChronosBolt-small/
+     --local-dir ./baselines/ChronosBolt/ckpt/chronos-bolt-small/
    ```
 
 > [!IMPORTANT]

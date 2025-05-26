@@ -68,11 +68,11 @@ BasicTS currently supports training **TimeMoE** and **ChronosBolt** on BLAST.
 
    huggingface-cli download autogluon/chronos-bolt-base \
      --repo-type model \
-     --local-dir ./baselines/ChronosBolt/ckpt/ChronosBolt-base/
+     --local-dir ./baselines/ChronosBolt/ckpt/chronos-bolt-base/
 
    huggingface-cli download autogluon/chronos-bolt-small \
      --repo-type model \
-     --local-dir ./baselines/ChronosBolt/ckpt/ChronosBolt-small/
+     --local-dir ./baselines/ChronosBolt/ckpt/chronos-bolt-small/
    ```
 
 > [!IMPORTANT]
