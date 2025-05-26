@@ -38,15 +38,12 @@
 
 </div>
 
-$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series forecasting. It now supports a wide range of tasks and datasets, including spatial-temporal forecasting and long-term time series forecasting. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series forecasting models.
+$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series forecasting. It now supports a wide range of tasks and datasets, including spatial-temporal forecasting and long-term time series forecasting. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series forecasting models. You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md).
+
+🎉 **Update (May 2025):** BasicTS now supports training universal forecasting models—such as **TimeMoE** and **ChronosBolt**—with the [BLAST](https://arxiv.org/abs/2505.17871) corpus. BLAST enables **faster convergence**, **notable reductions in computational cost**, and superior performance even with limited resources. See [here](./tutorial/training_with_BLAST.md).  
 
 If you find this project helpful, please don't forget to give it a ⭐ Star to show your support. Thank you!
 
-On one hand, BasicTS provides a **unified and standardized pipeline**, offering a **fair and comprehensive** platform for reproducing and comparing popular models.
-
-On the other hand, BasicTS offers a **user-friendly and easily extensible** interface, enabling quick design and evaluation of new models. Users can simply define their model structure and easily perform basic operations.
-
-You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md). Additionally, we are collecting **ToDo** and **HowTo** items. If you need more features (e.g., additional datasets or benchmark models) or tutorials, feel free to open an issue or leave a comment [here](https://github.com/zezhishao/BasicTS/issues/95).
 
 > [!IMPORTANT]
 > If you find this repository helpful for your work, please consider citing the following benchmarking paper:
@@ -67,6 +64,10 @@ You can find detailed tutorials in [Getting Started](./tutorial/getting_started.
 > 🔥🔥🔥 ***The paper has been accepted by IEEE TKDE! You can check it out [here](https://arxiv.org/abs/2310.06119).***  🔥🔥🔥
 
 ## ✨ Highlighted Features
+
+On one hand, BasicTS provides a **unified and standardized pipeline**, offering a **fair and comprehensive** platform for reproducing and comparing popular models.
+
+On the other hand, BasicTS offers a **user-friendly and easily extensible** interface, enabling quick design and evaluation of new models. Users can simply define their model structure and easily perform basic operations.
 
 ### Fair Performance Review
 
@@ -100,11 +101,21 @@ For detailed instructions, please refer to the [Getting Started](./tutorial/gett
 
 ## 📦 Supported Baselines
 
-BasicTS implements a wealth of models, including ***classic models***, ***spatial-temporal forecasting*** models, and ***long-term time series forecasting*** model:
+BasicTS implements a wealth of models, including ***classic models***, ***spatial-temporal forecasting*** models, and ***long-term time series forecasting*** model, and **universal forecasting models**.
 
 You can find the implementation of these models in the [baselines](./baselines) directory.
 
 The code links (💻Code) in the table below point to the official implementations from these papers. Many thanks to the authors for open-sourcing their work!
+
+<details open>
+  <summary><h3>Universal Forecasting Models</h3></summary>
+
+| 📊Baseline | 📝Title                                                                                                              | 📄Paper                                              | 💻Code                                                                                                                                 | 🏛Venue     | 🎯Task |
+| :--------- | :------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :----- |
+| TimeMoE | Time-MoE: Billion-Scale Time Series Foundation Models with Mixture of Experts | [Link](https://openreview.net/forum?id=e1wDDFmlVu) | [Link](https://github.com/Time-MoE/Time-MoE) | ICLR'25 | UFM |
+| ChronosBolt | Chronos: Learning the Language of Time Series | [Link](https://arxiv.org/abs/2403.07815) | [Link](https://github.com/amazon-science/chronos-forecasting) | TMLR'24 | UFM |
+MOIRAI (inference) | Unified Training of Universal Time Series Forecasting Transformers  | [Link](https://arxiv.org/abs/2402.02592) | [Link](https://github.com/SalesforceAIResearch/uni2ts) | ICML'24 | UFM |
+</details>
 
 <details open>
   <summary><h3>Spatial-Temporal Forecasting</h3></summary>

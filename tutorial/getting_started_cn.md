@@ -56,14 +56,14 @@ pip install -r requirements.txt
 
 ### 示例设置
 
-#### 示例 1：Python 3.11 + PyTorch 2.3.1 + CUDA 12.1 (推荐)
+#### 示例 1：Python 3.11 + PyTorch 2.5.1 + CUDA 12.4 (推荐)
 
 ```bash
 # 安装 Python
 conda create -n BasicTS python=3.11
 conda activate BasicTS
 # 安装 PyTorch
-pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
 # 安装其他依赖项
 pip install -r requirements.txt
 ```
