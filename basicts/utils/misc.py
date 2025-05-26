@@ -1,5 +1,6 @@
 import time
 from functools import partial
+from typing import List, Tuple, Union
 
 import torch
 
@@ -66,3 +67,15 @@ def remove_nan_inf(tensor: torch.Tensor) -> torch.Tensor:
     tensor = torch.where(torch.isnan(tensor), torch.zeros_like(tensor), tensor)
     tensor = torch.where(torch.isinf(tensor), torch.zeros_like(tensor), tensor)
     return tensor
+
+def convert_iteration_save_strategy_to_epoch_save_strategy(ckpt_save_strategy: Union[int, List, Tuple], val_interval: int) -> Union[int, List, Tuple]:
+    if isinstance(ckpt_save_strategy, int):
+        assert ckpt_save_strategy % val_interval == 0, "ckpt_save_strategy must be divisible by val_interval"
+        return ckpt_save_strategy // val_interval
+    elif isinstance(ckpt_save_strategy, (list, tuple)):
+        assert all(epoch % val_interval == 0 for epoch in ckpt_save_strategy), "ckpt_save_strategy must be divisible by val_interval"
+        return [epoch // val_interval for epoch in ckpt_save_strategy]
+    elif ckpt_save_strategy is None:
+        return None
+    else:
+        raise ValueError("ckpt_save_strategy must be int, list, tuple or None")
