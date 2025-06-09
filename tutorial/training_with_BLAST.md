@@ -2,7 +2,8 @@
 
 ## 1  BLAST Dataset Overview
 
-The [BLAST](https://arxiv.org/abs/2505.17871) dataset is a large-scale time-series corpus created specifically for **Universal Forecasting Models**. Thanks to its rich and diverse samples, BLAST enables **faster convergence**, **notable reductions in computational cost**, and superior performance even with limited resources.  
+The [BLAST](https://arxiv.org/abs/2505.17871) dataset is a large-scale time-series corpus created specifically for **Universal Forecasting Models**. Thanks to its rich and diverse samples, BLAST enables **faster convergence**, **notable reductions in computational cost**, and superior performance even with limited resources. The BLAST data is now available at [huggingface](https://huggingface.co/datasets/ZezhiShao/BLAST).
+
 BasicTS provides native support for BLAST and can be used to train models such as **TimeMoE** (decoder-only architecture) and **ChronosBolt** (encoder-decoder architecture). Before you start, follow the BasicTS [README](../README.md) to clone the codebase and set up the environment.
 
 ## 2  Data Preparation
