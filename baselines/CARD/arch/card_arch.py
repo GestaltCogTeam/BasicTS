@@ -15,7 +15,7 @@ class CARD(nn.Module):
     """
     Paper: CARD: Channel Aligned Robust Blend Transformer for Time Series Forecasting
     Link: https://arxiv.org/abs/2305.12095
-    Official Code: https://github.com/thuml/TimeXer
+    Official Code: https://github.com/wxie9/CARD
     Venue:  ICLR 2024
     Task: Long-term Time Series Forecasting
     """
