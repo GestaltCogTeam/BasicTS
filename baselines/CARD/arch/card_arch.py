@@ -14,6 +14,13 @@ import pdb
 class CARD(nn.Module):
 
     def __init__(self, **config):
+        """
+        Paper: CARD: Channel Aligned Robust Blend Transformer for Time Series Forecasting
+        Link: https://arxiv.org/abs/2305.12095
+        Official Code: https://github.com/wxie9/CARD
+        Venue: ICLR 2024
+        Task: Long-term Time Series Forecasting
+        """
         super().__init__()
         config = Namespace(**config)
         self.patch_len  = config.patch_len
