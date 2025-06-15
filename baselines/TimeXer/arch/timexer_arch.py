@@ -121,7 +121,7 @@ class TimeXer(nn.Module):
     Official Code: https://github.com/thuml/TimeXer
     Venue:  NIPS 2024
     Task: Long-term Time Series Forecasting
-        """
+    """
     def __init__(self, **model_args):
         super().__init__()
         configs = Namespace(**model_args)
