@@ -87,6 +87,8 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.val_interval = cfg.get('VAL', {}).get('INTERVAL', 1)
         self.test_interval = cfg.get('TEST', {}).get('INTERVAL', 1)
 
+        self.save_results = cfg.get('EVAL', {}).get('SAVE_RESULTS', False)
+
         # create checkpoint save dir
         if not os.path.isdir(self.ckpt_save_dir):
             os.makedirs(self.ckpt_save_dir)
@@ -691,7 +693,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
             )
             self.logger.info('Evaluating the best model on the test set.')
             self.load_model(ckpt_path=best_model_path, strict=True)
-            self.test_pipeline(cfg=cfg, train_epoch=train_epoch, save_metrics=True, save_results=True)
+            self.test_pipeline(cfg=cfg, train_epoch=train_epoch, save_metrics=True, save_results=self.save_results)
 
     # endregion Hook Functions
 

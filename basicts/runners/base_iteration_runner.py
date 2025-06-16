@@ -86,6 +86,8 @@ class BaseIterationRunner(metaclass=ABCMeta):
         self.val_data_loader = None
         self.test_data_loader = None
 
+        self.save_results = cfg.get('EVAL', {}).get('SAVE_RESULTS', False)
+
         # declare meter pool
         self.meter_pool = None
 
@@ -574,7 +576,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
             )
             self.logger.info('Evaluating the best model on the test set.')
             self.load_model(ckpt_path=best_model_path, strict=True)
-            self.test_pipeline(cfg=cfg, train_iteration=train_iteration, save_metrics=True, save_results=True)
+            self.test_pipeline(cfg=cfg, train_iteration=train_iteration, save_metrics=True, save_results=self.save_results)
 
     def get_ckpt_path(self, iteration: int) -> str:
         """Get checkpoint path.
