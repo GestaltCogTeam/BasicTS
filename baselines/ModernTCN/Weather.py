@@ -28,7 +28,7 @@ MODEL_PARAM = {
     "stem_ratio": 6,
     "downsample_ratio": 2,
     "ffn_ratio": 8,
-    "num_blocks": [1],
+    "num_blocks": [3],
     "large_size": [51],
     "small_size": [5], 
     "dims": [64, 64, 64, 64],
@@ -36,10 +36,10 @@ MODEL_PARAM = {
     "enc_in": NUM_NODES,
     "small_kernel_merged": False,
     "dropout": 0.4,
-    "head_dropout": 0.,
+    "head_dropout": 0,
     "use_multi_scale": False,
     "revin": True,
-    "affine": True,
+    "affine": False,
     "subtract_last": False,
     "freq": 'h', 
     "seq_len": INPUT_LEN,
@@ -50,7 +50,7 @@ MODEL_PARAM = {
     "patch_stride": 4,
     "decomposition": True,
     "individual": False,
-    "time_of_day_size": 144,
+    "time_of_day_size": 96,
     "day_of_week_size": 7,
     "day_of_month_size": 31,
     "day_of_year_size": 366
@@ -127,20 +127,17 @@ CFG.TRAIN.LOSS = masked_mse
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.001
+    "lr": 0.0001
 }
 # Learning rate scheduler settings
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones": [1, 25]
-}
-CFG.TRAIN.CLIP_GRAD_PARAM = {
-    'max_norm': 5.0
+    "milestones": [25]
 }
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.DATA.BATCH_SIZE = 64
+CFG.TRAIN.DATA.BATCH_SIZE = 128
 CFG.TRAIN.DATA.SHUFFLE = True
 
 ############################## Validation Configuration ##############################

@@ -35,11 +35,11 @@ MODEL_PARAM = {
     "dw_dims": [256,256,256,256],
     "enc_in": NUM_NODES,
     "small_kernel_merged": False,
-    "dropout": 0.3,
+    "dropout": 0.8,
     "head_dropout": 0.2,
     "use_multi_scale": False,
     "revin": True,
-    "affine": True,
+    "affine": False,
     "subtract_last": False,
     "freq": 'h', 
     "seq_len": INPUT_LEN,
@@ -122,25 +122,22 @@ CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     MODEL_ARCH.__name__,
     '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_EPOCHS), str(INPUT_LEN), str(OUTPUT_LEN)])
 )
-CFG.TRAIN.LOSS = masked_mse
+CFG.TRAIN.LOSS = masked_mae
 # Optimizer settings
 CFG.TRAIN.OPTIM = EasyDict()
 CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
-    "lr": 0.001
+    "lr": 0.0001
 }
 # Learning rate scheduler settings
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
 CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones": [1, 25]
-}
-CFG.TRAIN.CLIP_GRAD_PARAM = {
-    'max_norm': 5.0
+    "milestones": [25]
 }
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.DATA.BATCH_SIZE = 64
+CFG.TRAIN.DATA.BATCH_SIZE = 256
 CFG.TRAIN.DATA.SHUFFLE = True
 
 ############################## Validation Configuration ##############################
