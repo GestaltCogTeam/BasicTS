@@ -3,7 +3,6 @@ import torch.nn as nn
 import numpy as np
 from math import sqrt
 from .masking import TriangularCausalMask, ProbMask
-from reformer_pytorch import LSHSelfAttention
 from einops import rearrange, repeat
 
 
@@ -218,6 +217,7 @@ class ReformerLayer(nn.Module):
                  d_values=None, causal=False, bucket_size=4, n_hashes=4):
         super().__init__()
         self.bucket_size = bucket_size
+        from reformer_pytorch import LSHSelfAttention
         self.attn = LSHSelfAttention(
             dim=d_model,
             heads=n_heads,
