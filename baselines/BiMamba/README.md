@@ -1,4 +1,1 @@
-BiMamba additionally requires the following dependency:
-```bash
-pip install mamba_ssm
-````
+BiMamba requires `mamba_ssm` package. Please refer to the [mamba_ssm documentation](https://github.com/state-spaces/mamba).

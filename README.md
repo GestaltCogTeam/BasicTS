@@ -40,10 +40,11 @@
 
 $\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series forecasting. It now supports a wide range of tasks and datasets, including spatial-temporal forecasting and long-term time series forecasting. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series forecasting models. You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md).
 
+🎉 **Update (June 2025):** Adds six LTSF baselines: CARD, TimeXer, Bi-Mamba, ModernTCN, S-D-Mamba, and S4.
+
 🎉 **Update (May 2025):** BasicTS now supports training universal forecasting models—such as **TimeMoE** and **ChronosBolt**—with the [BLAST](https://arxiv.org/abs/2505.17871) corpus. BLAST enables **faster convergence**, **notable reductions in computational cost**, and superior performance even with limited resources. See [here](./tutorial/training_with_BLAST.md).  
 
 If you find this project helpful, please don't forget to give it a ⭐ Star to show your support. Thank you!
-
 
 > [!IMPORTANT]
 > If you find this repository helpful for your work, please consider citing the following benchmarking paper:
@@ -148,6 +149,11 @@ MOIRAI (inference) | Unified Training of Universal Time Series Forecasting Trans
 
 | 📊Baseline    | 📝Title                                                                                                  | 📄Paper                                                | 💻Code                                                                        | 🏛Venue    | 🎯Task |
 | :------------ | :------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- | :---------------------------------------------------------------------------- | :--------- | :----- |
+| S-D-Mamba         | Is Mamba Effective for Time Series Forecasting?                           | [Link](https://arxiv.org/abs/2403.11144v3)                  | [Link](https://github.com/wzhwzhwzh0921/S-D-Mamba)                                        | NeuroComputing'24 | LTSF   |
+| Bi-Mamba         | Bi-Mamba+: Bidirectional Mamba for Time Series Forecasting                           | [Link](https://arxiv.org/abs/2404.15772)                  | [Link](https://github.com/Leopold2333/Bi-Mamba4TS)                                        | arXiv'24 | LTSF   |
+| ModernTCN         | ModernTCN: A Modern Pure Convolution Structure for General Time Series Analysis                           | [Link](https://openreview.net/forum?id=vpJMJerXHU)                  | [Link](https://github.com/luodhhh/ModernTCN)                                        | ICLR'24 | LTSF   |
+| TimeXer         | TimeXer: Empowering Transformers for Time Series Forecasting with Exogenous Variables                           | [Link](https://arxiv.org/abs/2402.19072)                  | [Link](https://github.com/thuml/TimeXer)                                        | NeurIPS'24 | LTSF   |
+| CARD         | CARD: Channel Aligned Robust Blend Transformer for Time Series Forecasting                           | [Link](https://arxiv.org/abs/2305.12095)                  | [Link](https://github.com/wxie9/CARD)                                        | ICLR'24 | LTSF   |
 | SOFTS         | SOFTS: Efficient Multivariate Time Series Forecasting with Series-Core Fusion                           | [Link](https://arxiv.org/pdf/2404.14197)                  | [Link](https://github.com/Secilia-Cxy/SOFTS)                                        | NeurIPS'24 | LTSF   |
 | CATS          | Are Self-Attentions Effective for Time Series Forecasting?                                               | [Link](https://arxiv.org/pdf/2405.16877)                  | [Link](https://github.com/dongbeank/CATS)                                        | NeurIPS'24 | LTSF   |
 | Sumba         | Structured Matrix Basis for Multivariate Time Series Forecasting with Interpretable Dynamics             | [Link](https://xiucheng.org/assets/pdfs/nips24-sumba.pdf) | [Link](https://github.com/chenxiaodanhit/Sumba/)                                 | NeurIPS'24 | LTSF   |
@@ -172,6 +178,7 @@ MOIRAI (inference) | Unified Training of Universal Time Series Forecasting Trans
 | NHiTS         | Neural Hierarchical Interpolation for Time Series Forecasting                                            | [Link](https://arxiv.org/abs/2201.12886)                  | [Link](https://github.com/cchallu/n-hits)                                        | AAAI'23    | LTSF   |
 | PatchTST      | A Time Series is Worth 64 Words: Long-term Forecasting with Transformers                                 | [Link](https://arxiv.org/abs/2211.14730)                  | [Link](https://github.com/yuqinie98/PatchTST)                                    | ICLR'23    | LTSF   |
 | TiDE          | Long-term Forecasting with TiDE: Time-series Dense Encoder                                               | [Link](https://arxiv.org/abs/2304.08424)                  | [Link](https://github.com/lich99/TiDE)                                           | TMLR'23    | LTSF   |
+| S4         | Efficiently Modeling Long Sequences with Structured State Spaces                           | [Link](https://openreview.net/pdf?id=uYLFoz1vlAC)                  | [Link](https://github.com/state-spaces/s4)                                        | ICLR'22 | LTSF   |
 | TimesNet      | Temporal 2D-Variation Modeling for General Time Series Analysis                                          | [Link](https://openreview.net/pdf?id=ju_Uqw384Oq)         | [Link](https://github.com/thuml/TimesNet)                                        | ICLR'23    | LTSF   |
 | Triformer     | Triangular, Variable-Specific Attentions for Long Sequence Multivariate Time Series Forecasting          | [Link](https://arxiv.org/abs/2204.13767)                  | [Link](https://github.com/razvanc92/triformer)                                   | IJCAI'22   | LTSF   |
 | NSformer      | Exploring the Stationarity in Time Series Forecasting                                                    | [Link](https://arxiv.org/abs/2205.14415)                  | [Link](https://github.com/thuml/Nonstationary_Transformers)                      | NeurIPS'22 | LTSF   |
@@ -289,9 +296,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
-## ⭐ Star History
+<!-- ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=GestaltCogTeam/BasicTS&type=Date)](https://star-history.com/#GestaltCogTeam/BasicTS&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=GestaltCogTeam/BasicTS&type=Date)](https://star-history.com/#GestaltCogTeam/BasicTS&Date) -->
 
 ## 🔗 Acknowledgement
 
