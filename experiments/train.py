@@ -8,6 +8,9 @@ sys.path.append(os.path.abspath(__file__ + '/../..'))
 os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import torch
+
+import basicts
+
 # import torch._dynamo
 
 # torch.set_float32_matmul_precision('high')
@@ -16,7 +19,6 @@ import torch
 # torch._dynamo.config.capture_scalar_outputs = True
 # torch._dynamo.config.optimize_ddp = False
 
-import basicts
 
 torch.set_num_threads(4) # aviod high cpu avg usage
 

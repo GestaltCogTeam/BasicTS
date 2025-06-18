@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 import torch
 
@@ -61,7 +61,7 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         # TODO: add more postprocessing steps as needed.
         return input_data
 
-    def forward(self, data: Dict, epoch: int = None, iter_num: int = None, train: bool = True, **kwargs) -> Dict:
+    def forward(self, data: Dict, epoch: Optional[int] = None, iter_num: Optional[int] = None, train: bool = True, **kwargs) -> Dict:
         """
         Performs the forward pass for training, validation, and testing. 
 

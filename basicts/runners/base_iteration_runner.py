@@ -349,6 +349,25 @@ class BaseIterationRunner(metaclass=ABCMeta):
 
         pass
 
+    def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list], context_length: int, prediction_length: int) -> Dataset:
+        """
+        Build the inference dataset.
+
+        Args:
+            cfg (Dict): Configuration dictionary.
+            input_data (Union[str, list]): The input data file path or data list for inference.
+            context_length (int): The length of the context for inference.
+            prediction_length (int): The length of the prediction for inference.
+
+        Returns:
+            Dataset: The inference dataset.
+
+        Raises:
+            NotImplementedError: Must be implemented in a subclass.
+        """
+
+        raise NotImplementedError('build_inference_dataset method must be implemented.')
+
     def init_lr_scheduler(self, cfg: Dict) -> None:
         """
         Initialize lr_scheduler
@@ -361,6 +380,22 @@ class BaseIterationRunner(metaclass=ABCMeta):
             self.scheduler = build_lr_scheduler(cfg['TRAIN.LR_SCHEDULER'], self.optim)
             self.logger.info('Set lr_scheduler: {}'.format(self.scheduler))
             self.register_iteration_meter('train/lr', 'train', '{:.2e}')
+
+    @master_only
+    def init_inference(self, cfg: Dict, input_data: Union[str, list], context_length: int, prediction_length: int) -> None:
+        """
+        Initialize the inference data loader and related settings.
+
+        Args:
+            cfg (Dict): Configuration dictionary.
+            input_data (Union[str, list]): The input data file path or data list for inference.
+            context_length (int): The length of the context for inference.
+            prediction_length (int): The length of the prediction for inference.
+        """
+
+        self.inference_dataset = self.build_inference_dataset(cfg, input_data, context_length, prediction_length)
+        self.inference_dataset_loader = DataLoader(self.inference_dataset, batch_size=1, shuffle=False)
+        self.register_iteration_meter('inference/time', 'inference', '{:.2f} (s)', plt=False)
 
     def load_model(self, ckpt_path: str = None, strict: bool = True) -> None:
         """Load model state dict.
@@ -761,6 +796,59 @@ class BaseIterationRunner(metaclass=ABCMeta):
 
         raise NotImplementedError('test method must be implemented.')
 
+    @torch.no_grad()
+    @master_only
+    def inference_pipeline(self, cfg: Optional[Dict] = None, input_data: Union[str, list] = '', output_data_file_path: str = '', context_length=0, prediction_length=0) -> tuple:
+        """
+        The complete inference process.
+
+        Args:
+            cfg (Dict, optional): Configuration dictionary.
+            input_data (Union[str, list], optional): The input data file path or data list for inference.
+            output_data_file_path (str, optional): The output data file path. Defaults to '' meaning no output file.
+            context_length (int, optional): Context length for inference, only used for utfs models. Defaults to 0.
+            prediction_length (int, optional): Prediction length for inference, only used for utfs models. Defaults to 0.
+        """
+
+        # if isinstance(input_data, str):
+        #     pass
+
+        self.init_inference(cfg, input_data, context_length, prediction_length)
+
+        self.on_inference_start()
+
+        inference_start_time = time.time()
+        self.model.eval()
+
+        # execute the inference process
+        result = self.inference(save_result_path=output_data_file_path)
+
+        inference_end_time = time.time()
+        self.update_iteration_meter('inference/time', inference_end_time - inference_start_time)
+
+        self.print_iteration_meters('inference')
+
+        # logging here for intuitiveness
+        if output_data_file_path:
+            self.logger.info(f'inference results saved to {output_data_file_path}.')
+
+        self.on_inference_end()
+
+        return result
+
+    def inference(self, save_result_path: str = '') -> tuple:
+        """
+        Define the details of the inference process.
+
+        Args:
+            save_result_path (str, optional): The output data file path. Defaults to '' meaning no output file.
+
+        Raises:
+            NotImplementedError: Must be implemented in a subclass.
+        """
+
+        raise NotImplementedError('test method must be implemented.')
+
     @master_only
     def on_test_start(self) -> None:
         """Callback at the start of testing."""
@@ -768,8 +856,20 @@ class BaseIterationRunner(metaclass=ABCMeta):
         pass
 
     @master_only
+    def on_inference_start(self) -> None:
+        """Callback at the start of inference."""
+
+        pass
+
+    @master_only
     def on_test_end(self) -> None:
         """Callback at the end of testing."""
+
+        pass
+
+    @master_only
+    def on_inference_end(self) -> None:
+        """Callback at the end of inference."""
 
         pass
 

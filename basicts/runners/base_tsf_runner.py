@@ -11,6 +11,8 @@ from easydict import EasyDict
 from easytorch.utils import master_only
 from tqdm import tqdm
 
+from basicts.data.simple_inference_dataset import TimeSeriesInferenceDataset
+
 from ..metrics import (masked_mae, masked_mape, masked_mse, masked_rmse,
                        masked_wape)
 from .base_epoch_runner import BaseEpochRunner
@@ -253,6 +255,21 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         return dataset
 
+    def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list]):
+        """Build the inference dataset.
+
+        Args:
+            cfg (Dict): Configuration.
+            input_data (Union[str, list]): The input data file path or data list for inference.
+        Returns:
+            Dataset: The constructed inference dataset.
+        """
+
+        dataset = TimeSeriesInferenceDataset(dataset=input_data, logger=self.logger, **cfg['DATASET']['PARAM'])
+        self.logger.info(f'Inference dataset length: {len(dataset)}')
+
+        return dataset
+
     def curriculum_learning(self, epoch: int = None) -> int:
         """Calculate task level for curriculum learning.
 
@@ -275,7 +292,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             cl_length = min(progress, self.prediction_length)
         return cl_length
 
-    def forward(self, data: tuple, epoch: int = None, iter_num: int = None, train: bool = True, **kwargs) -> Dict:
+    def forward(self, data: tuple, epoch: Optional[int] = None, iter_num: Optional[int] = None, train: bool = True, **kwargs) -> Dict:
         """
         Performs the forward pass for training, validation, and testing. 
         Note: The outputs are not re-scaled.
@@ -444,6 +461,47 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
                 json.dump(metrics_results, f, indent=4)
 
         return returns_all
+
+    @torch.no_grad()
+    @master_only
+    def inference(self, save_result_path: str = '') -> tuple:
+        """Inference process.
+        
+        Args:
+            save_result_path (str): The path to save the inference results. Defaults to '' meaning no saving.
+        """
+
+        data = next(iter(self.inference_dataset_loader))
+
+        forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
+        prediction = forward_return['prediction'].detach().cpu()
+        prediction = prediction.squeeze(0).squeeze(-1)
+
+        datetime_data = self._inference_get_data_time(prediction, self.inference_dataset.last_datetime, \
+                                                   self.inference_dataset.description['frequency (minutes)'])
+
+        # save
+        if save_result_path:
+            # save prediction to save_result_path with csv format
+            datetime_data = np.fromiter((x.astype('datetime64[us]').item().strftime('%Y-%m-%d %H:%M:%S')\
+                                         for x in datetime_data), 'S32').reshape(-1, 1)
+            save_data = np.concatenate((datetime_data, prediction.numpy().astype(str)), axis=1)
+            np.savetxt(save_result_path, save_data, delimiter=',', fmt='%s')
+
+        return prediction.numpy(), datetime_data
+
+    @torch.no_grad()
+    @master_only
+    def _inference_get_data_time(self, data: np.ndarray, last_datatime: np.datetime64, freq: int) -> np.ndarray:
+        """
+        Append new data to the existing data
+        """
+
+        datetime_data = np.arange(last_datatime + np.timedelta64(freq, 'm'),
+                             last_datatime + np.timedelta64(freq * (len(data) + 1), 'm'),
+                             np.timedelta64(freq, 'm'))
+
+        return datetime_data
 
     @master_only
     def on_validating_end(self, train_epoch: Optional[int]):
