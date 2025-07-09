@@ -34,6 +34,7 @@
 - **配置文件路径**
 - **输入数据路径**
 - **输出数据路径**
+- **设备类型**（可选）
 - **可用的GPU列表**（可选）
 
 如果你使用utsf模型（如TimeMoe）进行推理，还需要额外提供：
@@ -50,7 +51,7 @@ python experiments/inference.py -cfg <配置文件路径> -ckpt <检查点路径
 对于utsf模型，还需提供输入长度和输出长度
 
 ```bash
-python experiments/inference.py -cfg <配置文件路径> -ckpt <检查点路径> -i <输入文件路径> -o <输出文件路径> -ctx <输出长度> -pred <输出长度>
+python experiments/inference.py -cfg <配置文件路径> -ckpt <检查点路径> -d <设备类型:cpu/gpu> -i <输入文件路径> -o <输出文件路径> -ctx <输出长度> -pred <输出长度>
 ```
 
 ### 示例
@@ -82,7 +83,7 @@ python experiments/inference.py -cfg "baselines/STID/ETTh1.py" -ckpt "/checkpoin
 - **使用chronos进行推理**
 
 ```bash
-python experiments/inference.py -cfg "baselines/ChronosBolt/config/chronos_base.py" -ckpt "ckpts_release/ChronosBolt-base-BLAST.pt" -i "./in_etth1.csv" -o "out.csv" -ctx 72 -pred 36
+python experiments/inference.py -cfg "baselines/ChronosBolt/config/chronos_base.py" -ckpt "ckpts_release/ChronosBolt-base-BLAST.pt" -d gpu -i "./in_etth1.csv" -o "out.csv" -ctx 72 -pred 36
 ```
 
 输入数据集
