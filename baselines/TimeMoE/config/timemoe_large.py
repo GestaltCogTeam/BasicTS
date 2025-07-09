@@ -21,7 +21,7 @@ MODEL_ARCH = TimeMoE
 
 MODEL_PARAM = {
     'model_id': "baselines/TimeMoE/ckpt/TimeMoE-200M",
-    'from_pretrained': False,
+    'from_pretrained': pretrained,
     'context_length': 4095,
     'trust_remote_code': True,
 }

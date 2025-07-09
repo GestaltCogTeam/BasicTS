@@ -9,6 +9,8 @@ from easytorch.device import set_device_type
 from easytorch.utils import set_visible_devices
 
 sys.path.append(os.path.abspath(os.path.join(__file__,'..','..','..')))
+
+
 class inference_engine(object):
     """
     Inference engine for EasyTorch.

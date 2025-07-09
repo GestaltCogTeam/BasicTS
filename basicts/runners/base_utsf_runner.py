@@ -22,8 +22,8 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
     def __init__(self, cfg: Dict):
         super().__init__(cfg)
 
-        # setup graph flag
-        self.need_setup_graph = cfg['MODEL'].get('SETUP_GRAPH', False)
+        # setup graph flag, utsf models do not need
+        self.need_setup_graph = False
 
         # initialize scaler
         self.data_scaler = self.build_data_scaler(cfg)
