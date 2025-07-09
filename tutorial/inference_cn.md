@@ -139,8 +139,9 @@ streamlit run server/web_inference.py
 
 - **选择对应的检查点**
 
-  > [!NOTE]  
-  > checkpoint文件需要在项目目录下
+> [!NOTE]  
+> checkpoint文件需要在项目目录下
+
   ![select_checkpoint](figures/select_checkpoint.png)
 
 
