@@ -116,8 +116,8 @@ You can also access via `http://host-ip-or-localhost:8501`.
    ![load_config](figures/load_config.png)
 - **Choose checkpoint**  
 
-  > [!NOTE]  
-  > Checkpoint files must reside within the project directory.
+> [!NOTE]  
+> Checkpoint files must reside within the project directory.
 
 
    ![select_checkpoint](figures/select_checkpoint.png)
