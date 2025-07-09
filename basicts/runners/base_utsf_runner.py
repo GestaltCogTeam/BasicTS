@@ -9,6 +9,8 @@ from easytorch.device import _DEVICE_TYPE
 from easytorch.utils import get_world_size, master_only
 from torch.utils.data import DataLoader, Dataset
 
+from basicts.data.simple_inference_dataset import TimeSeriesInferenceDataset
+
 from .base_iteration_runner import BaseIterationRunner
 
 
@@ -19,6 +21,9 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
 
     def __init__(self, cfg: Dict):
         super().__init__(cfg)
+
+        # setup graph flag, utsf models do not need
+        self.need_setup_graph = False
 
         # initialize scaler
         self.data_scaler = self.build_data_scaler(cfg)
@@ -50,6 +55,11 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         self.amp_scaler = torch.amp.GradScaler(enabled=self.user_amp)
         # ddp with gradient accumulation
         self.grad_accumulation_steps = cfg.get('TRAIN.GRAD_ACCUMULATION_STEPS',1)
+
+        # inference settings
+        self.generation_params = cfg['INFERENCE'].get('GENERATION_PARAMS', {})
+        self.forward_features = [0] # do not use time features
+        self.target_features = [0] # do not use time features
 
     def build_data_scaler(self, cfg: Dict):
         """Build scaler.
@@ -130,6 +140,27 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
     def build_test_dataset(self, cfg: Dict) -> Dataset:
         """Build the test dataset."""
         return self.build_dataset(cfg, mode='test')
+
+    def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list], context_length: int, prediction_length: int):
+        """Build the inference dataset.
+
+        Args:
+            cfg (Dict): Configuration.
+            input_data (Union[str, list]): The input data file path or data list for inference.
+            context_length (int): The length of the context for inference.
+            prediction_length (int): The length of the prediction for inference.
+        Returns:
+            Dataset: The constructed inference dataset.
+        """
+        if context_length != 0:
+            cfg['DATASET']['PARAM']['input_len'] = context_length
+        if prediction_length != 0:
+            cfg['DATASET']['PARAM']['output_len'] = prediction_length
+
+        dataset = TimeSeriesInferenceDataset(dataset_name='', dataset=input_data, logger=self.logger, **cfg['DATASET']['PARAM'])
+        self.logger.info(f'Inference dataset length: {len(dataset)}')
+
+        return dataset
 
     def build_dataset(self, cfg: Dict, mode:str) -> Dataset:
         """Build the training/validation/test dataset.
@@ -335,6 +366,113 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
             self.update_iteration_meter(f'val/{metric_name}', metric_item.item())
+
+    @torch.no_grad()
+    @master_only
+    def inference(self, save_result_path: str = '') -> tuple:
+        """Inference process.
+        
+        Args:
+            save_result_path (str): The path to save the inference results. Defaults to '' meaning no saving.
+        """
+
+        data = next(iter(self.inference_dataset_loader))
+
+        forward_return = self.inference_forward(data)
+        prediction = forward_return['prediction'].detach().cpu()
+        prediction = prediction.squeeze(0).squeeze(-1)
+
+        datetime_data = self._inference_get_data_time(prediction, self.inference_dataset.last_datetime, \
+                                                   self.inference_dataset.description['frequency (minutes)'])
+
+        # save
+        if save_result_path:
+            # save prediction to save_result_path with csv format
+            datetime_data = np.fromiter((x.astype('datetime64[us]').item().strftime('%Y-%m-%d %H:%M:%S')\
+                                         for x in datetime_data), 'S32').reshape(-1, 1)
+            save_data = np.concatenate((datetime_data, prediction.numpy().astype(str)), axis=1)
+            np.savetxt(save_result_path, save_data, delimiter=',', fmt='%s')
+
+        return prediction.numpy(), datetime_data
+
+    @torch.no_grad()
+    @master_only
+    def _inference_get_data_time(self, data: np.ndarray, last_datatime: np.datetime64, freq: int) -> np.ndarray:
+        """
+        Append new data to the existing data
+        """
+
+        datetime_data = np.arange(last_datatime + np.timedelta64(freq, 'm'),
+                             last_datatime + np.timedelta64(freq * (len(data) + 1), 'm'),
+                             np.timedelta64(freq, 'm'))
+
+        return datetime_data
+
+    def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
+        if self.forward_features is not None:
+            data = data[:, :, :, self.forward_features]
+        return data
+
+    def select_target_features(self, data: torch.Tensor) -> torch.Tensor:
+        data = data[:, :, :, self.target_features]
+        return data
+
+    def inference_forward(self, data: Dict) -> Dict:
+        """
+        Performs the forward pass for inference. 
+
+        Args:
+            data (Dict): A dictionary containing 'target' (future data) and 'inputs' (history data) (normalized by self.scaler).
+
+        Returns:
+            Dict: A dictionary containing the keys:
+                  - 'inputs': Selected input features.
+                  - 'prediction': Model predictions.
+                  - 'target': Selected target features.
+
+        Raises:
+            AssertionError: If the shape of the model output does not match [B, L, N].
+        """
+
+        data = self.preprocessing(data)
+
+        # Preprocess input data
+        future_data, history_data = data['target'], data['inputs']
+        history_data = self.to_running_device(history_data)  # Shape: [B, L, N, C]
+        future_data = self.to_running_device(future_data)    # Shape: [B, L, N, C]
+        batch_size, length, num_nodes, _ = future_data.shape
+
+        # Select input features
+        history_data = self.select_input_features(history_data)
+        future_data_4_dec = self.select_input_features(future_data)
+
+        # For non-training phases, use only temporal features
+        future_data_4_dec[..., 0] = torch.empty_like(future_data_4_dec[..., 0])
+
+        # Forward pass through the model
+        B, L, N, _ = history_data.shape
+        prediction_length = future_data_4_dec.shape[1]
+        context = history_data[..., 0].transpose(1, 2).reshape(B * N, L).contiguous()
+
+        # Generate predictions
+        model_return = self.model.generate(context, prediction_length, **self.generation_params)
+        model_return = model_return.reshape(B, N, prediction_length, 1).transpose(1, 2).contiguous()
+
+        # Parse model return
+        if isinstance(model_return, torch.Tensor):
+            model_return = {'prediction': model_return}
+        if 'inputs' not in model_return:
+            model_return['inputs'] = self.select_target_features(history_data)
+        if 'target' not in model_return:
+            model_return['target'] = self.select_target_features(future_data)
+
+        # Ensure the output shape is correct
+        assert list(model_return['prediction'].shape)[:3] == [batch_size, length, num_nodes], \
+            'The shape of the output is incorrect. Ensure it matches [B, L, N, C].'
+
+        model_return = self.postprocessing(model_return)
+
+        return model_return
 
     @master_only
     def on_validating_end(self, train_iteration: Optional[int]):
