@@ -36,6 +36,7 @@ Context data must be:
 - Model checkpoint path (`-ckpt`)
 - Context data path (`-i`)
 - Output data path (`-o`)
+- Device type(optional) (`-d`)
 - GPU list (optional) (`-g`)
 
 **For UTFS models (e.g., TimeMoe) add:**
@@ -49,7 +50,7 @@ Context data must be:
 python experiments/inference.py -cfg <config_path> -ckpt <checkpoint_path> -i <context_path> -o <output_path>
 
 # UTFS models
-python experiments/inference.py -cfg <config_path> -ckpt <checkpoint_path> -i <context_path> -o <output_path> -ctx <context_length> -pred <prediction_length>
+python experiments/inference.py -cfg <config_path> -ckpt <checkpoint_path> -d <device_type:cpu/gpu> -i <context_path> -o <output_path> -ctx <context_length> -pred <prediction_length>
 ```
 
 ### Examples
@@ -72,7 +73,7 @@ python experiments/inference.py -cfg "baselines/STID/ETTh1.py" -ckpt "checkpoint
 2. **Chronos model:**
 
 ```bash
-python experiments/inference.py -cfg "baselines/ChronosBolt/config/chronos_base.py" -ckpt "ckpts_release/ChronosBolt-base-BLAST.pt" -i "./in_etth1.csv" -o "out.csv" -ctx 72 -pred 36
+python experiments/inference.py -cfg "baselines/ChronosBolt/config/chronos_base.py" -ckpt "ckpts_release/ChronosBolt-base-BLAST.pt" -d gpu -i "./in_etth1.csv" -o "out.csv" -ctx 72 -pred 36
 ```
 
 **Output example:**
