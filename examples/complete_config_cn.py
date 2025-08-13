@@ -226,3 +226,4 @@ CFG.EVAL = EasyDict()
 # 这是时空预测中的常见配置。对于长序列预测，建议将 HORIZONS 保持为默认值 []，以避免引发误解。
 CFG.EVAL.HORIZONS = []
 CFG.EVAL.USE_GPU = True # 是否在评估时使用 GPU。默认值：True
+CFG.EVAL.SAVE_RESULTS = False # 是否将评估结果保存为一个numpy文件。 默认值：False

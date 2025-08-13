@@ -229,3 +229,4 @@ CFG.EVAL = EasyDict()
 # This is a common setting in spatiotemporal forecasting. For long-sequence predictions, it is recommended to keep HORIZONS set to the default value [] to avoid confusion.
 CFG.EVAL.HORIZONS = []
 CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True
+CFG.EVAL.SAVE_RESULTS = False # Whether to save evaluation results in a numpy file. Default: False

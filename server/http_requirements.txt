@@ -1,0 +1,4 @@
+fastapi
+pydantic_settings
+python-multipart
+uvicorn[standard]

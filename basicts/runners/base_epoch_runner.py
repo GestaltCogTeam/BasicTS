@@ -87,6 +87,8 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.val_interval = cfg.get('VAL', {}).get('INTERVAL', 1)
         self.test_interval = cfg.get('TEST', {}).get('INTERVAL', 1)
 
+        self.save_results = cfg.get('EVAL', {}).get('SAVE_RESULTS', False)
+
         # create checkpoint save dir
         if not os.path.isdir(self.ckpt_save_dir):
             os.makedirs(self.ckpt_save_dir)
@@ -251,8 +253,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         dataset = self.build_val_dataset(cfg)
         return build_data_loader(dataset, cfg['VAL.DATA'])
 
-    @staticmethod
-    def build_val_dataset(cfg: Dict) -> Dataset:
+    def build_val_dataset(self, cfg: Dict) -> Dataset:
         """It can be implement to build dataset for validation (not necessary).
 
         Args:
@@ -293,6 +294,22 @@ class BaseEpochRunner(metaclass=ABCMeta):
         """
 
         raise NotImplementedError('build_test_dataset method must be implemented.')
+
+    def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list]) -> Dataset:
+        """
+        Build the inference dataset.
+
+        Args:
+            cfg (Dict): Configuration dictionary.
+
+        Returns:
+            Dataset: The inference dataset.
+
+        Raises:
+            NotImplementedError: Must be implemented in a subclass.
+        """
+
+        raise NotImplementedError('build_inference_dataset method must be implemented.')
 
     def init_training(self, cfg: Dict) -> None:
         """
@@ -371,6 +388,20 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.test_interval = cfg['TEST'].get('INTERVAL', 1)
         self.test_data_loader = self.build_test_data_loader(cfg)
         self.register_epoch_meter('test/time', 'test', '{:.2f} (s)', plt=False)
+
+    @master_only
+    def init_inference(self, cfg: Dict, input_data: Union[str, list]) -> None:
+        """
+        Initialize the inference data loader and related settings.
+
+        Args:
+            cfg (Dict): Configuration dictionary.
+            input_data (Union[str, list]): The input data file path or data list for inference.
+        """
+
+        self.inference_dataset = self.build_inference_dataset(cfg, input_data)
+        self.inference_dataset_loader = DataLoader(self.inference_dataset, batch_size=1, shuffle=False)
+        self.register_epoch_meter('inference/time', 'inference', '{:.2f} (s)', plt=False)
 
     # endregion Initialization Functions
 
@@ -532,6 +563,47 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
         self.on_test_end()
 
+    @torch.no_grad()
+    @master_only
+    # pylint: disable=unused-argument
+    def inference_pipeline(self, cfg: Optional[Dict] = None, input_data: Union[str, list] = '', output_data_file_path: str = '', **kwargs) -> tuple:
+        """
+        The complete inference process.
+
+        Args:
+            cfg (Dict, optional): Configuration dictionary.
+            input_data (Union[str, list], optional): The input data file path or data list for inference.
+            output_data_file_path (str, optional): The output data file path. Defaults to '' meaning no output file.
+            **kwargs: Additional keyword arguments for flexibility in inference.
+        """
+
+        # if isinstance(input_data, str):
+        #     pass
+
+        self.init_inference(cfg, input_data)
+
+        self.on_inference_start()
+
+        inference_start_time = time.time()
+        self.model.eval()
+
+        # execute the inference process
+        result = self.inference(save_result_path=output_data_file_path)
+
+        inference_end_time = time.time()
+        self.update_epoch_meter('inference/time', inference_end_time - inference_start_time)
+
+        self.print_epoch_meters('inference')
+
+        # logging here for intuitiveness
+        if output_data_file_path:
+            self.logger.info(f'inference results saved to {output_data_file_path}.')
+
+        self.on_inference_end()
+
+        return result
+
+
     # endregion Entries
 
     # region Main Loops
@@ -578,6 +650,19 @@ class BaseEpochRunner(metaclass=ABCMeta):
             train_epoch (int, optional): Current epoch during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
             save_results (bool, optional): Save the test results. Defaults to False.
+
+        Raises:
+            NotImplementedError: Must be implemented in a subclass.
+        """
+
+        raise NotImplementedError('test method must be implemented.')
+
+    def inference(self, save_result_path: str = '') -> tuple:
+        """
+        Define the details of the inference process.
+
+        Args:
+            save_result_path (str, optional): The output data file path. Defaults to '' meaning no output file.
 
         Raises:
             NotImplementedError: Must be implemented in a subclass.
@@ -666,8 +751,20 @@ class BaseEpochRunner(metaclass=ABCMeta):
         pass
 
     @master_only
+    def on_inference_start(self) -> None:
+        """Callback at the start of inference."""
+
+        pass
+
+    @master_only
     def on_test_end(self) -> None:
         """Callback at the end of testing."""
+
+        pass
+
+    @master_only
+    def on_inference_end(self) -> None:
+        """Callback at the end of inference."""
 
         pass
 
@@ -691,7 +788,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
             )
             self.logger.info('Evaluating the best model on the test set.')
             self.load_model(ckpt_path=best_model_path, strict=True)
-            self.test_pipeline(cfg=cfg, train_epoch=train_epoch, save_metrics=True, save_results=True)
+            self.test_pipeline(cfg=cfg, train_epoch=train_epoch, save_metrics=True, save_results=self.save_results)
 
     # endregion Hook Functions
 

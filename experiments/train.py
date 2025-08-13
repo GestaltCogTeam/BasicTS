@@ -11,6 +11,15 @@ import torch
 
 import basicts
 
+# import torch._dynamo
+
+# torch.set_float32_matmul_precision('high')
+# torch._dynamo.config.accumulated_cache_size_limit = 256
+# torch._dynamo.config.cache_size_limit = 256  # 或更高
+# torch._dynamo.config.capture_scalar_outputs = True
+# torch._dynamo.config.optimize_ddp = False
+
+
 torch.set_num_threads(4) # aviod high cpu avg usage
 
 def parse_args():
