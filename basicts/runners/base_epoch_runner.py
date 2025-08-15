@@ -552,16 +552,11 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.update_epoch_meter('test/time', test_end_time - test_start_time)
 
         self.print_epoch_meters('test')
+
         if train_epoch is not None:
             self.plt_epoch_meters('test', train_epoch // self.test_interval)
 
-        # logging here for intuitiveness
-        if save_results:
-            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results.npz")}.')
-        if save_metrics:
-            self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
-
-        self.on_test_end()
+        self.on_test_end(save_metrics)
 
     @torch.no_grad()
     @master_only
@@ -642,14 +637,13 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
-    def test(self, train_epoch: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> None:
+    def test(self, train_epoch: Optional[int] = None, save_metrics: bool = False) -> None:
         """
         Define the details of the testing process.
 
         Args:
             train_epoch (int, optional): Current epoch during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
-            save_results (bool, optional): Save the test results. Defaults to False.
 
         Raises:
             NotImplementedError: Must be implemented in a subclass.
@@ -757,7 +751,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         pass
 
     @master_only
-    def on_test_end(self) -> None:
+    def on_test_end(self, save_metrics: bool = False) -> None:
         """Callback at the end of testing."""
 
         pass

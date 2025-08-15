@@ -9,6 +9,7 @@ import numpy as np
 import torch
 from easydict import EasyDict
 from easytorch.utils import master_only
+from easytorch.core.meter_pool import MeterPool
 from tqdm import tqdm
 
 from basicts.data.simple_inference_dataset import TimeSeriesInferenceDataset
@@ -178,6 +179,10 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         self.register_epoch_meter('test/loss', 'test', '{:.4f}')
         for key in self.metrics:
             self.register_epoch_meter(f'test/{key}', 'test', '{:.4f}')
+        
+        for i in self.evaluation_horizons:
+            for key in self.metrics:
+                self.register_epoch_meter(f'test/{key}@h{i+1}', f'test @ horizon {i+1}', '{:.4f}')
 
     def build_train_dataset(self, cfg: Dict):
         """Build the training dataset.
@@ -361,7 +366,8 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             forward_return['prediction'] = forward_return['prediction'][:, :cl_length, :, :]
             forward_return['target'] = forward_return['target'][:, :cl_length, :, :]
         loss = self.metric_forward(self.loss, forward_return)
-        self.update_epoch_meter('train/loss', loss.item())
+        batch_size = forward_return['target'].shape[0]
+        self.update_epoch_meter('train/loss', loss.item(), batch_size)
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
@@ -378,41 +384,12 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
         loss = self.metric_forward(self.loss, forward_return)
-        self.update_epoch_meter('val/loss', loss.item())
+        batch_size = forward_return['target'].shape[0]
+        self.update_epoch_meter('val/loss', loss.item(), batch_size)
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
-            self.update_epoch_meter(f'val/{metric_name}', metric_item.item())
-
-    def compute_evaluation_metrics(self, returns_all: Dict):
-        """Compute metrics for evaluating model performance during the test process.
-
-        Args:
-            returns_all (Dict): Must contain keys: inputs, prediction, target.
-        """
-
-        metrics_results = {}
-        for i in self.evaluation_horizons:
-            pred = returns_all['prediction'][:, i, :, :]
-            real = returns_all['target'][:, i, :, :]
-
-            metrics_results[f'horizon_{i + 1}'] = {}
-            metric_repr = ''
-            for metric_name, metric_func in self.metrics.items():
-                if metric_name.lower() == 'mase':
-                    continue # MASE needs to be calculated after all horizons
-                metric_item = self.metric_forward(metric_func, {'prediction': pred, 'target': real})
-                metric_repr += f', Test {metric_name}: {metric_item.item():.4f}'
-                metrics_results[f'horizon_{i + 1}'][metric_name] = metric_item.item()
-            self.logger.info(f'Evaluate best model on test data for horizon {i + 1}{metric_repr}')
-
-        metrics_results['overall'] = {}
-        for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, returns_all)
-            self.update_epoch_meter(f'test/{metric_name}', metric_item.item())
-            metrics_results['overall'][metric_name] = metric_item.item()
-
-        return metrics_results
+            self.update_epoch_meter(f'val/{metric_name}', metric_item.item(), batch_size)
 
     @torch.no_grad()
     @master_only
@@ -425,42 +402,52 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             save_results (bool): Save the test results. Defaults to False.
         """
 
-        prediction, target, inputs = [], [], []
-
-        for data in tqdm(self.test_data_loader):
+        for batch_idx, data in tqdm(enumerate(self.test_data_loader)):
             forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
 
             loss = self.metric_forward(self.loss, forward_return)
-            self.update_epoch_meter('test/loss', loss.item())
+            batch_size = forward_return['target'].shape[0]
+            self.update_epoch_meter('test/loss', loss.item(), batch_size)
 
             if not self.if_evaluate_on_gpu:
-                forward_return['prediction'] = forward_return['prediction'].detach().cpu()
-                forward_return['target'] = forward_return['target'].detach().cpu()
-                forward_return['inputs'] = forward_return['inputs'].detach().cpu()
+                pred = forward_return['prediction'].detach().cpu()
+                target = forward_return['target'].detach().cpu()
+            else:
+                pred = forward_return['prediction']
+                target = forward_return['target']
+            
+            if save_results:
+                batch_data = {
+                    'prediction': forward_return['prediction'].detach().cpu().numpy(),
+                    'target': forward_return['target'].detach().cpu().numpy(),
+                    'inputs': forward_return['inputs'].detach().cpu().numpy()
+                }
+                self._save_test_results(batch_idx, batch_data)
 
-            prediction.append(forward_return['prediction'])
-            target.append(forward_return['target'])
-            inputs.append(forward_return['inputs'])
+            # evaluation on specific timesteps
+            for i in self.evaluation_horizons:
+                pred_h = pred[:, i, :, :]
+                target_h = target[:, i, :, :]
 
-        prediction = torch.cat(prediction, dim=0)
-        target = torch.cat(target, dim=0)
-        inputs = torch.cat(inputs, dim=0)
+                for metric_name, metric_func in self.metrics.items():
+                    if metric_name.lower() == 'mase':
+                        continue  # MASE needs to be calculated after all horizons
+                    metric_val = self.metric_forward(metric_func, {'prediction': pred_h, 'target': target_h})
+                    self.update_epoch_meter(f'test/{metric_name}@h{i+1}', metric_val.item(), batch_size)
 
-        returns_all = {'prediction': prediction, 'target': target, 'inputs': inputs}
-        metrics_results = self.compute_evaluation_metrics(returns_all)
-
-        # save
-        if save_results:
-            # save returns_all to self.ckpt_save_dir/test_results.npz
-            test_results = {k: v.cpu().numpy() for k, v in returns_all.items()}
-            np.savez(os.path.join(self.ckpt_save_dir, 'test_results.npz'), **test_results)
+            for metric_name, metric_func in self.metrics.items():
+                metric_item = self.metric_forward(metric_func, {'prediction': pred, 'target': target})
+                self.update_epoch_meter(f'test/{metric_name}', metric_item.item(), batch_size)
 
         if save_metrics:
+            metrics_results = {}
+            metrics_results['overall'] = {k: self.meter_pool.get_avg(f'test/{k}') for k in self.metrics.keys()}
+            for i in self.evaluation_horizons:
+                metrics_results[f'horizon_{i+1}'] = {k: self.meter_pool.get_avg(f'test/{k}@h{i+1}') for k in self.metrics.keys()}
+
             # save metrics_results to self.ckpt_save_dir/test_metrics.json
             with open(os.path.join(self.ckpt_save_dir, 'test_metrics.json'), 'w') as f:
                 json.dump(metrics_results, f, indent=4)
-
-        return returns_all
 
     @torch.no_grad()
     @master_only
@@ -513,3 +500,65 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         greater_best = not self.metrics_best == 'min'
         if train_epoch is not None:
             self.save_best_model(train_epoch, 'val/' + self.target_metrics, greater_best=greater_best)
+    
+    @master_only
+    def on_test_end(self, save_metrics: bool = False):
+        """Callback at the end of the test process.
+        """
+
+        if len(self.evaluation_horizons) > 0:
+            self.logger.info(f"Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.")
+            for i in self.evaluation_horizons:
+                self.print_epoch_meters(f'test @ horizon {i+1}')
+
+        # logging here for intuitiveness
+        if self.save_results:
+            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results")}.')
+        if save_metrics:
+            self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
+    
+    @master_only
+    def _save_test_results(self, batch_idx: int, batch_data: Dict[str, np.ndarray]) -> None:
+
+        """
+        Save the test results to disk.
+        
+        Args:
+            batch_idx (int): The index of the current batch.
+            batch_data (Dict[np.ndarray]): The test results:{
+                'inputs': np.ndarray,
+                'prediction': np.ndarray,
+                'target': np.ndarray,
+            }
+        """
+
+        total_samples = len(self.test_data_loader.dataset)
+        
+        save_dir = os.path.join(self.ckpt_save_dir, "test_results")
+        os.makedirs(save_dir, exist_ok=True)
+        inputs_path = os.path.join(save_dir, "inputs.npy")
+        pred_path = os.path.join(save_dir, "predictions.npy")
+        tgt_path = os.path.join(save_dir, "targets.npy")
+
+        # create memmap files
+        if batch_idx == 0:
+
+            global pred_memmap, tgt_memmap, inputs_memmap
+            inputs_memmap = np.memmap(inputs_path, dtype=batch_data['inputs'].dtype, mode='w+',
+                                    shape=(total_samples, *batch_data['inputs'].shape[1:]))
+            pred_memmap = np.memmap(pred_path, dtype=batch_data['prediction'].dtype, mode='w+',
+                                    shape=(total_samples, *batch_data['prediction'].shape[1:]))
+            tgt_memmap = np.memmap(tgt_path, dtype=batch_data['target'].dtype, mode='w+',
+                                shape=(total_samples, *batch_data['target'].shape[1:]))
+
+        start = batch_idx * batch_data['inputs'].shape[0]
+        end = start + batch_data['inputs'].shape[0]
+
+        inputs_memmap[start:end] = batch_data['inputs']
+        pred_memmap[start:end] = batch_data['prediction']
+        tgt_memmap[start:end] = batch_data['target']
+
+        if batch_idx == (total_samples // batch_data['inputs'].shape[0]):
+            inputs_memmap.flush()
+            pred_memmap.flush()
+            tgt_memmap.flush()
