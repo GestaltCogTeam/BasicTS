@@ -546,18 +546,19 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.model.eval()
 
         # execute the test process
-        self.test(train_epoch=train_epoch, save_results=save_results, save_metrics=save_metrics)
+        self.test(train_epoch=train_epoch, save_metrics=save_metrics, save_results=save_results)
 
         test_end_time = time.time()
         self.update_epoch_meter('test/time', test_end_time - test_start_time)
 
         self.print_epoch_meters('test')
+
         if train_epoch is not None:
             self.plt_epoch_meters('test', train_epoch // self.test_interval)
 
         # logging here for intuitiveness
-        if save_results:
-            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results.npz")}.')
+        if self.save_results:
+            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results")}.')
         if save_metrics:
             self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
 
@@ -649,7 +650,6 @@ class BaseEpochRunner(metaclass=ABCMeta):
         Args:
             train_epoch (int, optional): Current epoch during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
-            save_results (bool, optional): Save the test results. Defaults to False.
 
         Raises:
             NotImplementedError: Must be implemented in a subclass.
