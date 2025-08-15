@@ -503,7 +503,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         greater_best = not self.metrics_best == 'min'
         if train_epoch is not None:
             self.save_best_model(train_epoch, 'val/' + self.target_metrics, greater_best=greater_best)
-    
+
     @master_only
     def on_test_end(self, save_metrics: bool = False):
         """Callback at the end of the test process.
