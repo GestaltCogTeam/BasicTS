@@ -546,7 +546,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.model.eval()
 
         # execute the test process
-        self.test(train_epoch=train_epoch, save_results=save_results, save_metrics=save_metrics)
+        self.test(train_epoch=train_epoch, save_metrics=save_metrics, save_results=save_results)
 
         test_end_time = time.time()
         self.update_epoch_meter('test/time', test_end_time - test_start_time)
@@ -637,7 +637,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
-    def test(self, train_epoch: Optional[int] = None, save_results: bool = False, save_metrics: bool = False) -> None:
+    def test(self, train_epoch: Optional[int] = None, save_metrics: bool = False, save_results: bool = False,) -> None:
         """
         Define the details of the testing process.
 

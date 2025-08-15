@@ -183,7 +183,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         self.register_epoch_meter('test/loss', 'test', '{:.4f}')
         for key in self.metrics:
             self.register_epoch_meter(f'test/{key}', 'test', '{:.4f}')
-        
+        # Register metrics for each evaluation horizons
         for i in self.evaluation_horizons:
             for key in self.metrics:
                 self.register_epoch_meter(f'test/{key}@h{i+1}', f'test @ horizon {i+1}', '{:.4f}')
@@ -419,7 +419,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             else:
                 pred = forward_return['prediction']
                 target = forward_return['target']
-            
             if save_results:
                 batch_data = {
                     'prediction': forward_return['prediction'].detach().cpu().numpy(),
