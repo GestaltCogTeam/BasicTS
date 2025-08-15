@@ -9,7 +9,6 @@ import numpy as np
 import torch
 from easydict import EasyDict
 from easytorch.utils import master_only
-from easytorch.core.meter_pool import MeterPool
 from tqdm import tqdm
 
 from basicts.data.simple_inference_dataset import TimeSeriesInferenceDataset
@@ -99,6 +98,11 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         self.if_evaluate_on_gpu = cfg.get('EVAL', EasyDict()).get('USE_GPU', True)
         self.evaluation_horizons = [_ - 1 for _ in cfg.get('EVAL', EasyDict()).get('HORIZONS', [])]
         assert len(self.evaluation_horizons) == 0 or min(self.evaluation_horizons) >= 0, 'The horizon should start counting from 1.'
+
+        # For saving test results
+        self._inputs_memmap = None
+        self._pred_memmap = None
+        self._tgt_memmap = None
 
     def build_scaler(self, cfg: Dict):
         """Build scaler.
@@ -507,7 +511,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         """
 
         if len(self.evaluation_horizons) > 0:
-            self.logger.info(f"Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.")
+            self.logger.info(f'Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.')
             for i in self.evaluation_horizons:
                 self.print_epoch_meters(f'test @ horizon {i+1}')
 
@@ -534,31 +538,30 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         total_samples = len(self.test_data_loader.dataset)
         
-        save_dir = os.path.join(self.ckpt_save_dir, "test_results")
+        save_dir = os.path.join(self.ckpt_save_dir, 'test_results')
         os.makedirs(save_dir, exist_ok=True)
-        inputs_path = os.path.join(save_dir, "inputs.npy")
-        pred_path = os.path.join(save_dir, "predictions.npy")
-        tgt_path = os.path.join(save_dir, "targets.npy")
+        inputs_path = os.path.join(save_dir, 'inputs.npy')
+        pred_path = os.path.join(save_dir, 'predictions.npy')
+        tgt_path = os.path.join(save_dir, 'targets.npy')
 
         # create memmap files
         if batch_idx == 0:
 
-            global pred_memmap, tgt_memmap, inputs_memmap
-            inputs_memmap = np.memmap(inputs_path, dtype=batch_data['inputs'].dtype, mode='w+',
+            self._inputs_memmap = np.memmap(inputs_path, dtype=batch_data['inputs'].dtype, mode='w+',
                                     shape=(total_samples, *batch_data['inputs'].shape[1:]))
-            pred_memmap = np.memmap(pred_path, dtype=batch_data['prediction'].dtype, mode='w+',
+            self._pred_memmap = np.memmap(pred_path, dtype=batch_data['prediction'].dtype, mode='w+',
                                     shape=(total_samples, *batch_data['prediction'].shape[1:]))
-            tgt_memmap = np.memmap(tgt_path, dtype=batch_data['target'].dtype, mode='w+',
+            self._tgt_memmap = np.memmap(tgt_path, dtype=batch_data['target'].dtype, mode='w+',
                                 shape=(total_samples, *batch_data['target'].shape[1:]))
 
         start = batch_idx * batch_data['inputs'].shape[0]
         end = start + batch_data['inputs'].shape[0]
 
-        inputs_memmap[start:end] = batch_data['inputs']
-        pred_memmap[start:end] = batch_data['prediction']
-        tgt_memmap[start:end] = batch_data['target']
+        self._inputs_memmap[start:end] = batch_data['inputs']
+        self._pred_memmap[start:end] = batch_data['prediction']
+        self._tgt_memmap[start:end] = batch_data['target']
 
         if batch_idx == (total_samples // batch_data['inputs'].shape[0]):
-            inputs_memmap.flush()
-            pred_memmap.flush()
-            tgt_memmap.flush()
+            self._inputs_memmap.flush()
+            self._pred_memmap.flush()
+            self._tgt_memmap.flush()

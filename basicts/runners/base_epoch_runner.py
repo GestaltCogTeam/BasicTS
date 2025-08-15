@@ -637,7 +637,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
-    def test(self, train_epoch: Optional[int] = None, save_metrics: bool = False) -> None:
+    def test(self, train_epoch: Optional[int] = None, save_results: bool = False, save_metrics: bool = False) -> None:
         """
         Define the details of the testing process.
 
