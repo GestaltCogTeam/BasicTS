@@ -519,7 +519,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results")}.')
         if save_metrics:
             self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
-    
+
     @master_only
     def _save_test_results(self, batch_idx: int, batch_data: Dict[str, np.ndarray]) -> None:
 
@@ -536,7 +536,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         """
 
         total_samples = len(self.test_data_loader.dataset)
-        
+
         save_dir = os.path.join(self.ckpt_save_dir, 'test_results')
         os.makedirs(save_dir, exist_ok=True)
         inputs_path = os.path.join(save_dir, 'inputs.npy')
