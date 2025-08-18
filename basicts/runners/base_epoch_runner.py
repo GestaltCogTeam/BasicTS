@@ -556,11 +556,16 @@ class BaseEpochRunner(metaclass=ABCMeta):
         if train_epoch is not None:
             self.plt_epoch_meters('test', train_epoch // self.test_interval)
 
+        if len(self.evaluation_horizons) > 0:
+            self.logger.info(f'Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.')
+            for i in self.evaluation_horizons:
+                self.print_epoch_meters(f'test @ horizon {i+1}')
+
         # logging here for intuitiveness
         if self.save_results:
-            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results")}.')
+            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, 'test_results')}.')
         if save_metrics:
-            self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
+            self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, 'test_metrics.json')}.')
 
         self.on_test_end()
 

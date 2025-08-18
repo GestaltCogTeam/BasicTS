@@ -101,8 +101,8 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         # For saving test results
         self._inputs_memmap = None
-        self._pred_memmap = None
-        self._tgt_memmap = None
+        self._prediction_memmap = None
+        self._target_memmap = None
 
     def build_scaler(self, cfg: Dict):
         """Build scaler.
@@ -369,9 +369,10 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             cl_length = self.curriculum_learning(epoch=epoch)
             forward_return['prediction'] = forward_return['prediction'][:, :cl_length, :, :]
             forward_return['target'] = forward_return['target'][:, :cl_length, :, :]
+
         loss = self.metric_forward(self.loss, forward_return)
-        batch_size = forward_return['target'].shape[0]
-        self.update_epoch_meter('train/loss', loss.item(), batch_size)
+        weight = self._get_metric_weight(forward_return['target'])
+        self.update_epoch_meter('train/loss', loss.item(), weight)
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
@@ -388,12 +389,12 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
         loss = self.metric_forward(self.loss, forward_return)
-        batch_size = forward_return['target'].shape[0]
-        self.update_epoch_meter('val/loss', loss.item(), batch_size)
+        weight = self._get_metric_weight(forward_return['target'])
+        self.update_epoch_meter('val/loss', loss.item(), weight)
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
-            self.update_epoch_meter(f'val/{metric_name}', metric_item.item(), batch_size)
+            self.update_epoch_meter(f'val/{metric_name}', metric_item.item(), weight)
 
     @torch.no_grad()
     @master_only
@@ -410,8 +411,8 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
 
             loss = self.metric_forward(self.loss, forward_return)
-            batch_size = forward_return['target'].shape[0]
-            self.update_epoch_meter('test/loss', loss.item(), batch_size)
+            weight = self._get_metric_weight(forward_return['target'])
+            self.update_epoch_meter('test/loss', loss.item(), weight)
 
             if not self.if_evaluate_on_gpu:
                 pred = forward_return['prediction'].detach().cpu()
@@ -436,11 +437,11 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
                     if metric_name.lower() == 'mase':
                         continue  # MASE needs to be calculated after all horizons
                     metric_val = self.metric_forward(metric_func, {'prediction': pred_h, 'target': target_h})
-                    self.update_epoch_meter(f'test/{metric_name}@h{i+1}', metric_val.item(), batch_size)
+                    self.update_epoch_meter(f'test/{metric_name}@h{i+1}', metric_val.item(), weight)
 
             for metric_name, metric_func in self.metrics.items():
                 metric_item = self.metric_forward(metric_func, {'prediction': pred, 'target': target})
-                self.update_epoch_meter(f'test/{metric_name}', metric_item.item(), batch_size)
+                self.update_epoch_meter(f'test/{metric_name}', metric_item.item(), weight)
 
         if save_metrics:
             metrics_results = {}
@@ -505,22 +506,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             self.save_best_model(train_epoch, 'val/' + self.target_metrics, greater_best=greater_best)
 
     @master_only
-    def on_test_end(self, save_metrics: bool = False):
-        """Callback at the end of the test process.
-        """
-
-        if len(self.evaluation_horizons) > 0:
-            self.logger.info(f'Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.')
-            for i in self.evaluation_horizons:
-                self.print_epoch_meters(f'test @ horizon {i+1}')
-
-        # logging here for intuitiveness
-        if self.save_results:
-            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results")}.')
-        if save_metrics:
-            self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
-
-    @master_only
     def _save_test_results(self, batch_idx: int, batch_data: Dict[str, np.ndarray]) -> None:
 
         """
@@ -548,19 +533,38 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
             self._inputs_memmap = np.memmap(inputs_path, dtype=batch_data['inputs'].dtype, mode='w+',
                                     shape=(total_samples, *batch_data['inputs'].shape[1:]))
-            self._pred_memmap = np.memmap(pred_path, dtype=batch_data['prediction'].dtype, mode='w+',
+            self._prediction_memmap = np.memmap(pred_path, dtype=batch_data['prediction'].dtype, mode='w+',
                                     shape=(total_samples, *batch_data['prediction'].shape[1:]))
-            self._tgt_memmap = np.memmap(tgt_path, dtype=batch_data['target'].dtype, mode='w+',
+            self._target_memmap = np.memmap(tgt_path, dtype=batch_data['target'].dtype, mode='w+',
                                 shape=(total_samples, *batch_data['target'].shape[1:]))
 
         start = batch_idx * batch_data['inputs'].shape[0]
         end = start + batch_data['inputs'].shape[0]
 
         self._inputs_memmap[start:end] = batch_data['inputs']
-        self._pred_memmap[start:end] = batch_data['prediction']
-        self._tgt_memmap[start:end] = batch_data['target']
+        self._prediction_memmap[start:end] = batch_data['prediction']
+        self._target_memmap[start:end] = batch_data['target']
 
         if batch_idx == (total_samples // batch_data['inputs'].shape[0]):
             self._inputs_memmap.flush()
-            self._pred_memmap.flush()
-            self._tgt_memmap.flush()
+            self._prediction_memmap.flush()
+            self._target_memmap.flush()
+
+    def _get_metric_weight(self, x: torch.Tensor) -> int:
+        """
+        Get the weight for calculating metrics.
+        1. Since the last batch may be smaller (`drop_last=False`), it is necessary to perform a weighted average based on the batch size.
+        2. Since the number of valid values in each batch may vary, a weighted average based on the valid value count is also required.
+           Valid value count is the total count minus the number of missing values.
+        The weight is the product of the batch size and the valid value count.
+        """
+
+        batch_size = x.shape[0]
+
+        if self.null_val == np.nan:
+            valid_num = (~torch.isnan(x)).sum().item()
+        else:
+            eps = 5e-5
+            valid_num = (~torch.isclose(x, torch.tensor(self.null_val).expand_as(x).to(x.device), atol=eps, rtol=0.0)).sum().item()
+
+        return batch_size * valid_num
