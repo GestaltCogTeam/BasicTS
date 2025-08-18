@@ -563,9 +563,9 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
         # logging here for intuitiveness
         if self.save_results:
-            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, 'test_results')}.')
+            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results")}.')
         if save_metrics:
-            self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, 'test_metrics.json')}.')
+            self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
 
         self.on_test_end()
 
