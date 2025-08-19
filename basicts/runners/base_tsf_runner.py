@@ -74,7 +74,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         # define metrics
         self.metrics = cfg.get('METRICS', {}).get('FUNCS', {
                                                             'MAE': masked_mae, 
-                                                            'RMSE': masked_rmse, 
+                                                            'RMSE': masked_rmse,
                                                             'MAPE': masked_mape, 
                                                             'WAPE': masked_wape, 
                                                             'MSE': masked_mse
@@ -376,7 +376,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         for metric_name, metric_func in self.metrics.items():
             metric_item = self.metric_forward(metric_func, forward_return)
-            self.update_epoch_meter(f'train/{metric_name}', metric_item.item())
+            self.update_epoch_meter(f'train/{metric_name}', metric_item.item(), weight)
         return loss
 
     def val_iters(self, iter_index: int, data: Union[torch.Tensor, Tuple]):
@@ -432,12 +432,13 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             for i in self.evaluation_horizons:
                 pred_h = pred[:, i, :, :]
                 target_h = target[:, i, :, :]
+                weight_h = self._get_metric_weight(target_h)
 
                 for metric_name, metric_func in self.metrics.items():
                     if metric_name.lower() == 'mase':
                         continue  # MASE needs to be calculated after all horizons
                     metric_val = self.metric_forward(metric_func, {'prediction': pred_h, 'target': target_h})
-                    self.update_epoch_meter(f'test/{metric_name}@h{i+1}', metric_val.item(), weight)
+                    self.update_epoch_meter(f'test/{metric_name}@h{i+1}', metric_val.item(), weight_h)
 
             for metric_name, metric_func in self.metrics.items():
                 metric_item = self.metric_forward(metric_func, {'prediction': pred, 'target': target})
@@ -445,9 +446,9 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         if save_metrics:
             metrics_results = {}
-            metrics_results['overall'] = {k: self.meter_pool.get_avg(f'test/{k}') for k in self.metrics.keys()}
+            metrics_results['overall'] = {k: self.meter_pool.get_value(f'test/{k}') for k in self.metrics.keys()}
             for i in self.evaluation_horizons:
-                metrics_results[f'horizon_{i+1}'] = {k: self.meter_pool.get_avg(f'test/{k}@h{i+1}') for k in self.metrics.keys()}
+                metrics_results[f'horizon_{i+1}'] = {k: self.meter_pool.get_value(f'test/{k}@h{i+1}') for k in self.metrics.keys()}
 
             # save metrics_results to self.ckpt_save_dir/test_metrics.json
             with open(os.path.join(self.ckpt_save_dir, 'test_metrics.json'), 'w') as f:
@@ -553,13 +554,9 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
     def _get_metric_weight(self, x: torch.Tensor) -> int:
         """
         Get the weight for calculating metrics.
-        1. Since the last batch may be smaller (`drop_last=False`), it is necessary to perform a weighted average based on the batch size.
-        2. Since the number of valid values in each batch may vary, a weighted average based on the valid value count is also required.
-           Valid value count is the total count minus the number of missing values.
-        The weight is the product of the batch size and the valid value count.
+        Since the number of valid values in each batch may vary, it is necessary to perform a weighted average based on the valid value count.
+        The valid value count is the total count minus the number of missing values.
         """
-
-        batch_size = x.shape[0]
 
         if self.null_val == np.nan:
             valid_num = (~torch.isnan(x)).sum().item()
@@ -567,4 +564,4 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             eps = 5e-5
             valid_num = (~torch.isclose(x, torch.tensor(self.null_val).expand_as(x).to(x.device), atol=eps, rtol=0.0)).sum().item()
 
-        return batch_size * valid_num
+        return valid_num

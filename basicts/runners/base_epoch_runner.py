@@ -10,7 +10,6 @@ from easytorch.config import get_ckpt_save_dir
 from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
                                        save_ckpt)
 from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
-from easytorch.core.meter_pool import MeterPool
 from easytorch.device import to_device
 from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
                              is_master, master_only, set_env)
@@ -22,7 +21,7 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from ..utils import get_dataset_name
+from ..utils import MeterPool, get_dataset_name
 from . import optim
 
 
@@ -597,7 +596,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         result = self.inference(save_result_path=output_data_file_path)
 
         inference_end_time = time.time()
-        self.update_epoch_meter('inference/time', inference_end_time - inference_start_time)
+        self.update_epoch_meter('inference/time', 'inference', inference_end_time - inference_start_time)
 
         self.print_epoch_meters('inference')
 
@@ -924,7 +923,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
                 `False` means lower value is best, such as `loss`. Defaults to True.
         """
 
-        metric = self.meter_pool.get_avg(metric_name)
+        metric = self.meter_pool.get_value(metric_name)
         best_metric = self.best_metrics.get(metric_name)
         if best_metric is None or (metric > best_metric if greater_best else metric < best_metric):
             self.best_metrics[metric_name] = metric
