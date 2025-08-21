@@ -1,0 +1,209 @@
+METRLA:
+  num_nodes: 207
+  in_steps: 12
+  out_steps: 12
+
+  time_of_day: True
+  day_of_week: True
+  y_time_of_day: True
+  y_day_of_week: True
+
+  lr: 0.001
+  eps: 0.001
+  weight_decay: 0.0005
+  milestones: [30, 40]
+  clip_grad: 5
+  batch_size: 16
+  max_epochs: 200
+  early_stop: 20
+
+  model_args:
+    num_nodes: 207
+    input_dim: 3
+    output_dim: 1
+    out_steps: 12
+    hidden_dim: 64
+    num_layers: 1
+    cheb_k: 2
+    ycov_dim: 2
+    tod_embedding_dim: 8
+    dow_embedding_dim: 8
+    node_embedding_dim: 16
+    st_embedding_dim: 16
+    tf_decay_steps: 6000
+    use_teacher_forcing: True
+
+PEMSBAY:
+  num_nodes: 325
+  in_steps: 12
+  out_steps: 12
+
+  time_of_day: True
+  day_of_week: True
+  y_time_of_day: True
+  y_day_of_week: True
+
+  lr: 0.001
+  eps: 0.001
+  weight_decay: 0.0001
+  milestones: [25, 35]
+  clip_grad: 5
+  batch_size: 16
+  max_epochs: 200
+  early_stop: 20
+
+  model_args:
+    num_nodes: 325
+    input_dim: 3
+    output_dim: 1
+    tod_embedding_dim: 8
+    dow_embedding_dim: 8
+    out_steps: 12
+    hidden_dim: 64
+    num_layers: 1
+    cheb_k: 2
+    ycov_dim: 2
+    node_embedding_dim: 16
+    st_embedding_dim: 16
+    tf_decay_steps: 6000
+    use_teacher_forcing: True
+
+PEMS03:
+  num_nodes: 358
+  in_steps: 12
+  out_steps: 12
+
+  time_of_day: True
+  day_of_week: True
+  y_time_of_day: True
+  y_day_of_week: True
+
+  lr: 0.001
+  eps: 0.001
+  weight_decay: 0.0003
+  milestones: [30, 50]
+  clip_grad: 5
+  batch_size: 16
+  max_epochs: 200
+  early_stop: 20
+
+  model_args:
+    num_nodes: 358
+    input_dim: 3
+    output_dim: 1
+    tod_embedding_dim: 8
+    dow_embedding_dim: 8
+    out_steps: 12
+    hidden_dim: 64
+    num_layers: 1
+    cheb_k: 2
+    ycov_dim: 2
+    node_embedding_dim: 16
+    st_embedding_dim: 16
+    tf_decay_steps: 4000
+    use_teacher_forcing: True
+
+PEMS04:
+  num_nodes: 307
+  in_steps: 12
+  out_steps: 12
+
+  time_of_day: True
+  day_of_week: True
+  y_time_of_day: True
+  y_day_of_week: True
+
+  lr: 0.001
+  eps: 0.001
+  weight_decay: 0.0001
+  milestones: [30, 50]
+  clip_grad: 5
+  batch_size: 16
+  max_epochs: 200
+  early_stop: 20
+
+  model_args:
+    num_nodes: 307
+    input_dim: 3
+    output_dim: 1
+    tod_embedding_dim: 12
+    dow_embedding_dim: 4
+    out_steps: 12
+    hidden_dim: 64
+    num_layers: 1
+    cheb_k: 2
+    ycov_dim: 2
+    node_embedding_dim: 16
+    st_embedding_dim: 16
+    tf_decay_steps: 4000
+    use_teacher_forcing: True
+
+PEMS07:
+  num_nodes: 883
+  in_steps: 12
+  out_steps: 12
+
+  time_of_day: True
+  day_of_week: True
+  y_time_of_day: True
+  y_day_of_week: True
+
+  lr: 0.001
+  eps: 0.001
+  weight_decay: 0.0001
+  milestones: [40, 60]
+  clip_grad: 5
+  batch_size: 16
+  max_epochs: 200
+  early_stop: 20
+
+  model_args:
+    num_nodes: 883
+    input_dim: 3
+    output_dim: 1
+    tod_embedding_dim: 8
+    dow_embedding_dim: 8
+    out_steps: 12
+    hidden_dim: 64
+    num_layers: 1
+    cheb_k: 2
+    ycov_dim: 2
+    node_embedding_dim: 16
+    st_embedding_dim: 16
+    tf_decay_steps: 6000
+    use_teacher_forcing: True
+
+PEMS08:
+  num_nodes: 170
+  in_steps: 12
+  out_steps: 12
+
+  time_of_day: True
+  day_of_week: True
+  y_time_of_day: True
+  y_day_of_week: True
+
+  lr: 0.001
+  eps: 0.001
+  weight_decay: 0
+  milestones: [40, 60, 80]
+  clip_grad: 5
+  batch_size: 16
+  max_epochs: 200
+  early_stop: 20
+
+  model_args:
+    num_nodes: 170
+    input_dim: 3
+    output_dim: 1
+    tod_embedding_dim: 10
+    dow_embedding_dim: 2
+    out_steps: 12
+    hidden_dim: 96
+    num_layers: 1
+    cheb_k: 2
+    ycov_dim: 2
+    node_embedding_dim: 14
+    st_embedding_dim: 10
+    tf_decay_steps: 6000
+    use_teacher_forcing: True

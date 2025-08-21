@@ -6,6 +6,7 @@ from .r_square import masked_r2
 from .rmse import masked_rmse
 from .smape import masked_smape
 from .wape import masked_wape
+from .huber import masked_huber
 
 ALL_METRICS = {
             'MAE': masked_mae,
@@ -15,7 +16,8 @@ ALL_METRICS = {
             'WAPE': masked_wape,
             'SMAPE': masked_smape,
             'R2': masked_r2,
-            'CORR': masked_corr
+            'CORR': masked_corr,
+            'HUBER': masked_huber,
             }
 
 __all__ = [
@@ -27,5 +29,6 @@ __all__ = [
     'masked_smape',
     'masked_r2',
     'masked_corr',
+    'masked_huber',
     'ALL_METRICS'
 ]

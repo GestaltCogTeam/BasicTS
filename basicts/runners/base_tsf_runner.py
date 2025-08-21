@@ -70,6 +70,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         # define loss function
         self.loss = cfg['TRAIN']['LOSS']
+        self.loss_args = cfg['TRAIN'].get('LOSS_ARGS', {})
 
         # define metrics
         self.metrics = cfg.get('METRICS', {}).get('FUNCS', {
@@ -328,6 +329,12 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         covariate_names = inspect.signature(metric_func).parameters.keys()
         args = {k: v for k, v in args.items() if k in covariate_names}
+
+        # add loss args
+        if self.loss_args:
+            for k, v in self.loss_args.items():
+                if k in covariate_names and k not in args:
+                    args[k] = v
 
         if isinstance(metric_func, functools.partial):
             if 'null_val' not in metric_func.keywords and 'null_val' in covariate_names: # null_val is required but not provided
