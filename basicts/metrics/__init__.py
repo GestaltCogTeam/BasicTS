@@ -1,4 +1,5 @@
 from .corr import masked_corr
+from .huber import masked_huber
 from .mae import masked_mae
 from .mape import masked_mape
 from .metric_meter import AvgMeter, RMSEMeter
@@ -16,7 +17,8 @@ ALL_METRICS = {
             'WAPE': masked_wape,
             'SMAPE': masked_smape,
             'R2': masked_r2,
-            'CORR': masked_corr
+            'CORR': masked_corr,
+            'HUBER': masked_huber,
             }
 
 METRIC_METER = {
@@ -33,6 +35,7 @@ __all__ = [
     'masked_smape',
     'masked_r2',
     'masked_corr',
+    'masked_huber',
     'ALL_METRICS',
     'METRIC_METER'
 ]
