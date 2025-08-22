@@ -28,7 +28,6 @@ __all__ = [
     'masked_mae',
     'masked_mse',
     'masked_rmse',
-    'incremental_masked_rmse',
     'masked_mape',
     'masked_wape',
     'masked_smape',
