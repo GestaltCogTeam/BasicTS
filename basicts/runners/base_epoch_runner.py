@@ -10,7 +10,6 @@ from easytorch.config import get_ckpt_save_dir
 from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
                                        save_ckpt)
 from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
-from easytorch.core.meter_pool import MeterPool
 from easytorch.device import to_device
 from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
                              is_master, master_only, set_env)
@@ -22,7 +21,7 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from ..utils import get_dataset_name
+from ..utils import MeterPool, get_dataset_name
 from . import optim
 
 
@@ -546,18 +545,24 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.model.eval()
 
         # execute the test process
-        self.test(train_epoch=train_epoch, save_results=save_results, save_metrics=save_metrics)
+        self.test(train_epoch=train_epoch, save_metrics=save_metrics, save_results=save_results)
 
         test_end_time = time.time()
         self.update_epoch_meter('test/time', test_end_time - test_start_time)
 
         self.print_epoch_meters('test')
+
         if train_epoch is not None:
             self.plt_epoch_meters('test', train_epoch // self.test_interval)
 
+        if len(self.evaluation_horizons) > 0:
+            self.logger.info(f'Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.')
+            for i in self.evaluation_horizons:
+                self.print_epoch_meters(f'test @ horizon {i+1}')
+
         # logging here for intuitiveness
-        if save_results:
-            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results.npz")}.')
+        if self.save_results:
+            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results")}.')
         if save_metrics:
             self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
 
@@ -591,7 +596,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         result = self.inference(save_result_path=output_data_file_path)
 
         inference_end_time = time.time()
-        self.update_epoch_meter('inference/time', inference_end_time - inference_start_time)
+        self.update_epoch_meter('inference/time', 'inference', inference_end_time - inference_start_time)
 
         self.print_epoch_meters('inference')
 
@@ -649,7 +654,6 @@ class BaseEpochRunner(metaclass=ABCMeta):
         Args:
             train_epoch (int, optional): Current epoch during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
-            save_results (bool, optional): Save the test results. Defaults to False.
 
         Raises:
             NotImplementedError: Must be implemented in a subclass.
@@ -919,7 +923,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
                 `False` means lower value is best, such as `loss`. Defaults to True.
         """
 
-        metric = self.meter_pool.get_avg(metric_name)
+        metric = self.meter_pool.get_value(metric_name)
         best_metric = self.best_metrics.get(metric_name)
         if best_metric is None or (metric > best_metric if greater_best else metric < best_metric):
             self.best_metrics[metric_name] = metric
