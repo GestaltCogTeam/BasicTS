@@ -131,6 +131,8 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         dataloader = self.build_test_data_loader(cfg=cfg) if not train else self.build_train_data_loader(cfg=cfg)
         data = next(iter(dataloader))  # get the first batch
+        if not train:
+            self.model.eval()
         self.forward(data=data, epoch=1, iter_num=0, train=train)
 
     def count_parameters(self):
