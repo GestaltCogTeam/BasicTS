@@ -41,6 +41,8 @@
 
 $\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) 是一个面向时间序列预测的基准库和工具箱，现已支持时空预测、长序列预测等多种任务与数据集，涵盖统计模型、机器学习模型、深度学习模型等多类算法，为开发和评估时间序列预测模型提供了理想的工具。你可以在[快速上手](./tutorial/getting_started_cn.md)找到详细的教程。
 
+🎉 **更新（2025年8月）：BasicTS现已支持时间序列分类任务和UEA数据集!** 在这里了解[使用BasicTS进行分类任务](./tutorial/time_series_classification_cn.md)。
+
 🎉 **更新（2025年6月）：** 添加了6个长序列预测基线：CARD、TimeXer、Bi-Mamba、ModernTCN、S-D-Mamba、S4。
 
 🎉 **更新（2025年5月）：** BasicTS 现已支持使用 [BLAST](https://arxiv.org/abs/2505.17871) 语料库训练通用预测模型（例如 **TimeMoE** 和 **ChronosBolt**）。BLAST 能够实现 **更快的收敛速度**、**显著降低计算成本**，并且即使在资源有限的情况下也能获得卓越性能。[查看](./tutorial/training_with_BLAST_cn.md)。

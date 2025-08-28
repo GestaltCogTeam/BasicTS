@@ -30,4 +30,5 @@ For example, setting `CFG.TRAIN.EARLY_STOPPING_PATIENCE = 10` enables early stop
 - **📉 [Examining the Metrics Convention and Developing Your Own Loss & Metrics](./metrics_design.md)**
 - **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](./runner_design.md)**
 - **📜 [Interpreting the Config File Convention and Customizing Your Configuration](./config_design.md)**
+- **🎯 [Exploring Time Series Classification with BasicTS](./time_series_classification_cn.md)**
 - **🔍 [Exploring a Variety of Baseline Models](../baselines/)**
