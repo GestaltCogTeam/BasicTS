@@ -1,9 +1,16 @@
-import torch
-import numpy as np
 import unittest
+
+import numpy as np
+import torch
+
 from basicts.metrics.mse import masked_mse
 
+
 class TestMaskedMSE(unittest.TestCase):
+    """
+    Test the masked MSE function.
+    """
+
     def test_masked_mse_no_nulls(self):
         prediction = torch.tensor([1.0, 3.0, 3.0, 5.0])
         target = torch.tensor([1.0, 2.0, 3.0, 4.0])
@@ -32,5 +39,5 @@ class TestMaskedMSE(unittest.TestCase):
         expected = torch.tensor(0.0)
         self.assertTrue(torch.allclose(result, expected), f"Expected {expected}, but got {result}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

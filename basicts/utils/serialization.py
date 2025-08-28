@@ -1,12 +1,12 @@
 import json
 import pickle
+
 import numpy as np
-from .adjacent_matrix_norm import (
-    calculate_scaled_laplacian,
-    calculate_symmetric_normalized_laplacian,
-    calculate_symmetric_message_passing_adj,
-    calculate_transition_matrix
-)
+
+from .adjacent_matrix_norm import (calculate_scaled_laplacian,
+                                   calculate_symmetric_message_passing_adj,
+                                   calculate_symmetric_normalized_laplacian,
+                                   calculate_transition_matrix)
 
 
 def get_regular_settings(dataset_name: str) -> dict:

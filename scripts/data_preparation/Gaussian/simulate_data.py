@@ -1,7 +1,7 @@
 import os
 
-import torch
 import numpy as np
+import torch
 
 PROJECT_DIR = os.path.abspath(__file__ + '/../../../..')
 os.chdir(PROJECT_DIR)

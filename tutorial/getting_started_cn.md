@@ -56,7 +56,19 @@ pip install -r requirements.txt
 
 ### 示例设置
 
-#### 示例 1：Python 3.9 + PyTorch 1.10.0 + CUDA 11.1
+#### 示例 1：Python 3.11 + PyTorch 2.5.1 + CUDA 12.4 (推荐)
+
+```bash
+# 安装 Python
+conda create -n BasicTS python=3.11
+conda activate BasicTS
+# 安装 PyTorch
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+# 安装其他依赖项
+pip install -r requirements.txt
+```
+
+#### 示例 2：Python 3.9 + PyTorch 1.10.0 + CUDA 11.1
 
 ```bash
 # 安装 Python
@@ -64,18 +76,6 @@ conda create -n BasicTS python=3.9
 conda activate BasicTS
 # 安装 PyTorch
 pip install torch==1.10.0+cu111 torchvision==0.11.0+cu111 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
-# 安装其他依赖项
-pip install -r requirements.txt
-```
-
-#### 示例 2：Python 3.11 + PyTorch 2.3.1 + CUDA 12.1
-
-```bash
-# 安装 Python
-conda create -n BasicTS python=3.11
-conda activate BasicTS
-# 安装 PyTorch
-pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
 # 安装其他依赖项
 pip install -r requirements.txt
 ```

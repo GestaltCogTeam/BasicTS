@@ -38,31 +38,37 @@
 
 </div>
 
-$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series forecasting. It now supports a wide range of tasks and datasets, including spatial-temporal forecasting and long-term time series forecasting. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series forecasting models.
+$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series forecasting. It now supports a wide range of tasks and datasets, including spatial-temporal forecasting and long-term time series forecasting. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series forecasting models. You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md).
+
+🎉 **Update (June 2025):** Adds six LTSF baselines: CARD, TimeXer, Bi-Mamba, ModernTCN, S-D-Mamba, and S4.
+
+🎉 **Update (May 2025):** BasicTS now supports training universal forecasting models—such as **TimeMoE** and **ChronosBolt**—with the [BLAST](https://arxiv.org/abs/2505.17871) corpus. BLAST enables **faster convergence**, **notable reductions in computational cost**, and superior performance even with limited resources. See [here](./tutorial/training_with_BLAST.md).  
 
 If you find this project helpful, please don't forget to give it a ⭐ Star to show your support. Thank you!
-
-On one hand, BasicTS provides a **unified and standardized pipeline**, offering a **fair and comprehensive** platform for reproducing and comparing popular models.
-
-On the other hand, BasicTS offers a **user-friendly and easily extensible** interface, enabling quick design and evaluation of new models. Users can simply define their model structure and easily perform basic operations.
-
-You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md). Additionally, we are collecting **ToDo** and **HowTo** items. If you need more features (e.g., additional datasets or benchmark models) or tutorials, feel free to open an issue or leave a comment [here](https://github.com/zezhishao/BasicTS/issues/95).
 
 > [!IMPORTANT]
 > If you find this repository helpful for your work, please consider citing the following benchmarking paper:
 >
 > ```LaTeX
-> @article{shao2023exploring,
->    title={Exploring Progress in Multivariate Time Series Forecasting: Comprehensive Benchmarking and Heterogeneity Analysis},
->    author={Shao, Zezhi and Wang, Fei and Xu, Yongjun and Wei, Wei and Yu, Chengqing and Zhang, Zhao and Yao, Di and Jin, Guangyin and Cao, Xin and Cong, Gao and others},
->    journal={arXiv preprint arXiv:2310.06119},
->    year={2023}
->  }
+> @article{shao2024exploring,
+>  title={Exploring progress in multivariate time series forecasting: Comprehensive benchmarking and heterogeneity analysis},
+>  author={Shao, Zezhi and Wang, Fei and Xu, Yongjun and Wei, Wei and Yu, Chengqing and Zhang, Zhao and Yao, Di and Sun, Tao and Jin, Guangyin and Cao, Xin and others},
+>  journal={IEEE Transactions on Knowledge and Data Engineering},
+>  year={2024},
+>  volume={37},
+>  number={1},
+>  pages={291-305},
+>  publisher={IEEE}
+> }
 > ```
 >
 > 🔥🔥🔥 ***The paper has been accepted by IEEE TKDE! You can check it out [here](https://arxiv.org/abs/2310.06119).***  🔥🔥🔥
 
 ## ✨ Highlighted Features
+
+On one hand, BasicTS provides a **unified and standardized pipeline**, offering a **fair and comprehensive** platform for reproducing and comparing popular models.
+
+On the other hand, BasicTS offers a **user-friendly and easily extensible** interface, enabling quick design and evaluation of new models. Users can simply define their model structure and easily perform basic operations.
 
 ### Fair Performance Review
 
@@ -96,17 +102,30 @@ For detailed instructions, please refer to the [Getting Started](./tutorial/gett
 
 ## 📦 Supported Baselines
 
-BasicTS implements a wealth of models, including ***classic models***, ***spatial-temporal forecasting*** models, and ***long-term time series forecasting*** model:
+BasicTS implements a wealth of models, including ***classic models***, ***spatial-temporal forecasting*** models, and ***long-term time series forecasting*** model, and **universal forecasting models**.
 
 You can find the implementation of these models in the [baselines](./baselines) directory.
 
 The code links (💻Code) in the table below point to the official implementations from these papers. Many thanks to the authors for open-sourcing their work!
 
 <details open>
+  <summary><h3>Universal Forecasting Models</h3></summary>
+
+| 📊Baseline | 📝Title                                                                                                              | 📄Paper                                              | 💻Code                                                                                                                                 | 🏛Venue     | 🎯Task |
+| :--------- | :------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :----- |
+| TimeMoE | Time-MoE: Billion-Scale Time Series Foundation Models with Mixture of Experts | [Link](https://openreview.net/forum?id=e1wDDFmlVu) | [Link](https://github.com/Time-MoE/Time-MoE) | ICLR'25 | UFM |
+| ChronosBolt | Chronos: Learning the Language of Time Series | [Link](https://arxiv.org/abs/2403.07815) | [Link](https://github.com/amazon-science/chronos-forecasting) | TMLR'24 | UFM |
+MOIRAI (inference) | Unified Training of Universal Time Series Forecasting Transformers  | [Link](https://arxiv.org/abs/2402.02592) | [Link](https://github.com/SalesforceAIResearch/uni2ts) | ICML'24 | UFM |
+</details>
+
+<details open>
   <summary><h3>Spatial-Temporal Forecasting</h3></summary>
 
 | 📊Baseline | 📝Title                                                                                                              | 📄Paper                                              | 💻Code                                                                                                                                                                                        | 🏛Venue     | 🎯Task |
 | :--------- | :------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :----- |
+| STDN       | Spatiotemporal-aware Trend-Seasonality Decomposition Network for Traffic Flow Forecasting                            | [Link](https://ojs.aaai.org/index.php/AAAI/article/view/33247)   | [Link](https://github.com/roarer008/STDN)                                                                                                                                               | AAAI'25     | STF    |
+| HimNet     | Heterogeneity-Informed Meta-Parameter Learning for Spatiotemporal Time Series Forecasting                            | [Link](https://arxiv.org/abs/2405.10800)                | [Link](https://github.com/XDZhelheim/HimNet)                                                                                                                                                     | SIGKDD'24   | STF    |
+| STPGNN     | Spatio-Temporal Pivotal Graph Neural Networks for Trafﬁc Flow Forecasting                                            | [Link](https://ojs.aaai.org/index.php/AAAI/article/view/28707) | [Link](https://github.com/Kongwy5689/STPGNN?tab=readme-ov-file)                                                                                                                           | AAAI'24     | STF    |
 | BigST      | Linear Complexity Spatio-Temporal Graph Neural Network for Traffic Forecasting on Large-Scale Road Networks          | [Link](https://dl.acm.org/doi/10.14778/3641204.3641217) | [Link](https://github.com/usail-hkust/BigST?tab=readme-ov-file)                                                                                                                                  | VLDB'24     | STF    |
 | STDMAE     | Spatio-Temporal-Decoupled Masked Pre-training for Traffic Forecasting                                                | [Link](https://arxiv.org/abs/2312.00516)                | [Link](https://github.com/Jimmy-7664/STD-MAE)                                                                                                                                                    | IJCAI'24    | STF    |
 | STWave     | When Spatio-Temporal Meet Wavelets: Disentangled Traffic Forecasting via Efficient Spectral Graph Attention Networks | [Link](https://ieeexplore.ieee.org/document/10184591)   | [Link](https://github.com/LMissher/STWave)                                                                                                                                                       | ICDE'23     | STF    |
@@ -133,6 +152,12 @@ The code links (💻Code) in the table below point to the official implementatio
 
 | 📊Baseline    | 📝Title                                                                                                  | 📄Paper                                                | 💻Code                                                                        | 🏛Venue    | 🎯Task |
 | :------------ | :------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- | :---------------------------------------------------------------------------- | :--------- | :----- |
+| S-D-Mamba         | Is Mamba Effective for Time Series Forecasting?                           | [Link](https://arxiv.org/abs/2403.11144v3)                  | [Link](https://github.com/wzhwzhwzh0921/S-D-Mamba)                                        | NeuroComputing'24 | LTSF   |
+| Bi-Mamba         | Bi-Mamba+: Bidirectional Mamba for Time Series Forecasting                           | [Link](https://arxiv.org/abs/2404.15772)                  | [Link](https://github.com/Leopold2333/Bi-Mamba4TS)                                        | arXiv'24 | LTSF   |
+| ModernTCN         | ModernTCN: A Modern Pure Convolution Structure for General Time Series Analysis                           | [Link](https://openreview.net/forum?id=vpJMJerXHU)                  | [Link](https://github.com/luodhhh/ModernTCN)                                        | ICLR'24 | LTSF   |
+| TimeXer         | TimeXer: Empowering Transformers for Time Series Forecasting with Exogenous Variables                           | [Link](https://arxiv.org/abs/2402.19072)                  | [Link](https://github.com/thuml/TimeXer)                                        | NeurIPS'24 | LTSF   |
+| CARD         | CARD: Channel Aligned Robust Blend Transformer for Time Series Forecasting                           | [Link](https://arxiv.org/abs/2305.12095)                  | [Link](https://github.com/wxie9/CARD)                                        | ICLR'24 | LTSF   |
+| SOFTS         | SOFTS: Efficient Multivariate Time Series Forecasting with Series-Core Fusion                           | [Link](https://arxiv.org/pdf/2404.14197)                  | [Link](https://github.com/Secilia-Cxy/SOFTS)                                        | NeurIPS'24 | LTSF   |
 | CATS          | Are Self-Attentions Effective for Time Series Forecasting?                                               | [Link](https://arxiv.org/pdf/2405.16877)                  | [Link](https://github.com/dongbeank/CATS)                                        | NeurIPS'24 | LTSF   |
 | Sumba         | Structured Matrix Basis for Multivariate Time Series Forecasting with Interpretable Dynamics             | [Link](https://xiucheng.org/assets/pdfs/nips24-sumba.pdf) | [Link](https://github.com/chenxiaodanhit/Sumba/)                                 | NeurIPS'24 | LTSF   |
 | GLAFF         | Rethinking the Power of Timestamps for Robust Time Series Forecasting: A Global-Local Fusion Perspective | [Link](https://arxiv.org/pdf/2409.18696)                  | [Link](https://github.com/ForestsKing/GLAFF)                                     | NeurIPS'24 | LTSF   |
@@ -156,6 +181,7 @@ The code links (💻Code) in the table below point to the official implementatio
 | NHiTS         | Neural Hierarchical Interpolation for Time Series Forecasting                                            | [Link](https://arxiv.org/abs/2201.12886)                  | [Link](https://github.com/cchallu/n-hits)                                        | AAAI'23    | LTSF   |
 | PatchTST      | A Time Series is Worth 64 Words: Long-term Forecasting with Transformers                                 | [Link](https://arxiv.org/abs/2211.14730)                  | [Link](https://github.com/yuqinie98/PatchTST)                                    | ICLR'23    | LTSF   |
 | TiDE          | Long-term Forecasting with TiDE: Time-series Dense Encoder                                               | [Link](https://arxiv.org/abs/2304.08424)                  | [Link](https://github.com/lich99/TiDE)                                           | TMLR'23    | LTSF   |
+| S4         | Efficiently Modeling Long Sequences with Structured State Spaces                           | [Link](https://openreview.net/pdf?id=uYLFoz1vlAC)                  | [Link](https://github.com/state-spaces/s4)                                        | ICLR'22 | LTSF   |
 | TimesNet      | Temporal 2D-Variation Modeling for General Time Series Analysis                                          | [Link](https://openreview.net/pdf?id=ju_Uqw384Oq)         | [Link](https://github.com/thuml/TimesNet)                                        | ICLR'23    | LTSF   |
 | Triformer     | Triangular, Variable-Specific Attentions for Long Sequence Multivariate Time Series Forecasting          | [Link](https://arxiv.org/abs/2204.13767)                  | [Link](https://github.com/razvanc92/triformer)                                   | IJCAI'22   | LTSF   |
 | NSformer      | Exploring the Stationarity in Time Series Forecasting                                                    | [Link](https://arxiv.org/abs/2205.14415)                  | [Link](https://github.com/thuml/Nonstationary_Transformers)                      | NeurIPS'22 | LTSF   |
@@ -233,50 +259,49 @@ BasicTS support a variety of datasets, including ***spatial-temporal forecasting
 See the paper *[Exploring Progress in Multivariate Time Series Forecasting:
 Comprehensive Benchmarking and Heterogeneity Analysis](https://arxiv.org/pdf/2310.06119.pdf).*
 
-## Contributors ✨
+## ✨ Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-
 <!-- prettier-ignore-start -->
-
 <!-- markdownlint-disable -->
-
 <table>
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/zezhishao"><img src="https://avatars.githubusercontent.com/u/33691477?v=4?s=100" width="100px;" alt="S22"/><br /><sub><b>S22</b></sub></a><br /><a href="#maintenance-zezhishao" title="Maintenance">🚧</a> <a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=zezhishao" title="Code">💻</a> <a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Azezhishao" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/finleywang"><img src="https://avatars.githubusercontent.com/u/5022944?v=4?s=100" width="100px;" alt="finleywang"/><br /><sub><b>finleywang</b></sub></a><br /><a href="#mentoring-finleywang" title="Mentoring">🧑‍🏫</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/blisky-li"><img src="https://avatars.githubusercontent.com/u/66107694?v=4?s=100" width="100px;" alt="blisky-li"/><br /><sub><b>blisky-li</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=blisky-li" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/LMissher"><img src="https://avatars.githubusercontent.com/u/37818979?v=4?s=100" width="100px;" alt="LMissher"/><br /><sub><b>LMissher</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=LMissher" title="Code">💻</a> <a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3ALMissher" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/cnstark"><img src="https://avatars.githubusercontent.com/u/45590791?v=4?s=100" width="100px;" alt="CNStark"/><br /><sub><b>CNStark</b></sub></a><br /><a href="#infra-cnstark" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Azusa-Yuan"><img src="https://avatars.githubusercontent.com/u/61765965?v=4?s=100" width="100px;" alt="Azusa"/><br /><sub><b>Azusa</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3AAzusa-Yuan" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ywoelker"><img src="https://avatars.githubusercontent.com/u/94364022?v=4?s=100" width="100px;" alt="Yannick Wölker"/><br /><sub><b>Yannick Wölker</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Aywoelker" title="Bug reports">🐛</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hlhang9527"><img src="https://avatars.githubusercontent.com/u/77621248?v=4?s=100" width="100px;" alt="hlhang9527"/><br /><sub><b>hlhang9527</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Ahlhang9527" title="Bug reports">🐛</a></td>
     </tr>
     <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/hlhang9527"><img src="https://avatars.githubusercontent.com/u/77621248?v=4?s=100" width="100px;" alt="hlhang9527"/><br /><sub><b>hlhang9527</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Ahlhang9527" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ChengqingYu"><img src="https://avatars.githubusercontent.com/u/114470704?v=4?s=100" width="100px;" alt="Chengqing Yu"/><br /><sub><b>Chengqing Yu</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=ChengqingYu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Reborn14"><img src="https://avatars.githubusercontent.com/u/74488779?v=4?s=100" width="100px;" alt="Reborn14"/><br /><sub><b>Reborn14</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=Reborn14" title="Documentation">📖</a> <a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=Reborn14" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/TensorPulse"><img src="https://avatars.githubusercontent.com/u/94754159?v=4?s=100" width="100px;" alt="TensorPulse"/><br /><sub><b>TensorPulse</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3ATensorPulse" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/superarthurlx"><img src="https://avatars.githubusercontent.com/u/40826115?v=4?s=100" width="100px;" alt="superarthurlx"/><br /><sub><b>superarthurlx</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=superarthurlx" title="Code">💻</a> <a href="https://github.com/GestaltCogTeam/BasicTS/issues?q=author%3Asuperarthurlx" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yisongfu"><img src="https://avatars.githubusercontent.com/u/139831104?v=4?s=100" width="100px;" alt="Yisong Fu"/><br /><sub><b>Yisong Fu</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=yisongfu" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/DiamonJoy"><img src="https://avatars.githubusercontent.com/u/11327242?v=4?s=100" width="100px;" alt="Xubin"/><br /><sub><b>Xubin</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=DiamonJoy" title="Documentation">📖</a></td>
+    </tr>
+    <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/duyifanict"><img src="https://avatars.githubusercontent.com/u/171222220?v=4?s=100" width="100px;" alt="DU YIFAN"/><br /><sub><b>DU YIFAN</b></sub></a><br /><a href="https://github.com/GestaltCogTeam/BasicTS/commits?author=duyifanict" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
 
 <!-- markdownlint-restore -->
-
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
-## ⭐ Star History
+<!-- ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=GestaltCogTeam/BasicTS&type=Date)](https://star-history.com/#GestaltCogTeam/BasicTS&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=GestaltCogTeam/BasicTS&type=Date)](https://star-history.com/#GestaltCogTeam/BasicTS&Date) -->
 
 ## 🔗 Acknowledgement
 
@@ -284,9 +309,9 @@ BasicTS is developed based on [EasyTorch](https://github.com/cnstark/easytorch),
 
 ## 📧 Contact
 
-Official Discord Server:
+We invite you to join our official community to access comprehensive technical support.
 
-https://discord.gg/jkjGf9Hz
+Official Discord Server: [Click here to join our Discord community](https://discord.gg/UWFP7b3b7H)
 
 Official WeChat Group:
 

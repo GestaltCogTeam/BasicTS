@@ -43,7 +43,7 @@ MODEL_PARAM = {
     "sigma" : 0.2,
     "dropout": 0.1,
     "freq": 'h',
-    "use_norm" : False,
+    "use_norm" : True,
     "output_attention": False,
     "embed": "timeF",                           # [timeF, fixed, learned]
     "activation": "gelu",
@@ -154,5 +154,4 @@ CFG.TEST.DATA.BATCH_SIZE = 64
 CFG.EVAL = EasyDict()
 
 # Evaluation parameters
-CFG.EVAL.HORIZONS = [12, 24, 48, 96, 192, 288, 336]
 CFG.EVAL.USE_GPU = True # Whether to use GPU for evaluation. Default: True
