@@ -1,3 +1,4 @@
+from .cls_metrics import accuracy
 from .corr import masked_corr
 from .huber import masked_huber
 from .mae import masked_mae
@@ -19,6 +20,7 @@ ALL_METRICS = {
             'R2': masked_r2,
             'CORR': masked_corr,
             'HUBER': masked_huber,
+            'Accuracy': accuracy,
             }
 
 METRIC_METER = {
@@ -30,12 +32,14 @@ __all__ = [
     'masked_mae',
     'masked_mse',
     'masked_rmse',
+    'incremental_masked_rmse',
     'masked_mape',
     'masked_wape',
     'masked_smape',
     'masked_r2',
     'masked_corr',
     'masked_huber',
+    'accuracy',
     'ALL_METRICS',
     'METRIC_METER'
 ]

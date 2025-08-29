@@ -21,7 +21,7 @@ class TimeSeriesInferenceDataset(BaseDataset):
     """
 
     # pylint: disable=unused-argument
-    def __init__(self, dataset_name:str, dataset: Union[str, list], input_len: int, output_len: int,
+    def __init__(self, dataset_name:str, dataset: Union[str, list], input_len: int, output_len: int, memmap: bool = False,
                  logger: logging.Logger = None, **kwargs) -> None:
         """
         Initializes the TimeSeriesInferenceDataset by setting up paths, loading data, and 
@@ -36,8 +36,9 @@ class TimeSeriesInferenceDataset(BaseDataset):
         """
         train_val_test_ratio: List[float] = []
         mode: str = 'inference'
-        overlap = False
-        super().__init__(dataset_name, train_val_test_ratio, mode, input_len, output_len, overlap)
+        super().__init__(dataset_name, train_val_test_ratio, mode, memmap)
+        self.input_len = input_len
+        self.output_len = output_len
         self.logger = logger
 
         self.description = {}

@@ -4,7 +4,6 @@ import torch.nn.functional as F
 from .Transformer_EncDec import Encoder, EncoderLayer
 from .SelfAttention_Family import FullAttention, AttentionLayer
 from .Embed import DataEmbedding_inverted
-import numpy as np
 from basicts.utils import data_transformation_4_xformer
 
 class iTransformer(nn.Module):
@@ -13,28 +12,28 @@ class iTransformer(nn.Module):
     Official Code: https://github.com/thuml/iTransformer
     Link: https://arxiv.org/abs/2310.06625
     Venue: ICLR 2024
-    Task: Long-term Time Series Forecasting
+    Task: Long-term Time Series Forecasting, Time Series Classification
     """
     def __init__(self, **model_args):
-        super(iTransformer, self).__init__()
+        super().__init__()
         self.pred_len = model_args['pred_len']
         self.seq_len = model_args['seq_len']
         self.output_attention = model_args['output_attention']
         self.enc_in = model_args['enc_in']
         self.dec_in = model_args['dec_in']
         self.c_out = model_args['c_out']
-        self.factor = model_args["factor"]
+        self.factor = model_args['factor']
         self.d_model = model_args['d_model']
         self.n_heads = model_args['n_heads']
         self.d_ff = model_args['d_ff']
         self.embed = model_args['embed']
-        self.freq = model_args["freq"]
-        self.dropout = model_args["dropout"]
+        self.freq = model_args['freq']
+        self.dropout = model_args['dropout']
         self.activation = model_args['activation']
         self.e_layers = model_args['e_layers']
-        self.d_layers = model_args['d_layers']
+        self.use_norm = model_args['use_norm']
+        self.task_name = model_args['task_name']
 
-        self.use_norm =model_args['use_norm']
         # Embedding
         self.enc_embedding = DataEmbedding_inverted(self.seq_len, self.d_model, self.embed, self.freq,
                                                     self.dropout)
@@ -54,7 +53,16 @@ class iTransformer(nn.Module):
             ],
             norm_layer=torch.nn.LayerNorm(self.d_model)
         )
-        self.projector = nn.Linear(self.d_model, self.pred_len, bias=True)
+        if self.task_name == 'forecast':
+            self.projector = nn.Linear(self.d_model, self.pred_len, bias=True)
+
+        elif self.task_name == 'classification':
+            self.num_classes = model_args['num_classes']
+            self.act = F.gelu
+            self.dropout = nn.Dropout(self.dropout)
+            self.projector = nn.Linear(self.d_model * self.enc_in, self.num_classes)
+        else:
+            raise ValueError(f"Task name {self.task_name} is not supported.")
 
     def forward_xformer(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor,
                         x_mark_dec: torch.Tensor,
@@ -103,9 +111,23 @@ class iTransformer(nn.Module):
             torch.Tensor: outputs with shape [B, L2, N, 1]
         """
 
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data,
-                                                                             future_data=future_data,
-                                                                             start_token_len=0)
-        #print(x_mark_enc.shape, x_mark_dec.shape)
-        prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
-        return prediction.unsqueeze(-1)
+        if self.task_name == 'forecast':
+            x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data,
+                                                                                future_data=future_data,
+                                                                                start_token_len=0)
+
+            prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
+
+        elif self.task_name == 'classification':
+            enc_out = self.enc_embedding(history_data[..., 0], None)
+            enc_out, attns = self.encoder(enc_out, attn_mask=None)
+            # Output
+            output = self.act(enc_out)  # the output transformer encoder/decoder embeddings don't include non-linearity
+            output = self.dropout(output)
+            output = output.reshape(output.shape[0], -1)  # (batch_size, c_in * d_model)
+            prediction = self.projector(output)  # (batch_size, num_classes)
+
+        else:
+            raise ValueError(f"Task name {self.task_name} is not supported.")
+
+        return prediction
