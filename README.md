@@ -42,7 +42,7 @@ $\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and 
 
 🎉 **Update (Aug 2025):** BasicTS now supports **time series classification tasks and the UEA dataset!** Check out [how to use BasicTS for classification tasks](./tutorial/time_series_classification_cn.md).
 
-🎉 **Update (June 2025):** Adds six LTSF baselines: CARD, TimeXer, Bi-Mamba, ModernTCN, S-D-Mamba, and S4.
+🎉 **Update (June/July 2025):** Adds nine baselines: STDN, HimNet, STPGNN, CARD, TimeXer, Bi-Mamba, etc.
 
 🎉 **Update (May 2025):** BasicTS now supports training universal forecasting models—such as **TimeMoE** and **ChronosBolt**—with the [BLAST](https://arxiv.org/abs/2505.17871) corpus. BLAST enables **faster convergence**, **notable reductions in computational cost**, and superior performance even with limited resources. See [here](./tutorial/training_with_BLAST.md).  
 
@@ -267,6 +267,15 @@ BasicTS support a variety of datasets, including ***spatial-temporal forecasting
 | GBA      | Traffic Flow |    35040 |                2352 | True    |            15 | Large Scale |
 | GLA      | Traffic Flow |    35040 |                3834 | True    |            15 | Large Scale |
 | SD       | Traffic Flow |    35040 |                 716 | True    |            15 | Large Scale |
+
+</details>
+
+<details open>
+  <summary><h3>Pre-training Corpus</h3></summary>
+
+| 🏷️Name | 🌐Domain     | 📏Length | 📊Time Series Count | 🔄Graph | ⏱️Freq. | 🎯Task      |
+| :------- | :----------- | -------: | ------------------: | :------ | ------------: | :---------- |
+|   [BLAST](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/training_with_BLAST.md)  |  Multiple |     4096 |      20000000       | False  |   Multiple  |     UFM     |
 
 </details>
 

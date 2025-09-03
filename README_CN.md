@@ -43,7 +43,7 @@ $\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) 是一个面向时间序列
 
 🎉 **更新（2025年8月）：BasicTS现已支持时间序列分类任务和UEA数据集!** 在这里了解[使用BasicTS进行分类任务](./tutorial/time_series_classification_cn.md)。
 
-🎉 **更新（2025年6月）：** 添加了6个长序列预测基线：CARD、TimeXer、Bi-Mamba、ModernTCN、S-D-Mamba、S4。
+🎉 **更新（2025年6/7月）：** 添加了9个长序列预测基线：STDN, HimNet, STPGNN, CARD, TimeXer, Bi-Mamba 等。
 
 🎉 **更新（2025年5月）：** BasicTS 现已支持使用 [BLAST](https://arxiv.org/abs/2505.17871) 语料库训练通用预测模型（例如 **TimeMoE** 和 **ChronosBolt**）。BLAST 能够实现 **更快的收敛速度**、**显著降低计算成本**，并且即使在资源有限的情况下也能获得卓越性能。[查看](./tutorial/training_with_BLAST_cn.md)。
 
@@ -271,6 +271,13 @@ BasicTS 支持多种类型的数据集，涵盖时空预测、长序列预测及
 | SD       | Traffic Flow |    35040 |                 716 | True    |            15 | Large Scale |
 
 </details>
+
+<details open>
+  <summary><h3>Pre-training Corpus</h3></summary>
+
+| 🏷️Name | 🌐Domain     | 📏Length | 📊Time Series Count | 🔄Graph | ⏱️Freq. | 🎯Task      |
+| :------- | :----------- | -------: | ------------------: | :------ | ------------: | :---------- |
+|   [BLAST](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/training_with_BLAST_cn.md)  |  Multiple |     4096 |      20000000       | False  |   Multiple  |     UFM     |
 
 ## 📉 主要结果
 
