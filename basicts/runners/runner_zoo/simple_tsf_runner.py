@@ -3,6 +3,7 @@ from typing import Dict, Optional
 import torch
 
 from ..base_tsf_runner import BaseTimeSeriesForecastingRunner
+from basicts.configs import BasicTSForecastingConfig
 
 
 class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
@@ -11,15 +12,15 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
     Selects forward and target features. This runner is designed to handle most cases.
 
     Args:
-        cfg (Dict): Configuration dictionary.
+        cfg (BasicTSForecastingConfig): Configuration dictionary.
     """
 
-    def __init__(self, cfg: Dict):
+    def __init__(self, cfg: BasicTSForecastingConfig):
 
         super().__init__(cfg)
-        self.forward_features = cfg['MODEL'].get('FORWARD_FEATURES', None)
-        self.target_features = cfg['MODEL'].get('TARGET_FEATURES', None)
-        self.target_time_series = cfg['MODEL'].get('TARGET_TIME_SERIES', None)
+        self.forward_features = cfg.forward_features
+        self.target_features = cfg.target_features
+        self.target_time_series = cfg.target_time_series
 
     def preprocessing(self, input_data: Dict) -> Dict:
         """Preprocess data.
@@ -30,7 +31,6 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         Returns:
             Dict: Processed data.
         """
-
         if self.scaler is not None:
             input_data['target'] = self.scaler.transform(input_data['target'])
             input_data['inputs'] = self.scaler.transform(input_data['inputs'])
@@ -46,7 +46,6 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
         Returns:
             Dict: Processed data.
         """
-
         # rescale data
         if self.scaler is not None and self.scaler.rescale:
             input_data['prediction'] = self.scaler.inverse_transform(input_data['prediction'])
@@ -91,7 +90,7 @@ class SimpleTimeSeriesForecastingRunner(BaseTimeSeriesForecastingRunner):
 
         # Select input features
         history_data = self.select_input_features(history_data)
-        future_data_4_dec = self.select_input_features(future_data)
+        future_data_4_dec = self.select_input_features(future_data).clone()
 
         if not train:
             # For non-training phases, use only temporal features

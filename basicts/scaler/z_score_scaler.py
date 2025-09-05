@@ -1,12 +1,12 @@
-import json
+from typing import Union
 
 import numpy as np
 import torch
 
-from .base_scaler import BaseScaler
+from .base_scaler import BasicTSScaler
 
 
-class ZScoreScaler(BaseScaler):
+class ZScoreScaler(BasicTSScaler):
     """
     ZScoreScaler performs Z-score normalization on the dataset, transforming the data to have a mean of zero 
     and a standard deviation of one. This is commonly used in preprocessing to normalize data, ensuring that 
@@ -21,7 +21,7 @@ class ZScoreScaler(BaseScaler):
             By default, it is set to 0, indicating the first channel.
     """
 
-    def __init__(self, dataset_name: str, train_ratio: float, norm_each_channel: bool, rescale: bool):
+    def __init__(self, norm_each_channel: bool, rescale: bool, target_feature: int = 0):
         """
         Initialize the ZScoreScaler by loading the dataset and fitting the scaler to the training data.
 
@@ -37,31 +37,40 @@ class ZScoreScaler(BaseScaler):
                 the base class but is not directly used in Z-score normalization.
         """
 
-        super().__init__(dataset_name, train_ratio, norm_each_channel, rescale)
-        self.target_channel = 0  # assuming normalization on the first channel
+        super().__init__(norm_each_channel, rescale)
+        self.target_feature = target_feature # assuming normalization on the first channel
+        self.mean: torch.Tensor = None
+        self.std: torch.Tensor = None
 
-        # load dataset description and data
-        description_file_path = f'datasets/{dataset_name}/desc.json'
-        with open(description_file_path, 'r') as f:
-            description = json.load(f)
-        data_file_path = f'datasets/{dataset_name}/data.dat'
-        data = np.memmap(data_file_path, dtype='float32', mode='r', shape=tuple(description['shape']))
+    def fit(self, data: Union[np.ndarray, torch.Tensor]) -> None:
+        """
+        Fit the scaler to the training data.
 
-        # split data into training set based on the train_ratio
-        train_size = int(len(data) * train_ratio)
-        train_data = data[:train_size, :, self.target_channel].copy()
-
-        # compute mean and standard deviation
-        if norm_each_channel:
-            self.mean = np.mean(train_data, axis=0, keepdims=True)
-            self.std = np.std(train_data, axis=0, keepdims=True)
-            self.std[self.std == 0] = 1.0  # prevent division by zero by setting std to 1 where it's 0
+        Args:
+            data (torch.Tensor): Training data used to fit the scaler.
+        """
+        data = data[..., self.target_feature]
+        if isinstance(data, np.ndarray):
+            if self.norm_each_channel:
+                self.mean = np.mean(data, axis=0, keepdims=True)
+                self.std = np.std(data, axis=0, keepdims=True)
+                self.std[self.std == 0] = 1.0  # prevent division by zero by setting std to 1 where it's 0
+            else:
+                self.mean = np.mean(data)
+                self.std = np.std(data)
+                if self.std == 0:
+                    self.std = 1.0  # prevent division by zero by setting std to 1 where it's 0
+            self.mean, self.std = torch.Tensor(self.mean), torch.Tensor(self.std)
         else:
-            self.mean = np.mean(train_data)
-            self.std = np.std(train_data)
-            if self.std == 0:
-                self.std = 1.0  # prevent division by zero by setting std to 1 where it's 0
-        self.mean, self.std = torch.tensor(self.mean), torch.tensor(self.std)
+            if self.norm_each_channel:
+                self.mean = torch.mean(data, dim=0, keepdim=True)
+                self.std = torch.std(data, dim=0, keepdim=True)
+                self.std[self.std == 0] = 1.0  # prevent division by zero by setting std to 1 where it's 0
+            else:
+                self.mean = torch.mean(data)
+                self.std = torch.std(data)
+                if self.std == 0:
+                    self.std = 1.0  # prevent division by zero by setting std to 1 where it's 0
 
     def transform(self, input_data: torch.Tensor) -> torch.Tensor:
         """
@@ -79,7 +88,7 @@ class ZScoreScaler(BaseScaler):
 
         mean = self.mean.to(input_data.device)
         std = self.std.to(input_data.device)
-        input_data[..., self.target_channel] = (input_data[..., self.target_channel] - mean) / std
+        input_data[..., self.target_feature] = (input_data[..., self.target_feature] - mean) / std
         return input_data
 
     def inverse_transform(self, input_data: torch.Tensor) -> torch.Tensor:
@@ -100,5 +109,5 @@ class ZScoreScaler(BaseScaler):
         std = self.std.to(input_data.device)
         # Clone the input data to prevent in-place modification (which is not allowed in PyTorch)
         input_data = input_data.clone()
-        input_data[..., self.target_channel] = input_data[..., self.target_channel] * std + mean
+        input_data[..., self.target_feature] = input_data[..., self.target_feature] * std + mean
         return input_data
