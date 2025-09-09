@@ -3,7 +3,7 @@ import logging
 
 import numpy as np
 
-from .constants import MODE
+from basicts.utils import BasicTSMode 
 from .tsf_dataset import BasicTSForecastingDataset
 
 
@@ -123,10 +123,10 @@ class BuiltinTSForecastingDataset(BasicTSForecastingDataset):
         if self.mode is None:
             raise ValueError(f'Mode is None. The mode should be setted by using `{self.__class__.__name__}(mode)`.')
 
-        if self.mode == MODE.TRAIN:
+        if self.mode == BasicTSMode.TRAIN:
             offset = self.output_len if self.overlap else 0
             return self.data[:self.train_len + offset]
-        elif self.mode == MODE.VAL:
+        elif self.mode == BasicTSMode.VAL:
             offset_left = self.input_len - 1 if self.overlap else 0
             offset_right = self.output_len if self.overlap else 0
             return self.data[self.train_len - offset_left : self.train_len + self.val_len + offset_right]

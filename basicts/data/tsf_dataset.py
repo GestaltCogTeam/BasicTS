@@ -4,7 +4,6 @@ from abc import abstractmethod
 import numpy as np
 
 from .base_dataset import BasicTSDataset
-from .constants import MODE
 
 
 class BasicTSForecastingDataset(BasicTSDataset):

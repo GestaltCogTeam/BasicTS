@@ -17,9 +17,10 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
 from basicts.data import BasicTSDataset
+from basicts.runners.callback import BasicTSCallback
+from basicts.runners.taskflow import BasicTSTaskFlow
 from basicts.scaler import BasicTSScaler
-
-from .constants import BASICTS_TASK
+from basicts.utils import BasicTSTask
 
 
 @dataclass
@@ -30,16 +31,17 @@ class BasicTSConfig(EasyDict):
 
     Args:
         d (dict, optional): Dictionary to initialize the configuration. Defaults to None.
-    """    
+    """
 
     model: type
     dataset: BasicTSDataset
+    taskflow: BasicTSTaskFlow
+    callbacks: List[BasicTSCallback]
 
     ############################## General Configuration ##############################
 
     # General settings
-    task_name: Union[BASICTS_TASK, str]
-    _runner: type # Property. Runner class name
+    task_name: BasicTSTask
     gpus: Optional[str] # Wether to use GPUs. The default is None (on CPU). For example, '0,1' is using 'cuda:0' and 'cuda:1'.
     gpu_num: int # Post-init. Number of GPUs.
     seed: int # Random seed.
@@ -48,6 +50,8 @@ class BasicTSConfig(EasyDict):
 
     # Dataset settings
     batch_size: Optional[int] # if setted, all dataloaders will be setted to the same batch size.
+    null_val: float
+    null_to_num: float
 
     # Scaler settings
     scaler: BasicTSScaler # Post-init. Scaler.

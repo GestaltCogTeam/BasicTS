@@ -8,6 +8,7 @@ from easytorch.launcher.dist_wrap import dist_wrap
 from easytorch.utils import get_logger, set_visible_devices
 
 from basicts.configs.base_config import BasicTSConfig
+from basicts.runners import BasicTSRunner
 
 
 class BasicTSLauncher:
@@ -220,15 +221,14 @@ def training_func(cfg: BasicTSConfig):
 
     # init runner
     logger = get_logger('BasicTS-launcher')
-    logger.info('Initializing runner "{}"'.format(cfg.runner))
-    runner = cfg.runner(cfg)
+    runner = BasicTSRunner(cfg)
 
     # init logger (after making ckpt save dir)
     runner.init_logger(logger_name='BasicTS-training', log_file_name='training_log')
 
     # train
     try:
-        runner.train(cfg)
+        runner.train()
     except BaseException as e:
         # log exception to file
         runner.logger.error(traceback.format_exc())

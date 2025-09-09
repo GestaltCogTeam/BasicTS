@@ -38,7 +38,6 @@ class ZScoreScaler(BasicTSScaler):
         """
 
         super().__init__(norm_each_channel, rescale)
-        self.target_feature = target_feature # assuming normalization on the first channel
         self.mean: torch.Tensor = None
         self.std: torch.Tensor = None
 
@@ -49,7 +48,6 @@ class ZScoreScaler(BasicTSScaler):
         Args:
             data (torch.Tensor): Training data used to fit the scaler.
         """
-        data = data[..., self.target_feature]
         if isinstance(data, np.ndarray):
             if self.norm_each_channel:
                 self.mean = np.mean(data, axis=0, keepdims=True)
@@ -72,7 +70,7 @@ class ZScoreScaler(BasicTSScaler):
                 if self.std == 0:
                     self.std = 1.0  # prevent division by zero by setting std to 1 where it's 0
 
-    def transform(self, input_data: torch.Tensor) -> torch.Tensor:
+    def transform(self, input_data: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
         """
         Apply Z-score normalization to the input data.
 
@@ -88,10 +86,12 @@ class ZScoreScaler(BasicTSScaler):
 
         mean = self.mean.to(input_data.device)
         std = self.std.to(input_data.device)
-        input_data[..., self.target_feature] = (input_data[..., self.target_feature] - mean) / std
-        return input_data
+        normed_data = (input_data - mean) / std
+        if mask is not None:
+            normed_data = torch.where(mask, normed_data, input_data)
+        return normed_data
 
-    def inverse_transform(self, input_data: torch.Tensor) -> torch.Tensor:
+    def inverse_transform(self, input_data: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
         """
         Reverse the Z-score normalization to recover the original data scale.
 
@@ -107,7 +107,7 @@ class ZScoreScaler(BasicTSScaler):
 
         mean = self.mean.to(input_data.device)
         std = self.std.to(input_data.device)
-        # Clone the input data to prevent in-place modification (which is not allowed in PyTorch)
-        input_data = input_data.clone()
-        input_data[..., self.target_feature] = input_data[..., self.target_feature] * std + mean
-        return input_data
+        denormed_data = input_data * std + mean
+        if mask is not None:
+            denormed_data = torch.where(mask, denormed_data, input_data)
+        return denormed_data

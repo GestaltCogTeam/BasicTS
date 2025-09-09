@@ -1,15 +1,19 @@
 from dataclasses import dataclass, field
 from typing import Callable, List, Literal, Optional, Tuple, Union
 
+import numpy as np
 from torch.optim import Adam, Optimizer
 from torch.optim.lr_scheduler import LRScheduler, MultiStepLR
 
 from basicts.data import BuiltinTSForecastingDataset
 from basicts.metrics import masked_mae
+from basicts.runners.callback import BasicTSCallback
+from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
+                                      BasicTSTaskFlow)
 from basicts.scaler import BasicTSScaler, ZScoreScaler
+from basicts.utils import BasicTSTask
 
 from .base_config import BasicTSConfig
-from .constants import BASICTS_TASK
 
 
 @dataclass
@@ -52,12 +56,13 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     model: type
     dataset: BuiltinTSForecastingDataset
+    taskflow: BasicTSTaskFlow = BasicTSForecastingTaskFlow()
+    callbacks: List[BasicTSCallback] = field(default_factory=list)
 
     ############################## General Configuration ##############################
 
     # General settings
-    task_name: Union[BASICTS_TASK, str] = BASICTS_TASK.TIME_SERIES_FORECASTING
-    _runner: type = None # Runner class name
+    task_name: BasicTSTask = BasicTSTask.TIME_SERIES_FORECASTING
     gpus: Optional[str] = None # Wether to use GPUs. The default is None (on CPU). For example, '0,1' is using 'cuda:0' and 'cuda:1'.
     gpu_num: int = None # Post-init. Number of GPUs.
     seed: int = 42 # Random seed.
@@ -66,6 +71,8 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     # Dataset settings
     batch_size: Optional[int] = None # if setted, all dataloaders will be setted to the same batch size.
+    null_val: float = np.nan
+    null_to_num: float = 0.0
 
     # Scaler settings
     scaler: BasicTSScaler = None # Post-init. Scaler.
@@ -120,11 +127,11 @@ class BasicTSForecastingConfig(BasicTSConfig):
     clip_grad_param: dict = field(default_factory=lambda: None) # If not specified, the gradient clipping will not be used.
 
     # Curriculum learning settings
-    cl: dict = field(default_factory=lambda: None) # Curriculum learning settings. Default: None. If not specified, the curriculum learning will not be used.
-    cl_epochs: int = 1 # Number of epochs for each curriculum learning stage, must be specified if cl is specified.
-    warm_epochs: int = 0 # Number of warm-up epochs. Default: 0
-    cl_prediction_length: int = None # cl_prediction_length. Total prediction length, must be specified if cl is specified.
-    cl_step_size: int = 1 # Step size for the curriculum learning. Default: 1. The current prediction length will be increased by CFG.TRAIN.CL.STEP_SIZE in each stage.
+    # cl: dict = field(default_factory=lambda: None) # Curriculum learning settings. Default: None. If not specified, the curriculum learning will not be used.
+    # cl_epochs: int = 1 # Number of epochs for each curriculum learning stage, must be specified if cl is specified.
+    # warm_epochs: int = 0 # Number of warm-up epochs. Default: 0
+    # cl_prediction_length: int = None # cl_prediction_length. Total prediction length, must be specified if cl is specified.
+    # cl_step_size: int = 1 # Step size for the curriculum learning. Default: 1. The current prediction length will be increased by CFG.TRAIN.CL.STEP_SIZE in each stage.
 
     # Checkpoint loading and saving settings
 
@@ -193,23 +200,11 @@ class BasicTSForecastingConfig(BasicTSConfig):
          'test_batch_size', 'test_interval', 'test_data_prefetch', 'test_data_num_workers', 'test_data_pin_memory', \
          'eval_horizons', 'eval_on_gpu', 'save_results',])
 
-    #################################### Properties #######################################
-
-    @property
-    def runner(self) -> type:
-        if self._runner is None:
-            from basicts.runners import \
-                SimpleTimeSeriesForecastingRunner  # pylint: disable=import-outside-toplevel
-            self._runner = SimpleTimeSeriesForecastingRunner
-        return self._runner
-
-    @runner.setter
-    def runner(self, value: type):
-        self._runner = value
+    ##################################### Post Init #######################################
 
     def __post_init__(self):
-        if self.cl_prediction_length is None:
-            self.cl_prediction_length = self.dataset.output_len
+        # if self.cl_prediction_length is None:
+        #     self.cl_prediction_length = self.dataset.output_len
         if self.batch_size is not None:
             self.train_batch_size = self.batch_size
             self.val_batch_size = self.batch_size
@@ -219,11 +214,12 @@ class BasicTSForecastingConfig(BasicTSConfig):
                 f'checkpoints/{self.model.__class__.__name__}/{self.dataset.name}_{self.num_epochs}_{self.dataset.input_len}_{self.dataset.output_len}'
 
         # Follow the default settings in spatial-temporal forecasting and time series forecasting tasks.
-        if self.norm_each_channel is None:
-            if self.task_name == BASICTS_TASK.SPATIAL_TEMPORAL_FORECASTING:
-                self.norm_each_channel = False
-            else: # time series forecasting
-                self.norm_each_channel = True
+        # if self.norm_each_channel is None:
+        #     if self.task_name == BASICTS_TASK.SPATIAL_TEMPORAL_FORECASTING:
+        #         self.norm_each_channel = False
+        #     else: # time series forecasting
+        #         self.norm_each_channel = True
+        self.norm_each_channel = True
 
         # Post-init scaler if not specified
         if self.scaler is None:
