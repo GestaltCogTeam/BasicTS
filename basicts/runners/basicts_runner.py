@@ -1,12 +1,10 @@
-import functools
 import inspect
 import json
 import logging
 import math
 import os
 import time
-from typing import (TYPE_CHECKING, Any, Callable, Dict, Literal, Optional,
-                    Tuple, Union)
+from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Union
 
 import numpy as np
 import setproctitle
@@ -28,10 +26,10 @@ from tqdm import tqdm
 from basicts.metrics import ALL_METRICS
 from basicts.scaler import BasicTSScaler
 
-from ..data import MODE, TimeSeriesInferenceDataset
-from ..utils import BasicTSMode, MeterPool
+from ..data import TimeSeriesInferenceDataset
+from ..utils import BasicTSMode, MeterPool, RunnerStatus
 from .callback import BasicTSCallbackHandler
-from .distributed import distributed
+# from .distributed import distributed
 from .taskflow import BasicTSTaskFlow
 
 if TYPE_CHECKING:
@@ -84,6 +82,8 @@ class BasicTSRunner:
         self.cfg: 'BasicTSConfig' = cfg
         # default logger
         self.logger = get_logger('BasicTS')
+        # status
+        self.status: RunnerStatus = RunnerStatus.INITIALIZING
         # task flow
         self.taskflow: BasicTSTaskFlow = cfg.taskflow
         # callback handler
@@ -131,9 +131,9 @@ class BasicTSRunner:
 
         # define metrics
         self.metrics = {k: ALL_METRICS[k] for k in cfg.metrics if k in ALL_METRICS}
-        self.target_metrics = cfg.target_metric
+        self.target_metric = cfg.target_metric
         self.metrics_best = cfg.best_metric
-        assert self.target_metrics in self.metrics or self.target_metrics == 'loss', f'Target metric {self.target_metrics} not found in metrics.'
+        assert self.target_metric in self.metrics or self.target_metric == 'loss', f'Target metric {self.target_metric} not found in metrics.'
         assert self.metrics_best in ['min', 'max'], f'Invalid best metric {self.metrics_best}.'
         # handle null values in datasets, e.g., 0.0 or np.nan.
         self.null_val = cfg.dataset.null_val
@@ -154,9 +154,8 @@ class BasicTSRunner:
         #           training will resume from the last saved checkpoint.
         #       This feature is designed primarily for the convenience of users,
         #           allowing them to continue training seamlessly after an interruption.
-        self.early_stopping_patience = cfg.patience
-        self.current_patience = self.early_stopping_patience
-        assert self.early_stopping_patience is None or self.early_stopping_patience > 0, 'Early stopping patience must be a positive integer.'
+        # TODO: define a Control class
+        self.stop_training = False
 
         # set process title
         proctitle_name = f"{cfg.model.__class__.__name__}({cfg.dataset.name})"
@@ -267,7 +266,7 @@ class BasicTSRunner:
         # evaluate the best model on the test set
         best_model_path = os.path.join(
             self.ckpt_save_dir,
-            '{}_best_val_{}.pt'.format(self.model_name, self.target_metrics.replace('/', '_'))
+            '{}_best_val_{}.pt'.format(self.model_name, self.target_metric.replace('/', '_'))
         )
         self.logger.info('Evaluating the best model on the test set.')
         self.eval(best_model_path)
@@ -284,6 +283,7 @@ class BasicTSRunner:
         self.on_validate_start()
         self.callback_handler.trigger('on_validate_start', self)
         self.logger.info('Start validation.')
+        self.status = RunnerStatus.VALIDATING
         self.model.eval()
         val_start_time = time.time()
         self._eval_loop(BasicTSMode.VAL)
@@ -322,6 +322,7 @@ class BasicTSRunner:
         self.callback_handler.trigger('on_test_start', self)
         # self.logger.info('Start testing.')
         self.model.eval()
+        self.status = RunnerStatus.TESTING if mode == BasicTSMode.TEST else RunnerStatus.EVALUATING
         test_start_time = time.time()
         self._eval_loop(mode)
         test_end_time = time.time()
@@ -377,25 +378,28 @@ class BasicTSRunner:
         # training loop
         step = self.start_step
         while step < self.num_steps:
-            # TODO: remove early stopping to callback
-            # if self.check_early_stopping():
-            #     break
+
+            if self.stop_training:
+                break
 
             data_loader = self.train_data_loader
 
             # update epoch
             self.epoch = step // self.step_per_epoch + self.start_epoch + 1
             # a new epoch
-            if step % self.step_per_epoch == 0:
+            if self.training_unit == 'epoch' and step % self.step_per_epoch == 0:
                 self.on_epoch_start(self.epoch)
                 self.callback_handler.trigger('on_epoch_start', self, epoch=self.epoch)
-
-            if self.training_unit == 'epoch' and step % self.step_per_epoch == 0:
                 # epoch pbar
                 data_loader = tqdm(data_loader) if get_local_rank() == 0 else data_loader
 
             # data loop
             for data in data_loader:
+
+                if self.stop_training:
+                    break
+
+                self.status = RunnerStatus.TRAINING
                 self.on_step_start(step)
                 self.callback_handler.trigger('on_step_start', self, epoch=self.epoch, step=step)
                 self.model.train()
@@ -409,9 +413,7 @@ class BasicTSRunner:
                 if loss is not None:
                     self.optimizer.zero_grad()
                     loss.backward()
-                    # TODO: move grad clip and gradient accumulation to callback
-                    # if self.clip_grad_param is not None:
-                    #     torch.nn.utils.clip_grad_norm_(self.model.parameters(), **self.clip_grad_param)
+                    self.callback_handler.trigger('on_optimizer_step', self)
                     self.optimizer.step()
                 forward_return = self.taskflow.postprocess(self, forward_return) # task specific postprocess
                 # update metrics meter
@@ -432,11 +434,12 @@ class BasicTSRunner:
                     step_pbar.update()
                 # check if training should stop
                 if step >= self.num_steps:
-                    break
+                    self.stop_training = True
 
-            # on epoch end
-            self.callback_handler.trigger('on_epoch_end', self, epoch=self.epoch, step=step)
-            self.on_epoch_end(self.epoch, step)
+            # when training unit is epoch, call on epoch end
+            if self.training_unit == 'epoch':
+                self.callback_handler.trigger('on_epoch_end', self, epoch=self.epoch, step=step)
+                self.on_epoch_end(self.epoch, step)
 
     def _eval_loop(self, mode: BasicTSMode):
         """evaluate model.
@@ -551,10 +554,10 @@ class BasicTSRunner:
         if self.training_unit == 'epoch' and train_epoch is not None:
             # tensorboard plt meters
             self.plt_meters('val', train_epoch // self.val_interval)
-            self._save_best_model(train_epoch, 'val/' + self.target_metrics, greater_best=greater_best)
+            self._save_best_model(train_epoch, 'val/' + self.target_metric, greater_best=greater_best)
         else: # training_unit is 'step'
             self.plt_meters('val', train_step // self.val_interval)
-            self._save_best_model(train_step, 'val/' + self.target_metrics, greater_best=greater_best)
+            self._save_best_model(train_step, 'val/' + self.target_metric, greater_best=greater_best)
 
     @master_only
     def on_test_start(self) -> None:
@@ -586,7 +589,7 @@ class BasicTSRunner:
         if not self.is_train_initialized and self.scaler is not None:
             train_dataset = self.cfg.dataset(BasicTSMode.TRAIN)
             self.scaler.fit(train_dataset.data)
-        ckpt_path = os.path.join(self.ckpt_save_dir, '{}_best_val_{}.pt'.format(self.model_name, self.target_metrics.replace('/', '_')))
+        ckpt_path = os.path.join(self.ckpt_save_dir, '{}_best_val_{}.pt'.format(self.model_name, self.target_metric.replace('/', '_')))
         self.load_model(ckpt_path=ckpt_path, strict=True)
 
     @master_only
@@ -607,14 +610,13 @@ class BasicTSRunner:
             epoch (int): current epoch
         """
 
-        if self.training_unit == 'epoch':
-            # print epoch num
-            self.logger.info('Epoch {:d} / {:d}'.format(epoch, self.num_epochs))
-            # set epoch for sampler in distributed mode
-            # see https://pytorch.org/docs/stable/data.html
-            sampler = self.train_data_loader.sampler
-            if torch.distributed.is_initialized() and isinstance(sampler, DistributedSampler) and sampler.shuffle:
-                sampler.set_epoch(epoch)
+        # print epoch num
+        self.logger.info('Epoch {:d} / {:d}'.format(epoch, self.num_epochs))
+        # set epoch for sampler in distributed mode
+        # see https://pytorch.org/docs/stable/data.html
+        sampler = self.train_data_loader.sampler
+        if torch.distributed.is_initialized() and isinstance(sampler, DistributedSampler) and sampler.shuffle:
+            sampler.set_epoch(epoch)
 
     def on_epoch_end(self, epoch: int, step: int) -> None:
         """
@@ -624,32 +626,30 @@ class BasicTSRunner:
             epoch (int): The current epoch number.
         """
 
-        # update lr_scheduler
-        if self.training_unit == 'epoch':
-            if self.lr_scheduler is not None:
-                self.lr_scheduler.step()
-                self.update_meter('train/lr', self.lr_scheduler.get_last_lr()[0])
+        if self.lr_scheduler is not None:
+            self.lr_scheduler.step()
+            self.update_meter('train/lr', self.lr_scheduler.get_last_lr()[0])
 
-            # print training meters
-            self.print_meters('train')
-            # plot training meters to TensorBoard
-            self.plt_meters('train', epoch)
-            # perform validation if configured
-            if self.val_data_loader is not None and epoch % self.val_interval == 0:
-                self.validate(train_epoch=epoch)
-            # perform testing if configured
-            if self.test_data_loader is not None and epoch % self.test_interval == 0:
-                self._test(train_epoch=epoch)
-            # save the model checkpoint
-            self._save_model(epoch)
-            # reset epoch meters
-            self.reset_meters()
+        # print training meters
+        self.print_meters('train')
+        # plot training meters to TensorBoard
+        self.plt_meters('train', epoch)
+        # perform validation if configured
+        if self.val_data_loader is not None and epoch % self.val_interval == 0:
+            self.validate(train_epoch=epoch)
+        # perform testing if configured
+        if self.test_data_loader is not None and epoch % self.test_interval == 0:
+            self._test(train_epoch=epoch)
+        # save the model checkpoint
+        self._save_model(epoch)
+        # reset epoch meters
+        self.reset_meters()
 
-            # estimate training finish time
-            if self.epoch < self.num_epochs:
-                expected_end_time = self.train_time_predictor.get_expected_end_time(step)
-                self.logger.info('The estimated training finish time is {}'.format(
-                    time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(expected_end_time))))
+        # estimate training finish time
+        if not self.stop_training and self.epoch < self.num_epochs:
+            expected_end_time = self.train_time_predictor.get_expected_end_time(step)
+            self.logger.info('The estimated training finish time is {}'.format(
+                time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(expected_end_time))))
 
     def on_step_start(self, step: int) -> None:
         """Called before each step.
@@ -657,6 +657,7 @@ class BasicTSRunner:
         Args:
             step (int): current step
         """
+        
         if self.training_unit == 'step' and step % self.val_interval == 0:
             # print iteration num
             self.logger.info('Iteration {:d} / {:d}'.format(step, self.num_steps))
@@ -1101,10 +1102,6 @@ class BasicTSRunner:
                 '{}_best_{}.pt'.format(self.model_name, metric_name.replace('/', '_'))
             )
             save_ckpt(ckpt_dict, ckpt_path, self.logger)
-            self.current_patience = self.early_stopping_patience # reset patience
-        else:
-            if self.early_stopping_patience is not None:
-                self.current_patience -= 1
 
     @master_only
     def _save_results(self, batch_idx: int, batch_data: Dict[str, torch.Tensor]) -> None:
@@ -1203,13 +1200,6 @@ class BasicTSRunner:
         unit_count_str = str(unit_count).zfill(len(str(self.num_steps if self.training_unit == 'step' else self.num_epochs)))
         ckpt_name = '{}_{}.pt'.format(self.model_name, unit_count_str)
         return os.path.join(self.ckpt_save_dir, ckpt_name)
-
-    def check_early_stopping(self) -> bool:
-        """Check if early stopping criteria are met."""
-        if self.early_stopping_patience is not None and self.current_patience <= 0:
-            self.logger.info('Early stopping.')
-            return True
-        return False
 
     # endregion Misc Functions
 

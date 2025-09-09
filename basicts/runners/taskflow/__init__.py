@@ -1,2 +1,3 @@
 from .basicts_taskflow import BasicTSTaskFlow
+from .classification_taskflow import BasicTSClassificationTaskFlow
 from .forecasting_taskflow import BasicTSForecastingTaskFlow

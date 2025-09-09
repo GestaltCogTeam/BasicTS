@@ -24,6 +24,17 @@ class BasicTSMode(BasicTSEnum):
     INFERENCE = "inference"
 
 
+class RunnerStatus(BasicTSEnum):
+    """Status Enum"""
+
+    INITIALIZING = "initializing"
+    TRAINING = "training"
+    VALIDATING = "validating"
+    TESTING = "testing"
+    EVALUATING = "evaluating"
+    FINISHED = "finished"
+
+
 class BasicTSTask(BasicTSEnum):
     """Task Enum"""
 

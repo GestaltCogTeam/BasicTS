@@ -1,5 +1,5 @@
 from .config import get_dataset_name
-from .constants import BasicTSMode, BasicTSTask
+from .constants import BasicTSMode, BasicTSTask, RunnerStatus
 from .dataset import InfiniteGenerator
 from .mask import null_val_mask
 from .meter_pool import MeterPool
@@ -16,4 +16,4 @@ __all__ = ['load_adj', 'load_pkl', 'dump_pkl',
            'partial', 'get_regular_settings',
            'load_dataset_data', 'load_dataset_desc',
            'InfiniteGenerator', 'get_dataset_name', 'MeterPool',
-           'null_val_mask', 'BasicTSMode', 'BasicTSTask']
+           'null_val_mask', 'BasicTSMode', 'BasicTSTask', 'RunnerStatus']

@@ -21,16 +21,22 @@ class BasicTSCallback:
     def on_step_end(self, runner, *args, **kwargs):
         pass
 
-    def on_val_start(self, runner, *args, **kwargs):
+    def on_validate_start(self, runner, *args, **kwargs):
         pass
 
-    def on_val_end(self, runner, *args, **kwargs):
+    def on_validate_end(self, runner, *args, **kwargs):
         pass
 
     def on_test_start(self, runner, *args, **kwargs):
         pass
 
     def on_test_end(self, runner, *args, **kwargs):
+        pass
+
+    def on_compute_loss(self, runner, *args, **kwargs):
+        pass
+
+    def on_optimizer_step(self, runner, *args, **kwargs):
         pass
 
 
