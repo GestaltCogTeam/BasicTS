@@ -57,7 +57,7 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         self.grad_accumulation_steps = cfg.get('TRAIN.GRAD_ACCUMULATION_STEPS',1)
 
         # inference settings
-        self.generation_params = cfg['INFERENCE'].get('GENERATION_PARAMS', {})
+        self.generation_params = cfg.get('INFERENCE', {}).get('GENERATION_PARAMS', {})
         self.forward_features = [0] # do not use time features
         self.target_features = [0] # do not use time features
 
@@ -358,8 +358,9 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         data = self.preprocessing(data)
         # TODO: consider using amp for validation
         # with self.ctx:
-        forward_return = self.forward(data=data, iter_num=iter_index, train=False)
-        forward_return = self.postprocessing(forward_return)
+        with self.amp_context:
+            forward_return = self.forward(data=data, iter_num=iter_index, train=False)
+            forward_return = self.postprocessing(forward_return)
         loss = self.metric_forward(self.loss, forward_return)
         self.update_iteration_meter('val/loss', loss)
 
