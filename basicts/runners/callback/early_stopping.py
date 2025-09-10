@@ -35,6 +35,6 @@ class EarlyStopping(BasicTSCallback):
                     runner.logger.info(f'Early stopping at epoch {train_epoch}.')
                 elif runner.training_unit == 'step':
                     runner.logger.info(f'Early stopping at step {train_step}.')
-                runner.stop_training = True
+                runner.should_training_stop = True
         else:
             self.counter = 0

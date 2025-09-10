@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import time
+from contextlib import nullcontext
 from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Union
 
 import numpy as np
@@ -113,10 +114,25 @@ class BasicTSRunner:
         self.evaluation_horizons = None
         self.save_results = cfg.save_results
 
+        # define loss function
+        self.loss = cfg.loss
+
         # declare optimizer and lr_scheduler
         self.optimizer = None
         self.lr_scheduler = None
-        self.amp_scaler = None # TODO: add amp scaler
+
+        # automatic mixed precision (amp)
+        model_dtype: str | torch.dtype = cfg.get('model_dtype', 'float32')
+        if isinstance(self.model_dtype, str):
+            self.ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[model_dtype]
+        else:
+            self.ptdtype = model_dtype
+        self.use_amp = self.ptdtype in [torch.bfloat16, torch.float16]
+        if self.use_amp: assert cfg.gpus is not None, 'AMP only supports CUDA.'
+        self.amp_ctx = torch.amp.autocast(device_type='cuda', dtype=self.ptdtype, enabled=self.use_amp)
+        # GradScaler will scale up gradients and some of them might become inf, which may cause lr_scheduler throw incorrect warning information. See:
+        # https://discuss.pytorch.org/t/userwarning-detected-call-of-lr-scheduler-step-before-optimizer-step-in-pytorch-1-1-0-and-later-you-should-call-them-in-the-opposite-order-optimizer-step-before-lr-scheduler-step/88295/6
+        self.amp_scaler = torch.amp.GradScaler(enabled=self.use_amp)
 
         # declare data loaders
         self.train_data_loader = None
@@ -125,9 +141,6 @@ class BasicTSRunner:
 
         # declare scaler
         self.scaler: Optional[BasicTSScaler] = self.cfg.scaler
-
-        # define loss function
-        self.loss = cfg.loss
 
         # define metrics
         self.metrics = {k: ALL_METRICS[k] for k in cfg.metrics if k in ALL_METRICS}
@@ -148,14 +161,9 @@ class BasicTSRunner:
         if not os.path.isdir(self.ckpt_save_dir):
             os.makedirs(self.ckpt_save_dir)
 
-
-        # support early stopping
-        # NOTE: If the project has been stopped early and its configuration is rerun,
-        #           training will resume from the last saved checkpoint.
-        #       This feature is designed primarily for the convenience of users,
-        #           allowing them to continue training seamlessly after an interruption.
         # TODO: define a Control class
-        self.stop_training = False
+        self.should_training_stop = False
+        self.should_optimizer_step = True
 
         # set process title
         proctitle_name = f"{cfg.model.__class__.__name__}({cfg.dataset.name})"
@@ -183,6 +191,8 @@ class BasicTSRunner:
             self.scaler.fit(self.train_data_loader.dataset.data)
         self.optimizer = self.cfg.optimizer
         self.lr_scheduler = self.cfg.lr_scheduler
+        if self.use_amp:
+            self.register_meter('train/amp_scale', 'train', '{:.4f}')
         # fine tune
         if self.cfg.finetune_from is not None:
             self.load_model(self.cfg.finetune_from, self.cfg.strict_load)
@@ -379,7 +389,7 @@ class BasicTSRunner:
         step = self.start_step
         while step < self.num_steps:
 
-            if self.stop_training:
+            if self.should_training_stop:
                 break
 
             data_loader = self.train_data_loader
@@ -396,7 +406,7 @@ class BasicTSRunner:
             # data loop
             for data in data_loader:
 
-                if self.stop_training:
+                if self.should_training_stop:
                     break
 
                 self.status = RunnerStatus.TRAINING
@@ -405,16 +415,18 @@ class BasicTSRunner:
                 self.model.train()
                 step_start_time = time.time()
                 data = self.taskflow.preprocess(self, data) # task specific preprocess
-                forward_return = self._forward(data, step, self.epoch)
-                self.callback_handler.trigger('on_compute_loss', self, epoch=self.epoch, step=step, data=data, forward_return=forward_return)
-                loss = self._metric_forward(self.cfg.loss, forward_return)
+                with self.amp_ctx:
+                    forward_return = self._forward(data, step, self.epoch)
+                    self.callback_handler.trigger('on_compute_loss', self, epoch=self.epoch, step=step, data=data, forward_return=forward_return)
+                    loss = self._metric_forward(self.loss, forward_return)
                 loss_weight = self.taskflow.get_weight(forward_return) # task specific metric weight for averaging
                 self.update_meter('train/loss', loss.item(), loss_weight)
-                if loss is not None:
-                    self.optimizer.zero_grad()
-                    loss.backward()
+                self.callback_handler.trigger('on_backward', self, loss=loss)
+                with (self.model.no_sync() if hasattr(self.model, 'no_sync') else nullcontext()):
+                    self.amp_scaler.scale(loss).backward() # if not use_amp, it equals to loss.backward()
+                if self.should_optimizer_step:
                     self.callback_handler.trigger('on_optimizer_step', self)
-                    self.optimizer.step()
+                    self._optimizer_step()
                 forward_return = self.taskflow.postprocess(self, forward_return) # task specific postprocess
                 # update metrics meter
                 for metric_name, metric_fn in self.metrics.items():
@@ -434,7 +446,7 @@ class BasicTSRunner:
                     step_pbar.update()
                 # check if training should stop
                 if step >= self.num_steps:
-                    self.stop_training = True
+                    self.should_training_stop = True
 
             # when training unit is epoch, call on epoch end
             if self.training_unit == 'epoch':
@@ -646,7 +658,7 @@ class BasicTSRunner:
         self.reset_meters()
 
         # estimate training finish time
-        if not self.stop_training and self.epoch < self.num_epochs:
+        if not self.should_training_stop and self.epoch < self.num_epochs:
             expected_end_time = self.train_time_predictor.get_expected_end_time(step)
             self.logger.info('The estimated training finish time is {}'.format(
                 time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(expected_end_time))))
@@ -657,7 +669,7 @@ class BasicTSRunner:
         Args:
             step (int): current step
         """
-        
+
         if self.training_unit == 'step' and step % self.val_interval == 0:
             # print iteration num
             self.logger.info('Iteration {:d} / {:d}'.format(step, self.num_steps))
@@ -761,21 +773,20 @@ class BasicTSRunner:
     def _metric_forward(self, metric_fn: Callable, forward_return: Dict[str, Any]) -> torch.Tensor:
         covariate_names = inspect.signature(metric_fn).parameters.keys()
         args = {k: v for k, v in forward_return.items() if k in covariate_names}
-        # if isinstance(metric_fn, functools.partial):
-        #     if 'null_val' not in metric_fn.keywords and 'null_val' in covariate_names: # null_val is required but not provided
-        #         args['null_val'] = self.null_val
-        #     metric_value = metric_fn(**args)
-        # elif callable(metric_fn):
-        #     if 'null_val' in covariate_names: # null_val is required
-        #         args['null_val'] = self.null_val
-        #     metric_value = metric_fn(**args)
-        # else:
-        #     raise TypeError(f'Unknown metric type: {type(metric_fn)}')
         if callable(metric_fn):
             metric_value = metric_fn(**args)
         else:
             raise TypeError(f'Unknown metric type: {type(metric_fn)}')
         return metric_value
+
+    def _optimizer_step(self):
+        if self.use_amp:
+            self.update_meter('train/amp_scale', self.amp_scaler.get_scale())
+            self.amp_scaler.step(self.optimizer)
+            self.amp_scaler.update()
+        else:
+            self.optimizer.step()
+        self.optimizer.zero_grad()
 
     def set_env(self, cfg: 'BasicTSConfig'):
         """Setup runtime env, include tf32, seed and determinacy.

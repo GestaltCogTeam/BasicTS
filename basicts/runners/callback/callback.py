@@ -36,6 +36,9 @@ class BasicTSCallback:
     def on_compute_loss(self, runner, *args, **kwargs):
         pass
 
+    def on_backward(self, runner, *args, **kwargs):
+        pass
+
     def on_optimizer_step(self, runner, *args, **kwargs):
         pass
 
