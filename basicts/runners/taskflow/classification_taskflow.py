@@ -2,8 +2,9 @@ from typing import TYPE_CHECKING, Any, Dict
 
 import torch
 
-from basicts.runners.taskflow import BasicTSTaskFlow
-from basicts.utils import null_val_mask
+from basicts.utils.mask import null_val_mask
+
+from .basicts_taskflow import BasicTSTaskFlow
 
 if TYPE_CHECKING:
     from basicts.runners.basicts_runner import BasicTSRunner

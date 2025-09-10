@@ -5,10 +5,10 @@ import numpy as np
 
 from basicts.utils import BasicTSMode
 
-from .tsf_dataset import BasicTSForecastingDataset
+from .tsi_dataset import BasicTSImputationDataset
 
 
-class BuiltinTSForecastingDataset(BasicTSForecastingDataset):
+class BuiltinTSImputationDataset(BasicTSImputationDataset):
     """
     A dataset class for time series forecasting problems, handling the loading, parsing, and partitioning
     of time series data into training, validation, and testing sets based on provided ratios.
@@ -24,9 +24,9 @@ class BuiltinTSForecastingDataset(BasicTSForecastingDataset):
         description (dict): Metadata about the dataset, such as shape and other properties.
     """
 
-    def __init__(self, name: str, input_len: int, output_len: int, memmap: bool = False, overlap: bool = False, logger: logging.Logger = None) -> None:
+    def __init__(self, name: str, seq_len: int, memmap: bool = False, overlap: bool = False, logger: logging.Logger = None) -> None:
         """
-        Initializes the TimeSeriesForecastingDataset by setting up paths, loading data, and 
+        Initializes the TimeSeriesImputationDataset by setting up paths, loading data, and 
         preparing it according to the specified configurations.
 
         Args:
@@ -46,7 +46,7 @@ class BuiltinTSForecastingDataset(BasicTSForecastingDataset):
         """
 
         data_file_path = f'datasets/{name}/data.dat'
-        super().__init__(name, data_file_path, input_len, output_len, memmap, overlap, logger)
+        super().__init__(name, data_file_path, seq_len, memmap, overlap, logger)
         self.description_file_path = f'datasets/{name}/desc.json'
         self.description = self._load_description()
         self.data = self._load_data()
@@ -124,12 +124,12 @@ class BuiltinTSForecastingDataset(BasicTSForecastingDataset):
             raise ValueError(f'Mode is None. The mode should be setted by using `{self.__class__.__name__}(mode)`.')
 
         if self.mode == BasicTSMode.TRAIN:
-            offset = self.output_len if self.overlap else 0
+            offset = self.seq_len if self.overlap else 0
             return self.data[:self.train_len + offset]
         elif self.mode == BasicTSMode.VAL:
-            offset_left = self.input_len - 1 if self.overlap else 0
-            offset_right = self.output_len if self.overlap else 0
+            offset_left = self.seq_len - 1 if self.overlap else 0
+            offset_right = self.seq_len if self.overlap else 0
             return self.data[self.train_len - offset_left : self.train_len + self.val_len + offset_right]
         else:  # self.mode == MODE.TEST
-            offset = self.input_len - 1 if self.overlap else 0
+            offset = self.seq_len - 1 if self.overlap else 0
             return self.data[self.train_len + self.val_len - offset:]

@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 import inspect
+from abc import ABC, abstractmethod
 from typing import Dict, Tuple, Union
 
 import numpy as np
@@ -25,9 +25,10 @@ class BasicTSDataset(Dataset, ABC):
 
     _instances: Dict[BasicTSMode, "BasicTSDataset"] = {}
 
-    def __init__(self, name: str, memmap: bool, **kwargs):
+    def __init__(self, name: str, data_file_path: str, memmap: bool, **kwargs):
         super().__init__()
         self.name: str = name
+        self.data_file_path: str = data_file_path
         self.memmap: bool = memmap
         self.mode: BasicTSMode = None
         self.data: Union[np.ndarray, Tuple[np.ndarray], Dict[str, np.ndarray]] = None

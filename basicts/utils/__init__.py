@@ -1,7 +1,6 @@
 from .config import get_dataset_name
 from .constants import BasicTSMode, BasicTSTask, RunnerStatus
 from .dataset import InfiniteGenerator
-from .mask import null_val_mask
 from .meter_pool import MeterPool
 from .misc import check_nan_inf, clock
 from .misc import partial_func as partial

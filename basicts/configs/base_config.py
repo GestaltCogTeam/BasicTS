@@ -60,9 +60,6 @@ class BasicTSConfig(EasyDict):
 
     ############################## Model Configuration ##############################
 
-    # Features used in forward pass. The shape of input data is usually [B, L, N, C], this parameter specifies the index of the last dimension,
-    # i.e., inputs[:, :, :, CFG.MODEL.TARGET_FEATURES]. Default: input_data[..., 0]
-    forward_features: Union[slice, List[int]]
     # Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`.
     # In distributed computing, if there are unused parameters in the forward process, PyTorch usually raises a RuntimeError.
     # In such cases, this parameter should be set to True.
@@ -89,12 +86,6 @@ class BasicTSConfig(EasyDict):
 
     # Learning rate scheduler
     lr_scheduler: LRScheduler
-
-    # Early stopping
-    patience: int # Early stopping patience. Default: 5.
-
-    # Gradient clipping parameters (torch.nn.utils.clip_grad_norm_). Default: None.
-    clip_grad_param: dict # If not specified, the gradient clipping will not be used.
 
     # Checkpoint loading and saving settings
 
@@ -138,7 +129,6 @@ class BasicTSConfig(EasyDict):
 
     ########################### Evaluation Configuration ##########################
 
-    eval_on_gpu: bool # Whether to use GPU for evaluation. Default: True
     save_results: bool # Whether to save evaluation results in a numpy file. Default: False
 
     ############################## Environment Configuration ##############################

@@ -123,7 +123,7 @@ class BasicTSRunner:
 
         # automatic mixed precision (amp)
         model_dtype: str | torch.dtype = cfg.get('model_dtype', 'float32')
-        if isinstance(self.model_dtype, str):
+        if isinstance(model_dtype, str):
             self.ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[model_dtype]
         else:
             self.ptdtype = model_dtype
@@ -149,7 +149,7 @@ class BasicTSRunner:
         assert self.target_metric in self.metrics or self.target_metric == 'loss', f'Target metric {self.target_metric} not found in metrics.'
         assert self.metrics_best in ['min', 'max'], f'Invalid best metric {self.metrics_best}.'
         # handle null values in datasets, e.g., 0.0 or np.nan.
-        self.null_val = cfg.dataset.null_val
+        self.null_val = cfg.null_val
 
         # declare tensorboard_writer
         self.tensorboard_writer = None
@@ -184,7 +184,6 @@ class BasicTSRunner:
         else:
             raise ValueError('`num_epochs` and `num_steps` cannot be set at the same time.')
         self.best_metrics = {}
-        self.clip_grad_param = self.cfg.clip_grad_param
         self.train_data_loader = self._build_data_loader(self.cfg, BasicTSMode.TRAIN)
         self.register_meter('train/time', 'train', '{:.2f} (s)', plt=False)
         if self.scaler is not None:
@@ -206,8 +205,6 @@ class BasicTSRunner:
                 purge_step=(self.start_epoch + 1) if self.start_epoch != 0 else None
             )
         # log
-        if self.clip_grad_param is not None:
-            self.logger.info('Set clip grad, param: {}'.format(self.clip_grad_param))
         self.logger.info('Set optim: {}'.format(self.optimizer))
         if self.cfg.lr_scheduler is not None:
             self.logger.info('Set lr_scheduler: {}'.format(self.lr_scheduler))
@@ -458,7 +455,7 @@ class BasicTSRunner:
         """
 
         # tqdm process bar
-        leave = False if self.training_unit == 'step' and mode != BasicTSMode.EVAL else True
+        leave = not (self.training_unit == 'step' and mode != BasicTSMode.EVAL)
         if mode == BasicTSMode.VAL:
             data_iter = tqdm(self.val_data_loader, leave=leave)
             meter_type = 'val'
@@ -471,7 +468,7 @@ class BasicTSRunner:
             data = self.taskflow.preprocess(self, data) # task specific preprocess
             # TODO: consider using amp for validation
             # with self.ctx:
-            forward_return = self._forward(data, step=step, train=False)
+            forward_return = self._forward(data, step=step)
             self.callback_handler.trigger('on_compute_loss', self, forward_return=forward_return)
             # compute validation loss
             loss = self._metric_forward(self.cfg.loss, forward_return)
@@ -584,6 +581,7 @@ class BasicTSRunner:
 
         # print test metrics
         self.print_meters('test')
+
         if self.evaluation_horizons is not None and len(self.evaluation_horizons) > 0:
             self.logger.info(f'Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.')
             for i in self.evaluation_horizons:
@@ -722,7 +720,7 @@ class BasicTSRunner:
 
     # key methods
 
-    def _forward(self, data: Dict, step: int, epoch: Optional[int] = None, train: bool = True) -> Optional[torch.Tensor]:
+    def _forward(self, data: Dict, step: int, epoch: Optional[int] = None) -> Optional[torch.Tensor]:
         """Train model.
 
         Args:
@@ -738,29 +736,26 @@ class BasicTSRunner:
         for k in data.keys():
             data[k] = self.to_running_device(data[k]) if isinstance(data[k], torch.Tensor) else data[k]
 
-        # data must contain 'inputs' and 'target'
-        assert 'inputs' in data and 'target' in data, 'data must contain key \'inputs\' and \'target\'.'
-        inputs, target = data['inputs'], data['target']
-
-        # For non-training phases, the model should not be able to access target
-        target_4_model_input = torch.empty_like(target) if not train else target
+        # data must contain 'inputs'
+        assert 'inputs' in  data, 'data must contain key \'inputs\'.'
+        inputs = data['inputs']
 
         sig = inspect.signature(self.model.forward)
         all_params = list(sig.parameters.keys())
-        remaining_params = all_params[2:] # except for inputs and target
-        kwargs = {
-            k: data[k] if isinstance(data[k], torch.Tensor) else data[k]
-            for k in remaining_params if k in data
-        }
+        remaining_params = all_params[1:] # except for inputs
+        kwargs = {k: data[k] for k in remaining_params if k in data}
+        # For non-training phases, the model should not be able to access target
+        if 'target' in kwargs and self.status != RunnerStatus.TRAINING:
+            kwargs['target'] = torch.empty_like(kwargs['target'])
         if 'batch_seen' in sig.parameters.keys():
             kwargs['batch_seen'] = step
         if 'epoch' in sig.parameters.keys():
             kwargs['epoch'] = epoch
         if 'train' in sig.parameters.keys():
-            kwargs['train'] = train
+            kwargs['train'] = self.status == RunnerStatus.TRAINING
 
         # Forward pass through the model
-        forward_return = self.model(inputs, target_4_model_input, **kwargs)
+        forward_return = self.model(inputs, **kwargs)
 
         # Parse forward return
         if isinstance(forward_return, torch.Tensor):
@@ -771,6 +766,8 @@ class BasicTSRunner:
         return forward_return
 
     def _metric_forward(self, metric_fn: Callable, forward_return: Dict[str, Any]) -> torch.Tensor:
+        if metric_fn is self.loss and 'loss' in forward_return:
+            return forward_return['loss'] # loss has been computed in self.model.forward()
         covariate_names = inspect.signature(metric_fn).parameters.keys()
         args = {k: v for k, v in forward_return.items() if k in covariate_names}
         if callable(metric_fn):

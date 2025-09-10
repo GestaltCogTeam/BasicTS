@@ -4,10 +4,10 @@ from typing import List
 
 import numpy as np
 
-from .base_dataset import BaseDataset
+from .base_dataset import BasicTSDataset
 
 
-class TimeSeriesClassificationDataset(BaseDataset):
+class TimeSeriesClassificationDataset(BasicTSDataset):
     """
     A dataset class for time series classification problems, handling the loading, parsing, and partitioning
     of time series data into training, validation, and testing sets based on provided ratios.

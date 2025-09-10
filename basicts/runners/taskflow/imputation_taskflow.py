@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any, Dict
 
 import torch
 
-from basicts.utils.mask import null_val_mask
+from basicts.utils.mask import null_val_mask, reconstruction_mask
 
 from .basicts_taskflow import BasicTSTaskFlow
 
@@ -10,27 +10,31 @@ if TYPE_CHECKING:
     from basicts.runners.basicts_runner import BasicTSRunner
 
 
-class BasicTSForecastingTaskFlow(BasicTSTaskFlow):
-    """Forecasting Task Flow"""
+class BasicTSImputationTaskFlow(BasicTSTaskFlow):
+    """Imputation Task Flow"""
 
     def preprocess(self, runner: 'BasicTSRunner', data: Dict[str, Any]) -> Dict[str, Any]:
         """Run the task flow"""
 
-        # mask
-        inputs_mask = null_val_mask(data['inputs'], runner.cfg.null_val)
-        targets_mask = null_val_mask(data['target'], runner.cfg.null_val)
+        # mask null value
+        inputs_null_mask = null_val_mask(data['inputs'], runner.cfg.null_val)
 
+        # normalize inputs
         if runner.scaler is not None:
-            data['inputs'] = runner.scaler.transform(data['inputs'], inputs_mask)
-            data['target'] = runner.scaler.transform(data['target'], targets_mask)
+            data['inputs'] = runner.scaler.transform(data['inputs'], inputs_null_mask)
 
         # transform null values to cfg.null_to_num. default: 0.0.
-        data['inputs'] = torch.where(inputs_mask, data['inputs'],
+        data['inputs'] = torch.where(inputs_null_mask, data['inputs'],
                                     torch.tensor(runner.cfg.null_to_num, device=data['inputs'].device))
-        data['target'] = torch.where(targets_mask, data['target'],
-                                    torch.tensor(runner.cfg.null_to_num, device=data['target'].device))
 
-        data['mask'] = targets_mask # added by preprocessing, will be used in loss function
+        # ground truth for self-supervised imputation
+        data['target'] = data['inputs']
+        # mask for self-supervised reconstruction
+        inputs_rec_mask = reconstruction_mask(data['inputs'], runner.cfg.mask_ratio)
+        data['inputs'] = data['inputs'] * inputs_rec_mask
+        # loss should only be computed on points which was not null and was masked for reconstruction
+        data['mask'] = (~inputs_rec_mask) * inputs_null_mask
+
         return data
 
     def postprocess(self, runner: 'BasicTSRunner', forward_return: Dict[str, Any]) -> Dict[str, Any]:

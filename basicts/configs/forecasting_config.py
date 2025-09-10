@@ -81,15 +81,6 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     ############################## Model Configuration ##############################
 
-    # Features used in forward pass. The shape of input data is usually [B, L, N, C], this parameter specifies the index of the last dimension,
-    # i.e., inputs[:, :, :, CFG.MODEL.TARGET_FEATURES]. Default: input_data[..., 0]
-    forward_features: Union[slice, List[int]] = field(default_factory=lambda: [0])
-    # Features used as output. The shape of target data is usually [B, L, N, C], this parameter specifies the index of the last dimension,
-    # i.e., target[:, :, :, CFG.MODEL.TARGET_FEATURES]. Default: future_data[..., 0]
-    target_features: Union[slice, List[int]] = field(default_factory=lambda: [0])
-    # The index of the time series to be predicted, default is all ([..., :]). This setting is particularly useful in a Multivariate-to-Univariate setup.
-    # For example, if 7 time series are input and the last two need to be predicted, you can set `CFG.MODEL.TARGET_TIME_SERIES=[5, 6]` to achieve this.
-    target_time_series: Union[slice, List[int]] = slice(None)
     # Whether to set up the computation graph. Default: False.
     # Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
     setup_graph: bool = False
@@ -120,21 +111,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
     # Learning rate scheduler
     lr_scheduler: LRScheduler = None
 
-    # Early stopping
-    patience: int = 5 # Early stopping patience. Default: 5.
-
-    # Gradient clipping parameters (torch.nn.utils.clip_grad_norm_). Default: None.
-    clip_grad_param: dict = field(default_factory=lambda: None) # If not specified, the gradient clipping will not be used.
-
-    # Curriculum learning settings
-    # cl: dict = field(default_factory=lambda: None) # Curriculum learning settings. Default: None. If not specified, the curriculum learning will not be used.
-    # cl_epochs: int = 1 # Number of epochs for each curriculum learning stage, must be specified if cl is specified.
-    # warm_epochs: int = 0 # Number of warm-up epochs. Default: 0
-    # cl_prediction_length: int = None # cl_prediction_length. Total prediction length, must be specified if cl is specified.
-    # cl_step_size: int = 1 # Step size for the curriculum learning. Default: 1. The current prediction length will be increased by CFG.TRAIN.CL.STEP_SIZE in each stage.
-
     # Checkpoint loading and saving settings
-
     # Directory to save checkpoints. Default: 'checkpoints/{model}/{dataset}_{num_epochs}_{input_len}_{output_len}', which will be loaded lazily.
     ckpt_save_dir: str = None
     # Checkpoint save strategy. `CFG.TRAIN.CKPT_SAVE_STRATEGY` should be None, an int value, a list or a tuple. Default: None.
@@ -180,7 +157,6 @@ class BasicTSForecastingConfig(BasicTSConfig):
     # NOTE: HORIZONS[i] refers to testing **on the i-th** time step, representing the loss for that specific time step.
     # This is a common setting in spatiotemporal forecasting. For long-sequence predictions, it is recommended to keep HORIZONS set to the default value [] to avoid confusion.
     eval_horizons: List[int] = field(default_factory=lambda: [])
-    eval_on_gpu: bool = True # Whether to use GPU for evaluation. Default: True
     save_results: bool = False # Whether to save evaluation results in a numpy file. Default: False
 
     ############################## Environment Configuration ##############################
@@ -198,7 +174,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
          'train_data_prefetch', 'train_data_num_workers', 'train_data_pin_memory', \
          'val_batch_size', 'val_interval', 'val_data_prefetch', 'val_data_num_workers', 'val_data_pin_memory', \
          'test_batch_size', 'test_interval', 'test_data_prefetch', 'test_data_num_workers', 'test_data_pin_memory', \
-         'eval_horizons', 'eval_on_gpu', 'save_results',])
+         'eval_horizons', 'save_results',])
 
     ##################################### Post Init #######################################
 

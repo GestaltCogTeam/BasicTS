@@ -6,9 +6,9 @@ import numpy as np
 from .base_dataset import BasicTSDataset
 
 
-class BasicTSForecastingDataset(BasicTSDataset):
+class BasicTSImputationDataset(BasicTSDataset):
     """
-    A dataset class for time series forecasting problems, handling the loading, parsing, and partitioning
+    A dataset class for time series imputation problems, handling the loading, parsing, and partitioning
     of time series data into training, validation, and testing sets based on provided ratios.
     
     This class supports configurations where sequences may or may not overlap, accommodating scenarios
@@ -22,9 +22,9 @@ class BasicTSForecastingDataset(BasicTSDataset):
         description (dict): Metadata about the dataset, such as shape and other properties.
     """
 
-    def __init__(self, name: str, data_file_path: str, input_len: int, output_len: int, memmap: bool = False, overlap: bool = False, logger: logging.Logger = None) -> None:
+    def __init__(self, name: str, data_file_path: str, seq_len: int, memmap: bool = False, overlap: bool = False, logger: logging.Logger = None) -> None:
         """
-        Initializes the BasicTSForecastingDataset by setting up paths, loading data, and 
+        Initializes the TimeSeriesForecastingDataset by setting up paths, loading data, and 
         preparing it according to the specified configurations.
 
         Args:
@@ -42,10 +42,8 @@ class BasicTSForecastingDataset(BasicTSDataset):
         Raises:
             AssertionError: If `mode` is not one of ['train', 'val', 'test'].
         """
-        super().__init__(name=name, data_file_path=data_file_path, input_len=input_len, output_len=output_len,
-                 memmap=memmap, overlap=overlap, logger=logger)
-        self.input_len = input_len
-        self.output_len = output_len
+        super().__init__(name=name, data_file_path=data_file_path, seq_len=seq_len, memmap=memmap, overlap=overlap, logger=logger)
+        self.seq_len = seq_len
         self.overlap = overlap
         self.logger = logger
 
@@ -64,12 +62,10 @@ class BasicTSForecastingDataset(BasicTSDataset):
             dict: A dictionary containing 'inputs' and 'target', where both are slices of the dataset corresponding to
                   the historical input data and future prediction data, respectively.
         """
-        history_data = self.data[index:index + self.input_len]
-        future_data = self.data[index + self.input_len:index + self.input_len + self.output_len]
+        inputs = self.data[index:index + self.seq_len]
         if self.memmap:
-            history_data = history_data.copy()
-            future_data = future_data.copy()
-        return {'inputs': history_data, 'target': future_data}
+            inputs = inputs.copy()
+        return {'inputs': inputs}
 
     def __len__(self) -> int:
         """
@@ -78,4 +74,4 @@ class BasicTSForecastingDataset(BasicTSDataset):
         Returns:
             int: The number of valid samples that can be drawn from the dataset, based on the configurations of input and output lengths.
         """
-        return len(self.data) - self.input_len - self.output_len + 1
+        return len(self.data) - self.seq_len + 1
