@@ -1,20 +1,17 @@
 import functools
 import inspect
 import json
-import math
 import os
 from typing import Dict, Optional, Tuple, Union
 
 import numpy as np
 import torch
-from easydict import EasyDict
 from easytorch.utils import master_only
 from tqdm import tqdm
 
-from basicts.data.simple_inference_dataset import TimeSeriesInferenceDataset
+from basicts.configs.forecasting_config import BasicTSForecastingConfig
 
-from ..metrics import (masked_mae, masked_mape, masked_mse, masked_rmse,
-                       masked_wape)
+from ..metrics import ALL_METRICS
 from .base_epoch_runner import BaseEpochRunner
 
 
@@ -59,65 +56,43 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             - Return: The returned data will be passed to the `forward` function as the `data` argument.
     """
 
-    def __init__(self, cfg: Dict):
+    def __init__(self, cfg: BasicTSForecastingConfig):
         super().__init__(cfg)
 
         # setup graph flag
-        self.need_setup_graph = cfg['MODEL'].get('SETUP_GRAPH', False)
+        self.need_setup_graph = cfg.setup_graph
 
-        # initialize scaler
-        self.scaler = self.build_scaler(cfg)
+        self.scaler = cfg.scaler
 
         # define loss function
-        self.loss = cfg['TRAIN']['LOSS']
-        self.loss_args = cfg['TRAIN'].get('LOSS_ARGS', {})
+        self.loss = cfg.loss
 
         # define metrics
-        self.metrics = cfg.get('METRICS', {}).get('FUNCS', {
-                                                            'MAE': masked_mae, 
-                                                            'RMSE': masked_rmse,
-                                                            'MAPE': masked_mape, 
-                                                            'WAPE': masked_wape, 
-                                                            'MSE': masked_mse
-                                                        })
-        self.target_metrics = cfg.get('METRICS', {}).get('TARGET', 'loss')
-        self.metrics_best = cfg.get('METRICS', {}).get('BEST', 'min')
+        self.metrics = {k: ALL_METRICS[k] for k in cfg.metrics if k in ALL_METRICS}
+        self.target_metrics = cfg.target_metric
+        self.metrics_best = cfg.best_metric
         assert self.target_metrics in self.metrics or self.target_metrics == 'loss', f'Target metric {self.target_metrics} not found in metrics.'
         assert self.metrics_best in ['min', 'max'], f'Invalid best metric {self.metrics_best}.'
         # handle null values in datasets, e.g., 0.0 or np.nan.
-        self.null_val = cfg.get('METRICS', {}).get('NULL_VAL', np.nan)
+        self.null_val = cfg.dataset.null_val
 
         # curriculum learning setup
-        self.cl_param = cfg['TRAIN'].get('CL', None)
+        self.cl_param = cfg.cl
         if self.cl_param is not None:
-            self.warm_up_epochs = cfg['TRAIN'].CL.get('WARM_EPOCHS', 0)
-            self.cl_epochs = cfg['TRAIN'].CL.get('CL_EPOCHS')
-            self.prediction_length = cfg['TRAIN'].CL.get('PREDICTION_LENGTH')
-            self.cl_step_size = cfg['TRAIN'].CL.get('STEP_SIZE', 1)
+            self.warm_up_epochs = cfg.cl.warm_up_epochs
+            self.cl_epochs = cfg.cl.cl_epochs
+            self.prediction_length = cfg.cl.prediction_length
+            self.cl_step_size = cfg.cl.step_size
 
         # Eealuation settings
-        self.if_evaluate_on_gpu = cfg.get('EVAL', EasyDict()).get('USE_GPU', True)
-        self.evaluation_horizons = [_ - 1 for _ in cfg.get('EVAL', EasyDict()).get('HORIZONS', [])]
+        self.if_evaluate_on_gpu = cfg.eval_on_gpu
+        self.evaluation_horizons = [_ - 1 for _ in cfg.eval_horizons]
         assert len(self.evaluation_horizons) == 0 or min(self.evaluation_horizons) >= 0, 'The horizon should start counting from 1.'
 
         # For saving test results
         self._inputs_memmap = None
         self._prediction_memmap = None
         self._target_memmap = None
-
-    def build_scaler(self, cfg: Dict):
-        """Build scaler.
-
-        Args:
-            cfg (Dict): Configuration.
-
-        Returns:
-            Scaler instance or None if no scaler is declared.
-        """
-
-        if 'SCALER' in cfg:
-            return cfg['SCALER']['TYPE'](**cfg['SCALER']['PARAM'])
-        return None
 
     def setup_graph(self, cfg: Dict, train: bool):
         """Setup all parameters and the computation graph.
@@ -130,7 +105,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         """
 
         dataloader = self.build_test_data_loader(cfg=cfg) if not train else self.build_train_data_loader(cfg=cfg)
-        data = next(iter(dataloader))  # get the first batch
+        data = next(iter(dataloader)) # get the first batch
         if not train:
             self.model.eval()
         self.forward(data=data, epoch=1, iter_num=0, train=train)
@@ -141,7 +116,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         num_parameters = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
         self.logger.info(f'Number of parameters: {num_parameters}')
 
-    def init_training(self, cfg: Dict):
+    def init_training(self, cfg: BasicTSForecastingConfig):
         """Initialize training components, including loss, meters, etc.
 
         Args:
@@ -159,7 +134,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         for key in self.metrics:
             self.register_epoch_meter(f'train/{key}', 'train', '{:.4f}')
 
-    def init_validation(self, cfg: Dict):
+    def init_validation(self, cfg: BasicTSForecastingConfig):
         """Initialize validation components, including meters.
 
         Args:
@@ -171,7 +146,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         for key in self.metrics:
             self.register_epoch_meter(f'val/{key}', 'val', '{:.4f}')
 
-    def init_test(self, cfg: Dict):
+    def init_test(self, cfg: BasicTSForecastingConfig):
         """Initialize test components, including meters.
 
         Args:
@@ -190,97 +165,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         for i in self.evaluation_horizons:
             for key in self.metrics:
                 self.register_epoch_meter(f'test/{key}@h{i+1}', f'test @ horizon {i+1}', '{:.4f}')
-
-    def build_train_dataset(self, cfg: Dict):
-        """Build the training dataset.
-
-        Args:
-            cfg (Dict): Configuration.
-
-        Returns:
-            Dataset: The constructed training dataset.
-        """
-
-        if 'DATASET' not in cfg:
-            # TODO: support building different datasets for training, validation, and test.
-            if 'logger' in inspect.signature(cfg['TRAIN']['DATA']['DATASET']['TYPE'].__init__).parameters:
-                cfg['TRAIN']['DATA']['DATASET']['PARAM']['logger'] = self.logger
-            if 'mode' in inspect.signature(cfg['TRAIN']['DATA']['DATASET']['TYPE'].__init__).parameters:
-                cfg['TRAIN']['DATA']['DATASET']['PARAM']['mode'] = 'train'
-            dataset = cfg['TRAIN']['DATA']['DATASET']['TYPE'](**cfg['TRAIN']['DATA']['DATASET']['PARAM'])
-            self.logger.info(f'Train dataset length: {len(dataset)}')
-            batch_size = cfg['TRAIN']['DATA']['BATCH_SIZE']
-            self.iter_per_epoch = math.ceil(len(dataset) / batch_size)
-        else:
-            dataset = cfg['DATASET']['TYPE'](mode='train', logger=self.logger, **cfg['DATASET']['PARAM'])
-            self.logger.info(f'Train dataset length: {len(dataset)}')
-            batch_size = cfg['TRAIN']['DATA']['BATCH_SIZE']
-            self.iter_per_epoch = math.ceil(len(dataset) / batch_size)
-
-        return dataset
-
-    def build_val_dataset(self, cfg: Dict):
-        """Build the validation dataset.
-
-        Args:
-            cfg (Dict): Configuration.
-
-        Returns:
-            Dataset: The constructed validation dataset.
-        """
-
-        if 'DATASET' not in cfg:
-            # TODO: support building different datasets for training, validation, and test.
-            if 'logger' in inspect.signature(cfg['VAL']['DATA']['DATASET']['TYPE'].__init__).parameters:
-                cfg['VAL']['DATA']['DATASET']['PARAM']['logger'] = self.logger
-            if 'mode' in inspect.signature(cfg['VAL']['DATA']['DATASET']['TYPE'].__init__).parameters:
-                cfg['VAL']['DATA']['DATASET']['PARAM']['mode'] = 'valid'
-            dataset = cfg['VAL']['DATA']['DATASET']['TYPE'](**cfg['VAL']['DATA']['DATASET']['PARAM'])
-            self.logger.info(f'Validation dataset length: {len(dataset)}')
-        else:
-            dataset = cfg['DATASET']['TYPE'](mode='valid', logger=self.logger, **cfg['DATASET']['PARAM'])
-            self.logger.info(f'Validation dataset length: {len(dataset)}')
-
-        return dataset
-
-    def build_test_dataset(self, cfg: Dict):
-        """Build the test dataset.
-
-        Args:
-            cfg (Dict): Configuration.
-
-        Returns:
-            Dataset: The constructed test dataset.
-        """
-
-        if 'DATASET' not in cfg:
-            # TODO: support building different datasets for training, validation, and test.
-            if 'logger' in inspect.signature(cfg['TEST']['DATA']['DATASET']['TYPE'].__init__).parameters:
-                cfg['TEST']['DATA']['DATASET']['PARAM']['logger'] = self.logger
-            if 'mode' in inspect.signature(cfg['TEST']['DATA']['DATASET']['TYPE'].__init__).parameters:
-                cfg['TEST']['DATA']['DATASET']['PARAM']['mode'] = 'test'
-            dataset = cfg['TEST']['DATA']['DATASET']['TYPE'](**cfg['TEST']['DATA']['DATASET']['PARAM'])
-            self.logger.info(f'Test dataset length: {len(dataset)}')
-        else:
-            dataset = cfg['DATASET']['TYPE'](mode='test', logger=self.logger, **cfg['DATASET']['PARAM'])
-            self.logger.info(f'Test dataset length: {len(dataset)}')
-
-        return dataset
-
-    def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list]):
-        """Build the inference dataset.
-
-        Args:
-            cfg (Dict): Configuration.
-            input_data (Union[str, list]): The input data file path or data list for inference.
-        Returns:
-            Dataset: The constructed inference dataset.
-        """
-
-        dataset = TimeSeriesInferenceDataset(dataset=input_data, logger=self.logger, **cfg['DATASET']['PARAM'])
-        self.logger.info(f'Inference dataset length: {len(dataset)}')
-
-        return dataset
 
     def curriculum_learning(self, epoch: int = None) -> int:
         """Calculate task level for curriculum learning.
@@ -342,10 +226,10 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         args = {k: v for k, v in args.items() if k in covariate_names}
 
         # add loss args
-        if self.loss_args:
-            for k, v in self.loss_args.items():
-                if k in covariate_names and k not in args:
-                    args[k] = v
+        # if self.loss_args:
+        #     for k, v in self.loss_args.items():
+        #         if k in covariate_names and k not in args:
+        #             args[k] = v
 
         if isinstance(metric_func, functools.partial):
             if 'null_val' not in metric_func.keywords and 'null_val' in covariate_names: # null_val is required but not provided

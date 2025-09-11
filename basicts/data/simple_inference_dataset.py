@@ -5,10 +5,10 @@ from typing import List, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from .base_dataset import BaseDataset
+from .base_dataset import BasicTSDataset
 
 
-class TimeSeriesInferenceDataset(BaseDataset):
+class TimeSeriesInferenceDataset(BasicTSDataset):
     """
     A dataset class for time series inference tasks, where the input is a sequence of historical data points
     
@@ -21,8 +21,8 @@ class TimeSeriesInferenceDataset(BaseDataset):
     """
 
     # pylint: disable=unused-argument
-    def __init__(self, dataset_name:str, dataset: Union[str, list], input_len: int, output_len: int, memmap: bool = False,
-                 logger: logging.Logger = None, **kwargs) -> None:
+    def __init__(self, dataset_name:str, dataset: Union[str, list], input_len: int, output_len: int, mode: str = 'inference',
+                 memmap: bool = False, logger: logging.Logger = None, **kwargs) -> None:
         """
         Initializes the TimeSeriesInferenceDataset by setting up paths, loading data, and 
         preparing it according to the specified configurations.
@@ -35,7 +35,6 @@ class TimeSeriesInferenceDataset(BaseDataset):
             logger (logging.Logger): logger.
         """
         train_val_test_ratio: List[float] = []
-        mode: str = 'inference'
         super().__init__(dataset_name, train_val_test_ratio, mode, memmap)
         self.input_len = input_len
         self.output_len = output_len

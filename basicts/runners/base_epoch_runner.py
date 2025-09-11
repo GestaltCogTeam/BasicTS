@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 import time
 from abc import ABCMeta, abstractmethod
@@ -9,20 +10,23 @@ import torch
 from easytorch.config import get_ckpt_save_dir
 from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
                                        save_ckpt)
-from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
 from easytorch.device import to_device
 from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
-                             is_master, master_only, set_env)
+                             get_world_size, is_master, master_only)
+from easytorch.utils.data_prefetcher import DataLoaderX
+from easytorch.utils.env import get_rank, set_tf32_mode, setup_determinacy
 from packaging import version
-from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from ..utils import MeterPool, get_dataset_name
-from . import optim
+from basicts.scaler import BasicTSScaler
+
+from ..configs import BasicTSConfig
+from ..data import MODE, TimeSeriesInferenceDataset
+from ..utils import MeterPool
 
 
 class BaseEpochRunner(metaclass=ABCMeta):
@@ -50,7 +54,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
     #   - init_training / init_validation / init_test                                       #
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-    def __init__(self, cfg: Dict) -> None:
+    def __init__(self, cfg: BasicTSConfig) -> None:
         """
         Initialize the BaseRunner.
             - Initialize logger
@@ -68,44 +72,45 @@ class BaseEpochRunner(metaclass=ABCMeta):
         """
 
         # default logger
-        self.logger = get_logger('easytorch')
+        self.logger = get_logger('BasicTS')
 
         # set env
-        set_env(cfg.get('ENV', {}))
+        self.set_env(cfg)
         # ensure compatibility with higher versions of EasyTorch
         self.to_running_device = to_device
 
-        # param
-        self.model_name = cfg['MODEL.NAME']
+        # create meter pool
+        self.meter_pool = MeterPool()
+
+        # create model
+        self.model = self.build_model(cfg)
+        self.model_name = self.model.__class__.__name__
+
         self.ckpt_save_dir = get_ckpt_save_dir(cfg)
         self.logger.info('Set ckpt save dir: \'{}\''.format(self.ckpt_save_dir))
         self.ckpt_save_strategy = None
-        self.num_epochs = None
-        self.start_epoch = None
-
-        self.val_interval = cfg.get('VAL', {}).get('INTERVAL', 1)
-        self.test_interval = cfg.get('TEST', {}).get('INTERVAL', 1)
-
-        self.save_results = cfg.get('EVAL', {}).get('SAVE_RESULTS', False)
-
         # create checkpoint save dir
         if not os.path.isdir(self.ckpt_save_dir):
             os.makedirs(self.ckpt_save_dir)
 
-        # create model
-        self.model = self.build_model(cfg)
+        self.num_epochs = None
+        self.start_epoch = None
+        self.evaluation_horizons = None
+        self.val_interval = cfg.val_interval
+        self.test_interval = cfg.test_interval
+        self.save_results = cfg.save_results
 
         # declare optimizer and lr_scheduler
         self.optim = None
-        self.scheduler = None
+        self.lr_scheduler = None
 
         # declare data loaders
         self.train_data_loader = None
         self.val_data_loader = None
         self.test_data_loader = None
 
-        # declare meter pool
-        self.meter_pool = None
+        # declare scaler
+        self.scaler: Optional[BasicTSScaler] = None
 
         # declare tensorboard_writer
         self.tensorboard_writer = None
@@ -116,28 +121,47 @@ class BaseEpochRunner(metaclass=ABCMeta):
         #           training will resume from the last saved checkpoint.
         #       This feature is designed primarily for the convenience of users,
         #           allowing them to continue training seamlessly after an interruption.
-        self.early_stopping_patience = cfg.get('TRAIN', {}).get('EARLY_STOPPING_PATIENCE', None)
+        self.early_stopping_patience = cfg.patience
         self.current_patience = self.early_stopping_patience
         assert self.early_stopping_patience is None or self.early_stopping_patience > 0, 'Early stopping patience must be a positive integer.'
 
         # set process title
-        proctitle_name = f"{cfg['MODEL'].get('NAME')}({get_dataset_name(cfg)})"
+        proctitle_name = f"{cfg.model.__class__.__name__}({cfg.dataset.name})"
         setproctitle.setproctitle(f'{proctitle_name}@BasicTS')
 
-    def define_model(self, cfg: Dict) -> nn.Module:
-        """
-        Define the model architecture based on the configuration.
+    def set_env(self, cfg: BasicTSConfig):
+        """Setup runtime env, include tf32, seed and determinacy.
+
+        env config template:
+        ```
+        cfg.tf32 = False
+        cfg.seed = 42
+        cfg.deterministic = True
+        cfg.cudnn_enabled = False
+        cfg.cudnn_benchmark = False
+        cfg.cudnn_determinstic = True
+        ```
 
         Args:
-            cfg (Dict): Configuration dictionary containing model settings.
-
-        Returns:
-            nn.Module: The model architecture.
+            cfg (BasicTSConfig): env config.
         """
 
-        return cfg['MODEL']['ARCH'](**cfg['MODEL']['PARAM'])
+        # tf32
+        set_tf32_mode(cfg.tf32)
 
-    def build_model(self, cfg: Dict) -> nn.Module:
+        # determinacy
+        seed = cfg.seed
+        if seed is not None:
+            # each rank has different seed in distributed mode
+            setup_determinacy(
+                seed + get_rank(),
+                cfg.deterministic,
+                cfg.cudnn_enabled,
+                cfg.cudnn_benchmark,
+                cfg.cudnn_determinstic
+            )
+
+    def build_model(self, cfg: BasicTSConfig):
         """Build model.
 
         Initialize model by calling ```self.define_model```,
@@ -153,11 +177,10 @@ class BaseEpochRunner(metaclass=ABCMeta):
         """
 
         self.logger.info('Building model.')
-        model = self.define_model(cfg)
-        model = self.to_running_device(model)
+        model = self.to_running_device(cfg.model)
 
         # complie model
-        if cfg.get('TRAIN.COMPILE_MODEL', False):
+        if cfg.compile_model:
             # get current torch version
             current_version = torch.__version__
             # torch.compile() is only available in torch>=2.0
@@ -172,177 +195,117 @@ class BaseEpochRunner(metaclass=ABCMeta):
             model = DDP(
                 model,
                 device_ids=[get_local_rank()],
-                find_unused_parameters=cfg.get('MODEL.DDP_FIND_UNUSED_PARAMETERS', False)
+                find_unused_parameters=cfg.ddp_find_unused_parameters
             )
         return model
 
-    def build_optim(self, optim_cfg: Dict, model: nn.Module) -> optim.Optimizer:
-        """Build optimizer from `optim_cfg`.
+    # def build_dataset(self, dataset_type: Union[type, str], cfg: BasicTSConfig, mode: MODE):
+    #     """Build the dataset.
+
+    #     Args:
+    #         cfg (Dict): Configuration.
+    #         mode (str): Mode of the dataset.
+
+    #     Returns:
+    #         Dataset: The constructed dataset.
+    #     """
+    #     if isinstance(dataset_type, str):
+    #         dataset_type = Factory(Factory.DATASET, dataset_type)
+    #     sig = inspect.signature(dataset_type.__init__)
+    #     kwargs = {}
+    #     for name, param in sig.parameters.items():
+    #         if name not in cfg:
+    #             if name not in ['self', 'mode', 'logger'] and param.default is param.empty and param.kind is param.POSITIONAL_OR_KEYWORD:
+    #                 raise KeyError(f"Parameter {name} is required but not provided in config.")
+    #             continue
+    #         kwargs[name] = cfg[name]
+    #     dataset = dataset_type(mode=mode, logger=self.logger, **kwargs)
+    #     self.logger.info(f'{mode} dataset length: {len(dataset)}')
+    #     return dataset
+
+    def build_data_loader(self, cfg: BasicTSConfig, mode: MODE):
+        """Build dataloader from BasicTSConfig
+
+        structure of `data_cfg` is
+        {
+            'BATCH_SIZE': (int, optional) batch size of data loader (default: ``1``),
+            'SHUFFLE': (bool, optional) data reshuffled option (default: ``False``),
+            'NUM_WORKERS': (int, optional) num workers for data loader (default: ``0``),
+            'PIN_MEMORY': (bool, optional) pin_memory option (default: ``False``),
+            'PREFETCH': (bool, optional) set to ``True`` to use `DataLoaderX` (default: ``False``),
+        }
 
         Args:
-            optim_cfg (Dict): optimizer config
-            model (nn.Module): model
+            data_cfg (BasicTSConfig): config
+            mode (Literal['train', 'val', 'test']): mode
 
         Returns:
-            optim.Optimizer: optimizer
+            data loader
         """
 
-        # TODO: support other optimizers here
-        return optim.build_optim(optim_cfg, model)
+        self.logger.info(f'Building {mode.value} data loader.')
+        dataset = cfg.dataset(mode=mode)
+        if mode == MODE.TRAIN:
+            self.iter_per_epoch = math.ceil(len(dataset) / cfg.train_batch_size)
 
-    def build_lr_scheduler(self, cfg: Dict) -> None:
-        """
-        Initialize lr_scheduler
+        sampler = DistributedSampler(
+            dataset,
+            get_world_size(),
+            get_rank(),
+            shuffle=cfg.get(f'{mode.value}_data_shuffle', False)
+        ) if torch.distributed.is_initialized() and mode == MODE.TRAIN else None
 
-        Args:
-            cfg (Dict): config
-        """
-        # create lr_scheduler
-        if cfg.has('TRAIN.LR_SCHEDULER'):
-            self.scheduler = optim.build_lr_scheduler(cfg['TRAIN.LR_SCHEDULER'], self.optim)
-            self.logger.info('Set lr_scheduler: {}'.format(self.scheduler))
-            self.register_epoch_meter('train/lr', 'train', '{:.2e}')
+        shuffle = False if torch.distributed.is_initialized() and mode == MODE.TRAIN\
+              else cfg.get(f'{mode.value}_data_shuffle', False)
 
-    def build_train_data_loader(self, cfg: Dict) -> DataLoader:
-        """Build train dataset and dataloader.
-        Build dataset by calling ```self.build_train_dataset```,
-        build dataloader by calling ```build_data_loader``` or
-        ```build_data_loader_ddp``` when DDP is initialized
+        return (DataLoaderX if cfg.get(f'{mode.value}_data_prefetch') else DataLoader)(
+            dataset,
+            collate_fn=cfg.get(f'{mode.value}_data_collate_fn', None),
+            batch_size=cfg.get(f'{mode.value}_batch_size', 1),
+            shuffle=shuffle,
+            sampler=sampler,
+            num_workers=cfg.get(f'{mode.value}_data_num_workers', 0),
+            pin_memory=cfg.get(f'{mode.value}_data_pin_memory', False)
+        )
 
-        Args:
-            cfg (Dict): config
-
-        Returns:
-            train data loader (DataLoader)
-        """
-
-        self.logger.info('Building training data loader.')
-        dataset = self.build_train_dataset(cfg)
-        if torch.distributed.is_initialized():
-            return build_data_loader_ddp(dataset, cfg['TRAIN.DATA'])
-        else:
-            return build_data_loader(dataset, cfg['TRAIN.DATA'])
-
-    @abstractmethod
-    def build_train_dataset(self, cfg: Dict) -> Dataset:
-        """It must be implement to build dataset for training.
-
-        Args:
-            cfg (Dict): config
-
-        Returns:
-            train dataset (Dataset)
-        """
-
-        pass
-
-    def build_val_data_loader(self, cfg: Dict) -> DataLoader:
-        """Build val dataset and dataloader.
-        Build dataset by calling ```self.build_train_dataset```,
-        build dataloader by calling ```build_data_loader```.
-
-        Args:
-            cfg (Dict): config
-
-        Returns:
-            val data loader (DataLoader)
-        """
-
-        self.logger.info('Building val data loader.')
-        dataset = self.build_val_dataset(cfg)
-        return build_data_loader(dataset, cfg['VAL.DATA'])
-
-    def build_val_dataset(self, cfg: Dict) -> Dataset:
-        """It can be implement to build dataset for validation (not necessary).
-
-        Args:
-            cfg (Dict): config
-
-        Returns:
-            val dataset (Dataset)
-        """
-
-        raise NotImplementedError()
-
-    def build_test_data_loader(self, cfg: Dict) -> DataLoader:
-        """
-        Build the test data loader.
-
-        Args:
-            cfg (Dict): Configuration dictionary.
-
-        Returns:
-            DataLoader: The test data loader.
-        """
-
-        dataset = self.build_test_dataset(cfg)
-        return build_data_loader(dataset, cfg['TEST']['DATA'])
-
-    def build_test_dataset(self, cfg: Dict) -> Dataset:
-        """
-        Build the test dataset.
-
-        Args:
-            cfg (Dict): Configuration dictionary.
-
-        Returns:
-            Dataset: The test dataset.
-
-        Raises:
-            NotImplementedError: Must be implemented in a subclass.
-        """
-
-        raise NotImplementedError('build_test_dataset method must be implemented.')
-
-    def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list]) -> Dataset:
-        """
-        Build the inference dataset.
-
-        Args:
-            cfg (Dict): Configuration dictionary.
-
-        Returns:
-            Dataset: The inference dataset.
-
-        Raises:
-            NotImplementedError: Must be implemented in a subclass.
-        """
-
-        raise NotImplementedError('build_inference_dataset method must be implemented.')
-
-    def init_training(self, cfg: Dict) -> None:
+    def init_training(self, cfg: BasicTSConfig) -> None:
         """
         Initialize training, including support for the test data loader.
 
         Args:
-            cfg (Dict): Configuration dictionary.
+            cfg (BasicTSConfig): Configuration dictionary.
         """
 
         self.logger.info('Initializing training.')
 
         # init training param
-        self.num_epochs = cfg['TRAIN.NUM_EPOCHS']
+        self.num_epochs = cfg.num_epochs
         self.start_epoch = 0
-        self.ckpt_save_strategy = cfg.get('TRAIN.CKPT_SAVE_STRATEGY')
+        self.ckpt_save_strategy = cfg.ckpt_save_strategy
         self.best_metrics = {}
-        self.clip_grad_param = cfg.get('TRAIN.CLIP_GRAD_PARAM')
+        self.clip_grad_param = cfg.clip_grad_param
         if self.clip_grad_param is not None:
             self.logger.info('Set clip grad, param: {}'.format(self.clip_grad_param))
 
         # train data loader
-        self.train_data_loader = self.build_train_data_loader(cfg)
+        self.train_data_loader = self.build_data_loader(cfg, MODE.TRAIN)
         self.register_epoch_meter('train/time', 'train', '{:.2f} (s)', plt=False)
 
+        if self.scaler is not None:
+            self.scaler.fit(self.train_data_loader.dataset.data)
         # create optim
-        self.optim = self.build_optim(cfg['TRAIN.OPTIM'], self.model)
+        self.optim = cfg.optimizer
         self.logger.info('Set optim: {}'.format(self.optim))
 
         # create lr_scheduler
-        self.build_lr_scheduler(cfg)
+        if cfg.lr_scheduler is not None:
+            self.lr_scheduler = cfg.lr_scheduler
+            self.logger.info('Set lr_scheduler: {}'.format(self.lr_scheduler))
+            self.register_epoch_meter('train/lr', 'train', '{:.2e}')
 
         # fine tune
-        if cfg.has('TRAIN.FINETUNE_FROM'):
-            self.load_model(cfg['TRAIN.FINETUNE_FROM'], cfg.get('TRAIN.FINETUNE_STRICT_LOAD', True))
+        if cfg.finetune_from is not None:
+            self.load_model(cfg.finetune_from, cfg.strict_load)
             self.logger.info('Start fine tuning')
 
         # resume
@@ -356,36 +319,36 @@ class BaseEpochRunner(metaclass=ABCMeta):
             )
 
         # init validation
-        if cfg.has('VAL'):
+        if hasattr(cfg, 'val_interval'):
             self.init_validation(cfg)
 
-        if hasattr(cfg, 'TEST'):
+        if hasattr(cfg, 'test_interval'):
             self.init_test(cfg)
 
     @master_only
-    def init_validation(self, cfg: Dict):
+    def init_validation(self, cfg: BasicTSConfig):
         """Initialize validation
 
         Args:
-            cfg (Dict): config
+            cfg (BasicTSConfig): config
         """
 
         self.logger.info('Initializing validation.')
-        self.val_interval = cfg.get('VAL.INTERVAL', 1)
-        self.val_data_loader = self.build_val_data_loader(cfg)
+        self.val_interval = cfg.val_interval
+        self.val_data_loader = self.build_data_loader(cfg, MODE.VAL)
         self.register_epoch_meter('val/time', 'val', '{:.2f} (s)', plt=False)
 
     @master_only
-    def init_test(self, cfg: Dict) -> None:
+    def init_test(self, cfg: BasicTSConfig) -> None:
         """
         Initialize the test data loader and related settings.
 
         Args:
-            cfg (Dict): Configuration dictionary.
+            cfg (BasicTSConfig): Configuration dictionary.
         """
 
-        self.test_interval = cfg['TEST'].get('INTERVAL', 1)
-        self.test_data_loader = self.build_test_data_loader(cfg)
+        self.test_interval = cfg.test_interval
+        self.test_data_loader = self.build_data_loader(cfg, MODE.TEST)
         self.register_epoch_meter('test/time', 'test', '{:.2f} (s)', plt=False)
 
     @master_only
@@ -398,7 +361,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
             input_data (Union[str, list]): The input data file path or data list for inference.
         """
 
-        self.inference_dataset = self.build_inference_dataset(cfg, input_data)
+        self.inference_dataset = self.build_dataset(TimeSeriesInferenceDataset, cfg, input_data)
         self.inference_dataset_loader = DataLoader(self.inference_dataset, batch_size=1, shuffle=False)
         self.register_epoch_meter('inference/time', 'inference', '{:.2f} (s)', plt=False)
 
@@ -463,8 +426,8 @@ class BaseEpochRunner(metaclass=ABCMeta):
                 if loss is not None:
                     self.backward(loss)
             # update lr_scheduler
-            if self.scheduler is not None:
-                self.scheduler.step()
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.step()
 
             epoch_end_time = time.time()
             # epoch time
@@ -555,7 +518,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         if train_epoch is not None:
             self.plt_epoch_meters('test', train_epoch // self.test_interval)
 
-        if len(self.evaluation_horizons) > 0:
+        if self.evaluation_horizons is not None and len(self.evaluation_horizons) > 0:
             self.logger.info(f'Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.')
             for i in self.evaluation_horizons:
                 self.print_epoch_meters(f'test @ horizon {i+1}')
@@ -696,8 +659,8 @@ class BaseEpochRunner(metaclass=ABCMeta):
         # print epoch num
         self.logger.info('Epoch {:d} / {:d}'.format(epoch, self.num_epochs))
         # update lr meter
-        if self.scheduler is not None:
-            self.update_epoch_meter('train/lr', self.scheduler.get_last_lr()[0])
+        if self.lr_scheduler is not None:
+            self.update_epoch_meter('train/lr', self.lr_scheduler.get_last_lr()[0])
 
         # set epoch for sampler in distributed mode
         # see https://pytorch.org/docs/stable/data.html
@@ -772,7 +735,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
         pass
 
-    def on_training_end(self, cfg: Dict, train_epoch: Optional[int] = None):
+    def on_training_end(self, cfg: BasicTSConfig, train_epoch: Optional[int] = None):
         """Callback at the end of the training process.
         
         Args:
@@ -784,7 +747,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
             # close tensorboard writer
             self.tensorboard_writer.close()
 
-        if hasattr(cfg, 'TEST'):
+        if hasattr(cfg, 'test_interval'):
             # evaluate the best model on the test set
             best_model_path = os.path.join(
                 self.ckpt_save_dir,
@@ -852,8 +815,8 @@ class BaseEpochRunner(metaclass=ABCMeta):
             self.start_epoch = checkpoint_dict['epoch']
             if checkpoint_dict.get('best_metrics') is not None:
                 self.best_metrics = checkpoint_dict['best_metrics']
-            if self.scheduler is not None:
-                self.scheduler.last_epoch = checkpoint_dict['epoch']
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.last_epoch = checkpoint_dict['epoch']
             self.logger.info('Resume training')
         except (IndexError, OSError, KeyError):
             pass
@@ -1005,8 +968,6 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
     @master_only
     def register_epoch_meter(self, name, meter_type, fmt='{:f}', plt=True) -> None:
-        if self.meter_pool is None:
-            self.meter_pool = MeterPool()
         self.meter_pool.register(name, meter_type, fmt, plt)
 
     @master_only

@@ -1,0 +1,1 @@
+S-D-Mamba requires `mamba_ssm` package. Please refer to the [mamba_ssm documentation](https://github.com/state-spaces/mamba).
