@@ -17,10 +17,9 @@ class BasicTSDataset(Dataset, ABC):
     with specific implementations for different types of time series data.
 
     Attributes:
-        dataset_name (str): The name of the dataset which is used for identifying the dataset uniquely.
-        train_val_test_ratio (List[float]): Ratios for splitting the dataset into training, validation,
-            and testing sets respectively. Each value in the list should sum to 1.0.
-        mode (str): Operational mode of the dataset. Valid values are "train", "valid", or "test".
+        name (str): The name of the dataset which is used for identifying the dataset uniquely.
+        data_file_path (str): The file path of the dataset.
+        memmap (bool): Whether to use memory-mapped file access for loading data.
     """
 
     _instances: Dict[BasicTSMode, "BasicTSDataset"] = {}

@@ -39,8 +39,8 @@ class CurriculumLearning(BasicTSCallback):
             except KeyError as ke:
                 raise KeyError("Curriculum learning requires 'prediction' and 'target' in forward_return.") from ke
             except IndexError as ie:
-                raise IndexError("Curriculum learning should be used for forecasting tasks \
-                                with data in shape [batch_size, seq_len, num_features].") from ie
+                raise IndexError("Curriculum learning should be used for forecasting tasks" \
+                                "with data in shape [batch_size, seq_len, num_features].") from ie
 
     def curriculum_learning(self, epoch: int) -> int:
         """

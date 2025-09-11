@@ -6,9 +6,11 @@ from .simple_tsc_dataset import TimeSeriesClassificationDataset
 from .tsf_dataset import BasicTSForecastingDataset
 from .tsi_dataset import BasicTSImputationDataset
 from .uea_dataset import UEADataset
+from .blast import BLASTDatasetWoMixUp
 
 __all__ = ['BasicTSDataset',
            'BasicTSForecastingDataset',
+           'BLASTDatasetWoMixUp',
            'BuiltinTSForecastingDataset',
            'TimeSeriesClassificationDataset',
            'UEADataset',
