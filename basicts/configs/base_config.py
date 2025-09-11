@@ -77,6 +77,7 @@ class BasicTSConfig(EasyDict):
     ############################## Training Configuration ##############################
 
     num_epochs: int
+    num_steps: int
 
     # Loss function
     loss: Callable # Loss function
@@ -116,16 +117,6 @@ class BasicTSConfig(EasyDict):
     val_data_collate_fn: Callable
     val_data_num_workers: int
     val_data_pin_memory: bool
-
-    ############################## Test Configuration ##############################
-
-    test_batch_size: int
-    test_interval: int # Conduct test every `test_interval` epochs. Default: 1
-    test_data_prefetch: bool
-    test_data_shuffle: bool
-    test_data_collate_fn: Callable
-    test_data_num_workers: int
-    test_data_pin_memory: bool
 
     ########################### Evaluation Configuration ##########################
 

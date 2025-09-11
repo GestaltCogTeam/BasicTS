@@ -36,8 +36,8 @@ class ClipGrad(BasicTSCallback):
         self.log = log
 
     def on_train_start(self, runner: "BasicTSRunner"):
-        runner.logger.info(f"Use clip grad, max_norm: {self.max_norm}, norm_type: {self.norm_type}, \
-                           error_if_nonfinite: {self.error_if_nonfinite}, foreach: {self.foreach}.")
+        runner.logger.info(f"Use clip grad, max_norm: {self.max_norm}, norm_type: {self.norm_type}, "\
+                           f"error_if_nonfinite: {self.error_if_nonfinite}, foreach: {self.foreach}.")
         if self.log:
             runner.register_meter("train/grad_norm", "train", "{:.4f}")
 

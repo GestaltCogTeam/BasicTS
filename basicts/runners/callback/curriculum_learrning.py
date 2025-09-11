@@ -27,7 +27,7 @@ class CurriculumLearning(BasicTSCallback):
         self.cl_epochs = cl_epochs
         self.step_size = step_size
 
-    def on_train_start(self, runner: 'BasicTSRunner'):
+    def on_train_start(self, runner: "BasicTSRunner"):
         runner.logger.info("Use curriculum learning.")
 
     def on_compute_loss(self, runner: "BasicTSRunner", forward_return: Dict[str, Any]):
@@ -39,8 +39,8 @@ class CurriculumLearning(BasicTSCallback):
             except KeyError as ke:
                 raise KeyError("Curriculum learning requires 'prediction' and 'target' in forward_return.") from ke
             except IndexError as ie:
-                raise IndexError("Curriculum learning should be used for forecasting tasks \
-                                with data in shape [batch_size, seq_len, num_features].") from ie
+                raise IndexError("Curriculum learning should be used for forecasting tasks" \
+                                "with data in shape [batch_size, seq_len, num_features].") from ie
 
     def curriculum_learning(self, epoch: int) -> int:
         """

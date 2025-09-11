@@ -49,7 +49,7 @@ class BuiltinTSForecastingDataset(BasicTSForecastingDataset):
         super().__init__(name, data_file_path, input_len, output_len, memmap, overlap, logger)
         self.description_file_path = f'datasets/{name}/desc.json'
         self.description = self._load_description()
-        self.data = self._load_data()
+        self.data = self._load_data()[..., 0]
 
     def _load_description(self) -> dict:
         """

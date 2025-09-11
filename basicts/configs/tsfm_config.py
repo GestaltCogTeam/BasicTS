@@ -1,23 +1,25 @@
 from dataclasses import dataclass, field
-from typing import Callable, List, Literal, Optional, Tuple, Union
+from typing import Callable, List, Literal, Optional, Union
 
 import numpy as np
-from torch.optim import Adam, Optimizer
-from torch.optim.lr_scheduler import LRScheduler, MultiStepLR
+import torch
+from torch.optim import AdamW, Optimizer
+from torch.optim.lr_scheduler import LRScheduler
 
 from basicts.data import BuiltinTSForecastingDataset
 from basicts.metrics import masked_mae
 from basicts.runners.callback import BasicTSCallback
+from basicts.runners.optim.lr_schedulers import CosineWarmup
 from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
                                       BasicTSTaskFlow)
-from basicts.scaler import BasicTSScaler, ZScoreScaler
+from basicts.scaler import BasicTSScaler
 from basicts.utils import BasicTSTask
 
 from .base_config import BasicTSConfig
 
 
 @dataclass
-class BasicTSForecastingConfig(BasicTSConfig):
+class BasicTSFoundationModelConfig(BasicTSConfig):
 
     """
     BasicTS Forecasting Config, including general configuration, dataset and scaler configuration, model configuration, \
@@ -81,12 +83,10 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     ############################## Model Configuration ##############################
 
-    # Whether to set up the computation graph. Default: False.
-    # Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
-    setup_graph: bool = False
     # Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`.
     # In distributed computing, if there are unused parameters in the forward process, PyTorch usually raises a RuntimeError.
     # In such cases, this parameter should be set to True.
+    model_dtype: Union[torch.dtype, str] = 'bfloat16'
     ddp_find_unused_parameters: bool = False
 
     compile_model: bool = False
@@ -100,8 +100,8 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     ############################## Training Configuration ##############################
 
-    num_epochs: int = 100
-    num_steps: int = None
+    num_epochs: int = None
+    num_steps: int = 10_000
 
     # Loss function
     loss: Callable = masked_mae # Loss function
@@ -112,19 +112,8 @@ class BasicTSForecastingConfig(BasicTSConfig):
     # Learning rate scheduler
     lr_scheduler: LRScheduler = None
 
-    # Checkpoint loading and saving settings
-    # Directory to save checkpoints. Default: 'checkpoints/{model}/{dataset}_{num_epochs}_{input_len}_{output_len}', which will be loaded lazily.
-    ckpt_save_dir: str = None
-    # Checkpoint save strategy. `CFG.TRAIN.CKPT_SAVE_STRATEGY` should be None, an int value, a list or a tuple. Default: None.
-    # None: remove last checkpoint file every epoch.
-    # Int: save checkpoint every `CFG.TRAIN.CKPT_SAVE_STRATEGY` epoch.
-    # List or Tuple: save checkpoint when epoch in `CFG.TRAIN.CKPT_SAVE_STRATEGY, remove last checkpoint file when last_epoch not in ckpt_save_strategy
-    ckpt_save_strategy: Union[int, List[int], Tuple[int]] = field(default_factory=lambda: None)
-    finetune_from: str = None # Checkpoint path for fine-tuning. Default: None. If not specified, the model will be trained from scratch.
-    strict_load: bool = True # Whether to strictly load the checkpoint. Default: True.
-
     # Train data loader settings
-    train_batch_size: int = 64
+    train_batch_size: int = 32
     train_data_prefetch: bool = False # Whether to use dataloader with prefetch. See https://github.com/justheuristic/prefetch_generator. Default: False.
     train_data_shuffle: bool = True # Whether to shuffle the training data. Default: False
     train_data_collate_fn: Callable = None # Collate function for the training dataloader. Default: None
@@ -133,31 +122,24 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     ############################## Validation Configuration ##############################
 
-    val_batch_size: int = 64
-    val_interval: int = 1 # Conduct test every `val_interval` epochs. Default: 1
+    val_batch_size: int = 32
+    val_interval: int = 1000
     val_data_prefetch: bool = False
     val_data_shuffle: bool = False
     val_data_collate_fn: Callable = None
     val_data_num_workers: int = 0
     val_data_pin_memory: bool = False
 
-    ############################## Test Configuration ##############################
-
-    test_batch_size: int = 64
-    test_interval: int = 1 # Conduct test every `test_interval` epochs. Default: 1
-    test_data_prefetch: bool = False
-    test_data_shuffle: bool = False
-    test_data_collate_fn: Callable = None
-    test_data_num_workers: int = 0
-    test_data_pin_memory: bool = False
-
-    ########################### Evaluation Configuration ##########################
-
-    # Evaluation parameters
-    # The prediction horizons for evaluation. Default value: [].
-    # NOTE: HORIZONS[i] refers to testing **on the i-th** time step, representing the loss for that specific time step.
-    # This is a common setting in spatiotemporal forecasting. For long-sequence predictions, it is recommended to keep HORIZONS set to the default value [] to avoid confusion.
-    eval_horizons: List[int] = field(default_factory=lambda: [])
+    # Checkpoint loading and saving settings
+    # Directory to save checkpoints. Default: 'checkpoints/{model}/{dataset}_{num_epochs}_{input_len}_{output_len}', which will be loaded lazily.
+    ckpt_save_dir: str = None
+    # Checkpoint save strategy. `CFG.TRAIN.CKPT_SAVE_STRATEGY` should be None, an int value, a list or a tuple. Default: None.
+    # None: remove last checkpoint file every epoch.
+    # Int: save checkpoint every `CFG.TRAIN.CKPT_SAVE_STRATEGY` epoch.
+    # List or Tuple: save checkpoint when epoch in `CFG.TRAIN.CKPT_SAVE_STRATEGY, remove last checkpoint file when last_epoch not in ckpt_save_strategy
+    ckpt_save_strategy: Union[int, list[int], tuple[int]] = val_interval
+    finetune_from: str = None # Checkpoint path for fine-tuning. Default: None. If not specified, the model will be trained from scratch.
+    strict_load: bool = True # Whether to strictly load the checkpoint. Default: True.
     save_results: bool = False # Whether to save evaluation results in a numpy file. Default: False
 
     ############################## Environment Configuration ##############################
@@ -174,8 +156,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
         ['gpus', 'memmap', 'ddp_find_unused_parameters', 'compile_model', 'ckpt_save_strategy', \
          'train_data_prefetch', 'train_data_num_workers', 'train_data_pin_memory', \
          'val_batch_size', 'val_interval', 'val_data_prefetch', 'val_data_num_workers', 'val_data_pin_memory', \
-         'test_batch_size', 'test_interval', 'test_data_prefetch', 'test_data_num_workers', 'test_data_pin_memory', \
-         'eval_horizons', 'save_results',])
+         ])
 
     ##################################### Post Init #######################################
 
@@ -188,7 +169,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
             self.test_batch_size = self.batch_size
         if self.ckpt_save_dir is None:
             self.ckpt_save_dir = \
-                f'checkpoints/{self.model.__class__.__name__}/{self.dataset.name}_{self.num_epochs}_{self.dataset.input_len}_{self.dataset.output_len}'
+                f'checkpoints/{self.model.__class__.__name__}/{self.dataset.name}_{self.num_steps}'
 
         # Follow the default settings in spatial-temporal forecasting and time series forecasting tasks.
         # if self.norm_each_channel is None:
@@ -196,24 +177,19 @@ class BasicTSForecastingConfig(BasicTSConfig):
         #         self.norm_each_channel = False
         #     else: # time series forecasting
         #         self.norm_each_channel = True
-        self.norm_each_channel = True
-
-        # Post-init scaler if not specified
-        if self.scaler is None:
-            self.scaler = ZScoreScaler(self.norm_each_channel, self.rescale)
 
         # Post-init optimizer and lr scheduler if not specified
         if self.optimizer is None:
-            self.optimizer = Adam(
+            self.optimizer = AdamW(
                 params = self.model.parameters(),
-                lr = 0.0002,
-                weight_decay = 0.0005
+                lr=1e-3,
+                fused=True
             )
         if self.lr_scheduler is None:
-            self.lr_scheduler = MultiStepLR(
-                optimizer = self.optimizer,
-                milestones = [1, int(self.num_epochs / 2)],
-                gamma = 0.5
+            self.lr_scheduler = CosineWarmup(
+                optimizer=self.optimizer,
+                num_warmup_steps=self.num_steps / 10,
+                num_training_steps=self.num_steps
             )
         gpu_num = len(self.gpus.split(',')) if self.gpus else 0
         if self.gpu_num is not None:

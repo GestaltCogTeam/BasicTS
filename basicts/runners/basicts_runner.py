@@ -112,7 +112,8 @@ class BasicTSRunner:
 
         self.num_epochs = None
         self.num_steps = None
-        self.start_epoch = None
+        self.start_epoch = 0
+        self.start_step = 0
         self.evaluation_horizons = None
         self.save_results = cfg.save_results
 
@@ -177,12 +178,11 @@ class BasicTSRunner:
         self.logger.info('Initializing training.')
 
         # init training param
-        self.num_epochs = self.cfg.num_epochs
-        self.start_epoch = 0
+        self.num_epochs, self.num_steps = self.cfg.num_epochs, self.cfg.num_steps
         self.ckpt_save_strategy = self.cfg.ckpt_save_strategy
-        if self.cfg.num_epochs is not None and not hasattr(self.cfg, 'num_steps'):
+        if self.num_epochs is not None and self.num_steps is None:
             self.training_unit = 'epoch'
-        elif self.cfg.num_steps is not None and not hasattr(self.cfg, 'num_epochs'):
+        elif self.num_steps is not None and self.num_epochs is None:
             self.training_unit = 'step'
         else:
             raise ValueError('`num_epochs` and `num_steps` cannot be set at the same time.')
@@ -308,13 +308,26 @@ class BasicTSRunner:
         The complete evaluation process.
 
         Args:
-            train_epoch (int, optional): Current epoch during training. Defaults to None.
-            save_metrics (bool, optional): Save the test metrics. Defaults to False.
-            save_results (bool, optional): Save the test results. Defaults to False.
+            ckpt_path (str, optional): Path to the model checkpoint file. Defaults to None.
         """
         self.on_eval_start(ckpt_path)
         self._test(None, None, BasicTSMode.EVAL)
         self.on_eval_end()
+
+    @torch.no_grad()
+    def inference(self, inputs: Union[torch.Tensor, Dict[str, torch.Tensor]], ckpt_path: Optional[str] = None) -> None:
+        """
+        The complete inference process.
+
+        Args:
+            ckpt_path (str, optional): Path to the checkpoint file. Defaults to None.
+        """
+        # self.on_inference_start(ckpt_path)
+        if isinstance(inputs, torch.Tensor):
+            inputs = {'inputs': inputs}
+        self.taskflow.preprocess(self, inputs)
+        forward_return = self._forward(inputs, 0)
+        return forward_return['prediction']
 
     @torch.no_grad()
     def _test(self, train_step: Optional[int] = None, train_epoch: Optional[int] = None, \
@@ -386,8 +399,8 @@ class BasicTSRunner:
         self.train_time_predictor = TimePredictor(self.start_step, self.num_steps)
 
         # training loop
-        step = self.start_step
-        while step < self.num_steps:
+        step = self.start_step + 1
+        while step <= self.num_steps:
 
             if self.should_training_stop:
                 break
@@ -397,7 +410,7 @@ class BasicTSRunner:
             # update epoch
             self.epoch = step // self.step_per_epoch + self.start_epoch + 1
             # a new epoch
-            if self.training_unit == 'epoch' and step % self.step_per_epoch == 0:
+            if self.training_unit == 'epoch' and (step - 1) % self.step_per_epoch == 0:
                 self.on_epoch_start(self.epoch)
                 self.callback_handler.trigger('on_epoch_start', self, epoch=self.epoch)
                 # epoch pbar
@@ -603,7 +616,8 @@ class BasicTSRunner:
         if not self.is_train_initialized and self.scaler is not None:
             train_dataset = self.cfg.dataset(BasicTSMode.TRAIN)
             self.scaler.fit(train_dataset.data)
-        ckpt_path = os.path.join(self.ckpt_save_dir, '{}_best_val_{}.pt'.format(self.model_name, self.target_metric.replace('/', '_')))
+        if ckpt_path is None:
+            ckpt_path = os.path.join(self.ckpt_save_dir, '{}_best_val_{}.pt'.format(self.model_name, self.target_metric.replace('/', '_')))
         self.load_model(ckpt_path=ckpt_path, strict=True)
 
     @master_only
@@ -672,9 +686,9 @@ class BasicTSRunner:
             step (int): current step
         """
 
-        if self.training_unit == 'step' and step % self.val_interval == 0:
-            # print iteration num
-            self.logger.info('Iteration {:d} / {:d}'.format(step, self.num_steps))
+        if self.training_unit == 'step' and (step - 1) % self.val_interval == 0:
+            # print step num
+            self.logger.info('Step {:d} / {:d}'.format(step, self.num_steps))
 
     def on_step_end(self, step: int) -> None:
         """Called after each step.
@@ -693,7 +707,7 @@ class BasicTSRunner:
                 self.update_meter('train/lr', self.lr_scheduler.get_last_lr()[0])
 
             # tensorboard plt meters
-            # self.plt_iteration_meters('train', iteration, value_type='last')
+            self.plt_meters('train', step, value_type='last')
             if step % self.val_interval == 0:
                 # print train meters
                 self.print_meters('train')
@@ -704,9 +718,8 @@ class BasicTSRunner:
                     self._save_model(step)
                     # reset meters
                     self.reset_meters()
-
-            if self.test_interval is not None and step % self.test_interval == 0:
-                self._test(step)
+                if self.test_data_loader is not None:
+                    self._test(step)
 
     @master_only
     def on_inference_start(self) -> None:
@@ -912,46 +925,6 @@ class BasicTSRunner:
         self.logger.info(f'Total parameters: {total_params}')
         self.logger.info(f'Trainable parameters: {trainable_params}')
 
-    @torch.no_grad()
-    @master_only
-    # pylint: disable=unused-argument
-    def inference_pipeline(self, cfg: Optional[Dict] = None, input_data: Union[str, list] = '', output_data_file_path: str = '', **kwargs) -> tuple:
-        """
-        The complete inference process.
-
-        Args:
-            cfg (Dict, optional): Configuration dictionary.
-            input_data (Union[str, list], optional): The input data file path or data list for inference.
-            output_data_file_path (str, optional): The output data file path. Defaults to '' meaning no output file.
-            **kwargs: Additional keyword arguments for flexibility in inference.
-        """
-
-        # if isinstance(input_data, str):
-        #     pass
-
-        self._init_inference(cfg, input_data)
-
-        self.on_inference_start()
-
-        inference_start_time = time.time()
-        self.model.eval()
-
-        # execute the inference process
-        result = self.inference(save_result_path=output_data_file_path)
-
-        inference_end_time = time.time()
-        self.update_meter('inference/time', inference_end_time - inference_start_time)
-
-        self.print_meters('inference')
-
-        # logging here for intuitiveness
-        if output_data_file_path:
-            self.logger.info(f'inference results saved to {output_data_file_path}.')
-
-        self.on_inference_end()
-
-        return result
-
     # region Misc Functions
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     # Miscellaneous Functions:                                                              #
@@ -1016,11 +989,14 @@ class BasicTSRunner:
             else:
                 self.model.load_state_dict(checkpoint_dict['model_state_dict'], strict=strict)
             self.optimizer.load_state_dict(checkpoint_dict['optim_state_dict'])
-            self.start_epoch = checkpoint_dict[self.training_unit]
+            if self.training_unit == 'epoch':
+                self.start_epoch = checkpoint_dict[self.training_unit]
+            else: #self.training_unit == 'step'
+                self.start_step = checkpoint_dict[self.training_unit]
             if checkpoint_dict.get('best_metrics') is not None:
                 self.best_metrics = checkpoint_dict['best_metrics']
             if self.lr_scheduler is not None:
-                self.lr_scheduler.last_epoch = checkpoint_dict['epoch']
+                self.lr_scheduler.last_epoch = checkpoint_dict[self.training_unit]
             self.logger.info('Resume training')
             if self.amp_scaler is not None:
                 self.amp_scaler.load_state_dict(checkpoint_dict['amp_scaler_state_dict'])
@@ -1066,7 +1042,7 @@ class BasicTSRunner:
         backup_last_ckpt(last_ckpt_path, eqv_epoch, self.ckpt_save_strategy)
 
         # save ckpt
-        ckpt_path = self._get_ckpt_path(unit_count)
+        ckpt_path = self._get_ckpt_path(eqv_epoch)
         save_ckpt(ckpt_dict, ckpt_path, self.logger)
 
         # clear ckpt every 10 epoch or in the end
@@ -1197,7 +1173,7 @@ class BasicTSRunner:
 
         return os.path.join(cfg.ckpt_save_dir, cfg.md5)
 
-    def _get_ckpt_path(self, unit_count: int) -> str:
+    def _get_ckpt_path(self, epoch: int) -> str:
         """Get checkpoint path.
 
         The format is "{ckpt_save_dir}/{model_name}_{epoch}"
@@ -1209,7 +1185,7 @@ class BasicTSRunner:
             checkpoint path (str)
         """
 
-        unit_count_str = str(unit_count).zfill(len(str(self.num_steps if self.training_unit == 'step' else self.num_epochs)))
+        unit_count_str = str(epoch).zfill(len(str(self.num_steps if self.training_unit == 'step' else self.num_epochs)))
         ckpt_name = '{}_{}.pt'.format(self.model_name, unit_count_str)
         return os.path.join(self.ckpt_save_dir, ckpt_name)
 
@@ -1249,8 +1225,8 @@ class BasicTSRunner:
         self.meter_pool.print_meters(meter_type, self.logger)
 
     @master_only
-    def plt_meters(self, meter_type, step) -> None:
-        self.meter_pool.plt_meters(meter_type, step, self.tensorboard_writer)
+    def plt_meters(self, meter_type, step, value_type='avg') -> None:
+        self.meter_pool.plt_meters(meter_type, step, self.tensorboard_writer, value_type)
 
     @master_only
     def reset_meters(self) -> None:
