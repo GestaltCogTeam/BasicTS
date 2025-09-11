@@ -3,6 +3,7 @@ from .clip_grad import ClipGrad
 from .curriculum_learrning import CurriculumLearning
 from .early_stopping import EarlyStopping
 from .grad_accumulation import GradAccumulation
+from .no_bp import NoBP
 
 __ALL__ = [
     'BasicTSCallback',
@@ -10,5 +11,6 @@ __ALL__ = [
     'ClipGrad',
     'CurriculumLearning',
     'EarlyStopping',
-    'GradAccumulation'
+    'GradAccumulation',
+    'NoBP',
 ]

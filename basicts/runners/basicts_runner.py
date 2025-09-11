@@ -107,6 +107,8 @@ class BasicTSRunner:
         # create model
         self.model: torch.nn.Module = self.build_model(cfg)
         self.model_name: str = self.model.__class__.__name__
+        # check required callbacks for model
+        self._check_required_callbacks()
 
         self.num_epochs = None
         self.num_steps = None
@@ -164,6 +166,7 @@ class BasicTSRunner:
         # TODO: define a Control class
         self.should_training_stop = False
         self.should_optimizer_step = True
+        self.should_backward = True
 
         # set process title
         proctitle_name = f"{cfg.model.__class__.__name__}({cfg.dataset.name})"
@@ -418,12 +421,13 @@ class BasicTSRunner:
                     loss = self._metric_forward(self.loss, forward_return)
                 loss_weight = self.taskflow.get_weight(forward_return) # task specific metric weight for averaging
                 self.update_meter('train/loss', loss.item(), loss_weight)
-                self.callback_handler.trigger('on_backward', self, loss=loss)
-                with (self.model.no_sync() if hasattr(self.model, 'no_sync') else nullcontext()):
-                    self.amp_scaler.scale(loss).backward() # if not use_amp, it equals to loss.backward()
-                if self.should_optimizer_step:
-                    self.callback_handler.trigger('on_optimizer_step', self)
-                    self._optimizer_step()
+                if self.should_backward:
+                    self.callback_handler.trigger('on_backward', self, loss=loss)
+                    with (self.model.no_sync() if hasattr(self.model, 'no_sync') else nullcontext()):
+                        self.amp_scaler.scale(loss).backward() # if not use_amp, it equals to loss.backward()
+                    if self.should_optimizer_step:
+                        self.callback_handler.trigger('on_optimizer_step', self)
+                        self._optimizer_step()
                 forward_return = self.taskflow.postprocess(self, forward_return) # task specific postprocess
                 # update metrics meter
                 for metric_name, metric_fn in self.metrics.items():
@@ -1208,6 +1212,16 @@ class BasicTSRunner:
         unit_count_str = str(unit_count).zfill(len(str(self.num_steps if self.training_unit == 'step' else self.num_epochs)))
         ckpt_name = '{}_{}.pt'.format(self.model_name, unit_count_str)
         return os.path.join(self.ckpt_save_dir, ckpt_name)
+
+    def _check_required_callbacks(self) -> None:
+        """Check required callbacks.
+        """
+
+        if hasattr(self.model, '_required_callbacks'):
+            for r_cb in self.model._required_callbacks:
+                if not any(isinstance(cb, r_cb) for cb in self.callback_handler.callbacks):
+                    raise RuntimeError(f'Model {self.model_name} requires callback {r_cb.__name__}. '\
+                                       f'Please import it from {r_cb.__module__} and attach it to the config.')
 
     # endregion Misc Functions
 
