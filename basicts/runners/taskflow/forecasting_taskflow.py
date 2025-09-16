@@ -18,19 +18,19 @@ class BasicTSForecastingTaskFlow(BasicTSTaskFlow):
 
         # mask
         inputs_mask = null_val_mask(data['inputs'], runner.cfg.null_val)
-        targets_mask = null_val_mask(data['target'], runner.cfg.null_val)
+        targets_mask = null_val_mask(data['targets'], runner.cfg.null_val)
 
         if runner.scaler is not None:
             data['inputs'] = runner.scaler.transform(data['inputs'], inputs_mask)
-            data['target'] = runner.scaler.transform(data['target'], targets_mask)
+            data['targets'] = runner.scaler.transform(data['targets'], targets_mask)
 
         # transform null values to cfg.null_to_num. default: 0.0.
         data['inputs'] = torch.where(inputs_mask, data['inputs'],
                                     torch.tensor(runner.cfg.null_to_num, device=data['inputs'].device))
-        data['target'] = torch.where(targets_mask, data['target'],
-                                    torch.tensor(runner.cfg.null_to_num, device=data['target'].device))
+        data['targets'] = torch.where(targets_mask, data['targets'],
+                                    torch.tensor(runner.cfg.null_to_num, device=data['targets'].device))
 
-        data['mask'] = targets_mask # added by preprocessing, will be used in loss function
+        data['targets_mask'] = targets_mask # added by preprocessing, will be used in loss function
         return data
 
     def postprocess(self, runner: 'BasicTSRunner', forward_return: Dict[str, Any]) -> Dict[str, Any]:
@@ -45,4 +45,4 @@ class BasicTSForecastingTaskFlow(BasicTSTaskFlow):
     def get_weight(self, forward_return: Dict[str, Any]) -> float:
         """Get the weight of the forward return"""
 
-        return forward_return['mask'].sum().item()
+        return forward_return['targets_mask'].sum().item()

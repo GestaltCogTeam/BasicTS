@@ -2,16 +2,16 @@ from dataclasses import dataclass, field
 from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
+import torch
 from torch.optim import Adam, Optimizer
 from torch.optim.lr_scheduler import LRScheduler, MultiStepLR
 
-from basicts.data import BuiltinTSForecastingDataset
+from basicts.data import BasicTSForecastingDataset
 from basicts.metrics import masked_mae
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
                                       BasicTSTaskFlow)
 from basicts.scaler import BasicTSScaler, ZScoreScaler
-from basicts.utils import BasicTSTask
 
 from .base_config import BasicTSConfig
 
@@ -37,7 +37,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
     - `rescale` (bool): Whether to rescale data.
     - `norm_each_channel` (bool): Whether to normalize data for each channel independently.
     
-    **Hot Field:** Though these parameters have default settings, they are likely to be modified frequently.
+    **Hot field:** Though these parameters have default settings, they are likely to be modified frequently.
     - `gpus` (str|None): The used GPU devices (e.g., '0,1,2,3'). Default: None (on CPU).
     - `num_epochs` (int): Number of epochs. Default: 100.
     - `batch_size` (int): Batch size. If you specify this field, all dataloader will be setted to the same batch size. \
@@ -54,49 +54,52 @@ class BasicTSForecastingConfig(BasicTSConfig):
     - `save_results` (bool): Whether to save results. Default: False.
     """
 
-    model: type
-    dataset: BuiltinTSForecastingDataset
-    taskflow: BasicTSTaskFlow = BasicTSForecastingTaskFlow()
-    callbacks: List[BasicTSCallback] = field(default_factory=list)
+    model: torch.nn.Module
+    dataset_name: str
+
+    taskflow: BasicTSTaskFlow = field(default=BasicTSForecastingTaskFlow(),
+                                      metadata={"help": "Taskflow."})
+    callbacks: List[BasicTSCallback] = field(default_factory=list,
+                                             metadata={"help": "Callbacks."})
 
     ############################## General Configuration ##############################
 
     # General settings
-    task_name: BasicTSTask = BasicTSTask.TIME_SERIES_FORECASTING
-    gpus: Optional[str] = None # Wether to use GPUs. The default is None (on CPU). For example, '0,1' is using 'cuda:0' and 'cuda:1'.
-    gpu_num: int = None # Post-init. Number of GPUs.
-    seed: int = 42 # Random seed.
+    gpus: Optional[str] = field(default=None,
+                                 metadata={"help": "Wether to use GPUs. The default is None (on CPU). For example, '0,1' is using 'cuda:0' and 'cuda:1'."})
+    gpu_num: int = field(default=None, metadata={"help": "Post-init. Number of GPUs."})
+    seed: int = field(default=42, metadata={"help": "Random seed."})
+    ddp_find_unused_parameters: bool = field(default=False,
+                                             metadata={"help": "Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`."})
+    compile_model: bool = field(default=False, metadata={"help": "Whether to compile model."})
 
     ############################## Dataset and Scaler Configuration ##############################
 
     # Dataset settings
-    batch_size: Optional[int] = None # if setted, all dataloaders will be setted to the same batch size.
-    null_val: float = np.nan
-    null_to_num: float = 0.0
+    dataset_type: type = field(default=BasicTSForecastingDataset, metadata={"help": "Dataset type."})
+    dataset_params: dict = field(default=None, metadata={"help": "Dataset parameters."})
+    input_len: int = field(default=336, metadata={"help": "Input length."})
+    output_len: int = field(default=336, metadata={"help": "Output length."})
+    use_timestamps: bool = field(default=True, metadata={"help": "Whether to use timestamps as supplementary."})
+    memmap: bool = field(default=False, metadata={"help": "Whether to use memmap to load datasets."})
+
+    batch_size: Optional[int] = field(default=None, metadata={"help": "Batch size. If setted, all dataloaders will be setted to the same batch size."})
+    null_val: float = field(default=np.nan, metadata={"help": "Null value."})
+    null_to_num: float = field(default=0.0, metadata={"help": "Null value to number."})
 
     # Scaler settings
-    scaler: BasicTSScaler = None # Post-init. Scaler.
-    norm_each_channel: bool = None # Post-init. Whether to normalize data for each channel independently.
-    rescale: bool = False # Whether to rescale data. Default: False
-
-    ############################## Model Configuration ##############################
-
-    # Whether to set up the computation graph. Default: False.
-    # Implementation of many works (e.g., DCRNN, GTS) acts like TensorFlow, which creates parameters in the first feedforward process.
-    setup_graph: bool = False
-    # Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`.
-    # In distributed computing, if there are unused parameters in the forward process, PyTorch usually raises a RuntimeError.
-    # In such cases, this parameter should be set to True.
-    ddp_find_unused_parameters: bool = False
-
-    compile_model: bool = False
+    scaler: BasicTSScaler = field(default=ZScoreScaler, metadata={"help": "Scaler type."})
+    norm_each_channel: bool = field(default=True, metadata={"help": "Whether to normalize data for each channel independently."})
+    rescale: bool = field(default=False, metadata={"help": "Whether to rescale data."})
 
     ############################## Metrics Configuration ##############################
 
-    # Metrics settings
-    metrics: List[str] = field(default_factory=lambda: ['MAE', 'MSE', 'RMSE', 'MAPE', 'WAPE']) # Metrics functions, default: MAE, MSE, RMSE, MAPE, WAPE
-    target_metric: str = 'MAE' # Target metric, used for saving best checkpoints. It should be in `metrics` or a string "loss".
-    best_metric: Literal['min', 'max'] = 'min' # Best metric, used for saving best checkpoints. 'min' or 'max'. Default: 'min'. If 'max', the larger the metric, the better.
+    metrics: List[str] = field(default_factory=lambda: ["MAE", "MSE", "RMSE", "MAPE", "WAPE"], metadata={"help": "Metric names."})
+    target_metric: str = field(default="MAE",
+                               metadata={"help": "Target metric, used for saving best checkpoints. It should be in `metrics` or a string \"loss\"."})
+    best_metric: Literal["min", "max"] = field(default="min",
+                                               metadata={"help": "Best metric, used for saving best checkpoints." \
+                                               "Should be \"min\" or \"max\". If \"max\", the larger the metric, the better."})
 
     ############################## Training Configuration ##############################
 
@@ -107,10 +110,14 @@ class BasicTSForecastingConfig(BasicTSConfig):
     loss: Callable = masked_mae # Loss function
 
     # Optimizer
-    optimizer: Optimizer = None
+    optimizer: Optimizer = field(default=Adam, metadata={"help": "Optimizer type."})
+    optimizer_params: dict = field(default_factory=lambda: {"lr": 2e-4, "weight_decay": 5e-4},
+                                   metadata={"help": "Optimizer parameters."})
 
     # Learning rate scheduler
-    lr_scheduler: LRScheduler = None
+    lr_scheduler: LRScheduler = field(default=MultiStepLR, metadata={"help": "Learning rate scheduler type."})
+    lr_scheduler_params: dict = field(default_factory=lambda: {"milestones": [1, 50], "gamma": 0.5},
+                                      metadata={"help": "Learning rate scheduler parameters."})
 
     # Checkpoint loading and saving settings
     # Directory to save checkpoints. Default: 'checkpoints/{model}/{dataset}_{num_epochs}_{input_len}_{output_len}', which will be loaded lazily.
@@ -154,10 +161,6 @@ class BasicTSForecastingConfig(BasicTSConfig):
     ########################### Evaluation Configuration ##########################
 
     # Evaluation parameters
-    # The prediction horizons for evaluation. Default value: [].
-    # NOTE: HORIZONS[i] refers to testing **on the i-th** time step, representing the loss for that specific time step.
-    # This is a common setting in spatiotemporal forecasting. For long-sequence predictions, it is recommended to keep HORIZONS set to the default value [] to avoid confusion.
-    eval_horizons: List[int] = field(default_factory=lambda: [])
     save_results: bool = False # Whether to save evaluation results in a numpy file. Default: False
 
     ############################## Environment Configuration ##############################
@@ -171,53 +174,20 @@ class BasicTSForecastingConfig(BasicTSConfig):
     ############################## Training-Independent Keys ##############################
 
     _TRAINING_INDEPENDENT_KEYS: List[str] = field(default_factory=lambda: \
-        ['gpus', 'memmap', 'ddp_find_unused_parameters', 'compile_model', 'ckpt_save_strategy', \
-         'train_data_prefetch', 'train_data_num_workers', 'train_data_pin_memory', \
-         'val_batch_size', 'val_interval', 'val_data_prefetch', 'val_data_num_workers', 'val_data_pin_memory', \
-         'test_batch_size', 'test_interval', 'test_data_prefetch', 'test_data_num_workers', 'test_data_pin_memory', \
-         'eval_horizons', 'save_results',])
+        ["gpus", "memmap", "ddp_find_unused_parameters", "compile_model", "ckpt_save_strategy", \
+         "train_data_prefetch", "train_data_num_workers", "train_data_pin_memory", \
+         "val_batch_size", "val_interval", "val_data_prefetch", "val_data_num_workers", "val_data_pin_memory", \
+         "test_batch_size", "test_interval", "test_data_prefetch", "test_data_num_workers", "test_data_pin_memory", \
+         "save_results",])
 
     ##################################### Post Init #######################################
 
     def __post_init__(self):
-        # if self.cl_prediction_length is None:
-        #     self.cl_prediction_length = self.dataset.output_len
         if self.batch_size is not None:
             self.train_batch_size = self.batch_size
             self.val_batch_size = self.batch_size
             self.test_batch_size = self.batch_size
         if self.ckpt_save_dir is None:
             self.ckpt_save_dir = \
-                f'checkpoints/{self.model.__class__.__name__}/{self.dataset.name}_{self.num_epochs}_{self.dataset.input_len}_{self.dataset.output_len}'
-
-        # Follow the default settings in spatial-temporal forecasting and time series forecasting tasks.
-        # if self.norm_each_channel is None:
-        #     if self.task_name == BASICTS_TASK.SPATIAL_TEMPORAL_FORECASTING:
-        #         self.norm_each_channel = False
-        #     else: # time series forecasting
-        #         self.norm_each_channel = True
-        self.norm_each_channel = True
-
-        # Post-init scaler if not specified
-        if self.scaler is None:
-            self.scaler = ZScoreScaler(self.norm_each_channel, self.rescale)
-
-        # Post-init optimizer and lr scheduler if not specified
-        if self.optimizer is None:
-            self.optimizer = Adam(
-                params = self.model.parameters(),
-                lr = 0.0002,
-                weight_decay = 0.0005
-            )
-        if self.lr_scheduler is None:
-            self.lr_scheduler = MultiStepLR(
-                optimizer = self.optimizer,
-                milestones = [1, int(self.num_epochs / 2)],
-                gamma = 0.5
-            )
-        gpu_num = len(self.gpus.split(',')) if self.gpus else 0
-        if self.gpu_num is not None:
-            if self.gpu_num != gpu_num:
-                raise ValueError(f'gpu_num ({self.gpu_num}) is not equal to the number of gpus {self.gpus}.')
-        else:
-            self.gpu_num = gpu_num
+                f"checkpoints/{self.model.__class__.__name__}/{self.dataset_name}_{self.num_epochs}_{self.input_len}_{self.output_len}"
+        self.gpu_num = len(self.gpus.split(",")) if self.gpus else 0

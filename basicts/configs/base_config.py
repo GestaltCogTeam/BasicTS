@@ -13,14 +13,9 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 import numpy as np
 import torch
 from easydict import EasyDict
-from torch.optim import Optimizer
-from torch.optim.lr_scheduler import LRScheduler
 
-from basicts.data import BasicTSDataset
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import BasicTSTaskFlow
-from basicts.scaler import BasicTSScaler
-from basicts.utils import BasicTSTask
 
 
 @dataclass
@@ -33,15 +28,14 @@ class BasicTSConfig(EasyDict):
         d (dict, optional): Dictionary to initialize the configuration. Defaults to None.
     """
 
-    model: type
-    dataset: BasicTSDataset
+    model: torch.nn.Module
+    dataset_name: str
     taskflow: BasicTSTaskFlow
     callbacks: List[BasicTSCallback]
 
     ############################## General Configuration ##############################
 
     # General settings
-    task_name: BasicTSTask
     gpus: Optional[str] # Wether to use GPUs. The default is None (on CPU). For example, '0,1' is using 'cuda:0' and 'cuda:1'.
     gpu_num: int # Post-init. Number of GPUs.
     seed: int # Random seed.
@@ -49,12 +43,14 @@ class BasicTSConfig(EasyDict):
     ############################## Dataset and Scaler Configuration ##############################
 
     # Dataset settings
+    dataset_type: type
+    dataset_params: dict
     batch_size: Optional[int] # if setted, all dataloaders will be setted to the same batch size.
     null_val: float
     null_to_num: float
 
     # Scaler settings
-    scaler: BasicTSScaler # Post-init. Scaler.
+    scaler: type # Post-init. Scaler.
     norm_each_channel: bool # Post-init. Whether to normalize data for each channel independently.
     rescale: bool # Whether to rescale data. Default: False
 
@@ -83,10 +79,10 @@ class BasicTSConfig(EasyDict):
     loss: Callable # Loss function
 
     # Optimizer
-    optimizer: Optimizer
+    optimizer: type
 
     # Learning rate scheduler
-    lr_scheduler: LRScheduler
+    lr_scheduler: type
 
     # Checkpoint loading and saving settings
 

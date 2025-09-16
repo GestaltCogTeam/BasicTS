@@ -36,4 +36,4 @@ class BasicTSClassificationTaskFlow(BasicTSTaskFlow):
 
     def get_weight(self, forward_return: Dict[str, Any]) -> float:
         """Get the weight of the forward return"""
-        return forward_return['target'].shape[0]
+        return forward_return['targets'].shape[0]

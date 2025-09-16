@@ -1,57 +1,68 @@
-import logging
-from abc import abstractmethod
+import os
+from typing import Optional, Union
 
 import numpy as np
+from torch.utils.data import Dataset
 
-from .base_dataset import BasicTSDataset
+from basicts.utils.constants import BasicTSMode
 
 
-class BasicTSForecastingDataset(BasicTSDataset):
+class BasicTSForecastingDataset(Dataset):
     """
-    A dataset class for time series forecasting problems, handling the loading, parsing, and partitioning
-    of time series data into training, validation, and testing sets based on provided ratios.
-    
-    This class supports configurations where sequences may or may not overlap, accommodating scenarios
-    where time series data is drawn from continuous periods or distinct episodes, affecting how
-    the data is split into batches for model training or evaluation.
+    A dataset class for time series forecasting problems.
     
     Attributes:
-        data_file_path (str): Path to the file containing the time series data.
-        description_file_path (str): Path to the JSON file containing the description of the dataset.
-        data (np.ndarray): The loaded time series data array, split according to the specified mode.
-        description (dict): Metadata about the dataset, such as shape and other properties.
+        name (str): The name of the dataset.
+        input_len (int): The length of the input sequence (number of historical points).
+        output_len (int): The length of the output sequence (number of future points to predict).
+        mode (Union[BasicTSMode, str]): The mode of the dataset, indicating whether it is for training, validation, or testing.
+        use_timestamps (bool): Flag to determine if timestamps should be used.
+        memmap (bool): Flag to determine if the dataset should be loaded using memory mapping.
     """
 
-    def __init__(self, name: str, data_file_path: str, input_len: int, output_len: int, memmap: bool = False, overlap: bool = False, logger: logging.Logger = None) -> None:
+    def __init__(self,
+        dataset_name: str,
+        input_len: int,
+        output_len: int,
+        mode: Union[BasicTSMode, str],
+        use_timestamps: bool = False,
+        local: bool = True,
+        data_file_path: Optional[str] = None,
+        memmap: bool = False) -> None:
         """
         Initializes the BasicTSForecastingDataset by setting up paths, loading data, and 
         preparing it according to the specified configurations.
 
         Args:
-            dataset_name (str): The name of the dataset.
-            train_val_test_ratio (List[float]): Ratios for splitting the dataset into train, validation, and test sets.
-                Each value should be a float between 0 and 1, and their sum should ideally be 1.
-            mode (str): The operation mode of the dataset. Valid values are 'train', 'valid', or 'test'.
+            name (str): The name of the dataset.
             input_len (int): The length of the input sequence (number of historical points).
             output_len (int): The length of the output sequence (number of future points to predict).
+            mode (Union[BasicTSMode, str]): The mode of the dataset, indicating whether it is for training, validation, or testing.
+            use_timestamps (bool): Flag to determine if timestamps should be used.
+            local (bool): Flag to determine if the dataset is local.
+            data_file_path (str | None): Path to the file containing the time series data. Default to "datasets/{name}".
             memmap (bool): Flag to determine if the dataset should be loaded using memory mapping.
-            overlap (bool): Flag to determine if training/validation/test splits should overlap. 
-                Defaults to False for strictly non-overlapping periods. Set to True to allow overlap.
-            logger (logging.Logger): logger.
-
-        Raises:
-            AssertionError: If `mode` is not one of ['train', 'val', 'test'].
         """
-        super().__init__(name=name, data_file_path=data_file_path, input_len=input_len, output_len=output_len,
-                 memmap=memmap, overlap=overlap, logger=logger)
+        super().__init__()
         self.input_len = input_len
         self.output_len = output_len
-        self.overlap = overlap
-        self.logger = logger
-
-    @abstractmethod
-    def load_data(self) -> np.ndarray:
-        pass
+        if not local:
+            pass # TODO: support download remotely
+        if data_file_path is None:
+            data_file_path = f"datasets/{dataset_name}" # default file path
+        try:
+            self.data = np.load(
+                os.path.join(data_file_path, f"{mode}_data.npy"),
+                mmap_mode="r" if memmap else None)
+            if use_timestamps:
+                self.timestamps = np.load(
+                    os.path.join(data_file_path, f"{mode}_timestamps.npy"),
+                    mmap_mode="r" if memmap else None)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"Cannot load dataset from {data_file_path}, Please set a correct local path."\
+                                    "If you want to download the dataset, please set the argument `local` to False.") from e
+        self.memmap = memmap
+        self.use_timestamps = use_timestamps
 
     def __getitem__(self, index: int) -> dict:
         """
@@ -61,15 +72,20 @@ class BasicTSForecastingDataset(BasicTSDataset):
             index (int): The index of the desired sample in the dataset.
 
         Returns:
-            dict: A dictionary containing 'inputs' and 'target', where both are slices of the dataset corresponding to
+            dict: A dictionary containing "inputs" and "targets", where both are slices of the dataset corresponding to
                   the historical input data and future prediction data, respectively.
         """
-        history_data = self.data[index:index + self.input_len]
-        future_data = self.data[index + self.input_len:index + self.input_len + self.output_len]
-        if self.memmap:
-            history_data = history_data.copy()
-            future_data = future_data.copy()
-        return {'inputs': history_data, 'target': future_data}
+        item = {}
+        history_data = self.data[index: index + self.input_len]
+        future_data = self.data[index + self.input_len: index + self.input_len + self.output_len]
+        item["inputs"] = history_data.copy() if self.memmap else history_data
+        item["targets"] = future_data.copy() if self.memmap else future_data
+        if self.use_timestamps:
+            history_timestamps = self.timestamps[index: index + self.input_len]
+            future_timestamps = self.timestamps[index + self.input_len: index + self.input_len + self.output_len]
+            item["inputs_timestamps"] = history_timestamps.copy() if self.memmap else history_timestamps
+            item["targets_timestamps"] = future_timestamps.copy() if self.memmap else future_timestamps
+        return item
 
     def __len__(self) -> int:
         """

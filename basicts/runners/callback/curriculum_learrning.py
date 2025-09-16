@@ -35,9 +35,9 @@ class CurriculumLearning(BasicTSCallback):
             cl_length = self.curriculum_learning(epoch=runner.epoch)
             try:
                 forward_return["prediction"] = forward_return["prediction"][:, :cl_length, :]
-                forward_return["target"] = forward_return["target"][:, :cl_length, :]
+                forward_return["targets"] = forward_return["targets"][:, :cl_length, :]
             except KeyError as ke:
-                raise KeyError("Curriculum learning requires 'prediction' and 'target' in forward_return.") from ke
+                raise KeyError("Curriculum learning requires 'prediction' and 'targets' in forward_return.") from ke
             except IndexError as ie:
                 raise IndexError("Curriculum learning should be used for forecasting tasks" \
                                 "with data in shape [batch_size, seq_len, num_features].") from ie

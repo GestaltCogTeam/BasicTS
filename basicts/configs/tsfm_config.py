@@ -3,17 +3,14 @@ from typing import Callable, List, Literal, Optional, Union
 
 import numpy as np
 import torch
-from torch.optim import AdamW, Optimizer
-from torch.optim.lr_scheduler import LRScheduler
+from torch.optim import AdamW
 
-from basicts.data import BuiltinTSForecastingDataset
+from basicts.data import BasicTSForecastingDataset
 from basicts.metrics import masked_mae
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.optim.lr_schedulers import CosineWarmup
 from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
                                       BasicTSTaskFlow)
-from basicts.scaler import BasicTSScaler
-from basicts.utils import BasicTSTask
 
 from .base_config import BasicTSConfig
 
@@ -56,15 +53,14 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     - `save_results` (bool): Whether to save results. Default: False.
     """
 
-    model: type
-    dataset: BuiltinTSForecastingDataset
+    model: torch.nn.Module
+    dataset_name: str
     taskflow: BasicTSTaskFlow = BasicTSForecastingTaskFlow()
     callbacks: List[BasicTSCallback] = field(default_factory=list)
 
     ############################## General Configuration ##############################
 
     # General settings
-    task_name: BasicTSTask = BasicTSTask.TIME_SERIES_FORECASTING
     gpus: Optional[str] = None # Wether to use GPUs. The default is None (on CPU). For example, '0,1' is using 'cuda:0' and 'cuda:1'.
     gpu_num: int = None # Post-init. Number of GPUs.
     seed: int = 42 # Random seed.
@@ -72,12 +68,18 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     ############################## Dataset and Scaler Configuration ##############################
 
     # Dataset settings
-    batch_size: Optional[int] = None # if setted, all dataloaders will be setted to the same batch size.
-    null_val: float = np.nan
-    null_to_num: float = 0.0
+    dataset_type: type = field(default=BasicTSForecastingDataset, metadata={"help": "Dataset type."})
+    dataset_params: dict = field(default_factory=dict)
+    input_len: int = field(default=336, metadata={"help": "Input length."})
+    output_len: int = field(default=336, metadata={"help": "Output length."})
+    use_timestamps: bool = field(default=False, metadata={"help": "Whether to use timestamps as supplementary."})
+    memmap: bool = field(default=False, metadata={"help": "Whether to use memmap to load datasets."})
+    batch_size: Optional[int] = field(default=None, metadata={"help": "Batch size. If setted, all dataloaders will be setted to the same batch size."})
+    null_val: float = field(default=np.nan, metadata={"help": "Null value."})
+    null_to_num: float = field(default=0.0, metadata={"help": "Null value to number."})
 
     # Scaler settings
-    scaler: BasicTSScaler = None # Post-init. Scaler.
+    scaler: type = None # Post-init. Scaler.
     norm_each_channel: bool = None # Post-init. Whether to normalize data for each channel independently.
     rescale: bool = False # Whether to rescale data. Default: False
 
@@ -86,7 +88,7 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     # Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`.
     # In distributed computing, if there are unused parameters in the forward process, PyTorch usually raises a RuntimeError.
     # In such cases, this parameter should be set to True.
-    model_dtype: Union[torch.dtype, str] = 'bfloat16'
+    model_dtype: Union[torch.dtype, str] = "bfloat16"
     ddp_find_unused_parameters: bool = False
 
     compile_model: bool = False
@@ -94,9 +96,9 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     ############################## Metrics Configuration ##############################
 
     # Metrics settings
-    metrics: List[str] = field(default_factory=lambda: ['MAE', 'MSE', 'RMSE', 'MAPE', 'WAPE']) # Metrics functions, default: MAE, MSE, RMSE, MAPE, WAPE
-    target_metric: str = 'MAE' # Target metric, used for saving best checkpoints. It should be in `metrics` or a string "loss".
-    best_metric: Literal['min', 'max'] = 'min' # Best metric, used for saving best checkpoints. 'min' or 'max'. Default: 'min'. If 'max', the larger the metric, the better.
+    metrics: List[str] = field(default_factory=list) # Metrics functions, default: MAE, MSE, RMSE, MAPE, WAPE
+    target_metric: str = "loss" # Target metric, used for saving best checkpoints. It should be in `metrics` or a string "loss".
+    best_metric: Literal["min", "max"] = "min" # Best metric, used for saving best checkpoints. 'min' or 'max'. Default: 'min'. If 'max', the larger the metric, the better.
 
     ############################## Training Configuration ##############################
 
@@ -107,10 +109,12 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     loss: Callable = masked_mae # Loss function
 
     # Optimizer
-    optimizer: Optimizer = None
+    optimizer: type = field(default=AdamW)
+    optimizer_params: dict = field(default_factory=lambda: {"lr": 1e-3, "fused": True})
 
     # Learning rate scheduler
-    lr_scheduler: LRScheduler = None
+    lr_scheduler: type = field(default=CosineWarmup)
+    lr_scheduler_params: dict = field(default_factory=lambda: {"num_warmup_steps": 1000, "num_training_steps": 10_000})
 
     # Train data loader settings
     train_batch_size: int = 32
@@ -153,47 +157,19 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     ############################## Training-Independent Keys ##############################
 
     _TRAINING_INDEPENDENT_KEYS: List[str] = field(default_factory=lambda: \
-        ['gpus', 'memmap', 'ddp_find_unused_parameters', 'compile_model', 'ckpt_save_strategy', \
-         'train_data_prefetch', 'train_data_num_workers', 'train_data_pin_memory', \
-         'val_batch_size', 'val_interval', 'val_data_prefetch', 'val_data_num_workers', 'val_data_pin_memory', \
+        ["gpus", "memmap", "ddp_find_unused_parameters", "compile_model", "ckpt_save_strategy", \
+         "train_data_prefetch", "train_data_num_workers", "train_data_pin_memory", \
+         "val_batch_size", "val_interval", "val_data_prefetch", "val_data_num_workers", "val_data_pin_memory", \
          ])
 
     ##################################### Post Init #######################################
 
     def __post_init__(self):
-        # if self.cl_prediction_length is None:
-        #     self.cl_prediction_length = self.dataset.output_len
         if self.batch_size is not None:
             self.train_batch_size = self.batch_size
             self.val_batch_size = self.batch_size
             self.test_batch_size = self.batch_size
         if self.ckpt_save_dir is None:
             self.ckpt_save_dir = \
-                f'checkpoints/{self.model.__class__.__name__}/{self.dataset.name}_{self.num_steps}'
-
-        # Follow the default settings in spatial-temporal forecasting and time series forecasting tasks.
-        # if self.norm_each_channel is None:
-        #     if self.task_name == BASICTS_TASK.SPATIAL_TEMPORAL_FORECASTING:
-        #         self.norm_each_channel = False
-        #     else: # time series forecasting
-        #         self.norm_each_channel = True
-
-        # Post-init optimizer and lr scheduler if not specified
-        if self.optimizer is None:
-            self.optimizer = AdamW(
-                params = self.model.parameters(),
-                lr=1e-3,
-                fused=True
-            )
-        if self.lr_scheduler is None:
-            self.lr_scheduler = CosineWarmup(
-                optimizer=self.optimizer,
-                num_warmup_steps=self.num_steps / 10,
-                num_training_steps=self.num_steps
-            )
-        gpu_num = len(self.gpus.split(',')) if self.gpus else 0
-        if self.gpu_num is not None:
-            if self.gpu_num != gpu_num:
-                raise ValueError(f'gpu_num ({self.gpu_num}) is not equal to the number of gpus {self.gpus}.')
-        else:
-            self.gpu_num = gpu_num
+                f"checkpoints/{self.model.__class__.__name__}/{self.dataset_name}_{self.num_steps}"
+        self.gpu_num = len(self.gpus.split(",")) if self.gpus else 0

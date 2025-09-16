@@ -1,7 +1,6 @@
 import inspect
 import json
 import logging
-import math
 import os
 import time
 from contextlib import nullcontext
@@ -14,21 +13,18 @@ from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
                                        save_ckpt)
 from easytorch.device import to_device
 from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
-                             get_world_size, is_master, master_only)
-from easytorch.utils.data_prefetcher import DataLoaderX
+                             is_master, master_only)
 from easytorch.utils.env import get_rank, set_tf32_mode, setup_determinacy
-from packaging import version
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from basicts.metrics import ALL_METRICS
 from basicts.scaler import BasicTSScaler
+from basicts.utils import BasicTSMode, MeterPool, RunnerStatus
 
-from ..data import TimeSeriesInferenceDataset
-from ..utils import BasicTSMode, MeterPool, RunnerStatus
+from .builder import Builder
 from .callback import BasicTSCallbackHandler
 # from .distributed import distributed
 from .taskflow import BasicTSTaskFlow
@@ -105,8 +101,8 @@ class BasicTSRunner:
         # create meter pool
         self.meter_pool: MeterPool = MeterPool()
         # create model
-        self.model: torch.nn.Module = self.build_model(cfg)
-        self.model_name: str = self.model.__class__.__name__
+        self.model_name: str = self.cfg.model.__class__.__name__
+        self.model: torch.nn.Module = Builder.build_model(cfg, self.logger)
         # check required callbacks for model
         self._check_required_callbacks()
 
@@ -142,8 +138,11 @@ class BasicTSRunner:
         self.val_data_loader = None
         self.test_data_loader = None
 
+        self.val_interval = cfg.get('val_interval', None)
+        self.test_interval = cfg.get('test_interval', None)
+
         # declare scaler
-        self.scaler: Optional[BasicTSScaler] = self.cfg.scaler
+        self.scaler: Optional[BasicTSScaler] = Builder.build_scaler(cfg) if cfg.scaler is not None else None
 
         # define metrics
         self.metrics = {k: ALL_METRICS[k] for k in cfg.metrics if k in ALL_METRICS}
@@ -170,10 +169,9 @@ class BasicTSRunner:
         self.should_backward = True
 
         # set process title
-        proctitle_name = f"{cfg.model.__class__.__name__}({cfg.dataset.name})"
+        proctitle_name = f"{cfg.model.__class__.__name__}({cfg.dataset_name})"
         setproctitle.setproctitle(f'{proctitle_name}@BasicTS')
 
-    @master_only
     def _init_train(self):
         self.logger.info('Initializing training.')
 
@@ -187,12 +185,13 @@ class BasicTSRunner:
         else:
             raise ValueError('`num_epochs` and `num_steps` cannot be set at the same time.')
         self.best_metrics = {}
-        self.train_data_loader = self._build_data_loader(self.cfg, BasicTSMode.TRAIN)
+        self.train_data_loader = Builder.build_data_loader(self.cfg, BasicTSMode.TRAIN, self.logger)
+        self.step_per_epoch = len(self.train_data_loader)
         self.register_meter('train/time', 'train', '{:.2f} (s)', plt=False)
         if self.scaler is not None:
             self.scaler.fit(self.train_data_loader.dataset.data)
-        self.optimizer = self.cfg.optimizer
-        self.lr_scheduler = self.cfg.lr_scheduler
+        self.optimizer = Builder.build_optimizer(self.cfg, self.model)
+        self.lr_scheduler = Builder.build_lr_scheduler(self.cfg, self.optimizer)
         if self.use_amp:
             self.register_meter('train/amp_scale', 'train', '{:.4f}')
         # fine tune
@@ -217,8 +216,7 @@ class BasicTSRunner:
     def _init_validation(self):
         """Initialize validation"""
 
-        self.val_interval = self.cfg.val_interval
-        self.val_data_loader = self._build_data_loader(self.cfg, BasicTSMode.VAL)
+        self.val_data_loader = Builder.build_data_loader(self.cfg, BasicTSMode.VAL, self.logger)
         self.register_meter('val/time', 'val', '{:.2f} (s)', plt=False)
         self.register_meter('val/loss', 'val', '{:.4f}')
         for key in self.metrics:
@@ -233,26 +231,25 @@ class BasicTSRunner:
             cfg (BasicTSConfig): Configuration dictionary.
         """
 
-        self.test_interval = self.cfg.test_interval
-        self.test_data_loader = self._build_data_loader(self.cfg, BasicTSMode.TEST)
+        self.test_data_loader = Builder.build_data_loader(self.cfg, BasicTSMode.TEST, self.logger)
         self.register_meter('test/time', 'test', '{:.2f} (s)', plt=False)
         self.register_meter('test/loss', 'test', '{:.4f}')
         for key in self.metrics:
             self.register_meter(f'test/{key}', 'test', '{:.4f}')
 
-    @master_only
-    def _init_inference(self, cfg: Dict, input_data: Union[str, list]) -> None:
-        """
-        Initialize the inference data loader and related settings.
+    # @master_only
+    # def _init_inference(self, cfg: Dict, input_data: Union[str, list]) -> None:
+    #     """
+    #     Initialize the inference data loader and related settings.
 
-        Args:
-            cfg (Dict): Configuration dictionary.
-            input_data (Union[str, list]): The input data file path or data list for inference.
-        """
+    #     Args:
+    #         cfg (Dict): Configuration dictionary.
+    #         input_data (Union[str, list]): The input data file path or data list for inference.
+    #     """
 
-        self.inference_dataset = self.build_dataset(TimeSeriesInferenceDataset, cfg, input_data)
-        self.inference_dataset_loader = DataLoader(self.inference_dataset, batch_size=1, shuffle=False)
-        self.register_meter('inference/time', 'inference', '{:.2f} (s)', plt=False)
+    #     self.inference_dataset = self.build_dataset(TimeSeriesInferenceDataset, cfg, input_data)
+    #     self.inference_dataset_loader = DataLoader(self.inference_dataset, batch_size=1, shuffle=False)
+    #     self.register_meter('inference/time', 'inference', '{:.2f} (s)', plt=False)
 
     # endregion Initialization Functions
 
@@ -281,6 +278,7 @@ class BasicTSRunner:
         self.logger.info('Evaluating the best model on the test set.')
         self.eval(best_model_path)
 
+    @master_only
     @torch.no_grad()
     def validate(self, train_step: Optional[int] = None, train_epoch: Optional[int] = None):
         """Validate model.
@@ -302,6 +300,7 @@ class BasicTSRunner:
         self.callback_handler.trigger('on_validate_end', self, train_step=train_step, train_epoch=train_epoch)
         self.on_validate_end(train_step, train_epoch)
 
+    @master_only
     @torch.no_grad()
     def eval(self, ckpt_path: Optional[str] = None) -> None:
         """
@@ -314,6 +313,7 @@ class BasicTSRunner:
         self._test(None, None, BasicTSMode.EVAL)
         self.on_eval_end()
 
+    @master_only
     @torch.no_grad()
     def inference(self, inputs: Union[torch.Tensor, Dict[str, torch.Tensor]], ckpt_path: Optional[str] = None) -> None:
         """
@@ -329,6 +329,7 @@ class BasicTSRunner:
         forward_return = self._forward(inputs, 0)
         return forward_return['prediction']
 
+    @master_only
     @torch.no_grad()
     def _test(self, train_step: Optional[int] = None, train_epoch: Optional[int] = None, \
               mode: BasicTSMode = Optional[BasicTSMode.TEST]) -> None:
@@ -364,24 +365,7 @@ class BasicTSRunner:
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
     def _train_loop(self) -> None:
-        """Train model. 
-            The start point of training process.
-
-        Train process:
-        [init_training]
-        for in train_epoch
-            [on_epoch_start]
-            for in train iters
-                [train_iters]
-            [on_epoch_end] ------> Epoch Val: val every n epoch
-                                    [on_validating_start]
-                                    for in val iters
-                                        val iter
-                                    [on_validating_end]
-        [on_training_end]
-
-        Args:
-            cfg (Dict): config
+        """Train loop.
         """
 
         if self.training_unit == 'epoch':
@@ -528,11 +512,6 @@ class BasicTSRunner:
             self._init_test()
             self.is_test_initialized = True
 
-        # TODO: move setup graph to callback
-        # if self.need_setup_graph:
-        #     self.setup_graph(cfg=cfg, train=True)
-        #     self.need_setup_graph = False
-
         self._count_parameters()
 
         self.register_meter('train/loss', 'train', '{:.4f}')
@@ -655,8 +634,8 @@ class BasicTSRunner:
         """
 
         if self.lr_scheduler is not None:
+            self.update_meter('train/lr', self.optimizer.param_groups[0]['lr'])
             self.lr_scheduler.step()
-            self.update_meter('train/lr', self.lr_scheduler.get_last_lr()[0])
 
         # print training meters
         self.print_meters('train')
@@ -703,8 +682,8 @@ class BasicTSRunner:
         if self.training_unit == 'step':
             # update lr_scheduler per step
             if self.lr_scheduler is not None:
+                self.update_meter('train/lr', self.optimizer.param_groups[0]['lr'])
                 self.lr_scheduler.step()
-                self.update_meter('train/lr', self.lr_scheduler.get_last_lr()[0])
 
             # tensorboard plt meters
             self.plt_meters('train', step, value_type='last')
@@ -757,15 +736,16 @@ class BasicTSRunner:
         assert 'inputs' in  data, 'data must contain key \'inputs\'.'
         inputs = data['inputs']
 
-        sig = inspect.signature(self.model.forward)
+        forward_fn = self.model.module.forward if torch.distributed.is_initialized() else self.model.forward
+        sig = inspect.signature(forward_fn)
         all_params = list(sig.parameters.keys())
         remaining_params = all_params[1:] # except for inputs
         kwargs = {k: data[k] for k in remaining_params if k in data}
-        # For non-training phases, the model should not be able to access target
-        if 'target' in kwargs and self.status != RunnerStatus.TRAINING:
-            kwargs['target'] = torch.empty_like(kwargs['target'])
-        if 'batch_seen' in sig.parameters.keys():
-            kwargs['batch_seen'] = step
+        # For non-training phases, the model should not be able to access targets
+        if 'targets' in kwargs and self.status != RunnerStatus.TRAINING:
+            kwargs['targets'] = torch.empty_like(kwargs['targets'])
+        if 'step' in sig.parameters.keys():
+            kwargs['step'] = step
         if 'epoch' in sig.parameters.keys():
             kwargs['epoch'] = epoch
         if 'train' in sig.parameters.keys():
@@ -833,89 +813,6 @@ class BasicTSRunner:
                 cfg.cudnn_benchmark,
                 cfg.cudnn_determinstic
             )
-
-    def build_model(self, cfg: 'BasicTSConfig'):
-        """Build model.
-
-        Initialize model by calling ```self.define_model```,
-        Moves model to the GPU.
-
-        If DDP is initialized, initialize the DDP wrapper.
-
-        Args:
-            cfg (Dict): config
-
-        Returns:
-            model (nn.Module)
-        """
-
-        self.logger.info('Building model.')
-        model = self.to_running_device(cfg.model)
-
-        # complie model
-        if cfg.compile_model:
-            # get current torch version
-            current_version = torch.__version__
-            # torch.compile() is only available in torch>=2.0
-            if version.parse(current_version) >= version.parse('2.0'):
-                self.logger.info('Compile model with torch.compile')
-                model = torch.compile(model)
-            else:
-                self.logger.warning(f'torch.compile requires PyTorch 2.0 or higher. Current version: {current_version}. Skipping compilation.')
-
-        # DDP
-        if torch.distributed.is_initialized():
-            model = DDP(
-                model,
-                device_ids=[get_local_rank()],
-                find_unused_parameters=cfg.ddp_find_unused_parameters
-            )
-        return model
-
-    def _build_data_loader(self, cfg: 'BasicTSConfig', mode: BasicTSMode):
-        """Build dataloader from BasicTSConfig
-
-        structure of `data_cfg` is
-        {
-            'BATCH_SIZE': (int, optional) batch size of data loader (default: ``1``),
-            'SHUFFLE': (bool, optional) data reshuffled option (default: ``False``),
-            'NUM_WORKERS': (int, optional) num workers for data loader (default: ``0``),
-            'PIN_MEMORY': (bool, optional) pin_memory option (default: ``False``),
-            'PREFETCH': (bool, optional) set to ``True`` to use `DataLoaderX` (default: ``False``),
-        }
-
-        Args:
-            data_cfg (BasicTSConfig): config
-            mode (Literal['train', 'val', 'test']): mode
-
-        Returns:
-            data loader
-        """
-
-        self.logger.info(f'Building {mode} data loader.')
-        dataset = cfg.dataset(mode=mode)
-        if mode == BasicTSMode.TRAIN:
-            self.step_per_epoch = math.ceil(len(dataset) / cfg.train_batch_size)
-
-        sampler = DistributedSampler(
-            dataset,
-            get_world_size(),
-            get_rank(),
-            shuffle=cfg.get(f'{mode}_data_shuffle', False)
-        ) if torch.distributed.is_initialized() and mode == BasicTSMode.TRAIN else None
-
-        shuffle = False if torch.distributed.is_initialized() and mode == BasicTSMode.TRAIN\
-              else cfg.get(f'{mode}_data_shuffle', False)
-
-        return (DataLoaderX if cfg.get(f'{mode}_data_prefetch') else DataLoader)(
-            dataset,
-            collate_fn=cfg.get(f'{mode}_data_collate_fn', None),
-            batch_size=cfg.get(f'{mode}_batch_size', 1),
-            shuffle=shuffle,
-            sampler=sampler,
-            num_workers=cfg.get(f'{mode}_data_num_workers', 0),
-            pin_memory=cfg.get(f'{mode}_data_pin_memory', False)
-        )
 
     def _count_parameters(self) -> None:
         """Count parameters of the model.
@@ -1102,13 +999,13 @@ class BasicTSRunner:
             batch_data (Dict[np.ndarray]): The test results:{
                 'inputs': np.ndarray,
                 'prediction': np.ndarray,
-                'target': np.ndarray,
+                'targets': np.ndarray,
             }
         """
 
         inputs = batch_data['inputs'].detach().cpu().numpy()
         prediction = batch_data['prediction'].detach().cpu().numpy()
-        target = batch_data['target'].detach().cpu().numpy()
+        targets = batch_data['targets'].detach().cpu().numpy()
 
         total_samples = len(self.test_data_loader.dataset)
 
@@ -1116,7 +1013,7 @@ class BasicTSRunner:
         os.makedirs(save_dir, exist_ok=True)
         inputs_path = os.path.join(save_dir, 'inputs.npy')
         pred_path = os.path.join(save_dir, 'prediction.npy')
-        tgt_path = os.path.join(save_dir, 'target.npy')
+        targets_path = os.path.join(save_dir, 'targets.npy')
 
         # create memmap files
         if batch_idx == 0:
@@ -1124,20 +1021,19 @@ class BasicTSRunner:
                                     shape=(total_samples, *inputs.shape[1:]))
             self._prediction_memmap = np.memmap(pred_path, dtype=prediction.dtype, mode='w+',
                                     shape=(total_samples, *prediction.shape[1:]))
-            self._target_memmap = np.memmap(tgt_path, dtype=target.dtype, mode='w+',
-                                shape=(total_samples, *target.shape[1:]))
+            self._targets_memmap = np.memmap(targets_path, dtype=targets.dtype, mode='w+',
+                                shape=(total_samples, *targets.shape[1:]))
 
         start = batch_idx * inputs.shape[0]
         end = start + inputs.shape[0]
 
         self._inputs_memmap[start:end] = inputs
         self._prediction_memmap[start:end] = prediction
-        self._target_memmap[start:end] = target
-
+        self._targets_memmap[start:end] = targets
         if batch_idx == (total_samples // inputs.shape[0]):
             self._inputs_memmap.flush()
             self._prediction_memmap.flush()
-            self._target_memmap.flush()
+            self._targets_memmap.flush()
 
     def init_logger(self, logger: logging.Logger = None, logger_name: str = None,
                     log_file_name: str = None, log_level: int = logging.INFO) -> None:
