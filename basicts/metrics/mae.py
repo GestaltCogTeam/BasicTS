@@ -1,8 +1,7 @@
-import numpy as np
 import torch
 
 
-def masked_mae(prediction: torch.Tensor, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+def masked_mae(prediction: torch.Tensor, targets: torch.Tensor, targets_mask: torch.Tensor = None) -> torch.Tensor:
     """
     Calculate the Masked Mean Absolute Error (MAE) between the predicted and target values,
     while ignoring the entries in the target tensor that match the specified null value.
@@ -22,17 +21,12 @@ def masked_mae(prediction: torch.Tensor, target: torch.Tensor, null_val: float =
 
     """
 
-    if np.isnan(null_val):
-        mask = ~torch.isnan(target)
-    else:
-        eps = 5e-5
-        mask = ~torch.isclose(target, torch.tensor(null_val).expand_as(target).to(target.device), atol=eps, rtol=0.0)
-
+    mask = targets_mask if targets_mask is not None else torch.ones_like(targets)
     mask = mask.float()
     mask /= torch.mean(mask)  # Normalize mask to avoid bias in the loss due to the number of valid entries
     mask = torch.nan_to_num(mask)  # Replace any NaNs in the mask with zero
 
-    loss = torch.abs(prediction - target)
+    loss = torch.abs(prediction - targets)
     loss = loss * mask  # Apply the mask to the loss
     loss = torch.nan_to_num(loss)  # Replace any NaNs in the loss with zero
 

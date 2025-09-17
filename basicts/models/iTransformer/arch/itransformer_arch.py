@@ -1,13 +1,15 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from .Transformer_EncDec import Encoder, EncoderLayer
-from .SelfAttention_Family import FullAttention, AttentionLayer
-from .Embed import DataEmbedding_inverted
-from basicts.utils import data_transformation_4_xformer, BasicTSModel
+from torch import nn
+
+from basicts.modules.mlps import MLPLayer
+from basicts.modules.norm import RevIN
+from basicts.modules.transformer import (MultiHeadSelfAttention,
+                                         TransformerBlock)
+
+from ..config.itransformer_config import iTransformerConfig
+from .embed import InvertedDataEmbedding
 
 
-@BasicTSModel
 class iTransformer(nn.Module):
     """
     Paper: iTransformer: Inverted Transformers Are Effective for Time Series Forecasting
@@ -16,121 +18,81 @@ class iTransformer(nn.Module):
     Venue: ICLR 2024
     Task: Long-term Time Series Forecasting, Time Series Classification
     """
-    def __init__(self, **model_args):
+    def __init__(self, config: iTransformerConfig):
         super().__init__()
-        self.pred_len = model_args.pred_len
-        self.seq_len = model_args.seq_len
-        self.output_attention = model_args.output_attention
-        self.enc_in = model_args.enc_in
-        self.dec_in = model_args.dec_in
-        self.c_out = model_args.c_out
-        self.factor = model_args.factor
-        self.d_model = model_args.d_model
-        self.n_heads = model_args.n_heads
-        self.d_ff = model_args.d_ff
-        self.embed = model_args.embed
-        self.freq = model_args.freq
-        self.dropout = model_args.dropout
-        self.activation = model_args.activation
-        self.e_layers = model_args.e_layers
-        self.use_norm = model_args.use_norm
-        self.task_name = model_args.task_name
+        self.input_len = config.input_len
+        self.output_len = config.output_len
+        self.output_attention = config.output_attention
+        self.num_features = config.num_features
+        self.hidden_size = config.hidden_size
+        self.n_heads = config.n_heads
+        self.intermediate_size = config.intermediate_size
+        self.dropout = config.dropout
+        self.activation = config.activation
+        self.num_layers = config.num_layers
+        self.use_revin = config.use_revin
+        if self.use_revin:
+            self.revin = RevIN(self.num_features, affine=False)
 
         # Embedding
-        self.enc_embedding = DataEmbedding_inverted(self.seq_len, self.d_model, self.embed, self.freq,
-                                                    self.dropout)
+        self.enc_embedding = InvertedDataEmbedding(self.input_len, self.hidden_size, self.dropout)
 
         # Encoder-only architecture
-        self.encoder = Encoder(
+        self.encoder = nn.ModuleList(
             [
-                EncoderLayer(
-                    AttentionLayer(
-                        FullAttention(False, self.factor, attention_dropout=self.dropout,
-                                      output_attention=self.output_attention), self.d_model, self.n_heads),
-                    self.d_model,
-                    self.d_ff,
-                    dropout=self.dropout,
-                    activation=self.activation
-                ) for l in range(self.e_layers)
-            ],
-            norm_layer=torch.nn.LayerNorm(self.d_model)
+                TransformerBlock(
+                    MultiHeadSelfAttention(self.hidden_size, self.n_heads, self.dropout),
+                    MLPLayer(
+                        self.hidden_size,
+                        self.intermediate_size,
+                        hidden_act=self.activation,
+                        dropout=self.dropout),
+                    layer_norm=(nn.LayerNorm, {"normalized_shape": self.hidden_size}),
+                    norm_position="post"
+                ) for _ in range(self.num_layers)
+            ]
         )
-        if self.task_name == 'forecasting':
-            self.projector = nn.Linear(self.d_model, self.pred_len, bias=True)
+        self.post_norm = nn.LayerNorm(self.hidden_size)
+        self.projector = nn.Linear(self.hidden_size, self.output_len)
 
-        elif self.task_name == 'classification':
-            self.num_classes = model_args['num_classes']
-            self.act = F.gelu
-            self.dropout = nn.Dropout(self.dropout)
-            self.projector = nn.Linear(self.d_model * self.enc_in, self.num_classes)
-        else:
-            raise ValueError(f"Task name {self.task_name} is not supported.")
+        # elif self.task_name == 'classification':
+        #     self.num_classes = model_args['num_classes']
+        #     self.act = F.gelu
+        #     self.dropout = nn.Dropout(self.dropout)
+        #     self.projector = nn.Linear(self.d_model * self.enc_in, self.num_classes)
+        # else:
+        #     raise ValueError(f"Task name {self.task_name} is not supported.")
 
-    def forward_xformer(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor,
-                        x_mark_dec: torch.Tensor,
-                        enc_self_mask: torch.Tensor = None, dec_self_mask: torch.Tensor = None,
-                        dec_enc_mask: torch.Tensor = None) -> torch.Tensor:
-
-        if self.use_norm:
-            # Normalization from Non-stationary Transformer
-            means = x_enc.mean(1, keepdim=True).detach()
-            x_enc = x_enc - means
-            stdev = torch.sqrt(torch.var(x_enc, dim=1, keepdim=True, unbiased=False) + 1e-5)
-            x_enc /= stdev
-
-        _, _, N = x_enc.shape  # B L N
-        # B: batch_size;    E: d_model;
-        # L: seq_len;       S: pred_len;
-        # N: number of variate (tokens), can also includes covariates
-
-        # Embedding
-        # B L N -> B N E                (B L N -> B L E in the vanilla Transformer)
-        enc_out = self.enc_embedding(x_enc, x_mark_enc)  # covariates (e.g timestamp) can be also embedded as tokens
-
-        # B N E -> B N E                (B L E -> B L E in the vanilla Transformer)
-        # the dimensions of embedded time series has been inverted, and then processed by native attn, layernorm and ffn modules
-        enc_out, attns = self.encoder(enc_out, attn_mask=None)
-
-        # B N E -> B N S -> B S N
-        dec_out = self.projector(enc_out).permute(0, 2, 1)[:, :, :N]  # filter the covariates
-
-        if self.use_norm:
-            # De-Normalization from Non-stationary Transformer
-            dec_out = dec_out * (stdev[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
-            dec_out = dec_out + (means[:, 0, :].unsqueeze(1).repeat(1, self.pred_len, 1))
-
-        return dec_out
-
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool,
-                **kwargs) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor, inputs_timestamps: torch.Tensor) -> torch.Tensor:
         """
 
         Args:
-            history_data (Tensor): Input data with shape: [B, L1, N, C]
-            future_data (Tensor): Future data with shape: [B, L2, N, C]
+            inputs (Tensor): Input data with shape: [batch_size, input_len, num_features]
+            inputs_timestamps (Tensor): Input timestamps with shape: [batch_size, input_len, num_time_stamps]
 
         Returns:
-            torch.Tensor: outputs with shape [B, L2, N, 1]
+            torch.Tensor: outputs with shape [batch_size, output_len, num_features]
         """
 
-        if self.task_name == 'forecasting':
-            x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data,
-                                                                                future_data=future_data,
-                                                                                start_token_len=0)
+        if self.use_revin:
+            inputs = self.revin(inputs, "norm")
 
-            prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
-            prediction = prediction.unsqueeze(-1)
+        hidden_states = self.enc_embedding(inputs, inputs_timestamps)
 
-        elif self.task_name == 'classification':
-            enc_out = self.enc_embedding(history_data[..., 0], None)
-            enc_out, attns = self.encoder(enc_out, attn_mask=None)
-            # Output
-            output = self.act(enc_out)  # the output transformer encoder/decoder embeddings don't include non-linearity
-            output = self.dropout(output)
-            output = output.reshape(output.shape[0], -1)  # (batch_size, c_in * d_model)
-            prediction = self.projector(output)  # (batch_size, num_classes)
+        attn_weights = []
+        for layer in self.encoder:
+            hidden_states, attns, _, _ = layer(hidden_states)
+            if self.output_attention:
+                attn_weights.append(attns)
 
+        hidden_states = self.post_norm(hidden_states)
+        prediction = self.projector(hidden_states).transpose(1, 2)
+        prediction = prediction[..., :self.num_features]
+
+        if self.use_revin:
+            prediction = self.revin(prediction, "denorm")
+
+        if self.output_attention:
+            return {"prediction": prediction, "attn_weights": attn_weights}
         else:
-            raise ValueError(f"Task name {self.task_name} is not supported.")
-
-        return prediction
+            return prediction

@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 
-def masked_wape(prediction: torch.Tensor, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+def masked_wape(prediction: torch.Tensor, targets: torch.Tensor, targets_mask: torch.Tensor = None) -> torch.Tensor:
     """
     Calculate the Masked Weighted Absolute Percentage Error (WAPE) between predicted and target values,
     ignoring entries in the target tensor that match the specified null value.
@@ -20,18 +20,13 @@ def masked_wape(prediction: torch.Tensor, target: torch.Tensor, null_val: float 
         torch.Tensor: A scalar tensor representing the masked weighted absolute percentage error.
     """
 
-    if np.isnan(null_val):
-        mask = ~torch.isnan(target)
-    else:
-        eps = 5e-5
-        mask = ~torch.isclose(target, torch.tensor(null_val).to(target.device), atol=eps)
-
+    mask = targets_mask if targets_mask is not None else torch.ones_like(targets)
     mask = mask.float()
-    prediction, target = prediction * mask, target * mask
+    prediction, targets = prediction * mask, targets * mask
 
     prediction = torch.nan_to_num(prediction)
-    target = torch.nan_to_num(target)
+    targets = torch.nan_to_num(targets)
 
-    loss = torch.sum(torch.abs(prediction - target), dim=1) / (torch.sum(torch.abs(target), dim=1) + 5e-5)
+    loss = torch.sum(torch.abs(prediction - targets), dim=1) / (torch.sum(torch.abs(targets), dim=1) + 5e-5)
 
     return torch.mean(loss)

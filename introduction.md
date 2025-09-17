@@ -31,9 +31,9 @@
 ```python
 {
     'inputs': torch.Tensor,
-    'target': torch.Tensor, [Optional] # 这里目前还不是optional，后面改成optional
-    'inputs_timestamp': torch.Tensor, [Optional]
-    'target_timestamp': torch.Tensor [Optional]
+    'targets': torch.Tensor, [Optional]
+    'inputs_timestamps': torch.Tensor, [Optional]
+    'targets_timestamps': torch.Tensor [Optional]
 }
 ```
 
@@ -43,8 +43,8 @@
 
 |          | 前处理                 | 前传             | 计算loss        | 计算指标前       | 计算指标        |
 | -------- | ---------------------- | ---------------- | --------------- | ---------------- | --------------- |
-| 预测     | 归一化                 | inputs、target   | point-wise权重  | 反归一化（可选） | point-wise权重  |
-| 分类     | 归一化                 | inputs、target   | sample-wise权重 | argmax           | sample-wise权重 |
+| 预测     | 归一化                 | inputs、targets   | point-wise权重  | 反归一化（可选） | point-wise权重  |
+| 分类     | 归一化                 | inputs、targets   | sample-wise权重 | argmax           | sample-wise权重 |
 | 插补     | 先mask再归一化         | 可能额外多传mask | point-wise权重  | 反归一化（可选） | point-wise权重  |
 | 异常检测 | 先mask（可选）再归一化 | 可能额外多传mask | point-wise权重  | 根据残差计算Topk | point-wise权重 |
 
@@ -54,6 +54,3 @@
 3. Callback负责与策略相关的设计，如课程学习、早停、梯度累计等，需要实现相应位置的hook函数
 
 这样的设计下，90%的用户只用接触runner，30%的用户只用接触runner和callback，只有非常少部分的用户才会深入到taskflow逻辑。
-
-### NOTE
-由于目前内置数据的格式没改，所以直接跑会有问题，需要在builtin dataset类中把data = data[..., 0]，并只用不需要时间戳的模型跑。

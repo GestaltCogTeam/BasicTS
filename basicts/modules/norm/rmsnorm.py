@@ -8,7 +8,7 @@ class RMSNorm(nn.Module):
     Root Mean Square Layer Normalization
     """
 
-    def __init__(self, hidden_size: torch.Tensor, eps: float = 1e-8):
+    def __init__(self, hidden_size: torch.Tensor, eps: float = 1e-6):
         super().__init__()
         self.weight = nn.Parameter(torch.ones(hidden_size))
         self.eps = eps

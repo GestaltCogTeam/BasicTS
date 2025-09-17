@@ -7,8 +7,10 @@ import torch.nn as nn
 
 from basicts.runners.callback import NoBP
 
+from ..config.hi_config import HIConfig
 
-class HINetwork(nn.Module):
+
+class HI(nn.Module):
     """
     Paper: Historical Inertia: A Neglected but Powerful Baseline for Long Sequence Time-series Forecasting
     Link: https://arxiv.org/abs/2103.16349
@@ -19,40 +21,35 @@ class HINetwork(nn.Module):
 
     _required_callbacks: List[type] = [NoBP]
 
-    def __init__(self, input_length: int, output_length: int, reverse=False):
+    def __init__(self, config: HIConfig):
         """
         Init HI.
 
         Args:
-            input_length (int): input time series length
-            output_length (int): prediction time series length
-            reverse (bool, optional): if reverse the prediction of HI. Defaults to False.
+            config (HIConfig): model config.
         """
 
-        super(HINetwork, self).__init__()
-        assert input_length >= output_length, "HI model requires input length > output length"
-        self.input_length    = input_length
-        self.output_length   = output_length
-        self.reverse         = reverse
+        super().__init__()
+        self.input_len    = config.input_len
+        self.output_len   = config.output_len
+        assert self.input_len >= self.output_len, "HI model requires input length > output length"
+        self.reverse         = config.reverse
         self.fake_param      = nn.Linear(1, 1, bias=False)
 
-    # pylint: disable=unused-argument
-    def forward(self, inputs: torch.Tensor, **kwargs) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         """Forward function of HI.
 
         Args:
-            history_data (torch.Tensor): shape = [B, L_in, N]
+            inputs (torch.Tensor): shape = [B, L_in, N]
 
         Returns:
             torch.Tensor: model prediction [B, L_out, N].
         """
 
-        _, L_in, _ = inputs.shape
-        assert self.input_length == L_in, "error input length"
         # historical inertia
-        prediction = inputs[:, -self.output_length:, :]
+        prediction = inputs[:, -self.output_len:, :]
         # last point
-        # prediction = history_data[:, [-1], :].expand(-1, self.output_length, -1)
+        # prediction = inputs[:, [-1], :].expand(-1, self.output_len, -1)
         if self.reverse:
             prediction = prediction.flip(dims=[1])
         return prediction

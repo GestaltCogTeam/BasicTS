@@ -9,4 +9,5 @@ ACT2FN = {
     "swish": nn.SiLU(),
     "tanh": nn.Tanh(),
     "prelu": nn.PReLU(),
+    "gelu": nn.GELU(),
 }
