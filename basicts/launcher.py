@@ -1,12 +1,59 @@
 import os
 import traceback
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
-import easytorch
 from easytorch.config import init_cfg
 from easytorch.device import set_device_type
+from easytorch.launcher.dist_wrap import dist_wrap
 from easytorch.utils import get_logger, set_visible_devices
 
+from basicts.configs.base_config import BasicTSConfig
+from basicts.runners import BasicTSRunner
+
+
+class BasicTSLauncher:
+
+    @classmethod
+    def launch_training(cls, cfg: BasicTSConfig, node_rank: int = 0) -> None:
+        """
+        Launches the training process.
+
+        This method initializes the runner specified in the configuration, sets up logging,
+        and starts the training loop.
+
+        Args:
+            cfg (Dict): EasyTorch configuration dictionary.
+        """
+        # launch the training process
+        logger = get_logger('BasicTS-launcher')
+        logger.info('Launching BasicTS training.')
+
+        if node_rank == 0:
+            cfg.save()
+
+        if cfg.get('gpus', None) is not None or cfg.get('mlus', None) is not None:
+            if cfg.get('gpus', None) is not None and cfg.get('mlus', None) is None:
+                set_device_type('gpu')
+                device_num = cfg.get('gpu_num', 0)
+            elif cfg.get('gpus', None) is None and cfg.get('mlus', None) is not None:
+                set_device_type('mlu')
+                device_num = cfg.get('mlu_num', 0)
+            else:
+                raise ValueError('At least one of `CFG.GPU_NUM` and `CFG.MLU_NUM` is 0.')
+            set_visible_devices(cfg.get('gpus', None))
+        else:
+            set_device_type('cpu')
+            device_num = 0
+
+        train_dist = dist_wrap(
+            training_func,
+            node_num=cfg.get('dist_node_num', 1),
+            device_num=device_num,
+            node_rank=node_rank,
+            dist_backend=cfg.get('dist_backend'),
+            init_method=cfg.get('dist_init_method')
+        )
+        train_dist(cfg)
 
 def evaluation_func(cfg: Dict,
                     ckpt_path: str = None,
@@ -112,26 +159,80 @@ def launch_evaluation(cfg: Union[Dict, str],
     # run the evaluation process
     evaluation_func(cfg, ckpt_path, batch_size)
 
-def launch_training(cfg: Union[Dict, str],
-                    gpus: Optional[str] = None,
-                    node_rank: int = 0) -> None:
+def launch_training(args: List[str], node_rank: int = 0) -> None:
     """
     Launches the training process using EasyTorch.
 
     Args:
-        cfg (Union[Dict, str]): EasyTorch configuration as a dictionary or a path to a config file.
-        gpus (Optional[str]): GPU device IDs to use. Defaults to None (use all available GPUs).
+        args (List[str]): Command line arguments.
         node_rank (int, optional): Rank of the current node in distributed training. Defaults to 0.
     """
 
     # placeholder for potential pre-processing steps (e.g., model registration, config validation)
 
     # cfg path which start with dot will crash the easytorch, just remove dot
-    while isinstance(cfg, str) and cfg.startswith(('./','.\\')):
-        cfg = cfg[2:]
+    # while isinstance(cfg, str) and cfg.startswith(('./','.\\')):
+    #     cfg = cfg[2:]
 
     # launch the training process
-    easytorch.launch_training(cfg=cfg, devices=gpus, node_rank=node_rank)
+    logger = get_logger('BasicTS-launcher')
+    logger.info('Launching BasicTS training.')
+
+    cfg = load_config(args, node_rank == 0)
+
+    if cfg.get('DEVICE') is not None:
+        set_device_type(cfg['DEVICE'])
+        device_num = cfg.get('DEVICE_NUM', 0)
+    elif cfg.gpus is not None or cfg.get('MLU_NUM', 0) != 0:
+        if cfg.gpus is not None and cfg.get('MLU_NUM', 0) == 0:
+            set_device_type('gpu')
+            device_num = cfg.get('GPU_NUM', 0)
+        elif cfg.gpus is None and cfg.get('MLU_NUM', 0) != 0:
+            set_device_type('mlu')
+            device_num = cfg.get('MLU_NUM', 0)
+        else:
+            raise ValueError('At least one of `CFG.GPU_NUM` and `CFG.MLU_NUM` is 0.')
+        set_visible_devices(cfg.gpus)
+    else:
+        set_device_type('cpu')
+        device_num = 0
+
+    train_dist = dist_wrap(
+        training_func,
+        node_num=cfg.get('DIST_NODE_NUM', 1),
+        device_num=device_num,
+        node_rank=node_rank,
+        dist_backend=cfg.get('DIST_BACKEND'),
+        init_method=cfg.get('DIST_INIT_METHOD')
+    )
+    train_dist(cfg)
+
+
+def training_func(cfg: BasicTSConfig):
+    """Start training
+
+    1. Init runner defined by `cfg`
+    2. Init logger
+    3. Call `train()` method in the runner
+
+    Args:
+        cfg (Dict): Easytorch config.
+    """
+
+    # init runner
+    logger = get_logger('BasicTS-launcher')
+    runner = BasicTSRunner(cfg)
+
+    # init logger (after making ckpt save dir)
+    runner.init_logger(logger_name='BasicTS-training', log_file_name='training_log')
+
+    # train
+    try:
+        runner.train()
+    except BaseException as e:
+        # log exception to file
+        runner.logger.error(traceback.format_exc())
+        raise e
 
 def inference_func(cfg: Dict,
                     input_data_file_path: str,
@@ -242,3 +343,21 @@ def launch_inference(cfg: Union[Dict, str],
 
     # run the inference process
     inference_func(cfg_dict, input_data_file_path, output_data_file_path, ckpt_path, context_length=context_length, prediction_length=prediction_length)
+
+def import_config(path: str) -> BasicTSConfig:
+    """
+    Import the configuration from a file.
+
+    Args:
+        path (str): Path to the configuration file.
+        verbose (bool, optional): Whether to print verbose information. Defaults to False.
+
+    Returns:
+        BasicTSConfig: Imported configuration.
+    """
+    if path.find('.py') != -1:
+        path = path[:path.find('.py')].replace('/', '.').replace('\\', '.')
+    cfg_name = path.split('.')[-1]
+    cfg = __import__(path, fromlist=[cfg_name]).BasicTSForecastingConfig()
+
+    return cfg

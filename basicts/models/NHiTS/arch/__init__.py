@@ -1,0 +1,1 @@
+from .nhits_arch import NHiTS

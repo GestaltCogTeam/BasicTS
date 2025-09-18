@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 
-def masked_mape(prediction: torch.Tensor, target: torch.Tensor, null_val: float = np.nan) -> torch.Tensor:
+def masked_mape(prediction: torch.Tensor, targets: torch.Tensor, targets_mask: torch.Tensor = None) -> torch.Tensor:
     """
     Calculate the Masked Mean Absolute Percentage Error (MAPE) between predicted and target values,
     ignoring entries that are either zero or match the specified null value in the target tensor.
@@ -32,22 +32,15 @@ def masked_mape(prediction: torch.Tensor, target: torch.Tensor, null_val: float 
     """
 
     # mask to exclude zero values in the target
-    zero_mask = ~torch.isclose(target, torch.tensor(0.0).to(target.device), atol=5e-5)
+    zero_mask = ~torch.isclose(targets, torch.tensor(0.0, dtype=targets.dtype).to(targets.device), atol=5e-5)
+    null_mask = targets_mask if targets_mask is not None else torch.ones_like(targets)
 
-    # mask to exclude null values in the target
-    if np.isnan(null_val):
-        null_mask = ~torch.isnan(target)
-    else:
-        eps = 5e-5
-        null_mask = ~torch.isclose(target, torch.tensor(null_val).to(target.device), atol=eps)
-
-    # combine zero and null masks
-    mask = (zero_mask & null_mask).float()
-
-    mask /= torch.mean(mask)
+    mask = (zero_mask * null_mask).float()
+    if targets_mask is not None:
+        mask /= torch.mean(mask)
     mask = torch.nan_to_num(mask)
 
-    loss = torch.abs((prediction - target) / target)
+    loss = torch.abs((prediction - targets) / targets)
     loss *= mask
     loss = torch.nan_to_num(loss)
 

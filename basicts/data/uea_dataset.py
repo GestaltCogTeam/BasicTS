@@ -2,10 +2,10 @@ import logging
 import os
 from typing import List
 
-from .simple_tsc_dataset import TimeSeriesClassificationDataset
+from torch.utils.data import Dataset
 
 
-class UEADataset(TimeSeriesClassificationDataset):
+class UEADataset(Dataset):
     """
     A UEA dataset class for time series classification problems, handling the loading, parsing, and partitioning
     of time series data into training, validation, and testing sets based on provided ratios.
