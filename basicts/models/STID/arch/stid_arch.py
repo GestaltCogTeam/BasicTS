@@ -50,7 +50,7 @@ class STID(nn.Module):
             config.tid_hidden_size * int(self.if_time_in_day) + config.diw_hidden_size * int(self.if_day_in_week)
         self.intermediate_size = config.intermediate_size if config.intermediate_size is not None else self.hidden_size
         self.encoder = nn.Sequential(
-            *[ResMLPLayer(self.hidden_size, self.intermediate_size, config.activation) for _ in range(config.num_layers)])
+            *[ResMLPLayer(self.hidden_size, self.intermediate_size, config.hidden_act) for _ in range(config.num_layers)])
 
         # regression layer
         self.regression_layer = nn.Linear(self.hidden_size, self.output_len)

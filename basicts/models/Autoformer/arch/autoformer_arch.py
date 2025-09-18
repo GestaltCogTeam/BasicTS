@@ -1,11 +1,14 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
-from basicts.utils import data_transformation_4_xformer
+from basicts.modules.decomposition import MovingAverageDecomposition
+from basicts.modules.embed import FeatureEmbedding
+from basicts.modules.mlps import MLPLayer
+from basicts.modules.norm import CenteredLayerNorm
+from basicts.modules.transformer import AutoCorrelation, Encoder, EncoderLayer
 
-from .embed import DataEmbedding_wo_pos, DataEmbedding
-from .auto_correlation import AutoCorrelation, AutoCorrelationLayer
-from .enc_dec import Encoder, Decoder, EncoderLayer, DecoderLayer, my_Layernorm, series_decomp
+from ..config.autoformer_config import AutoformerConfig
+from .decoder import AutoformerDecoder
 
 
 class Autoformer(nn.Module):
@@ -17,138 +20,91 @@ class Autoformer(nn.Module):
     Task: Long-term Time Series Forecasting
     """
 
-    def __init__(self, **model_args):
-        super(Autoformer, self).__init__()
-        self.seq_len = int(model_args["seq_len"])
-        self.label_len = int(model_args["label_len"])
-        self.pred_len = int(model_args["pred_len"])
-        self.output_attention = model_args["output_attention"]
-
-        self.time_of_day_size = model_args.get("time_of_day_size", None)
-        self.day_of_week_size = model_args.get("day_of_week_size", None)
-        self.day_of_month_size = model_args.get("day_of_month_size", None)
-        self.day_of_year_size = model_args.get("day_of_year_size", None)
-        self.embed = model_args["embed"]
+    def __init__(self, config: AutoformerConfig):
+        super().__init__()
+        self.input_len = config.input_len
+        self.output_len = config.output_len
+        self.label_len = int(config.label_len)
+        self.output_attentions = config.output_attentions
 
         # Decomp
-        kernel_size = model_args["moving_avg"]
-        self.decomp = series_decomp(kernel_size)
+        self.decomp = MovingAverageDecomposition(config.kernel_size)
 
         # Embedding
-        # The series-wise connection inherently contains the sequential information.
-        # Thus, we can discard the position embedding of transformers.
-        self.enc_embedding = DataEmbedding_wo_pos(
-                                                    model_args["enc_in"],
-                                                    model_args["d_model"],
-                                                    self.time_of_day_size,
-                                                    self.day_of_week_size,
-                                                    self.day_of_month_size,
-                                                    self.day_of_year_size,
-                                                    model_args["embed"],
-                                                    model_args["num_time_features"],
-                                                    model_args["dropout"])
-        self.dec_embedding = DataEmbedding_wo_pos(
-                                                    model_args["dec_in"],
-                                                    model_args["d_model"],
-                                                    self.time_of_day_size,
-                                                    self.day_of_week_size,
-                                                    self.day_of_month_size,
-                                                    self.day_of_year_size,
-                                                    model_args["embed"],
-                                                    model_args["num_time_features"],
-                                                    model_args["dropout"])
+        self.enc_embedding = FeatureEmbedding(
+            config.num_features, config.hidden_size, config.use_timestamps, config.timestamp_sizes, config.dropout)
+        self.dec_embedding = FeatureEmbedding(
+            config.num_features, config.hidden_size, config.use_timestamps, config.timestamp_sizes, config.dropout)
 
-        # Encoder
         self.encoder = Encoder(
-            [
+            nn.ModuleList([
                 EncoderLayer(
-                    AutoCorrelationLayer(
-                        AutoCorrelation(False, model_args["factor"], attention_dropout=model_args["dropout"],
-                                        output_attention=model_args["output_attention"]),
-                        model_args["d_model"], model_args["n_heads"]),
-                    model_args["d_model"],
-                    model_args["d_ff"],
-                    moving_avg=model_args["moving_avg"],
-                    dropout=model_args["dropout"],
-                    activation=model_args["activation"]
-                ) for l in range(model_args["e_layers"])
-            ],
-            norm_layer=my_Layernorm(model_args["d_model"])
+                    AutoCorrelation(config.hidden_size, config.n_heads, config.dropout),
+                    MLPLayer(
+                        config.hidden_size,
+                        config.intermediate_size,
+                        hidden_act=config.hidden_act,
+                        dropout=config.dropout),
+                    layer_norm=(CenteredLayerNorm, config.hidden_size),
+                    norm_position="post"
+                ) for _ in range(config.num_encoder_layers)
+            ]),
+            layer_norm=CenteredLayerNorm(config.hidden_size),
         )
-        # Decoder
-        self.decoder = Decoder(
-            [
-                DecoderLayer(
-                    AutoCorrelationLayer(
-                        AutoCorrelation(True, model_args["factor"], attention_dropout=model_args["dropout"],
-                                        output_attention=False),
-                        model_args["d_model"], model_args["n_heads"]),
-                    AutoCorrelationLayer(
-                        AutoCorrelation(False, model_args["factor"], attention_dropout=model_args["dropout"],
-                                        output_attention=False),
-                        model_args["d_model"], model_args["n_heads"]),
-                    model_args["d_model"],
-                    model_args["c_out"],
-                    model_args["d_ff"],
-                    moving_avg=model_args["moving_avg"],
-                    dropout=model_args["dropout"],
-                    activation=model_args["activation"],
-                )
-                for l in range(model_args["d_layers"])
-            ],
-            norm_layer=my_Layernorm(model_args["d_model"]),
-            projection=nn.Linear(model_args["d_model"], model_args["c_out"], bias=True)
-        )
+        self.decoder = AutoformerDecoder(config)
 
-    def forward_xformer(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor, x_mark_dec: torch.Tensor,
-                enc_self_mask: torch.Tensor=None, dec_self_mask: torch.Tensor=None, dec_enc_mask: torch.Tensor=None) -> torch.Tensor:
-        """Feed forward of AutoFormer. Kindly note that `enc_self_mask`, `dec_self_mask`, and `dec_enc_mask` are not actually used in AutoFormer.
-           See: 
-            - https://github.com/thuml/Autoformer/blob/e116bbcf41f537f4ab53d172d9babfc0a026330f/layers/AutoCorrelation.py#L103
-            - https://github.com/thuml/Autoformer/blob/e116bbcf41f537f4ab53d172d9babfc0a026330f/exp/exp_main.py#L136
+        self.projection = nn.Linear(config.hidden_size, config.num_features)
 
-        Args:
-            x_enc (torch.Tensor): input data of encoder (without the time features). Shape: [B, L1, N]
-            x_mark_enc (torch.Tensor): time features input of encoder w.r.t. x_enc. Shape: [B, L1, C-1]
-            x_dec (torch.Tensor): input data of decoder. Shape: [B, start_token_length + L2, N]
-            x_mark_dec (torch.Tensor): time features input to decoder w.r.t. x_dec. Shape: [B, start_token_length + L2, C-1]
-            enc_self_mask (torch.Tensor, optional): encoder self attention masks. Defaults to None.
-            dec_self_mask (torch.Tensor, optional): decoder self attention masks. Defaults to None.
-            dec_enc_mask (torch.Tensor, optional): decoder encoder self attention masks. Defaults to None.
+    def forward(
+            self,
+            inputs: torch.Tensor,
+            targets: torch.Tensor,
+            inputs_timestamps: torch.Tensor,
+            targets_timestamps: torch.Tensor
+            ) -> torch.Tensor:
+        """
 
-        Returns:
-            torch.Tensor: outputs with shape [B, L2, N, 1]
+        :param inputs: Input data with shape: [batch_size, input_len, num_features]
+        :param targets: Future data with shape: [batch_size, output_len, num_features]
+        :param inputs_timestamps: Input timestamps with shape: [batch_size, input_len, num_timestamps]
+        :param targets_timestamps: Future timestamps with shape: [batch_size, output_len, num_timestamps]
+
+        :return: Output data with shape: [batch_size, output_len, num_features]
         """
 
         # decomp init
-        mean = torch.mean(x_enc, dim=1).unsqueeze(1).repeat(1, self.pred_len, 1)
-        zeros = torch.zeros([x_dec.shape[0], self.pred_len, x_dec.shape[2]], device=x_enc.device)
-        seasonal_init, trend_init = self.decomp(x_enc)
+        mean = torch.mean(inputs, dim=1, keepdim=True).repeat(1, self.output_len, 1)
+        zeros = torch.zeros_like(targets)
+        seasonal, trend = self.decomp(inputs)
         # decoder input
-        trend_init = torch.cat([trend_init[:, -self.label_len:, :], mean], dim=1)
-        seasonal_init = torch.cat([seasonal_init[:, -self.label_len:, :], zeros], dim=1)
-        # enc
-        enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
-        # dec
-        dec_out = self.dec_embedding(seasonal_init, x_mark_dec)
-        seasonal_part, trend_part = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask,
-                                                 trend=trend_init)
-        # final
-        dec_out = trend_part + seasonal_part
+        trend = torch.cat([trend[:, -self.label_len:, :], mean], dim=1)
+        seasonal = torch.cat([seasonal[:, -self.label_len:, :], zeros], dim=1)
 
-        return dec_out[:, -self.pred_len:, :].unsqueeze(-1)  # [B, L, N, C]
+        # encoder
+        enc_hidden_states = self.enc_embedding(inputs, inputs_timestamps)
 
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
-        """
+        enc_output, enc_attn_weights = self.encoder(
+            enc_hidden_states,
+            output_attentions=self.output_attentions
+            )
 
-        Args:
-            history_data (Tensor): Input data with shape: [B, L1, N, C]
-            future_data (Tensor): Future data with shape: [B, L2, N, C]
+        # decoder
+        dec_hidden_states = self.dec_embedding(seasonal, targets_timestamps)
 
-        Returns:
-            torch.Tensor: outputs with shape [B, L2, N, 1]
-        """
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len)
-        prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
-        return prediction
+        dec_output, trend, dec_self_attn_weights, dec_cross_attn_weights = self.decoder(
+            dec_hidden_states,
+            enc_output,
+            trend,
+            output_attentions=self.output_attentions)
+
+        seasonal = self.projection(dec_output)
+
+        prediction = (trend + seasonal)[:, -self.output_len:, :]
+
+        if self.output_attentions:
+            attn_weights = {"enc_attn_weights": enc_attn_weights,
+                            "dec_self_attn_weights": dec_self_attn_weights,
+                            "dec_cross_attn_weights": dec_cross_attn_weights}
+            return {"prediction": prediction, "attn_weights": attn_weights}
+        else:
+            return prediction

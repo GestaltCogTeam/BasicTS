@@ -1,13 +1,14 @@
+from typing import Optional, Tuple, List
+
 import torch
 from torch import nn
 
+from basicts.modules.embed import SequenceEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import RevIN
-from basicts.modules.transformer import (MultiHeadSelfAttention,
-                                         TransformerBlock)
+from basicts.modules.transformer import Encoder, EncoderLayer, MultiHeadAttention
 
 from ..config.itransformer_config import iTransformerConfig
-from .embed import InvertedDataEmbedding
 
 
 class iTransformer(nn.Module):
@@ -20,50 +21,38 @@ class iTransformer(nn.Module):
     """
     def __init__(self, config: iTransformerConfig):
         super().__init__()
-        self.input_len = config.input_len
-        self.output_len = config.output_len
         self.output_attention = config.output_attention
         self.num_features = config.num_features
-        self.hidden_size = config.hidden_size
-        self.n_heads = config.n_heads
-        self.intermediate_size = config.intermediate_size
-        self.dropout = config.dropout
-        self.activation = config.activation
-        self.num_layers = config.num_layers
         self.use_revin = config.use_revin
         if self.use_revin:
             self.revin = RevIN(self.num_features, affine=False)
 
         # Embedding
-        self.enc_embedding = InvertedDataEmbedding(self.input_len, self.hidden_size, self.dropout)
+        self.enc_embedding = SequenceEmbedding(config.input_len, config.hidden_size, config.dropout)
 
         # Encoder-only architecture
-        self.encoder = nn.ModuleList(
-            [
-                TransformerBlock(
-                    MultiHeadSelfAttention(self.hidden_size, self.n_heads, self.dropout),
+        self.encoder = Encoder(
+            nn.ModuleList([
+                EncoderLayer(
+                    MultiHeadAttention(config.hidden_size, config.n_heads, config.dropout),
                     MLPLayer(
-                        self.hidden_size,
-                        self.intermediate_size,
-                        hidden_act=self.activation,
-                        dropout=self.dropout),
-                    layer_norm=(nn.LayerNorm, {"normalized_shape": self.hidden_size}),
+                        config.hidden_size,
+                        config.intermediate_size,
+                        hidden_act=config.hidden_act,
+                        dropout=config.dropout),
+                    layer_norm=(nn.LayerNorm, config.hidden_size),
                     norm_position="post"
-                ) for _ in range(self.num_layers)
-            ]
+                ) for _ in range(config.num_layers)
+            ]),
+            layer_norm=nn.LayerNorm(config.hidden_size),
         )
-        self.post_norm = nn.LayerNorm(self.hidden_size)
-        self.projector = nn.Linear(self.hidden_size, self.output_len)
+        self.projection = nn.Linear(config.hidden_size, config.output_len)
 
-        # elif self.task_name == 'classification':
-        #     self.num_classes = model_args['num_classes']
-        #     self.act = F.gelu
-        #     self.dropout = nn.Dropout(self.dropout)
-        #     self.projector = nn.Linear(self.d_model * self.enc_in, self.num_classes)
-        # else:
-        #     raise ValueError(f"Task name {self.task_name} is not supported.")
-
-    def forward(self, inputs: torch.Tensor, inputs_timestamps: torch.Tensor) -> torch.Tensor:
+    def forward(
+            self,
+            inputs: torch.Tensor,
+            inputs_timestamps: Optional[torch.Tensor] = None
+            ) -> Tuple[torch.Tensor, Optional[List[torch.Tensor]]]:
         """
 
         Args:
@@ -79,14 +68,9 @@ class iTransformer(nn.Module):
 
         hidden_states = self.enc_embedding(inputs, inputs_timestamps)
 
-        attn_weights = []
-        for layer in self.encoder:
-            hidden_states, attns, _, _ = layer(hidden_states)
-            if self.output_attention:
-                attn_weights.append(attns)
+        hidden_states, attn_weights= self.encoder(hidden_states, output_attentions=self.output_attention)
 
-        hidden_states = self.post_norm(hidden_states)
-        prediction = self.projector(hidden_states).transpose(1, 2)
+        prediction = self.projection(hidden_states).transpose(1, 2)
         prediction = prediction[..., :self.num_features]
 
         if self.use_revin:

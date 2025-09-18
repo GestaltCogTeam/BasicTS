@@ -16,7 +16,7 @@ class STIDConfig(BasicTSModelConfig):
     input_hidden_size: int = field(default=32, metadata={"help": "Hidden size of the imput embedding."})
     intermediate_size: int | None = field(default=None, metadata={"help": "Intermediate size of MLP layers. " \
                                                                   "If None, use hidden_size in STID."})
-    activation: str = field(default="relu", metadata={"help": "Activation function of MLP layers."})
+    hidden_act: str = field(default="relu", metadata={"help": "Activation function of MLP layers."})
     num_layers: int = field(default=1, metadata={"help": "Number of MLP layers."})
 
     if_spatial: bool = field(default=True, metadata={"help": "Whether to use spatial (feature) embedding."})
