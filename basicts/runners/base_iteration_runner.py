@@ -12,7 +12,6 @@ from easytorch.config import get_ckpt_save_dir
 from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
                                        save_ckpt)
 from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
-from easytorch.core.meter_pool import MeterPool
 from easytorch.device import to_device
 from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
                              is_master, master_only, set_env)
@@ -23,7 +22,7 @@ from torch.utils.data import DataLoader, Dataset
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from ..utils import InfiniteGenerator, get_dataset_name
+from ..utils import InfiniteGenerator, MeterPool, get_dataset_name
 from ..utils.misc import \
     convert_iteration_save_strategy_to_epoch_save_strategy as \
     convert_save_strategy
@@ -742,15 +741,28 @@ class BaseIterationRunner(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
-    def test_pipeline(self, cfg: Optional[Dict] = None, train_iteration: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> None:
-        """Test model.
+    def test_pipeline(self, cfg: Optional[Dict] = None, train_iteration: Optional[int] = None,
+                      save_metrics: bool = False, save_results: bool = False,
+                      context_length: Optional[int] = None, prediction_length: Optional[int] = None) -> None:
+        """Test model. Only for evaluation.
 
         Args:
             cfg (Dict, optional): Configuration dictionary. Defaults to None.
             train_iteration (int, optional): Current iteration during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
             save_results (bool, optional): Save the test results. Defaults to False.
+            context_length (int, optional): Context length for inference, only used for utfs models. Defaults to None.
+            prediction_length (int, optional): Prediction length for inference, only used for utfs models
         """
+        # only for evaluation
+        if not hasattr(cfg, 'TEST'):
+            return
+
+        # add context_length and prediction_length to cfg
+        if context_length is not None:
+            cfg['TEST']['DATASET']['PARAM']['input_len'] = context_length
+        if prediction_length is not None:
+            cfg['TEST']['DATASET']['PARAM']['output_len'] = prediction_length
 
         if train_iteration is None and cfg is not None:
             self.init_test(cfg)
@@ -783,7 +795,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
     @master_only
     def test(self, train_iteration: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> Dict:
         """
-        Define the details of the testing process.
+        Define the details of the testing process. Only for evaluation.
 
         Args:
             train_iteration (int, optional): Current epoch during training. Defaults to None.
