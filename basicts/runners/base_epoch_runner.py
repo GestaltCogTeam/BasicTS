@@ -525,7 +525,9 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
     @torch.no_grad()
     @master_only
-    def test_pipeline(self, cfg: Optional[Dict] = None, train_epoch: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> None:
+    def test_pipeline(self, cfg: Optional[Dict] = None, train_epoch: Optional[int] = None,
+                      save_metrics: bool = False, save_results: bool = False,
+                      context_length: Optional[int] = None, prediction_length: Optional[int] = None) -> None: # pylint: disable=unused-argument
         """
         The complete test process.
 
@@ -534,7 +536,12 @@ class BaseEpochRunner(metaclass=ABCMeta):
             train_epoch (int, optional): Current epoch during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
             save_results (bool, optional): Save the test results. Defaults to False.
+            context_length (int, optional): Context length for inference, only used for utfs models. 
+            prediction_length (int, optional): Prediction length for inference, only used for utfs models
         """
+        # do not use the context_length and prediction_length here
+        context_length = None
+        prediction_length = None
 
         if train_epoch is None and cfg is not None:
             self.init_test(cfg)

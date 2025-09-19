@@ -32,9 +32,11 @@ class TestLauncher(unittest.TestCase):
         device_type = 'gpu'
         gpus = '0'
         batch_size = 32
+        context_length = 72
+        prediction_length = 36
 
         # Call the function
-        launch_evaluation('././'+cfg, '././'+ckpt_path, device_type, gpus, batch_size)
+        launch_evaluation('././'+cfg, '././'+ckpt_path, device_type, gpus, batch_size, context_length, prediction_length)
 
         # Assertions
         mock_get_logger.assert_called_once_with('easytorch-launcher')
@@ -42,7 +44,8 @@ class TestLauncher(unittest.TestCase):
         mock_init_cfg.assert_called_once_with(cfg, save=True)
         mock_set_device_type.assert_called_once_with(device_type)
         mock_set_visible_devices.assert_called_once_with(gpus)
-        mock_evaluation_func.assert_called_once_with(mock_init_cfg.return_value, ckpt_path, batch_size)
+        mock_evaluation_func.assert_called_once_with(mock_init_cfg.return_value, ckpt_path, batch_size,
+                                                     context_length=context_length, prediction_length=prediction_length)
 
     @patch('basicts.launcher.easytorch.launch_training')
     def test_launch_training(self, mock_launch_training):
@@ -75,16 +78,19 @@ class TestLauncher(unittest.TestCase):
         strict = True
         test_cfg = copy.deepcopy(cfg)
         test_cfg.TEST.DATA.BATCH_SIZE = batch_size
+        context_length = 72
+        prediction_length = 36
 
         # Call the function
-        evaluation_func(cfg, ckpt_path, batch_size, strict)
+        evaluation_func(cfg, ckpt_path, batch_size, strict, context_length, prediction_length)
 
         # Assertions
         mock_get_logger.assert_called_once_with('easytorch-launcher')
         mock_logger.info.assert_any_call(f"Initializing runner '{cfg['RUNNER']}'")
         mock_runner.init_logger.assert_called_once_with(logger_name='easytorch-evaluation', log_file_name='evaluation_log')
         mock_runner.load_model.assert_called_once_with(ckpt_path=ckpt_path, strict=strict)
-        mock_runner.test_pipeline.assert_called_once_with(cfg=test_cfg, save_metrics=True, save_results=True)
+        mock_runner.test_pipeline.assert_called_once_with(cfg=test_cfg, save_metrics=True, save_results=True,
+                                                           context_length=context_length, prediction_length=prediction_length)
 
 if __name__ == '__main__':
     unittest.main()

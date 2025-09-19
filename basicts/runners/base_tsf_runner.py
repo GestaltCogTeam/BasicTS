@@ -453,8 +453,8 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
                 metric_item = self.metric_forward(metric_func, {'prediction': pred, 'target': target})
                 self.update_epoch_meter(f'test/{metric_name}', metric_item.item(), weight)
 
+        metrics_results = {}
         if save_metrics:
-            metrics_results = {}
             metrics_results['overall'] = {k: self.meter_pool.get_value(f'test/{k}') for k in self.metrics.keys()}
             for i in self.evaluation_horizons:
                 metrics_results[f'horizon_{i+1}'] = {k: self.meter_pool.get_value(f'test/{k}@h{i+1}') for k in self.metrics.keys()}
@@ -462,6 +462,8 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             # save metrics_results to self.ckpt_save_dir/test_metrics.json
             with open(os.path.join(self.ckpt_save_dir, 'test_metrics.json'), 'w') as f:
                 json.dump(metrics_results, f, indent=4)
+
+        return metrics_results
 
     @torch.no_grad()
     @master_only

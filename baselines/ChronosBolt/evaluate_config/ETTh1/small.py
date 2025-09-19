@@ -1,12 +1,16 @@
 import os
 import sys
 from easydict import EasyDict
+from basicts.data.simple_tsf_dataset import TimeSeriesForecastingDataset
+from basicts.scaler.z_score_scaler import ZScoreScaler
+from basicts.utils.serialization import get_regular_settings
+from basicts.metrics import masked_mae, masked_mse
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
 
-from ..arch import ChronosBolt
-from ..data import BLASTDatasetWoMixUp
-from ..runner import ChronosRunner
-from ..loss import fake_loss
+from ...arch import ChronosBolt
+from ...data import BLASTDatasetWoMixUp
+from ...runner import ChronosRunner
+from ...loss import fake_loss
 
 
 ############################## Hot Parameters ##############################
@@ -19,7 +23,7 @@ context_length = 1024
 predict_length = 64 # ref: /workspace/S22/TSFM_LLaMA3/huggingface_ckpts/chronos-bolt-tiny/config.json
 
 MODEL_PARAM = {
-    "model_id": "./baselines/ChronosBolt/ckpt/chronos-bolt-base",
+    "model_id": "./baselines/ChronosBolt/ckpt/chronos-bolt-small",
     "from_pretrained": False,
     "device_map": "cpu",
 }
@@ -31,7 +35,7 @@ VAL_ITERATION_INTERVAL = 10_000 # 每VAL_ITERATION_INTERVAL执行一次验证
 ############################## General Configuration ##############################
 CFG = EasyDict()
 # General settings
-CFG.DESCRIPTION = 'Chronos-Bolt Base | Debug: Data'
+CFG.DESCRIPTION = 'Chronos-Bolt Small'
 CFG.GPU_NUM = 8 # Number of GPUs to use (0 for CPU mode)
 # CFG.GPU_NUM = 8 # Number of GPUs to use (0 for CPU mode)
 # Runner
@@ -47,11 +51,6 @@ CFG.MODEL.ARCH = MODEL_ARCH
 CFG.MODEL.PARAM = MODEL_PARAM
 CFG.MODEL.DTYPE= 'bfloat16'
 
-############################## Metrics Configuration ##############################
-
-CFG.METRICS = EasyDict()
-# Metrics settings
-CFG.METRICS.FUNCS = EasyDict({})
 
 ############################## Training Configuration ##############################
 CFG.TRAIN = EasyDict()
@@ -110,6 +109,49 @@ CFG.DATASET.PARAM = EasyDict({
     'target_length': predict_length,
     'num_valid_samples': 1000
 })
+
+############################## Test Configuration ##############################
+# Only for evaluation after training
+
+CFG.TEST = EasyDict()
+CFG.TEST.DATASET = EasyDict()
+CFG.TEST.DATASET.NAME = 'ETTh1'
+testdata_regular_settings = get_regular_settings(CFG.TEST.DATASET.NAME)
+CFG.TEST.DATASET.TYPE = TimeSeriesForecastingDataset
+CFG.TEST.DATASET.CONTEXT_LENGTH = 512
+CFG.TEST.DATASET.PREDICTION_LENGTH = 96
+CFG.TEST.DATASET.PARAM = EasyDict({
+    'dataset_name': CFG.TEST.DATASET.NAME,
+    'train_val_test_ratio': testdata_regular_settings['TRAIN_VAL_TEST_RATIO'],
+    'input_len': CFG.TEST.DATASET.CONTEXT_LENGTH,
+    'output_len': CFG.TEST.DATASET.PREDICTION_LENGTH,
+    'overlap': True,
+    # 'mode' is automatically set by the runner
+})
+CFG.TEST.DATA = EasyDict()
+CFG.TEST.DATA.BATCH_SIZE = int(32 / (CFG.TEST.DATASET.CONTEXT_LENGTH / 640))
+CFG.TEST.DATA.SHUFFLE = False
+
+############################## TEST Scaler Configuration ##############################
+CFG.SCALER = EasyDict()
+# Scaler settings
+CFG.SCALER.TYPE = ZScoreScaler # Scaler class
+CFG.SCALER.PARAM = EasyDict({
+    'dataset_name': CFG.TEST.DATASET.NAME,
+    'train_ratio': testdata_regular_settings['TRAIN_VAL_TEST_RATIO'][0],
+    'norm_each_channel': testdata_regular_settings['NORM_EACH_CHANNEL'],
+    'rescale': testdata_regular_settings['RESCALE'],
+})
+
+############################## Metrics Configuration ##############################
+
+CFG.METRICS = EasyDict()
+# Metrics settings
+CFG.METRICS.FUNCS = EasyDict({
+                                'MAE': masked_mae,
+                                'MSE': masked_mse,
+                            })
+CFG.METRICS.NULL_VAL = testdata_regular_settings['NULL_VAL'] # Null value in the data
 
 ############################## Inference Configuration ##############################
 CFG.INFERENCE = EasyDict()

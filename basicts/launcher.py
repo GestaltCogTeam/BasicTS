@@ -11,7 +11,10 @@ from easytorch.utils import get_logger, set_visible_devices
 def evaluation_func(cfg: Dict,
                     ckpt_path: str = None,
                     batch_size: Optional[int] = None,
-                    strict: bool = True) -> None:
+                    strict: bool = True,
+                    context_length: Optional[int] = None,
+                    prediction_length: Optional[int] = None
+                    ) -> None:
     """
     Starts the evaluation process.
 
@@ -47,7 +50,7 @@ def evaluation_func(cfg: Dict,
     try:
         # set batch size if provided
         if batch_size is not None:
-            cfg.TEST.DATA.BATCH_SIZE = batch_size
+            cfg.TEST.DATA.BATCH_SIZE = int(batch_size)
         else:
             assert 'BATCH_SIZE' in cfg.TEST.DATA, 'Batch size must be specified either in the config or as an argument.'
 
@@ -63,7 +66,7 @@ def evaluation_func(cfg: Dict,
             runner.load_model(ckpt_path=ckpt_path, strict=strict)
 
         # start the evaluation pipeline
-        runner.test_pipeline(cfg=cfg, save_metrics=True, save_results=True)
+        runner.test_pipeline(cfg=cfg, save_metrics=True, save_results=True, context_length=context_length, prediction_length=prediction_length)
 
     except BaseException as e:
         # log the exception and re-raise it
@@ -74,7 +77,10 @@ def launch_evaluation(cfg: Union[Dict, str],
                       ckpt_path: str,
                       device_type: str = 'gpu',
                       gpus: Optional[str] = None,
-                      batch_size: Optional[int] = None) -> None:
+                      batch_size: Optional[int] = None,
+                      context_length: Optional[int] = None,
+                      prediction_length: Optional[int] = None
+                      ) -> None:
     """
     Launches the evaluation process using EasyTorch.
 
@@ -110,7 +116,7 @@ def launch_evaluation(cfg: Union[Dict, str],
         set_visible_devices(gpus)
 
     # run the evaluation process
-    evaluation_func(cfg, ckpt_path, batch_size)
+    evaluation_func(cfg, ckpt_path, batch_size, context_length=context_length, prediction_length=prediction_length)
 
 def launch_training(cfg: Union[Dict, str],
                     gpus: Optional[str] = None,

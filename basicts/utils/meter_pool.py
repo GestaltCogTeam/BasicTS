@@ -82,7 +82,7 @@ class MeterPool:
         else:
             logger.info(print_str)
 
-    def plt_meters(self, meter_type: str, step: int, tensorboard_writer: SummaryWriter):
+    def plt_meters(self, meter_type: str, step: int, tensorboard_writer: SummaryWriter, value_type: str = 'avg'):
         """Plot the specified type of meters in tensorboard.
 
         Args:
@@ -91,9 +91,14 @@ class MeterPool:
             tensorboard_writer (SummaryWriter): tensorboard SummaryWriter
         """
 
+        assert value_type in ['avg', 'last'], "value_type must be 'avg' or 'last'"
+
+        def get_value(meter):
+            return meter.value if value_type == 'avg' else meter.last
+
         for name, value in self._pool.items():
             if value['plt'] and value['type'] == meter_type:
-                tensorboard_writer.add_scalar(name, value['meter'].value, global_step=step)
+                tensorboard_writer.add_scalar(name, get_value(value['meter']), global_step=step)
         tensorboard_writer.flush()
 
     def reset(self):
