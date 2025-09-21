@@ -59,7 +59,7 @@ MODEL_PARAM = {
 CFG = EasyDict()
 # General settings
 CFG.DESCRIPTION = 'An Example Config'
-CFG.GPU_NUM = 8 # Number of GPUs to use (0 for CPU mode)
+CFG.GPU_NUM = 1 # Number of GPUs to use (0 for CPU mode)
 # Runner
 CFG.RUNNER = HimNetRunner
 
@@ -96,7 +96,7 @@ CFG.MODEL.ARCH = MODEL_ARCH
 CFG.MODEL.PARAM = MODEL_PARAM
 CFG.MODEL.FORWARD_FEATURES = [0, 1, 2]
 CFG.MODEL.TARGET_FEATURES = [0]
-CFG.MODEL.SETUP_GRAPH = True
+CFG.MODEL.SETUP_GRAPH = False
 
 ############################## Metrics Configuration ##############################
 

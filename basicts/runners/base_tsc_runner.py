@@ -9,35 +9,33 @@ import numpy as np
 import torch
 from easydict import EasyDict
 from easytorch.utils import master_only
+from torch import nn
 from tqdm import tqdm
 
 from basicts.data.simple_inference_dataset import TimeSeriesInferenceDataset
 
-from ..metrics import (masked_mae, masked_mape, masked_mse, masked_rmse,
-                       masked_wape)
+from ..metrics import accuracy
 from .base_epoch_runner import BaseEpochRunner
 
 
-class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
+class BaseTimeSeriesClassificationRunner(BaseEpochRunner):
     """
-    Runner for multivariate time series forecasting tasks.
+    Runner for multivariate time series classification tasks.
 
     Features:
-        - Supports evaluation at pre-defined horizons (optional) and overall performance assessment.
-        - Metrics: MAE, RMSE, MAPE, WAPE, and MSE. Customizable. The best model is selected based on the smallest MAE on the validation set.
+        - Metrics: Accuracy. Customizable. The best model is selected based on the highest accuracy on the validation set.
         - Supports `setup_graph` for models that operate similarly to TensorFlow.
-        - Default loss function is MAE (masked_mae), but it can be customized.
-        - Supports curriculum learning.
+        - Default loss function is CrossEntropyLoss, but it can be customized.
         - Users only need to implement the `forward` function.
 
     Customization:
         - Model:
             - Args:
-                - history_data (torch.Tensor): Historical data with shape [B, L, N, C], 
+                - inputs (torch.Tensor): input time series with shape [B, L, N, C], 
                   where B is the batch size, L is the sequence length, N is the number of nodes, 
                   and C is the number of features.
-                - future_data (torch.Tensor or None): Future data with shape [B, L, N, C]. 
-                  Can be None if there is no future data available.
+                - targets (torch.Tensor or None): labels with shape [B,]. 
+                  Can be None if there is no label available.
                 - batch_seen (int): The number of batches seen so far.
                 - epoch (int): The current epoch number.
                 - train (bool): Indicates whether the model is in training mode.
@@ -49,7 +47,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         - Loss & Metrics (optional):
             - Args:
                 - prediction (torch.Tensor): Model's predictions, with shape [B, L, N, C].
-                - target (torch.Tensor): Ground truth data, with shape [B, L, N, C].
+                - targets (torch.Tensor): Ground truth labels, with shape [B,].
                 - null_val (float): The value representing missing data in the dataset.
                 - Other args (optional): Additional arguments will be matched with keys in the model's return dictionary, if applicable.
             - Return:
@@ -64,24 +62,20 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         # setup graph flag
         self.need_setup_graph = cfg['MODEL'].get('SETUP_GRAPH', False)
+        self.num_classes = cfg['DATASET']['NUM_CLASSES']
 
         # initialize scaler
         self.scaler = self.build_scaler(cfg)
 
         # define loss function
-        self.loss = cfg['TRAIN']['LOSS']
-        self.loss_args = cfg['TRAIN'].get('LOSS_ARGS', {})
+        self.loss = cfg['TRAIN'].get('LOSS', nn.CrossEntropyLoss())
 
         # define metrics
         self.metrics = cfg.get('METRICS', {}).get('FUNCS', {
-                                                            'MAE': masked_mae, 
-                                                            'RMSE': masked_rmse,
-                                                            'MAPE': masked_mape, 
-                                                            'WAPE': masked_wape, 
-                                                            'MSE': masked_mse
+                                                            'Accuracy': accuracy, 
                                                         })
-        self.target_metrics = cfg.get('METRICS', {}).get('TARGET', 'loss')
-        self.metrics_best = cfg.get('METRICS', {}).get('BEST', 'min')
+        self.target_metrics = cfg.get('METRICS', {}).get('TARGET', 'Accuracy')
+        self.metrics_best = cfg.get('METRICS', {}).get('BEST', 'max')
         assert self.target_metrics in self.metrics or self.target_metrics == 'loss', f'Target metric {self.target_metrics} not found in metrics.'
         assert self.metrics_best in ['min', 'max'], f'Invalid best metric {self.metrics_best}.'
         # handle null values in datasets, e.g., 0.0 or np.nan.
@@ -97,8 +91,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         # Eealuation settings
         self.if_evaluate_on_gpu = cfg.get('EVAL', EasyDict()).get('USE_GPU', True)
-        self.evaluation_horizons = [_ - 1 for _ in cfg.get('EVAL', EasyDict()).get('HORIZONS', [])]
-        assert len(self.evaluation_horizons) == 0 or min(self.evaluation_horizons) >= 0, 'The horizon should start counting from 1.'
 
         # For saving test results
         self._inputs_memmap = None
@@ -131,8 +123,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         dataloader = self.build_test_data_loader(cfg=cfg) if not train else self.build_train_data_loader(cfg=cfg)
         data = next(iter(dataloader))  # get the first batch
-        if not train:
-            self.model.eval()
         self.forward(data=data, epoch=1, iter_num=0, train=train)
 
     def count_parameters(self):
@@ -186,10 +176,6 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         self.register_epoch_meter('test/loss', 'test', '{:.4f}')
         for key in self.metrics:
             self.register_epoch_meter(f'test/{key}', 'test', '{:.4f}')
-        # Register metrics for each evaluation horizons
-        for i in self.evaluation_horizons:
-            for key in self.metrics:
-                self.register_epoch_meter(f'test/{key}@h{i+1}', f'test @ horizon {i+1}', '{:.4f}')
 
     def build_train_dataset(self, cfg: Dict):
         """Build the training dataset.
@@ -282,35 +268,13 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
 
         return dataset
 
-    def curriculum_learning(self, epoch: int = None) -> int:
-        """Calculate task level for curriculum learning.
-
-        Args:
-            epoch (int, optional): Current epoch if in training process; None otherwise. Defaults to None.
-
-        Returns:
-            int: Task level for the current epoch.
-        """
-
-        if epoch is None:
-            return self.prediction_length
-        epoch -= 1
-        # generate curriculum length
-        if epoch < self.warm_up_epochs:
-            # still in warm-up phase
-            cl_length = self.prediction_length
-        else:
-            progress = ((epoch - self.warm_up_epochs) // self.cl_epochs + 1) * self.cl_step_size
-            cl_length = min(progress, self.prediction_length)
-        return cl_length
-
     def forward(self, data: tuple, epoch: Optional[int] = None, iter_num: Optional[int] = None, train: bool = True, **kwargs) -> Dict:
         """
         Performs the forward pass for training, validation, and testing. 
         Note: The outputs are not re-scaled.
 
         Args:
-            data (Dict): A dictionary containing 'target' (future data) and 'inputs' (history data) (normalized by self.scaler).
+            data (Dict): A dictionary containing 'target' and 'inputs'.
             epoch (int, optional): Current epoch number. Defaults to None.
             iter_num (int, optional): Current iteration number. Defaults to None.
             train (bool, optional): Indicates whether the forward pass is for training. Defaults to True.
@@ -319,10 +283,10 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             Dict: A dictionary containing the keys:
                   - 'inputs': Selected input features.
                   - 'prediction': Model predictions.
-                  - 'target': Selected target features.
+                  - 'target': Class labels.
 
         Raises:
-            AssertionError: If the shape of the model output does not match [B, L, N].
+            AssertionError: If the shape of the model output does not match [B, num_classes].
         """
 
         raise NotImplementedError()
@@ -341,19 +305,17 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         covariate_names = inspect.signature(metric_func).parameters.keys()
         args = {k: v for k, v in args.items() if k in covariate_names}
 
-        # add loss args
-        if self.loss_args:
-            for k, v in self.loss_args.items():
-                if k in covariate_names and k not in args:
-                    args[k] = v
-
         if isinstance(metric_func, functools.partial):
             if 'null_val' not in metric_func.keywords and 'null_val' in covariate_names: # null_val is required but not provided
                 args['null_val'] = self.null_val
+            if 'num_classes' in covariate_names: # num_classes is required
+                args['num_classes'] = self.num_classes
             metric_item = metric_func(**args)
         elif callable(metric_func):
             if 'null_val' in covariate_names: # null_val is required
                 args['null_val'] = self.null_val
+            if 'num_classes' in covariate_names: # num_classes is required
+                args['num_classes'] = self.num_classes
             metric_item = metric_func(**args)
         else:
             raise TypeError(f'Unknown metric type: {type(metric_func)}')
@@ -374,17 +336,14 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         iter_num = (epoch - 1) * self.iter_per_epoch + iter_index
         forward_return = self.forward(data=data, epoch=epoch, iter_num=iter_num, train=True)
 
-        if self.cl_param:
-            cl_length = self.curriculum_learning(epoch=epoch)
-            forward_return['prediction'] = forward_return['prediction'][:, :cl_length, :, :]
-            forward_return['target'] = forward_return['target'][:, :cl_length, :, :]
-
-        loss = self.metric_forward(self.loss, forward_return)
+        loss = self.loss(forward_return['prediction'], forward_return['target'])
         weight = self._get_metric_weight(forward_return['target'])
         self.update_epoch_meter('train/loss', loss.item(), weight)
 
+        preds = torch.argmax(forward_return['prediction'], dim=1)
+
         for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, forward_return)
+            metric_item = self.metric_forward(metric_func, {'pred': preds, 'target': forward_return['target']})
             self.update_epoch_meter(f'train/{metric_name}', metric_item.item(), weight)
         return loss
 
@@ -397,12 +356,14 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         """
 
         forward_return = self.forward(data=data, epoch=None, iter_num=iter_index, train=False)
-        loss = self.metric_forward(self.loss, forward_return)
+        # loss = self.metric_forward(self.loss, forward_return)
+        loss = self.loss(forward_return['prediction'], forward_return['target'])
         weight = self._get_metric_weight(forward_return['target'])
         self.update_epoch_meter('val/loss', loss.item(), weight)
 
+        preds = torch.argmax(forward_return['prediction'], dim=1)
         for metric_name, metric_func in self.metrics.items():
-            metric_item = self.metric_forward(metric_func, forward_return)
+            metric_item = self.metric_forward(metric_func, {'pred': preds, 'target': forward_return['target']})
             self.update_epoch_meter(f'val/{metric_name}', metric_item.item(), weight)
 
     @torch.no_grad()
@@ -419,7 +380,8 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         for batch_idx, data in enumerate(tqdm(self.test_data_loader)):
             forward_return = self.forward(data, epoch=None, iter_num=None, train=False)
 
-            loss = self.metric_forward(self.loss, forward_return)
+            # loss = self.metric_forward(self.loss, forward_return)
+            loss = self.loss(forward_return['prediction'], forward_return['target'])
             weight = self._get_metric_weight(forward_return['target'])
             self.update_epoch_meter('test/loss', loss.item(), weight)
 
@@ -429,36 +391,23 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
             else:
                 pred = forward_return['prediction']
                 target = forward_return['target']
+
+            pred = torch.argmax(pred, dim=1)
+
             if save_results:
                 batch_data = {
-                    'prediction': forward_return['prediction'].detach().cpu().numpy(),
+                    'prediction': pred.detach().cpu().numpy(),
                     'target': forward_return['target'].detach().cpu().numpy(),
                     'inputs': forward_return['inputs'].detach().cpu().numpy()
                 }
                 self._save_test_results(batch_idx, batch_data)
 
-            # evaluation on specific timesteps
-            for i in self.evaluation_horizons:
-                pred_h = pred[:, i, :, :]
-                target_h = target[:, i, :, :]
-                weight_h = self._get_metric_weight(target_h)
-
-                for metric_name, metric_func in self.metrics.items():
-                    if metric_name.lower() == 'mase':
-                        continue  # MASE needs to be calculated after all horizons
-                    metric_val = self.metric_forward(metric_func, {'prediction': pred_h, 'target': target_h})
-                    self.update_epoch_meter(f'test/{metric_name}@h{i+1}', metric_val.item(), weight_h)
-
             for metric_name, metric_func in self.metrics.items():
-                metric_item = self.metric_forward(metric_func, {'prediction': pred, 'target': target})
+                metric_item = self.metric_forward(metric_func, {'pred': pred, 'target': target})
                 self.update_epoch_meter(f'test/{metric_name}', metric_item.item(), weight)
 
         if save_metrics:
-            metrics_results = {}
-            metrics_results['overall'] = {k: self.meter_pool.get_value(f'test/{k}') for k in self.metrics.keys()}
-            for i in self.evaluation_horizons:
-                metrics_results[f'horizon_{i+1}'] = {k: self.meter_pool.get_value(f'test/{k}@h{i+1}') for k in self.metrics.keys()}
-
+            metrics_results = {k: self.meter_pool.get_value(f'test/{k}') for k in self.metrics.keys()}
             # save metrics_results to self.ckpt_save_dir/test_metrics.json
             with open(os.path.join(self.ckpt_save_dir, 'test_metrics.json'), 'w') as f:
                 json.dump(metrics_results, f, indent=4)
@@ -563,14 +512,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
     def _get_metric_weight(self, x: torch.Tensor) -> int:
         """
         Get the weight for calculating metrics.
-        Since the number of valid values in each batch may vary, it is necessary to perform a weighted average based on the valid value count.
-        The valid value count is the total count minus the number of missing values.
+        The weight is the number of samples in the batch.
         """
 
-        if self.null_val == np.nan:
-            valid_num = (~torch.isnan(x)).sum().item()
-        else:
-            eps = 5e-5
-            valid_num = (~torch.isclose(x, torch.tensor(self.null_val).expand_as(x).to(x.device), atol=eps, rtol=0.0)).sum().item()
-
-        return valid_num
+        return x.shape[0]

@@ -596,7 +596,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         result = self.inference(save_result_path=output_data_file_path)
 
         inference_end_time = time.time()
-        self.update_epoch_meter('inference/time', 'inference', inference_end_time - inference_start_time)
+        self.update_epoch_meter('inference/time', inference_end_time - inference_start_time)
 
         self.print_epoch_meters('inference')
 

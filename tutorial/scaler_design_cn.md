@@ -41,4 +41,5 @@ BasicTS 提供了几种常见的缩放器，例如 Z-Score 和 Min-Max 缩放器
 - **📉 [了解评估指标设计并开发自定义损失函数与评估指标](./metrics_design_cn.md)**
 - **🏃‍♂️ [掌握执行器设计并创建自定义执行器](./runner_design_cn.md)**
 - **📜 [解析配置文件设计并自定义配置](./config_design_cn.md)**
+- **🎯 [探索使用BasicTS进行时间序列分类](./time_series_classification_cn.md)**
 - **🔍 [探索多种基线模型](../baselines/)**

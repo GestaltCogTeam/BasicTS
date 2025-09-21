@@ -108,4 +108,5 @@ For more specific needs, you can extend the [`SimpleTimeSeriesForecastingRunner`
 - **📉 [Examining the Metrics Convention and Developing Your Own Loss & Metrics](./metrics_design.md)**
 - **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](./runner_design.md)**
 - **📜 [Interpreting the Config File Convention and Customizing Your Configuration](./config_design.md)**
+- **🎯 [Exploring Time Series Classification with BasicTS](./time_series_classification_cn.md)**
 - **🔍 [Exploring a Variety of Baseline Models](../baselines/)**

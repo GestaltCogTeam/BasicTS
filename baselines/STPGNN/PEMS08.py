@@ -42,7 +42,7 @@ MODEL_PARAM = {
     "in_dim": 1,  # Number of input features
     "normalization": "batch",
 }
-NUM_EPOCHS = 100
+NUM_EPOCHS = 200
 
 ############################## General Configuration ##############################
 CFG = EasyDict()
@@ -112,13 +112,6 @@ CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
     "lr": 0.001,
     "weight_decay": 0.0001,
-}
-# Learning rate scheduler settings
-CFG.TRAIN.LR_SCHEDULER = EasyDict()
-CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
-CFG.TRAIN.LR_SCHEDULER.PARAM = {
-    "milestones": [1, 50, 80],
-    "gamma": 0.5
 }
 CFG.TRAIN.CLIP_GRAD_PARAM = {
     'max_norm': 5.0

@@ -103,5 +103,9 @@ class DeepAR(nn.Module):
         mus = torch.concat(mus, dim=1)
         sigmas = torch.concat(sigmas, dim=1)
         reals = input_feat_full[:, -preds.shape[1]:, :, :]
-
+        if not train:
+            preds = preds[:, -len_out:, :, :]
+            reals = reals[:, -len_out:, :, :]
+            mus = mus[:, -len_out:, :, :]
+            sigmas = sigmas[:, -len_out:, :, :]
         return {"prediction": preds, "target": reals, "mus": mus, "sigmas": sigmas}

@@ -109,15 +109,14 @@ CFG.TRAIN.OPTIM.TYPE = "Adam"
 CFG.TRAIN.OPTIM.PARAM = {
     "lr": 0.01
 }
+# Train data loader settings
+CFG.TRAIN.DATA = EasyDict()
+CFG.TRAIN.DATA.BATCH_SIZE = 256
+CFG.TRAIN.DATA.SHUFFLE = True
 # Learning rate scheduler settings
 CFG.TRAIN.LR_SCHEDULER = EasyDict()
-# CFG.TRAIN.LR_SCHEDULER.TYPE = "MultiStepLR"
-# CFG.TRAIN.LR_SCHEDULER.PARAM = {
-#     "milestones": [1, 25, 50],
-#     "gamma": 0.5
-# }
 desc = load_dataset_desc(DATA_NAME)
-train_steps = math.ceil(desc["num_time_steps"] * TRAIN_VAL_TEST_RATIO[0])
+train_steps = math.ceil(desc["num_time_steps"] * TRAIN_VAL_TEST_RATIO[0]/CFG.TRAIN.DATA.BATCH_SIZE)
 CFG.TRAIN.LR_SCHEDULER.TYPE = "OneCycleLR"
 CFG.TRAIN.LR_SCHEDULER.PARAM = {
     "pct_start": 0.3,
@@ -128,10 +127,6 @@ CFG.TRAIN.LR_SCHEDULER.PARAM = {
 CFG.TRAIN.CLIP_GRAD_PARAM = {
     'max_norm': 5.0
 }
-# Train data loader settings
-CFG.TRAIN.DATA = EasyDict()
-CFG.TRAIN.DATA.BATCH_SIZE = 256
-CFG.TRAIN.DATA.SHUFFLE = True
 
 ############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()
