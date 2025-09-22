@@ -16,10 +16,10 @@ from ..loss import fake_loss
 MODEL_ARCH = ChronosBolt
 
 context_length = 1024
-predict_length = 64 # ref: /workspace/S22/TSFM_LLaMA3/huggingface_ckpts/chronos-bolt-tiny/config.json
+predict_length = 64 # ref: chronos-bolt-base/config.json
 
 MODEL_PARAM = {
-    "model_id": "./baselines/ChronosBolt/ckpt/chronos-bolt-base",
+    "model_id": "baselines/ChronosBolt/ckpt/chronos-bolt-base",
     "from_pretrained": False,
     "device_map": "cpu",
 }

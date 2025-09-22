@@ -4,7 +4,7 @@ import subprocess
 
 # parameters
 DEVICE_TYPE = 'gpu' # cpu or gpu
-GPU = '0'
+GPU = '3'
 BASICTS_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
 BASELINE_PREFIX = 'baselines/ChronosBolt/evaluate_config/'
 
@@ -13,8 +13,6 @@ MODEL_LIST = ['base.py', 'small.py']
 CHECKPOINT_PATH_List = ['/path/to/your/base/checkpoint.pt','/path/to/your/small/checkpoint.pt']
 CONTEXT_LENGTH_LIST = [512, 720, 1024, 2048]
 PREDICTION_LENGTH_LIST = [96, 192, 336, 720]
-
-
 
 
 def gen_config_path(dataset, model):

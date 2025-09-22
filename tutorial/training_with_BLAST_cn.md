@@ -124,3 +124,22 @@ BasicTS 当前支持使用 BLAST 训练TimeMoE和ChronosBolt两种模型。
 > - 默认配置已针对 BLAST 数据集做了批量大小、学习率等超参适配，若显存或机器规格不同，请适当调整。  
 
 如有任何问题，欢迎在 [BasicTS Issues](https://github.com/GestaltCogTeam/BasicTS/issues) 提交反馈。祝训练顺利！
+
+## 4. 模型评估
+
+我们在 [Hugging Face](https://huggingface.co/ZezhiShao/BLAST_CKPTS/tree/main) 上提供了基于 BLAST 训练的 **ChronosBolt**、**MOIRAI** 和 **TimeMoE** 模型权重。
+
+此外，我们还提供了针对 **ETTh1、ETTh2、ETTm1、ETTm2 以及 Weather** 数据集的一键评估脚本。这些脚本可以在各模型对应的 `evaluate_config` 目录中找到。
+
+例如，如果你希望评估 **ChronosBolt** 模型，只需修改
+`baselines/ChronosBolt/evaluate_config/evaluate_all.py` 脚本中的 `CHECKPOINT_PATH_List`，将其指向你下载或训练完成的权重文件，然后运行：
+
+```bash
+python baselines/ChronosBolt/evaluate_config/evaluate_all.py
+```
+
+即可获得完整的评估结果。我们复现的结果已整理在
+`baselines/ChronosBolt/evaluate_config/chronos_bolt_evaluation_results.txt` 文件中。需要注意的是，由于训练存在随机性，以及评估流程可能有所调整，结果可能与论文中报告的数值不完全一致，但整体上应当非常接近（可能略优或略劣）。
+
+**TimeMoE** 模型的使用方式与 ChronosBolt 基本相同。
+**MOIRAI** 模型的训练与评估，请参考 `baselines/MOIRAI/README.md`。

@@ -55,7 +55,9 @@ def evaluation_func(cfg: Dict,
             assert 'BATCH_SIZE' in cfg.TEST.DATA, 'Batch size must be specified either in the config or as an argument.'
 
         # load the model checkpoint
-        if ckpt_path is None or not os.path.exists(ckpt_path):
+        if ckpt_path is None:
+            logger.info('Checkpoint path is not provided, skipping loading checkpoint.')
+        elif not os.path.exists(ckpt_path):
             ckpt_path_auto = os.path.join(runner.ckpt_save_dir, '{}_best_val_{}.pt'.format(runner.model_name, runner.target_metrics.replace('/', '_')))
             logger.info(f'Checkpoint file not found at {ckpt_path}. Loading the best model checkpoint `{ckpt_path_auto}` automatically.')
             if not os.path.exists(ckpt_path_auto):
@@ -102,7 +104,7 @@ def launch_evaluation(cfg: Union[Dict, str],
     # cfg path which start with dot will crash the easytorch, just remove dot
     while isinstance(cfg, str) and cfg.startswith(('./','.\\')):
         cfg = cfg[2:]
-    while ckpt_path.startswith(('./','.\\')):
+    while isinstance(ckpt_path, str) and ckpt_path.startswith(('./','.\\')):
         ckpt_path = ckpt_path[2:]
 
     # initialize the configuration

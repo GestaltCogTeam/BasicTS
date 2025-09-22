@@ -1,8 +1,10 @@
-class AvgMeter:
+class AvgMeter(object):
     """Average meter.
     """
 
     def __init__(self):
+
+        self._last: float = 0.
         self._sum: float = 0.
         self._count: int = 0
 
@@ -10,6 +12,7 @@ class AvgMeter:
         """Reset counter.
         """
 
+        self._last = 0.
         self._sum = 0.
         self._count = 0
 
@@ -21,6 +24,7 @@ class AvgMeter:
             n (int): number.
         """
 
+        self._last = value
         self._sum += value * n
         self._count += n
 
@@ -33,6 +37,16 @@ class AvgMeter:
         """
 
         return self._sum / self._count if self._count != 0 else 0
+
+    @property
+    def last(self) -> float:
+        """Get last value.
+
+        Returns:
+            last (float)
+        """
+
+        return self._last
 
 
 class RMSEMeter:

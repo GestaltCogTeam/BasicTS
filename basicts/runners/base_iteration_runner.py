@@ -760,15 +760,21 @@ class BaseIterationRunner(metaclass=ABCMeta):
 
         # add context_length and prediction_length to cfg
         if context_length is not None:
-            cfg['TEST']['DATASET']['PARAM']['input_len'] = context_length
+            if 'DATASET' in cfg:
+                cfg['DATASET']['PARAM']['input_len'] = context_length
+            else:
+                cfg['TEST']['DATASET']['PARAM']['input_len'] = context_length
         if prediction_length is not None:
-            cfg['TEST']['DATASET']['PARAM']['output_len'] = prediction_length
+            if 'DATASET' in cfg:
+                cfg['DATASET']['PARAM']['output_len'] = prediction_length
+            else:
+                cfg['TEST']['DATASET']['PARAM']['output_len'] = prediction_length
 
         if train_iteration is None and cfg is not None:
             self.init_test(cfg)
 
         self.logger.info('Start test.')
-        self.on_test_start()
+        self.on_test_start(cfg)
 
         test_start_time = time.time()
         self.model.eval()
@@ -789,7 +795,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
         if save_metrics:
             self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
 
-        self.on_test_end()
+        self.on_test_end(cfg)
 
     @torch.no_grad()
     @master_only
@@ -827,7 +833,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
 
         self.init_inference(cfg, input_data, context_length, prediction_length)
 
-        self.on_inference_start()
+        self.on_inference_start(cfg)
 
         inference_start_time = time.time()
         self.model.eval()
@@ -844,7 +850,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
         if output_data_file_path:
             self.logger.info(f'inference results saved to {output_data_file_path}.')
 
-        self.on_inference_end()
+        self.on_inference_end(cfg)
 
         return result
 
@@ -862,25 +868,25 @@ class BaseIterationRunner(metaclass=ABCMeta):
         raise NotImplementedError('test method must be implemented.')
 
     @master_only
-    def on_test_start(self) -> None:
+    def on_test_start(self, cfg: Dict = None) -> None:
         """Callback at the start of testing."""
 
         pass
 
     @master_only
-    def on_inference_start(self) -> None:
+    def on_inference_start(self, cfg: Dict = None) -> None:
         """Callback at the start of inference."""
 
         pass
 
     @master_only
-    def on_test_end(self) -> None:
+    def on_test_end(self, cfg: Dict = None) -> None:
         """Callback at the end of testing."""
 
         pass
 
     @master_only
-    def on_inference_end(self) -> None:
+    def on_inference_end(self, cfg: Dict = None) -> None:
         """Callback at the end of inference."""
 
         pass

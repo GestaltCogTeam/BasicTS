@@ -1,3 +1,5 @@
+# 采样概率变化
+
 import os
 import sys
 from easydict import EasyDict
@@ -8,38 +10,38 @@ from basicts.utils.serialization import get_regular_settings
 from basicts.metrics import masked_mae, masked_mse
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
 
-from ...arch import ChronosBolt
-from ...data import BLASTDatasetWoMixUp
-from ...runner import ChronosRunner
-from ...loss import fake_loss
+from ...arch import MOIRAI
+from ...runner import MOIRAIEvalRunner
 
 
 ############################## Hot Parameters ##############################
 # Dataset & Metrics configuration
 # Model architecture and parameters
 
-MODEL_ARCH = ChronosBolt
-
 CONTEXT_LENGTH = None
-PREDICTION_LENGTH = None # ref: chronos-bolt-tiny/config.json
+PREDICTION_LENGTH = None
+
+MODEL_ARCH = MOIRAI
 
 MODEL_PARAM = {
-    "model_id": "baselines/ChronosBolt/ckpt/chronos-bolt-small",
-    "from_pretrained": False,
-    "device_map": "cpu",
+    'prediction_length': PREDICTION_LENGTH,
+    'context_length': CONTEXT_LENGTH,
+    'patch_size': 32,
+    'from_pretrained': "/path/to/your/model", # model id
+    # 'from_pretrained': "/home/S22/workspace/BLAST_CKPTS/MOIRAI-Large-BLAST",
 }
-DATA_NAME = "ETTh1"
+DATA_NAME = "ETTh2"
 
-NUM_ITERATIONS = None # 总轮数
+NUM_ITERATIONS = None
 
 ############################## General Configuration ##############################
 CFG = EasyDict()
 # General settings
-CFG.DESCRIPTION = 'Chronos-Bolt Base | Debug: Data'
-CFG.GPU_NUM = 8 # Number of GPUs to use (0 for CPU mode)
-# CFG.GPU_NUM = 8 # Number of GPUs to use (0 for CPU mode)
+CFG.DESCRIPTION = 'MOIRAI Large'
+CFG.DEVICE = 'gpu'
+CFG.DEVICE_NUM = 8
 # Runner
-CFG.RUNNER = ChronosRunner
+CFG.RUNNER = MOIRAIEvalRunner
 
 ############################## Model Configuration ################################
 CFG.MODEL = EasyDict()
@@ -50,13 +52,20 @@ CFG.MODEL.DTYPE= 'bfloat16'
 
 ############################## Training Configuration ##############################
 CFG.TRAIN = EasyDict()
-CFG.TRAIN.COMPILE_MODEL = False
+CFG.TRAIN.COMPILE_MODEL = True
 CFG.TRAIN.NUM_ITERATIONS = NUM_ITERATIONS
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
     MODEL_ARCH.__name__,
     '_'.join([DATA_NAME, str(CFG.TRAIN.NUM_ITERATIONS)])
 )
+
+############################## Inference Configuration ##############################
+CFG.INFERENCE = EasyDict()
+CFG.INFERENCE.GENERATION_PARAMS = EasyDict({
+    'normalize': True,
+    'reduce': 'median'
+})
 
 regular_settings = get_regular_settings(dataset_name=DATA_NAME)
 
@@ -97,8 +106,3 @@ CFG.METRICS.FUNCS = EasyDict({
                                 'MSE': masked_mse,
                             })
 CFG.METRICS.NULL_VAL = regular_settings['NULL_VAL'] # Null value in the data
-
-############################## Inference Configuration ##############################
-CFG.INFERENCE = EasyDict()
-CFG.INFERENCE.GENERATION_PARAMS = EasyDict({
-})

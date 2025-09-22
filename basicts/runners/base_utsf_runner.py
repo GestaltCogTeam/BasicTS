@@ -32,7 +32,7 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         self.data_scaler = self.build_data_scaler(cfg)
 
         # define loss function
-        self.loss = cfg['TRAIN']['LOSS']
+        self.loss = cfg.get('TRAIN', {}).get('LOSS', None) # cfg['TRAIN']['LOSS']
 
         # define metrics
         self.metrics = cfg.get('METRICS', {}).get('FUNCS', {})
@@ -141,10 +141,7 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
 
     def build_test_dataset(self, cfg: Dict) -> Dataset:
         """Build the test dataset. Only for evaluation after training."""
-        dataset = cfg['TEST']['DATASET']['TYPE'](mode='test', logger=self.logger, **cfg['TEST']['DATASET']['PARAM'])
-        self.logger.info(f'Test dataset parameters: {cfg["TEST"]["DATASET"]["PARAM"]}')
-        self.logger.info(f'Test dataset length: {len(dataset)}')
-        return dataset
+        return self.build_dataset(cfg, mode='test')
 
     def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list], context_length: int, prediction_length: int):
         """Build the inference dataset.
@@ -587,7 +584,7 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         context = history_data[..., 0].transpose(1, 2).reshape(B * N, L).contiguous()
 
         # Generate predictions
-        model_return = self.model.generate(context, prediction_length, **self.generation_params)
+        model_return = self.model.generate(context=context, prediction_length=prediction_length, **self.generation_params)
         model_return = model_return.reshape(B, N, prediction_length, 1).transpose(1, 2).contiguous()
 
         # Parse model return

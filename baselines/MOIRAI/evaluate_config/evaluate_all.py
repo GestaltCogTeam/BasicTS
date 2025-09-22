@@ -4,13 +4,12 @@ import subprocess
 
 # parameters
 DEVICE_TYPE = 'gpu' # cpu or gpu
-GPU = '0'
+GPU = '7'
 BASICTS_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
-BASELINE_PREFIX = 'baselines/TimeMoE/evaluate_config/'
+BASELINE_PREFIX = 'baselines/MOIRAI/evaluate_config/'
 
 DATASET_LIST = ['ETTh1', 'ETTh2', 'ETTm1', 'ETTm2', 'Weather']
 MODEL_LIST = ['base.py', 'large.py']
-CHECKPOINT_PATH_List = ['/path/to/your/base/checkpoint.pt','/path/to/your/large/checkpoint.pt']
 CONTEXT_LENGTH_LIST = [512, 720, 1024, 2048]
 PREDICTION_LENGTH_LIST = [96, 192, 336, 720]
 
@@ -19,8 +18,8 @@ def gen_config_path(dataset, model):
     config_path = os.path.join(BASELINE_PREFIX, dataset, model)
     return config_path
 
-def gen_evaluate_command(checkpoint, config_path, context_length, prediction_length):
-    command = f'cd {BASICTS_ROOT}; python experiments/evaluate.py -ckpt "{checkpoint}" -d {DEVICE_TYPE} -cfg "{config_path}" -g {GPU} -ctx {context_length} -pred {prediction_length}'
+def gen_evaluate_command(config_path, context_length, prediction_length):
+    command = f'cd {BASICTS_ROOT}; python experiments/evaluate.py -d {DEVICE_TYPE} -cfg "{config_path}" -g {GPU} -ctx {context_length} -pred {prediction_length}'
     return command
 
 if __name__ == '__main__':
@@ -28,11 +27,11 @@ if __name__ == '__main__':
     logs = []
 
     for dataset in DATASET_LIST:
-        for model, checkpoint in zip(MODEL_LIST, CHECKPOINT_PATH_List):
+        for model in MODEL_LIST:
             config_path = gen_config_path(dataset, model)
             for context_length in CONTEXT_LENGTH_LIST:
                 for prediction_length in PREDICTION_LENGTH_LIST:
-                    command = gen_evaluate_command(checkpoint, config_path, context_length, prediction_length)
+                    command = gen_evaluate_command(config_path, context_length, prediction_length)
                     print(command)
                     # get output
                     result = subprocess.run(command, shell=True, capture_output=True, text=True, check=False)
@@ -51,16 +50,16 @@ if __name__ == '__main__':
                             break
 
     # write logs to file
-    with open('timemoe_evaluation_logs.txt', 'w') as f:
+    with open('moirai_evaluation_logs.txt', 'w') as f:
         for log in logs:
             f.write(log)
             f.write('\n' + '='*80 + '\n')
 
     # write eval_result to file
-    with open('timemoe_evaluation_results.txt', 'w') as f:
+    with open('moirai_evaluation_results.txt', 'w') as f:
         for key, value in eval_result.items():
             f.write(f'{key}: MAE={value["MAE"]}, MSE={value["MSE"]}\n')
     
-    with open('timemoe_evaluation_results.json', 'w') as f:
+    with open('moirai_evaluation_results.json', 'w') as f:
         import json
         json.dump(eval_result, f, indent=4)

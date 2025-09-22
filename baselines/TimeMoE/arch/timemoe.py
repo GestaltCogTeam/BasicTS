@@ -6,14 +6,11 @@ from .configuration_time_moe import TimeMoeConfig
 from .modeling_time_moe import TimeMoeForPrediction
 
 class TimeMoE(nn.Module):
-    def __init__(self, model_id: str, from_pretrained: bool,
-                    context_length: int,
-                    trust_remote_code: bool):
+    def __init__(self, model_id: str, from_pretrained: bool, trust_remote_code: bool, **args):
         
         super().__init__()
         
         self.model_type = 'causal' # TimeMoE is a causal model
-        self.context_length = context_length
         
         if from_pretrained:
             self.model = AutoModelForCausalLM.from_pretrained(

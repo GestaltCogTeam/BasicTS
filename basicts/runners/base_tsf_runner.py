@@ -69,7 +69,7 @@ class BaseTimeSeriesForecastingRunner(BaseEpochRunner):
         self.scaler = self.build_scaler(cfg)
 
         # define loss function
-        self.loss = cfg['TRAIN']['LOSS']
+        self.loss = cfg.get('TRAIN', {}).get('LOSS', None) # cfg['TRAIN']['LOSS']
         self.loss_args = cfg['TRAIN'].get('LOSS_ARGS', {})
 
         # define metrics
