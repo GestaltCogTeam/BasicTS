@@ -763,12 +763,12 @@ class BaseIterationRunner(metaclass=ABCMeta):
             if 'DATASET' in cfg:
                 cfg['DATASET']['PARAM']['input_len'] = context_length
             else:
-                cfg['TEST']['DATASET']['PARAM']['input_len'] = context_length
+                cfg['TEST']['DATA']['DATASET']['PARAM']['input_len'] = context_length
         if prediction_length is not None:
             if 'DATASET' in cfg:
                 cfg['DATASET']['PARAM']['output_len'] = prediction_length
             else:
-                cfg['TEST']['DATASET']['PARAM']['output_len'] = prediction_length
+                cfg['TEST']['DATA']['DATASET']['PARAM']['output_len'] = prediction_length
 
         if train_iteration is None and cfg is not None:
             self.init_test(cfg)
