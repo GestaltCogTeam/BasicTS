@@ -1,5 +1,7 @@
 import functools
 import inspect
+import json
+import os
 from typing import Dict, Optional, Tuple, Union
 
 import numpy as np
@@ -8,6 +10,7 @@ from easydict import EasyDict
 from easytorch.device import _DEVICE_TYPE
 from easytorch.utils import get_world_size, master_only
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 from basicts.data.simple_inference_dataset import TimeSeriesInferenceDataset
 
@@ -29,7 +32,7 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         self.data_scaler = self.build_data_scaler(cfg)
 
         # define loss function
-        self.loss = cfg['TRAIN']['LOSS']
+        self.loss = cfg.get('TRAIN', {}).get('LOSS', None) # cfg['TRAIN']['LOSS']
 
         # define metrics
         self.metrics = cfg.get('METRICS', {}).get('FUNCS', {})
@@ -45,7 +48,7 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         self.if_evaluate_on_gpu = cfg.get('EVAL', EasyDict()).get('USE_GPU', True)
 
         # automatic mixed precision (amp)
-        self.model_dtype = cfg.get('MODEL.DTYPE', 'float32')
+        self.model_dtype = cfg.get('MODEL.DTYPE', 'float32') #TODO check dtype diff
         ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[self.model_dtype]
         self.user_amp = self.model_dtype in ['float16', 'bfloat16']
         if self.user_amp: assert _DEVICE_TYPE == 'gpu', 'AMP only supports CUDA.'
@@ -125,7 +128,6 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         """
 
         super().init_test(cfg)
-        self.register_iteration_meter('test/loss', 'test', '{:.4f}')
         for key in self.metrics:
             self.register_iteration_meter(f'test/{key}', 'test', '{:.4f}')
 
@@ -138,7 +140,7 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         return self.build_dataset(cfg, mode='valid')
 
     def build_test_dataset(self, cfg: Dict) -> Dataset:
-        """Build the test dataset."""
+        """Build the test dataset. Only for evaluation after training."""
         return self.build_dataset(cfg, mode='test')
 
     def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list], context_length: int, prediction_length: int):
@@ -370,6 +372,132 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
 
     @torch.no_grad()
     @master_only
+    def test_forward(self, data: Dict) -> Dict:
+        """Forward pass for testing/inference.
+
+        Args:
+            data (Dict): A dictionary containing 'target' (future data) and 'inputs' (history data) (normalized by self.scaler).
+
+        Returns:
+            Dict: A dictionary containing the keys:
+                  - 'inputs': Selected input features.
+                  - 'prediction': Model predictions.
+                  - 'target': Selected target features.
+        """
+
+        return self.inference_forward(data)
+
+    @torch.no_grad()
+    @master_only
+    def test(self, train_iteration: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> Dict:
+        """Test process. Only for evaluation.
+        
+        Args:
+            train_iteration (Optional[int]): Current iteration if in training process.
+            save_metrics (bool): Save the test metrics. Defaults to False.
+            save_results (bool): Save the test results. Defaults to False.
+        """
+
+        for batch_idx, data in enumerate(tqdm(self.test_data_loader)):
+
+            with self.amp_context:
+                forward_return = self.test_forward(data)
+
+            # loss = self.metric_forward(self.loss, forward_return)
+            weight = self._get_metric_weight(forward_return['target'])
+            # self.update_epoch_meter('test/loss', loss.item(), weight)
+
+            if not self.if_evaluate_on_gpu:
+                pred = forward_return['prediction'].detach().cpu()
+                target = forward_return['target'].detach().cpu()
+            else:
+                pred = forward_return['prediction']
+                target = forward_return['target']
+            if save_results:
+                batch_data = {
+                    'prediction': forward_return['prediction'].detach().cpu().numpy(),
+                    'target': forward_return['target'].detach().cpu().numpy(),
+                    'inputs': forward_return['inputs'].detach().cpu().numpy()
+                }
+                self._save_test_results(batch_idx, batch_data)
+
+
+            for metric_name, metric_func in self.metrics.items():
+                metric_item = self.metric_forward(metric_func, {'prediction': pred, 'target': target})
+                self.update_iteration_meter(f'test/{metric_name}', metric_item.item(), weight)
+
+        metrics_results = {}
+        if save_metrics:
+            metrics_results['overall'] = {k: self.meter_pool.get_value(f'test/{k}') for k in self.metrics.keys()}
+
+            # save metrics_results to self.ckpt_save_dir/test_metrics.json
+            with open(os.path.join(self.ckpt_save_dir, 'test_metrics.json'), 'w') as f:
+                json.dump(metrics_results, f, indent=4)
+
+        return metrics_results
+
+    @master_only
+    def _save_test_results(self, batch_idx: int, batch_data: Dict[str, np.ndarray]) -> None:
+
+        """
+        Save the test results to disk.
+        
+        Args:
+            batch_idx (int): The index of the current batch.
+            batch_data (Dict[np.ndarray]): The test results:{
+                'inputs': np.ndarray,
+                'prediction': np.ndarray,
+                'target': np.ndarray,
+            }
+        """
+
+        total_samples = len(self.test_data_loader.dataset)
+
+        save_dir = os.path.join(self.ckpt_save_dir, 'test_results')
+        os.makedirs(save_dir, exist_ok=True)
+        inputs_path = os.path.join(save_dir, 'inputs.npy')
+        pred_path = os.path.join(save_dir, 'predictions.npy')
+        tgt_path = os.path.join(save_dir, 'targets.npy')
+
+        # create memmap files
+        if batch_idx == 0:
+
+            self._inputs_memmap = np.memmap(inputs_path, dtype=batch_data['inputs'].dtype, mode='w+',
+                                    shape=(total_samples, *batch_data['inputs'].shape[1:]))
+            self._prediction_memmap = np.memmap(pred_path, dtype=batch_data['prediction'].dtype, mode='w+',
+                                    shape=(total_samples, *batch_data['prediction'].shape[1:]))
+            self._target_memmap = np.memmap(tgt_path, dtype=batch_data['target'].dtype, mode='w+',
+                                shape=(total_samples, *batch_data['target'].shape[1:]))
+
+        start = batch_idx * batch_data['inputs'].shape[0]
+        end = start + batch_data['inputs'].shape[0]
+
+        self._inputs_memmap[start:end] = batch_data['inputs']
+        self._prediction_memmap[start:end] = batch_data['prediction']
+        self._target_memmap[start:end] = batch_data['target']
+
+        if batch_idx == (total_samples // batch_data['inputs'].shape[0]):
+            self._inputs_memmap.flush()
+            self._prediction_memmap.flush()
+            self._target_memmap.flush()
+
+    def _get_metric_weight(self, x: torch.Tensor) -> int:
+        """
+        Get the weight for calculating metrics.
+        Since the number of valid values in each batch may vary, it is necessary to perform a weighted average based on the valid value count.
+        The valid value count is the total count minus the number of missing values.
+        """
+
+        if self.null_val == np.nan:
+            valid_num = (~torch.isnan(x)).sum().item()
+        else:
+            eps = 5e-5
+            valid_num = (~torch.isclose(x, torch.tensor(self.null_val).expand_as(x).to(x.device), atol=eps, rtol=0.0)).sum().item()
+
+        return valid_num
+
+    @torch.no_grad()
+    @master_only
     def inference(self, save_result_path: str = '') -> tuple:
         """Inference process.
         
@@ -378,8 +506,8 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         """
 
         data = next(iter(self.inference_dataset_loader))
-
-        forward_return = self.inference_forward(data)
+        with self.amp_context:
+            forward_return = self.inference_forward(data)
         prediction = forward_return['prediction'].detach().cpu()
         prediction = prediction.squeeze(0).squeeze(-1)
 
@@ -456,7 +584,7 @@ class BaseUniversalTimeSeriesForecastingRunner(BaseIterationRunner):
         context = history_data[..., 0].transpose(1, 2).reshape(B * N, L).contiguous()
 
         # Generate predictions
-        model_return = self.model.generate(context, prediction_length, **self.generation_params)
+        model_return = self.model.generate(context=context, prediction_length=prediction_length, **self.generation_params)
         model_return = model_return.reshape(B, N, prediction_length, 1).transpose(1, 2).contiguous()
 
         # Parse model return

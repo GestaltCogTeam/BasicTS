@@ -40,6 +40,17 @@ class MOIRAI(nn.Module):
             feat_dynamic_real_dim=None,
             past_feat_dynamic_real_dim=None,
         )
+    
+    def update_forecastor(self, context_length=None, prediction_length=None, patch_size=None):
+        self.model = MoiraiForecast(
+            module=self.module,
+            prediction_length=prediction_length if prediction_length is not None else self.prediction_length,
+            context_length=context_length if context_length is not None else self.context_length,
+            patch_size=patch_size if patch_size is not None else self.patch_size,
+            target_dim=1,
+            feat_dynamic_real_dim=None,
+            past_feat_dynamic_real_dim=None,
+        )
 
     def _get_batch_samples(self, all_data: torch.Tensor):
         b, l = all_data.size()
@@ -93,4 +104,3 @@ class MOIRAI(nn.Module):
 if __name__ == "__main__":
     pass
     model = MOIRAI(prediction_length=16, context_length=64, patch_size="auto", from_pretrained="/workspace/S22/TSFM_LLaMA3/huggingface_ckpts/MOIRAI-1.1-Base")
-    

@@ -9,7 +9,6 @@ class TimeMoERunner(BaseUniversalTimeSeriesForecastingRunner):
 
     def __init__(self, cfg: Dict):
         super().__init__(cfg)
-        self.context_length = cfg['MODEL']['PARAM']['context_length']
 
     def forward(self, data: Dict, **kwargs) -> Dict:
         inputs, labels, mask = data['inputs'], data['labels'], data['mask']

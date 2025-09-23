@@ -22,10 +22,10 @@ MODEL_ARCH = TimeMoE
 MODEL_PARAM = {
     'model_id': "baselines/TimeMoE/ckpt/TimeMoE-200M",
     'from_pretrained': pretrained,
-    'context_length': 4095,
     'trust_remote_code': True,
 }
 DATA_NAME = "BLAST"
+# context_length: 4095,
 
 # N = 20_000_000
 # batch size = 16*8
@@ -38,8 +38,7 @@ VAL_ITERATION_INTERVAL = 5_000 # 每VAL_ITERATION_INTERVAL执行一次验证
 CFG = EasyDict()
 # General settings
 CFG.DESCRIPTION = 'TimeMoE Large'
-CFG.DEVICE = 'gpu'
-CFG.DEVICE_NUM = 8
+CFG.GPU_NUM = 8
 # Runner
 CFG.RUNNER = TimeMoERunner
 
@@ -57,7 +56,7 @@ CFG.METRICS.FUNCS = EasyDict({})
 
 ############################## Training Configuration ##############################
 CFG.TRAIN = EasyDict()
-CFG.TRAIN.COMPILE_MODEL = True
+CFG.TRAIN.COMPILE_MODEL = True # see experiments/train.py for addressing compling error
 CFG.TRAIN.NUM_ITERATIONS = NUM_ITERATIONS
 CFG.TRAIN.CKPT_SAVE_DIR = os.path.join(
     'checkpoints',
@@ -87,10 +86,10 @@ CFG.TRAIN.CLIP_GRAD_PARAM = {
 # Train data loader settings
 CFG.TRAIN.DATA = EasyDict()
 CFG.TRAIN.DATA.BATCH_SIZE = 8
-CFG.TRAIN.DATA.SHUFFLE = True # has to be False
+CFG.TRAIN.DATA.SHUFFLE = True
 CFG.TRAIN.DATA.PIN_MEMORY = True
 CFG.TRAIN.DATA.PREFETCH = True
-CFG.TRAIN.GRAD_ACCUMULATION_STEPS = 2
+CFG.TRAIN.GRAD_ACCUMULATION_STEPS = 4
 
 ############################## Validation Configuration ##############################
 CFG.VAL = EasyDict()
