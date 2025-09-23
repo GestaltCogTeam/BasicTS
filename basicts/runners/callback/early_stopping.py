@@ -1,7 +1,4 @@
-import logging
 from typing import TYPE_CHECKING, Optional
-
-from easytorch.utils import get_logger
 
 from .callback import BasicTSCallback
 

@@ -2,13 +2,13 @@ from typing import List, Sequence
 
 from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
-from basicts.models.iTransformer import iTransformer, iTransformerConfig
+from basicts.models.iTransformer import iTransformerForForecasting, iTransformerConfig
 from basicts.runners.callback import BasicTSCallback
 
 
 def iTransformer_ETTh1(
         input_lens: Sequence[int] = (336,),
-        output_lens: Sequence[int] = (96, 192, 336, 720),
+        output_lens: Sequence[int] = (336,),
         training_config: BasicTSForecastingConfig | None = None,
         gpus: str | None = None,
         callbacks: List[BasicTSCallback] = None,
@@ -22,11 +22,13 @@ def iTransformer_ETTh1(
                     and training_config.dataset_name == "ETTh1", \
                     "The model should be iTransformer and dataset should be ETTh1."
             else:
-                model = iTransformer(
+                model = iTransformerForForecasting(
                     iTransformerConfig(
                         input_len=input_len,
                         output_len=output_len,
                         num_features=7,
+                        hidden_size=32,
+                        intermediate_size=32
                     )
                 )
                 training_config = BasicTSForecastingConfig(

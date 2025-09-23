@@ -28,7 +28,7 @@ class Autoformer(nn.Module):
         self.output_attentions = config.output_attentions
 
         # Decomp
-        self.decomp = MovingAverageDecomposition(config.kernel_size)
+        self.decomp = MovingAverageDecomposition(config.moving_avg)
 
         # Embedding
         self.enc_embedding = FeatureEmbedding(
@@ -63,13 +63,16 @@ class Autoformer(nn.Module):
             targets_timestamps: torch.Tensor
             ) -> torch.Tensor:
         """
+        Feed forward of Autoformer.
 
-        :param inputs: Input data with shape: [batch_size, input_len, num_features]
-        :param targets: Future data with shape: [batch_size, output_len, num_features]
-        :param inputs_timestamps: Input timestamps with shape: [batch_size, input_len, num_timestamps]
-        :param targets_timestamps: Future timestamps with shape: [batch_size, output_len, num_timestamps]
+        Args:
+            inputs: Input data with shape: [batch_size, input_len, num_features]
+            targets: Future data with shape: [batch_size, output_len, num_features]
+            inputs_timestamps: Input timestamps with shape: [batch_size, input_len, num_timestamps]
+            targets_timestamps: Future timestamps with shape: [batch_size, output_len, num_timestamps]
 
-        :return: Output data with shape: [batch_size, output_len, num_features]
+        Returns:
+            Output data with shape: [batch_size, output_len, num_features]
         """
 
         # decomp init

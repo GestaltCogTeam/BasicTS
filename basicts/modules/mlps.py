@@ -14,7 +14,8 @@ class MLPLayer(nn.Module):
         intermediate_size: int,
         output_size: int = None,
         hidden_act: str = "relu",
-        dropout: float = 0.0) -> None:
+        dropout: float = 0.0,
+        bias: bool = True) -> None:
         """
         Initialize the MLP layer.
 
@@ -27,8 +28,8 @@ class MLPLayer(nn.Module):
         super().__init__()
         output_size = output_size if output_size is not None else input_size
         self.act_fn = ACT2FN[hidden_act]
-        self.fc1 = nn.Linear(input_size, intermediate_size)
-        self.fc2 = nn.Linear(intermediate_size, output_size)
+        self.fc1 = nn.Linear(input_size, intermediate_size, bias=bias)
+        self.fc2 = nn.Linear(intermediate_size, output_size, bias=bias)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:

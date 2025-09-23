@@ -1,1 +1,2 @@
-from .tst_embed import FeatureEmbedding, SequenceEmbedding, TimestampEmbedding
+from .tst_embed import (FeatureEmbedding, SequenceEmbedding,
+                        TimestampEmbedding, TokenEmbedding)

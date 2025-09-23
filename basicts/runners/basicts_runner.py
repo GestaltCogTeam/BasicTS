@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import time
+import types
 from contextlib import nullcontext
 from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Union
 
@@ -15,6 +16,7 @@ from easytorch.device import to_device
 from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
                              is_master, master_only)
 from easytorch.utils.env import get_rank, set_tf32_mode, setup_determinacy
+from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
@@ -114,7 +116,10 @@ class BasicTSRunner:
         self.save_results = cfg.save_results
 
         # define loss function
-        self.loss = cfg.loss
+        self.loss = types.FunctionType(
+            cfg.loss.__code__,
+            cfg.loss.__globals__,
+            name='loss')
 
         # declare optimizer and lr_scheduler
         self.optimizer = None
@@ -326,7 +331,7 @@ class BasicTSRunner:
         if isinstance(inputs, torch.Tensor):
             inputs = {'inputs': inputs}
         self.taskflow.preprocess(self, inputs)
-        forward_return = self._forward(inputs, 0)
+        forward_return = self._forward(self.model, inputs, 0)
         return forward_return['prediction']
 
     @master_only
@@ -413,7 +418,7 @@ class BasicTSRunner:
                 step_start_time = time.time()
                 data = self.taskflow.preprocess(self, data) # task specific preprocess
                 with self.amp_ctx:
-                    forward_return = self._forward(data, step, self.epoch)
+                    forward_return = self._forward(self.model, data, step, self.epoch)
                     self.callback_handler.trigger('on_compute_loss', self, epoch=self.epoch, step=step, data=data, forward_return=forward_return)
                     loss = self._metric_forward(self.loss, forward_return)
                 loss_weight = self.taskflow.get_weight(forward_return) # task specific metric weight for averaging
@@ -469,10 +474,10 @@ class BasicTSRunner:
             data = self.taskflow.preprocess(self, data) # task specific preprocess
             # TODO: consider using amp for validation
             # with self.ctx:
-            forward_return = self._forward(data, step=step)
+            forward_return = self._forward(self.model, data, step=step)
             self.callback_handler.trigger('on_compute_loss', self, forward_return=forward_return)
             # compute validation loss
-            loss = self._metric_forward(self.cfg.loss, forward_return)
+            loss = self._metric_forward(self.loss, forward_return)
             loss_weight = self.taskflow.get_weight(forward_return) # task specific metric weight for averaging
             self.update_meter(f'{meter_type}/loss', loss.item(), loss_weight)
             forward_return = self.taskflow.postprocess(self, forward_return)
@@ -716,7 +721,7 @@ class BasicTSRunner:
 
     # key methods
 
-    def _forward(self, data: Dict, step: int, epoch: Optional[int] = None) -> Optional[torch.Tensor]:
+    def _forward(self, model: nn.Module, data: Dict, step: int, epoch: Optional[int] = None) -> Optional[torch.Tensor]:
         """Train model.
 
         Args:
@@ -736,7 +741,7 @@ class BasicTSRunner:
         assert 'inputs' in  data, 'data must contain key \'inputs\'.'
         inputs = data['inputs']
 
-        forward_fn = self.model.module.forward if torch.distributed.is_initialized() else self.model.forward
+        forward_fn = model.module.forward if torch.distributed.is_initialized() else model.forward
         sig = inspect.signature(forward_fn)
         all_params = list(sig.parameters.keys())
         remaining_params = all_params[1:] # except for inputs
@@ -752,7 +757,7 @@ class BasicTSRunner:
             kwargs['train'] = self.status == RunnerStatus.TRAINING
 
         # Forward pass through the model
-        forward_return = self.model(inputs, **kwargs)
+        forward_return = model(inputs, **kwargs)
 
         # Parse forward return
         if isinstance(forward_return, torch.Tensor):
@@ -763,7 +768,7 @@ class BasicTSRunner:
         return forward_return
 
     def _metric_forward(self, metric_fn: Callable, forward_return: Dict[str, Any]) -> torch.Tensor:
-        if metric_fn is self.loss and 'loss' in forward_return:
+        if metric_fn.__name__ in forward_return:
             return forward_return['loss'] # loss has been computed in self.model.forward()
         covariate_names = inspect.signature(metric_fn).parameters.keys()
         args = {k: v for k, v in forward_return.items() if k in covariate_names}

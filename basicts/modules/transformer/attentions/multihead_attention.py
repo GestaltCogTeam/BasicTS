@@ -3,6 +3,8 @@ from typing import Optional, Tuple
 import torch
 from torch import nn
 
+from ..kv_cache import KVCache
+
 
 class MultiHeadAttention(nn.Module):
     """
@@ -36,10 +38,11 @@ class MultiHeadAttention(nn.Module):
         key_value_states: Optional[torch.Tensor] = None,
         attention_mask: Optional[torch.Tensor] = None,
         position_ids: Optional[torch.LongTensor] = None,
-        past_key_value: Optional[Tuple[torch.Tensor]] = None,
+        past_key_value: Optional[KVCache] = None,
         use_cache: bool = False,
         output_attentions: bool = False,
-    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
+        layer_idx: Optional[int] = None,
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[KVCache]]:
 
         # Query
         B, L, _ = hidden_states.size()
@@ -49,8 +52,15 @@ class MultiHeadAttention(nn.Module):
 
         # Key/Value
         if is_cross:
-            if past_key_value is not None: # from kv cache
-                key, value = past_key_value
+            if use_cache:
+                # first time, cache key/value
+                if len(past_key_value) <= layer_idx:
+                    kv_seq_len = key_value_states.size(1)
+                    key = self._shape(self.k_proj(key_value_states), kv_seq_len)
+                    value = self._shape(self.v_proj(key_value_states), kv_seq_len)
+                    past_key_value.update(key, value, layer_idx)
+                else: # from kv cache
+                    key, value = past_key_value[layer_idx]
             else:
                 kv_seq_len = key_value_states.size(1)
                 key = self._shape(self.k_proj(key_value_states), kv_seq_len)
@@ -59,11 +69,8 @@ class MultiHeadAttention(nn.Module):
             # compute key/value from hidden_states
             key = self._shape(self.k_proj(hidden_states), L)
             value = self._shape(self.v_proj(hidden_states), L)
-            if past_key_value is not None: # concat from kv cache
-                key = torch.cat([past_key_value[0], key], dim=2)
-                value = torch.cat([past_key_value[1], value], dim=2)
-
-        present_key_value = (key, value) if use_cache else None
+            if use_cache:
+                key, value = past_key_value.update(key, value, layer_idx)
 
         # rope
         if self.use_rope:
@@ -86,4 +93,4 @@ class MultiHeadAttention(nn.Module):
         if not output_attentions:
             attn_weights = None
 
-        return output, attn_weights, present_key_value
+        return output, attn_weights, past_key_value

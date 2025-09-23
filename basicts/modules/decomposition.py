@@ -37,7 +37,9 @@ class MovingAverage(nn.Module):
 
 
 class MovingAverageDecomposition(nn.Module):
-    """Time series decomposition block by moving average."""
+    """
+    Time series decomposition layer by moving average.
+    """
 
     def __init__(self, kernel_size: int, stride: int = 1):
         super().__init__()
@@ -56,4 +58,34 @@ class MovingAverageDecomposition(nn.Module):
         """
         trend = self.moving_avg(inputs)
         seasonal = inputs - trend
+        return seasonal, trend
+
+
+class DFTDecomposition(nn.Module):
+    """
+    Time series decomposition layer by discrete Fourier transform.
+    """
+
+    def __init__(self, top_k: int = 5):
+        super().__init__()
+        self.top_k = top_k
+
+    def forward(self, inputs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Forward pass of the DFT decomposition layer.
+
+        Args:
+            inputs (torch.Tensor): Input tensor of shape [batch_size, seq_len, num_features]
+
+        Returns:
+            seasonal (torch.Tensor): Seasonal tensor of shape [batch_size, seq_len, num_features]
+            trend (torch.Tensor): Trend tensor of shape [batch_size, seq_len, num_features]
+        """
+        inputs_freq = torch.fft.rfft(inputs).abs()
+        freq = inputs_freq.abs()
+        freq[0] = 0 # remove the DC component
+        top_k_amps, _ = torch.topk(freq, self.top_k)
+        inputs_freq[freq <= top_k_amps.min()] = 0
+        seasonal = torch.fft.irfft(inputs_freq)
+        trend = inputs - seasonal
         return seasonal, trend

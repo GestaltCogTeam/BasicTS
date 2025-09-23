@@ -5,6 +5,8 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
+from ..kv_cache import KVCache
+
 
 class AutoCorrelation(nn.Module):
     """
@@ -58,10 +60,12 @@ class AutoCorrelation(nn.Module):
     def forward(
             self,
             hidden_states: torch.Tensor,
+            attention_mask: Optional[torch.Tensor] = None,
             key_value_states: Optional[torch.Tensor] = None,
-            past_key_value: Optional[Tuple[torch.Tensor]] = None,
+            past_key_value: Optional[KVCache] = None,
             use_cache: bool = False,
             output_attentions: bool = False,
+            layer_idx: Optional[int] = None,
             )->Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
 
         # Query
@@ -72,8 +76,15 @@ class AutoCorrelation(nn.Module):
 
         # Key/Value
         if is_cross:
-            if past_key_value is not None: # from kv cache
-                key, value = past_key_value
+            if use_cache:
+                # first time, cache key/value
+                if len(past_key_value) <= layer_idx:
+                    kv_len = key_value_states.size(1)
+                    key = self._shape(self.k_proj(key_value_states), kv_len)
+                    value = self._shape(self.v_proj(key_value_states), kv_len)
+                    past_key_value.update(key, value, layer_idx)
+                else: # from kv cache
+                    key, value = past_key_value[layer_idx]
             else:
                 kv_len = key_value_states.size(1)
                 key = self._shape(self.k_proj(key_value_states), kv_len)
@@ -82,11 +93,8 @@ class AutoCorrelation(nn.Module):
             # compute key/value from hidden_states
             key = self._shape(self.k_proj(hidden_states), q_len)
             value = self._shape(self.v_proj(hidden_states), q_len)
-            if past_key_value is not None: # concat from kv cache
-                key = torch.cat([past_key_value[0], key], dim=2)
-                value = torch.cat([past_key_value[1], value], dim=2)
-
-        present_key_value = (key, value) if use_cache else None
+            if use_cache:
+                key, value = past_key_value.update(key, value, layer_idx)
 
         # Align size to [batch_size, q_len, n_heads, head_dim]
         kv_len = value.size(1)
@@ -101,6 +109,10 @@ class AutoCorrelation(nn.Module):
         k_fft = torch.fft.rfft(key.movedim(1, -1), dim=-1)
         corr  = torch.fft.irfft(q_fft * torch.conj(k_fft), dim=-1)
 
+        # attention mask is not actually used in Autoformer
+        if attention_mask is not None:
+            corr = corr + attention_mask
+
         # [batch_size, n_heads, head_dim, seq_len]
         context = self._time_delay_aggregation(value.movedim(1, -1), corr)
         context = context.movedim(-1, 1).contiguous()   # [batch_size, q_len, n_heads, head_dim]
@@ -109,4 +121,4 @@ class AutoCorrelation(nn.Module):
 
         corr = corr.movedim(-1, 1) if output_attentions else None
 
-        return out, corr, present_key_value
+        return out, corr, past_key_value

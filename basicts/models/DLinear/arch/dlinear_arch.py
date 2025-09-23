@@ -17,7 +17,7 @@ class DLinear(nn.Module):
     def __init__(self, config: DLinearConfig):
         super().__init__()
 
-        self.decompsition = MovingAverageDecomposition(config.kernel_size, config.stride)
+        self.decompsition = MovingAverageDecomposition(config.moving_avg, config.stride)
         self.individual = config.individual
         self.num_features = config.num_features
 

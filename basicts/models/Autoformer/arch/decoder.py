@@ -30,9 +30,9 @@ class AutoformerDecoderLayer(nn.Module):
                                   config.intermediate_size,
                                   hidden_act=config.hidden_act,
                                   dropout=config.dropout)
-        self.self_attn_decomp = MovingAverageDecomposition(config.kernel_size)
-        self.cross_attn_decomp = MovingAverageDecomposition(config.kernel_size)
-        self.ffn_decomp = MovingAverageDecomposition(config.kernel_size)
+        self.self_attn_decomp = MovingAverageDecomposition(config.moving_avg)
+        self.cross_attn_decomp = MovingAverageDecomposition(config.moving_avg)
+        self.ffn_decomp = MovingAverageDecomposition(config.moving_avg)
         self.projection = nn.Conv1d(config.hidden_size, config.num_features, kernel_size=3, stride=1, padding=1,
                                     padding_mode='circular', bias=False)
 

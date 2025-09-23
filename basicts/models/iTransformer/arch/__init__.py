@@ -1,1 +1,1 @@
-from .itransformer_arch import iTransformer
+from .itransformer_arch import iTransformerBackbone, iTransformerForForecasting, iTransformerForClassification, iTransformerForReconstruction

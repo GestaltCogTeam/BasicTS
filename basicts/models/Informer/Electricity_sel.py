@@ -1,11 +1,15 @@
 import os
 import sys
+
 from easydict import EasyDict
+
 sys.path.append(os.path.abspath(__file__ + '/../../..'))
 
+from basicts.data import (SelectiveTimeSeriesForecastingDataset,
+                          TimeSeriesForecastingDataset)
 from basicts.metrics import masked_mae, masked_mse, selective_mse
-from basicts.data import TimeSeriesForecastingDataset, SelectiveTimeSeriesForecastingDataset
-from basicts.runners import SimpleTimeSeriesForecastingRunner, SelectiveTimeSeriesForecastingRunner
+from basicts.runners import (SelectiveTimeSeriesForecastingRunner,
+                             SimpleTimeSeriesForecastingRunner)
 from basicts.scaler import ZScoreScaler
 from basicts.utils import get_regular_settings, partial
 

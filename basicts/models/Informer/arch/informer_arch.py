@@ -1,12 +1,18 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
 
-from basicts.utils import data_transformation_4_xformer
+from basicts.modules.embed import FeatureEmbedding
+from basicts.modules.mlps import MLPLayer
+from basicts.modules.transformer import (EncoderLayer, MultiHeadAttention,
+                                         Seq2SeqDecoder, Seq2SeqDecoderLayer,
+                                         prepare_causal_attention_mask)
 
-from .embed import DataEmbedding
-from .decoder import Decoder, DecoderLayer
-from .attn import FullAttention, ProbAttention, AttentionLayer
-from .encoder import Encoder, EncoderLayer, ConvLayer, EncoderStack
+from ..config.informer_config import InformerConfig
+from .conv import ConvLayer
+from .encoder import InformerEncoder
+from .prob_attention import ProbAttention
 
 
 class Informer(nn.Module):
@@ -18,207 +24,109 @@ class Informer(nn.Module):
     Task: Long-term Time Series Forecasting
     """
 
-    def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, out_len, 
-                time_of_day_size, day_of_week_size, day_of_month_size=None, day_of_year_size=None,
-                factor=5, d_model=512, n_heads=8, e_layers=3, d_layers=2, d_ff=512, 
-                dropout=0.0, attn='prob', embed='fixed', freq='h', activation='gelu', 
-                output_attention = False, distil=True, mix=True, num_time_features=-1):
-        super(Informer, self).__init__()
-        self.pred_len = out_len
-        self.label_len = int(label_len)
-        self.attn = attn
-        self.output_attention = output_attention
+    def __init__(self, config: InformerConfig):
+        super().__init__()
+        self.output_len = config.output_len
+        self.output_attentions = config.output_attentions
 
-        self.time_of_day_size =time_of_day_size
-        self.day_of_week_size = day_of_week_size
-        self.day_of_month_size = day_of_month_size
-        self.day_of_year_size = day_of_year_size
-        self.embed = embed
+        # Embedding
+        self.enc_embedding = FeatureEmbedding(
+            config.num_features,
+            config.hidden_size,
+            use_timestamps=config.use_timestamps,
+            timestamp_sizes=config.timestamp_sizes,
+            use_pe=True,
+            dropout=config.dropout)
+        self.dec_embedding = FeatureEmbedding(
+            config.num_features,
+            config.hidden_size,
+            use_timestamps=config.use_timestamps,
+            timestamp_sizes=config.timestamp_sizes,
+            use_pe=True,
+            dropout=config.dropout)
 
-        # Encoding
-        self.enc_embedding = DataEmbedding(enc_in, d_model, time_of_day_size, day_of_week_size, day_of_month_size, day_of_year_size, embed, num_time_features, dropout)
-        self.dec_embedding = DataEmbedding(dec_in, d_model, time_of_day_size, day_of_week_size, day_of_month_size, day_of_year_size, embed, num_time_features, dropout)
-        # Attention
-        Attn = ProbAttention if attn=='prob' else FullAttention
         # Encoder
-        self.encoder = Encoder(
-            [
-                EncoderLayer(
-                    AttentionLayer(Attn(False, factor, attention_dropout=dropout, output_attention=output_attention), 
-                                d_model, n_heads, mix=False),
-                    d_model,
-                    d_ff,
-                    dropout=dropout,
-                    activation=activation
-                ) for l in range(e_layers)
-            ],
-            [
-                ConvLayer(
-                    d_model
-                ) for l in range(e_layers-1)
-            ] if distil else None,
-            norm_layer=torch.nn.LayerNorm(d_model)
-        )
-        # Decoder
-        self.decoder = Decoder(
-            [
-                DecoderLayer(
-                    AttentionLayer(Attn(True, factor, attention_dropout=dropout, output_attention=False), 
-                                d_model, n_heads, mix=mix),
-                    AttentionLayer(FullAttention(False, factor, attention_dropout=dropout, output_attention=False), 
-                                d_model, n_heads, mix=False),
-                    d_model,
-                    d_ff,
-                    dropout=dropout,
-                    activation=activation,
-                )
-                for l in range(d_layers)
-            ],
-            norm_layer=torch.nn.LayerNorm(d_model)
-        )
-        # self.end_conv1 = nn.Conv1d(in_channels=label_len+out_len, out_channels=out_len, kernel_size=1, bias=True)
-        # self.end_conv2 = nn.Conv1d(in_channels=d_model, out_channels=c_out, kernel_size=1, bias=True)
-        self.projection = nn.Linear(d_model, c_out, bias=True)
-
-    def forward_xformer(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor, x_mark_dec: torch.Tensor,
-                enc_self_mask: torch.Tensor=None, dec_self_mask: torch.Tensor=None, dec_enc_mask: torch.Tensor=None) -> torch.Tensor:
-        """Feed forward of Informer. Kindly note that `enc_self_mask`, `dec_self_mask`, and `dec_enc_mask` are not actually used in Informer.
-
-        Args:
-            x_enc (torch.Tensor): input data of encoder (without the time features). Shape: [B, L1, N]
-            x_mark_enc (torch.Tensor): time features input of encoder w.r.t. x_enc. Shape: [B, L1, C-1]
-            x_dec (torch.Tensor): input data of decoder. Shape: [B, start_token_length + L2, N]
-            x_mark_dec (torch.Tensor): time features input to decoder w.r.t. x_dec. Shape: [B, start_token_length + L2, C-1]
-            enc_self_mask (torch.Tensor, optional): encoder self attention masks. Defaults to None.
-            dec_self_mask (torch.Tensor, optional): decoder self attention masks. Defaults to None.
-            dec_enc_mask (torch.Tensor, optional): decoder encoder self attention masks. Defaults to None.
-
-        Returns:
-            torch.Tensor: outputs with shape [B, L2, N, 1]
-        """
-
-        enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
-
-        dec_out = self.dec_embedding(x_dec, x_mark_dec)
-        dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)
-        dec_out = self.projection(dec_out)
-
-        return dec_out[:, -self.pred_len:, :].unsqueeze(-1)  # [B, L, N, C]
-
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
-        """
-
-        Args:
-            history_data (Tensor): Input data with shape: [B, L1, N, C]
-            future_data (Tensor): Future data with shape: [B, L2, N, C]
-
-        Returns:
-            torch.Tensor: outputs with shape [B, L2, N, 1]
-        """
-
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len)
-        prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
-        return prediction
-
-
-class InformerStack(nn.Module):
-    def __init__(self, enc_in, dec_in, c_out, seq_len, label_len, out_len, 
-                factor=5, d_model=512, n_heads=8, e_layers=[3,2,1], d_layers=2, d_ff=512, 
-                dropout=0.0, attn='prob', embed='fixed', freq='h', activation='gelu',
-                output_attention = False, distil=True, mix=True, num_time_features=-1):
-        super(InformerStack, self).__init__()
-        self.pred_len = out_len
-        self.label_len = int(label_len)
-        self.attn = attn
-        self.output_attention = output_attention
-
-        # Encoding
-        self.enc_embedding = DataEmbedding(enc_in, d_model, num_time_features, dropout)
-        self.dec_embedding = DataEmbedding(dec_in, d_model, num_time_features, dropout)
-        # Attention
-        Attn = ProbAttention if attn=='prob' else FullAttention
-        # Encoder
-
-        inp_lens = list(range(len(e_layers))) # [0,1,2,...] you can customize here
-        encoders = [
-            Encoder(
+        self.encoder = InformerEncoder(
+            nn.ModuleList(
                 [
                     EncoderLayer(
-                        AttentionLayer(Attn(False, factor, attention_dropout=dropout, output_attention=output_attention), 
-                                    d_model, n_heads, mix=False),
-                        d_model,
-                        d_ff,
-                        dropout=dropout,
-                        activation=activation
-                    ) for l in range(el)
-                ],
+                        ProbAttention(config.hidden_size, config.n_heads, config.factor, config.dropout)
+                        if config.prob_attn else MultiHeadAttention(
+                            config.hidden_size, config.n_heads, config.dropout),
+                        MLPLayer(
+                            config.hidden_size,
+                            config.intermediate_size,
+                            hidden_act=config.hidden_act,
+                            dropout=config.dropout
+                            ),
+                        layer_norm=nn.LayerNorm(config.hidden_size),
+                        norm_position="post"
+                ) for _ in range(config.num_encoder_layers)
+            ]),
+            nn.ModuleList(
                 [
-                    ConvLayer(
-                        d_model
-                    ) for l in range(el-1)
-                ] if distil else None,
-                norm_layer=torch.nn.LayerNorm(d_model)
-            ) for el in e_layers]
-        self.encoder = EncoderStack(encoders, inp_lens)
-        # Decoder
-        self.decoder = Decoder(
-            [
-                DecoderLayer(
-                    AttentionLayer(Attn(True, factor, attention_dropout=dropout, output_attention=False), 
-                                d_model, n_heads, mix=mix),
-                    AttentionLayer(FullAttention(False, factor, attention_dropout=dropout, output_attention=False), 
-                                d_model, n_heads, mix=False),
-                    d_model,
-                    d_ff,
-                    dropout=dropout,
-                    activation=activation,
-                )
-                for l in range(d_layers)
-            ],
-            norm_layer=torch.nn.LayerNorm(d_model)
+                    ConvLayer(config.hidden_size, hidden_act=config.hidden_act)
+                    for _ in range(config.num_encoder_layers - 1)
+                ] if config.distill else None),
+            layer_norm=nn.LayerNorm(config.hidden_size)
         )
-        # self.end_conv1 = nn.Conv1d(in_channels=label_len+out_len, out_channels=out_len, kernel_size=1, bias=True)
-        # self.end_conv2 = nn.Conv1d(in_channels=d_model, out_channels=c_out, kernel_size=1, bias=True)
-        self.projection = nn.Linear(d_model, c_out, bias=True)
+        # Decoder
+        self.decoder = Seq2SeqDecoder(
+            nn.ModuleList(
+                [
+                    Seq2SeqDecoderLayer(
+                        ProbAttention(config.hidden_size, config.n_heads, config.factor, config.dropout)
+                        if config.prob_attn else MultiHeadAttention(
+                            config.hidden_size, config.n_heads, config.dropout),
+                        MultiHeadAttention(config.hidden_size, config.n_heads, config.dropout),
+                        MLPLayer(
+                            config.hidden_size,
+                            config.intermediate_size,
+                            hidden_act=config.hidden_act,
+                            dropout=config.dropout
+                            ),
+                        layer_norm=nn.LayerNorm(config.hidden_size),
+                        norm_position="post"
+                        )
+                    for _ in range(config.num_decoder_layers)
+                ]),
+            layer_norm=torch.nn.LayerNorm(config.hidden_size)
+        )
+        self.projection = nn.Linear(config.hidden_size, config.num_features, bias=True)
 
-    def forward_xformer(self, x_enc: torch.Tensor, x_mark_enc: torch.Tensor, x_dec: torch.Tensor, x_mark_dec: torch.Tensor,
-                enc_self_mask: torch.Tensor=None, dec_self_mask: torch.Tensor=None, dec_enc_mask: torch.Tensor=None) -> torch.Tensor:
-        """Feed forward of Informer. Kindly note that `enc_self_mask`, `dec_self_mask`, and `dec_enc_mask` are not actually used in Informer.
+    def forward(
+            self,
+            inputs: torch.Tensor,
+            targets: torch.Tensor,
+            inputs_timestamps: Optional[torch.Tensor] = None,
+            targets_timestamps: Optional[torch.Tensor] = None
+            ) -> torch.Tensor:
+        """Feed forward of Informer.
 
         Args:
-            x_enc (torch.Tensor): input data of encoder (without the time features). Shape: [B, L1, N]
-            x_mark_enc (torch.Tensor): time features input of encoder w.r.t. x_enc. Shape: [B, L1, C-1]
-            x_dec (torch.Tensor): input data of decoder. Shape: [B, start_token_length + L2, N]
-            x_mark_dec (torch.Tensor): time features input to decoder w.r.t. x_dec. Shape: [B, start_token_length + L2, C-1]
-            enc_self_mask (torch.Tensor, optional): encoder self attention masks. Defaults to None.
-            dec_self_mask (torch.Tensor, optional): decoder self attention masks. Defaults to None.
-            dec_enc_mask (torch.Tensor, optional): decoder encoder self attention masks. Defaults to None.
+            inputs: Input data with shape: [batch_size, input_len, num_features]
+            targets: Future data with shape: [batch_size, output_len, num_features]
+            inputs_timestamps: Input timestamps with shape: [batch_size, input_len, num_timestamps]
+            targets_timestamps: Future timestamps with shape: [batch_size, output_len, num_timestamps]
 
         Returns:
-            torch.Tensor: outputs with shape [B, L2, N, 1]
+            Output data with shape: [batch_size, output_len, num_features]
         """
 
-        enc_out = self.enc_embedding(x_enc, x_mark_enc)
-        enc_out, attns = self.encoder(enc_out, attn_mask=enc_self_mask)
+        enc_hidden_states = self.enc_embedding(inputs, inputs_timestamps)
+        enc_hidden_states, enc_attn_weights = self.encoder(enc_hidden_states, output_attentions=self.output_attentions)
 
-        dec_out = self.dec_embedding(x_dec, x_mark_dec)
-        dec_out = self.decoder(dec_out, enc_out, x_mask=dec_self_mask, cross_mask=dec_enc_mask)
-        dec_out = self.projection(dec_out)
+        dec_hidden_states = self.dec_embedding(targets, targets_timestamps)
+        attention_mask = prepare_causal_attention_mask(
+            (targets.shape[0], targets.shape[1]), dec_hidden_states)
+        dec_hidden_states, dec_self_attn_weights, dec_cross_attn_weights, _ = self.decoder(
+            dec_hidden_states, enc_hidden_states, attention_mask, output_attentions=self.output_attentions)
+        prediction = self.projection(dec_hidden_states)[:, -self.output_len:, :]
 
-        return dec_out[:, -self.pred_len:, :].unsqueeze(-1)  # [B, L, N, C]
-
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
-        """
-
-        Args:
-            history_data (Tensor): Input data with shape: [B, L1, N, C]
-            future_data (Tensor): Future data with shape: [B, L2, N, C]
-
-        Returns:
-            torch.Tensor: outputs with shape [B, L2, N, 1]
-        """
-
-        x_enc, x_mark_enc, x_dec, x_mark_dec = data_transformation_4_xformer(history_data=history_data, future_data=future_data, start_token_len=self.label_len)
-        prediction = self.forward_xformer(x_enc=x_enc, x_mark_enc=x_mark_enc, x_dec=x_dec, x_mark_dec=x_mark_dec)
-        return prediction
+        if self.output_attentions:
+            attn_weights = {"enc_attn_weights": enc_attn_weights,
+                            "dec_self_attn_weights": dec_self_attn_weights,
+                            "dec_cross_attn_weights": dec_cross_attn_weights}
+            return {"prediction": prediction, "attn_weights": attn_weights}
+        else:
+            return prediction

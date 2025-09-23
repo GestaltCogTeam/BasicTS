@@ -1,28 +1,34 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
 
-class Inception_Block_V1(nn.Module):
-    def __init__(self, in_channels, out_channels, num_kernels=6, init_weight=True):
-        super(Inception_Block_V1, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
+class InceptionBlockV1(nn.Module):
+
+    """Inception block v1 in TimesNet."""
+
+    def __init__(
+            self,
+            in_channels: int,
+            out_channels: int,
+            num_kernels: int = 6,
+            init_weights: bool = True):
+        super().__init__()
         self.num_kernels = num_kernels
         kernels = []
         for i in range(self.num_kernels):
             kernels.append(nn.Conv2d(in_channels, out_channels, kernel_size=2 * i + 1, padding=i))
         self.kernels = nn.ModuleList(kernels)
-        if init_weight:
-            self._initialize_weights()
+        if init_weights:
+            self._init_weights()
 
-    def _initialize_weights(self):
+    def _init_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight)
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         res_list = []
         for i in range(self.num_kernels):
             res_list.append(self.kernels[i](x))
@@ -30,11 +36,17 @@ class Inception_Block_V1(nn.Module):
         return res
 
 
-class Inception_Block_V2(nn.Module):
-    def __init__(self, in_channels, out_channels, num_kernels=6, init_weight=True):
-        super(Inception_Block_V2, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
+class InceptionBlockV2(nn.Module):
+
+    """Inception block v1 in TimesNet."""
+
+    def __init__(
+            self,
+            in_channels: int,
+            out_channels: int,
+            num_kernels: int = 6,
+            init_weights: bool = True):
+        super().__init__()
         self.num_kernels = num_kernels
         kernels = []
         for i in range(self.num_kernels // 2):
@@ -42,17 +54,17 @@ class Inception_Block_V2(nn.Module):
             kernels.append(nn.Conv2d(in_channels, out_channels, kernel_size=[2 * i + 3, 1], padding=[i + 1, 0]))
         kernels.append(nn.Conv2d(in_channels, out_channels, kernel_size=1))
         self.kernels = nn.ModuleList(kernels)
-        if init_weight:
-            self._initialize_weights()
+        if init_weights:
+            self._init_weights()
 
-    def _initialize_weights(self):
+    def _init_weights(self) -> None:
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight)
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         res_list = []
         for i in range(self.num_kernels + 1):
             res_list.append(self.kernels[i](x))

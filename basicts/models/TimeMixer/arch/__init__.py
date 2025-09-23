@@ -1,1 +1,1 @@
-from .timemixer_arch import TimeMixer
+from .timemixer_arch import TimeMixerBackBone, TimeMixerForForecasting

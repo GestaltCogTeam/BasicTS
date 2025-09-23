@@ -27,7 +27,6 @@ class GradAccumulation(BasicTSCallback):
         runner.logger.info(f'Effective batch size: {effective_batch_size}.')
 
     def on_backward(self, runner: "BasicTSRunner", loss: torch.Tensor):
-        runner.should_optimizer_step = False \
-            if (self.current_steps + 1) % self.accumulation_steps != 0 else True
+        runner.should_optimizer_step = (self.current_steps + 1) % self.accumulation_steps == 0
         loss = loss / self.accumulation_steps
         self.current_steps += 1

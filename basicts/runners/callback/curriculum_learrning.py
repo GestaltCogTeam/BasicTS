@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING
 
 from basicts.utils import RunnerStatus
 
@@ -30,7 +30,8 @@ class CurriculumLearning(BasicTSCallback):
     def on_train_start(self, runner: "BasicTSRunner"):
         runner.logger.info("Use curriculum learning.")
 
-    def on_compute_loss(self, runner: "BasicTSRunner", forward_return: Dict[str, Any]):
+    def on_compute_loss(self, runner: "BasicTSRunner", **kwargs):
+        forward_return = kwargs["forward_return"]
         if runner.status == RunnerStatus.TRAINING:
             cl_length = self.curriculum_learning(epoch=runner.epoch)
             try:

@@ -15,7 +15,7 @@ class RevIN(nn.Module):
     """
 
     def __init__(self,
-                 num_features: int,
+                 num_features: int = None,
                  eps: float = 1e-6,
                  affine: bool = True,
                  subtract_last: bool = False):
@@ -33,22 +33,24 @@ class RevIN(nn.Module):
         if self.affine:
             self._init_params()
 
-    def forward(self, x: torch.Tensor, mode: Literal['norm', 'denorm']) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, mode: Literal["norm", "denorm"]) -> torch.Tensor:
         """
         :param x: input tensor of shape [batch_size, seq_len, num_features]
         :param mode: 'norm' for normalization, 'denorm' for denormalization
         :return: normalized or denormalized tensor of shape [batch_size, seq_len, num_features]
         """
-        if mode == 'norm':
+        if mode == "norm":
             self._get_statistics(x)
             x = self._normalize(x)
-        elif mode == 'denorm':
+        elif mode == "denorm":
             x = self._denormalize(x)
         else:
             raise ValueError(f"Mode {mode} is not supported.")
         return x
 
     def _init_params(self):
+        if self.num_features is None:
+            raise ValueError("`num_features` need to be specified when `affine` = True.")
         # initialize RevIN params: [num_features,]
         self.affine_weight = nn.Parameter(torch.ones(self.num_features))
         self.affine_bias = nn.Parameter(torch.zeros(self.num_features))

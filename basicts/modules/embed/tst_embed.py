@@ -1,7 +1,63 @@
-from typing import Optional, Sequence
+import math
+from typing import Literal, Optional, Sequence
 
 import torch
 from torch import nn
+
+
+class PositionEmbedding(nn.Module):
+    """
+    PositionEmbedding layer is used to embed the position of the time series to hidden dimension, \
+    i.e., [batch_size, seq_len, hidden_size] -> [batch_size, seq_len, hidden_size].
+    """
+
+    def __init__(self, hidden_size: int, max_len: int = 5000):
+        """
+        Args:
+            hidden_size (int): size of hidden dimension.
+            max_len (int, optional): maximum length of the time series. Defaults to 5000.
+        """
+        super().__init__()
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, hidden_size, 2) \
+                             * (-math.log(10000.0) / hidden_size))
+        pe = torch.zeros(max_len, hidden_size)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)
+        self.register_buffer("pe", pe)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Position embedding.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape [batch_size, seq_len, hidden_size].
+
+        Returns:
+            torch.Tensor: Output tensor of shape [batch_size, seq_len, hidden_size].
+        """
+        return self.pe[:, :x.size(1)]
+
+class TokenEmbedding(nn.Module):
+    """
+    TokenEmbedding layer is used to embed the time series from the feature dimension to hidden dimension, \
+    i.e., [batch_size, num_features, seq_len] -> [batch_size, seq_len, hidden_size].
+    """
+
+    def __init__(self, num_features: int, hidden_size: int):
+        super().__init__()
+        padding = 1 if torch.__version__ >= "1.5.0" else 2
+        self.tokenConv = nn.Conv1d(num_features, hidden_size, kernel_size=3,
+                                   padding=padding, padding_mode="circular", bias=False)
+        self._init_weights()
+
+    def _init_weights(self) -> None:
+        nn.init.kaiming_normal_(self.tokenConv.weight)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.tokenConv(x.transpose(1, 2)) # [batch_size, hidden_size, seq_len]
+        return x.transpose(1, 2)
 
 
 class TimestampEmbedding(nn.Module):
@@ -46,16 +102,27 @@ class FeatureEmbedding(nn.Module):
             self,
             num_features: int,
             hidden_size: int,
+            embed_type: Literal["token", "linear"] = "token",
             use_timestamps: bool = False,
             timestamp_sizes: Optional[Sequence[int]] = None,
+            use_pe: bool = False,
             dropout: float = 0.1):
 
         super().__init__()
-        self.value_embedding = nn.Linear(num_features, hidden_size)
+        if embed_type == "token":
+            self.value_embedding = TokenEmbedding(num_features, hidden_size)
+        elif embed_type == "linear":
+            self.value_embedding = nn.Linear(num_features, hidden_size)
+        else:
+            raise ValueError(f"Unknown embed_type {embed_type}")
         self.use_timestamps = use_timestamps
         if use_timestamps:
-            self.timestamp_embedding = TimestampEmbedding(hidden_size, *timestamp_sizes)
-        self.dropout = nn.Dropout(p=dropout)
+            self.timestamp_embedding = TimestampEmbedding(hidden_size, timestamp_sizes)
+        if use_pe:
+            self.position_embedding = PositionEmbedding(hidden_size)
+        else:
+            self.position_embedding = None
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, inputs: torch.Tensor, inputs_timestamps: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
@@ -68,10 +135,12 @@ class FeatureEmbedding(nn.Module):
         Returns:
             torch.Tensor: Output tensor of shape [batch_size, seq_len, hidden_size].
         """
-        x = self.value_embedding(inputs)
+        embedded = self.value_embedding(inputs)
         if self.use_timestamps and inputs_timestamps is not None:
-            x += self.timestamp_embedding(inputs_timestamps)
-        return self.dropout(x)
+            embedded += self.timestamp_embedding(inputs_timestamps)
+        if self.position_embedding is not None:
+            embedded += self.position_embedding(embedded)
+        return self.dropout(embedded)
 
 class SequenceEmbedding(nn.Module):
     """
