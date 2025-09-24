@@ -6,7 +6,7 @@ from functools import partial
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LambdaLR
 
-__all__ = ['CosineWarmup', 'CosineWarmupRestarts']
+__all__ = ['CosineWarmup', 'CosineWarmupRestarts', 'SANWarmupMultiStepLR']
 
 
 class CosineWarmup(LambdaLR):
@@ -92,3 +92,50 @@ class CosineWarmupRestarts(LambdaLR):
         if progress >= 1.0:
             return 0.0
         return max(0.0, 0.5 * (1.0 + math.cos(math.pi * ((float(num_cycles) * progress) % 1.0))))
+
+
+class SANWarmupMultiStepLR(LambdaLR):
+    """
+    A learning rate scheduler that uses a fixed learning rate during a warmup phase,
+    then switches to the original learning rate and follows a MultiStepLR schedule.
+
+    Args:
+        optimizer (`torch.optim.Optimizer`):
+            The optimizer for which to schedule the learning rate.
+        warmup_epochs (`int`):
+            The number of epochs for the warmup phase.
+        warmup_lr (`float`):
+            The fixed learning rate during the warmup phase.
+        milestones (`list[int]`):
+            List of epoch indices for MultiStepLR. Must be increasing.
+        gamma (`float`, optional, default=0.1):
+            Multiplicative factor of learning rate decay.
+        last_epoch (`int`, optional, default=-1):
+            The index of the last epoch when resuming training.
+    """
+    def __init__(self, optimizer: Optimizer, warmup_epochs: int, warmup_lr: float, milestones: list, gamma: float = 0.1, last_epoch: int = -1):
+        self.milestones = milestones
+        self.gamma = gamma
+        base_lr = optimizer.defaults['lr']  # 原始学习率
+        # lr_lambda = lambda epoch: self._get_lr_lambda(epoch, warmup_epochs, warmup_lr, base_lr, milestones, gamma)
+        lr_lambda = partial(
+                self._get_lr_lambda,
+                warmup_epochs=warmup_epochs,
+                warmup_lr=warmup_lr,
+                base_lr=base_lr,
+                milestones=milestones,
+                gamma=gamma
+            )
+        super().__init__(optimizer, lr_lambda, last_epoch)
+
+    @staticmethod
+    def _get_lr_lambda(epoch: int, warmup_epochs: int, warmup_lr: float, base_lr: float, milestones: list, gamma: float):
+        if epoch +1 <= warmup_epochs:
+            # Warmup phase
+            return warmup_lr / base_lr # From SAN: * (0.5 ** ((epoch - 1) // 1))
+        # MultiStepLR phase: decay learning rate at milestones
+        adjusted_lr = 1.0
+        for milestone in milestones:
+            if epoch >= milestone:
+                adjusted_lr *= gamma
+        return adjusted_lr
