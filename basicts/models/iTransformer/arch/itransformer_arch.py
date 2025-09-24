@@ -46,12 +46,12 @@ class iTransformerBackbone(nn.Module):
             ]),
             layer_norm=nn.LayerNorm(config.hidden_size),
         )
+        self.output_attentions = config.output_attentions
 
     def forward(
             self,
             inputs: torch.Tensor,
             inputs_timestamps: Optional[torch.Tensor] = None,
-            output_attentions: bool = False,
             ) -> Tuple[torch.Tensor, Optional[List[torch.Tensor]]]:
         """
 
@@ -64,7 +64,7 @@ class iTransformerBackbone(nn.Module):
         """
 
         hidden_states = self.enc_embedding(inputs, inputs_timestamps)
-        hidden_states, attn_weights= self.encoder(hidden_states, output_attentions=output_attentions)
+        hidden_states, attn_weights= self.encoder(hidden_states, output_attentions=self.output_attentions)
         return hidden_states, attn_weights
 
 
@@ -89,6 +89,7 @@ class iTransformerForForecasting(nn.Module):
             inputs_timestamps: Optional[torch.Tensor] = None
             ) -> Tuple[torch.Tensor, Optional[List[torch.Tensor]]]:
         """
+        Forward pass of iTransformerForForecasting.
 
         Args:
             inputs (Tensor): Input data with shape: [batch_size, input_len, num_features]
@@ -100,7 +101,7 @@ class iTransformerForForecasting(nn.Module):
 
         if self.use_revin:
             inputs = self.revin(inputs, "norm")
-        hidden_states, attn_weights = self.backbone(inputs, inputs_timestamps, output_attentions=self.output_attentions)
+        hidden_states, attn_weights = self.backbone(inputs, inputs_timestamps)
         prediction = self.forecasting_head(hidden_states).transpose(1, 2)[..., :self.num_features]
         if self.use_revin:
             prediction = self.revin(prediction, "denorm")
@@ -140,7 +141,7 @@ class iTransformerForClassification(nn.Module):
         """
 
         batch_size = inputs.size(0)
-        hidden_states, attn_weights = self.backbone(inputs, inputs_timestamps, output_attentions=self.output_attentions)
+        hidden_states, attn_weights = self.backbone(inputs, inputs_timestamps)
         hidden_states = self.dropout(self.act(hidden_states))
         hidden_states = hidden_states.reshape(batch_size, -1)  # [batch_size, num_features * hidden_size]
         prediction = self.classification_head(hidden_states)  # [batch_size, num_classes]
@@ -182,7 +183,7 @@ class iTransformerForReconstruction(nn.Module):
 
         if self.use_revin:
             inputs = self.revin(inputs, "norm")
-        hidden_states, attn_weights = self.backbone(inputs, inputs_timestamps, output_attentions=self.output_attentions)
+        hidden_states, attn_weights = self.backbone(inputs, inputs_timestamps)
         prediction = self.reconstruction_head(hidden_states).transpose(1, 2)[..., :self.num_features]
         if self.use_revin:
             prediction = self.revin(prediction, "denorm")

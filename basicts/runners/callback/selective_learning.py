@@ -47,7 +47,7 @@ class SelectiveLearning(BasicTSCallback):
 
         if self.r_a is not None and self.estimator is None:
             raise RuntimeError("Anomaly mask ratio is set but estimation model is not provided.")
-        if self.estimator is not None and self.ckpt_path is not None:
+        if self.estimator is not None and self.ckpt_path is None:
             raise RuntimeError("Estimation model is set but checkpoint path is not provided.")
 
         self.history_residual: torch.Tensor = None

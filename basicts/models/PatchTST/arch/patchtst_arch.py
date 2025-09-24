@@ -1,14 +1,21 @@
 # Cell
-from typing import Callable, Optional
+from typing import List, Optional, Tuple
+
 import torch
 from torch import nn
-from torch import Tensor
-import torch.nn.functional as F
-import numpy as np
 
-from .patchtst_backbone import PatchTST_backbone, series_decomp
+from basicts.modules.decomposition import MovingAverageDecomposition
+from basicts.modules.embed import PatchEmbedding
+from basicts.modules.mlps import MLPLayer
+from basicts.modules.norm import RevIN
+from basicts.modules.transformer import (Encoder, EncoderLayer,
+                                         MultiHeadAttention)
 
-class PatchTST(nn.Module):
+from ..config.patchtst_config import PatchTSTConfig
+from .patchtst_layers import PatchTSTBatchNorm, PatchTSTHead
+
+
+class PatchTSTBackbone(nn.Module):
     """
     Paper: A Time Series is Worth 64 Words: Long-term Forecasting with Transformers
     Link: https://arxiv.org/abs/2211.14730
@@ -16,98 +23,209 @@ class PatchTST(nn.Module):
     Venue: ICLR 2023
     Task: Long-term Time Series Forecasting
     """
-    def __init__(self, enc_in, seq_len, pred_len, e_layers, n_heads, d_model, d_ff,
-                 dropout, fc_dropout, head_dropout, patch_len, stride, individual,
-                 padding_patch, revin, affine, subtract_last, decomposition, kernel_size,
-                 max_seq_len:Optional[int]=1024, d_k:Optional[int]=None, d_v:Optional[int]=None,
-                 norm:str='BatchNorm', attn_dropout:float=0., act:str="gelu",
-                 key_padding_mask:bool='auto',padding_var:Optional[int]=None,
-                 attn_mask:Optional[Tensor]=None, res_attention:bool=True, 
-                 pre_norm:bool=False, store_attn:bool=False, pe:str='zeros',
-                 learn_pe:bool=True, pretrain_head:bool=False, head_type = 'flatten',
-                 verbose:bool=False, **kwargs):
-    
+
+    def __init__(self, config: PatchTSTConfig):
+        """
+        patch_len: int, patch len for patch_embedding
+        stride: int, stride for patch_embedding
+        """
         super().__init__()
 
-        # load parameters
-        c_in = enc_in
-        context_window = seq_len
-        target_window = pred_len
-    
-        n_layers = e_layers
-        n_heads = n_heads
-        d_model = d_model
-        d_ff = d_ff
-        dropout = dropout
-        fc_dropout = fc_dropout
-        head_dropout = head_dropout
-    
-        individual = individual
+        self.num_features = config.num_features
 
-        patch_len = patch_len
-        stride = stride
-        padding_patch = padding_patch
-    
-        revin = revin
-        affine = affine
-        subtract_last = subtract_last
-    
-        decomposition = decomposition
-        kernel_size = kernel_size
-    
-    
-        # model
-        self.decomposition = decomposition
-        if self.decomposition:
-            self.decomp_module = series_decomp(kernel_size)
-            self.model_trend = PatchTST_backbone(c_in=c_in, context_window = context_window, target_window=target_window, patch_len=patch_len, stride=stride, 
-                                  max_seq_len=max_seq_len, n_layers=n_layers, d_model=d_model,
-                                  n_heads=n_heads, d_k=d_k, d_v=d_v, d_ff=d_ff, norm=norm, attn_dropout=attn_dropout,
-                                  dropout=dropout, act=act, key_padding_mask=key_padding_mask, padding_var=padding_var, 
-                                  attn_mask=attn_mask, res_attention=res_attention, pre_norm=pre_norm, store_attn=store_attn,
-                                  pe=pe, learn_pe=learn_pe, fc_dropout=fc_dropout, head_dropout=head_dropout, padding_patch = padding_patch,
-                                  pretrain_head=pretrain_head, head_type=head_type, individual=individual, revin=revin, affine=affine,
-                                  subtract_last=subtract_last, verbose=verbose, **kwargs)
-            self.model_res = PatchTST_backbone(c_in=c_in, context_window = context_window, target_window=target_window, patch_len=patch_len, stride=stride, 
-                                  max_seq_len=max_seq_len, n_layers=n_layers, d_model=d_model,
-                                  n_heads=n_heads, d_k=d_k, d_v=d_v, d_ff=d_ff, norm=norm, attn_dropout=attn_dropout,
-                                  dropout=dropout, act=act, key_padding_mask=key_padding_mask, padding_var=padding_var, 
-                                  attn_mask=attn_mask, res_attention=res_attention, pre_norm=pre_norm, store_attn=store_attn,
-                                  pe=pe, learn_pe=learn_pe, fc_dropout=fc_dropout, head_dropout=head_dropout, padding_patch = padding_patch,
-                                  pretrain_head=pretrain_head, head_type=head_type, individual=individual, revin=revin, affine=affine,
-                                  subtract_last=subtract_last, verbose=verbose, **kwargs)
-        else:
-            self.model = PatchTST_backbone(c_in=c_in, context_window = context_window, target_window=target_window, patch_len=patch_len, stride=stride, 
-                                  max_seq_len=max_seq_len, n_layers=n_layers, d_model=d_model,
-                                  n_heads=n_heads, d_k=d_k, d_v=d_v, d_ff=d_ff, norm=norm, attn_dropout=attn_dropout,
-                                  dropout=dropout, act=act, key_padding_mask=key_padding_mask, padding_var=padding_var, 
-                                  attn_mask=attn_mask, res_attention=res_attention, pre_norm=pre_norm, store_attn=store_attn,
-                                  pe=pe, learn_pe=learn_pe, fc_dropout=fc_dropout, head_dropout=head_dropout, padding_patch = padding_patch,
-                                  pretrain_head=pretrain_head, head_type=head_type, individual=individual, revin=revin, affine=affine,
-                                  subtract_last=subtract_last, verbose=verbose, **kwargs)
+        # patching and embedding
+        self.patch_embedding = PatchEmbedding(
+            config.hidden_size, config.patch_len, config.patch_stride, config.padding, config.fc_dropout)
+        self.patch_num = int((config.input_len - config.patch_len) / config.patch_stride + 1)
+        if config.padding:
+            self.patch_num += 1
 
+        # Encoder
+        norm_type = nn.LayerNorm if config.norm_type == "layer_norm" else PatchTSTBatchNorm
+        self.encoder = Encoder(
+            nn.ModuleList([
+                EncoderLayer(
+                    MultiHeadAttention(config.hidden_size, config.n_heads, config.attn_dropout),
+                    MLPLayer(
+                        config.hidden_size,
+                        config.intermediate_size,
+                        hidden_act=config.hidden_act,
+                        dropout=config.fc_dropout),
+                    layer_norm=(norm_type, config.hidden_size),
+                    norm_position="post"
+                ) for _ in range(config.num_layers)
+            ])
+        )
+        self.output_attentions = config.output_attentions
 
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
-        """Feed forward of PatchTST.
+    def forward(
+            self, inputs: torch.Tensor
+            ) -> Tuple[torch.Tensor, Optional[List[torch.Tensor]]]:
+        """
 
         Args:
-            history_data (torch.Tensor): history data with shape [B, L, N, C]
+            inputs (Tensor): Input data with shape: [batch_size, input_len, num_features]
 
         Returns:
-            torch.Tensor: prediction with shape [B, L, N, C]
+            torch.Tensor: outputs with shape [batch_size, num_features, patch_num, hidden_size]
+            Optional[List[torch.Tensor]]: attention weights if output_attentions=True, else None
         """
-        assert history_data.shape[-1] == 1      # only use the target feature
-        x = history_data[..., 0]     # B, L, N
-    
-        if self.decomposition:
-            res_init, trend_init = self.decomp_module(x)
-            res_init, trend_init = res_init.permute(0,2,1), trend_init.permute(0,2,1)  # x: [Batch, Channel, Input length]
-            res = self.model_res(res_init)
-            trend = self.model_trend(trend_init)
-            x = res + trend
-            x = x.permute(0,2,1)    # x: [Batch, Input length, Channel]
+
+        hidden_states = self.patch_embedding(inputs)
+        hidden_states, attn_weights= self.encoder(hidden_states, output_attentions=self.output_attentions)
+        hidden_states = hidden_states.reshape(
+            -1, self.num_features, hidden_states.shape[-2], hidden_states.shape[-1])
+        return hidden_states, attn_weights
+
+
+class PatchTSTForForecasting(nn.Module):
+    """
+    PatchTST for time series forecasting.
+    """
+    def __init__(self, config: PatchTSTConfig):
+        super().__init__()
+        self.decomp = config.decomp
+        if self.decomp:
+            self.decomp_layer = MovingAverageDecomposition(config.moving_avg)
+            self.seasonal_backbone = PatchTSTBackbone(config)
+            self.trend_backbone = PatchTSTBackbone(config)
+            self.patch_num = self.seasonal_backbone.patch_num
         else:
-            x = x.permute(0,2,1)    # x: [Batch, Channel, Input length]
-            x = self.model(x)
-            x = x.permute(0,2,1)    # x: [Batch, Input length, Channel]
-        return x.unsqueeze(-1)
+            self.backbone = PatchTSTBackbone(config)
+            self.patch_num = self.backbone.patch_num
+        self.flatten = nn.Flatten(start_dim=-2)
+        self.forecasting_head = PatchTSTHead(
+            self.patch_num * config.hidden_size,
+            config.output_len,
+            config.individual_head,
+            config.num_features,
+            config.head_dropout)
+        self.use_revin = config.use_revin
+        if self.use_revin:
+            self.revin = RevIN(
+                config.num_features, affine=config.affine, subtract_last=config.subtract_last)
+        self.output_attentions = config.output_attentions
+
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+
+        """
+        Forward pass of PatchTSTForForecasting.
+
+        Args:
+            inputs (Tensor): Input data with shape: [batch_size, input_len, num_features]
+
+        Returns:
+            torch.Tensor: outputs with shape [batch_size, output_len, num_features]
+        """
+
+        if self.use_revin:
+            inputs = self.revin(inputs, "norm")
+        # [batch_size, num_features, patch_num, hidden_size]
+        if self.decomp:
+            seasonal_hidden_states, attn_weights = self.seasonal_backbone(inputs)
+            trend_hidden_states, _ = self.trend_backbone(inputs)
+            hidden_states = seasonal_hidden_states + trend_hidden_states
+        else:
+            hidden_states, attn_weights = self.backbone(inputs)
+        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, patch_num * hidden_size]
+        # [batch_size, output_len, num_features]
+        prediction = self.forecasting_head(hidden_states).transpose(1, 2)
+        if self.use_revin:
+            prediction = self.revin(prediction, "denorm")
+        if self.output_attentions:
+            return {"prediction": prediction, "attn_weights": attn_weights}
+        else:
+            return prediction
+
+
+class PatchTSTForClassification(nn.Module):
+    """
+    PatchTST for time series classification.
+    """
+    def __init__(self, config: PatchTSTConfig):
+        super().__init__()
+        self.num_classes = config.num_classes
+        self.backbone = PatchTSTBackbone(config)
+        self.flatten = nn.Flatten(start_dim=1)
+        self.forecasting_head = PatchTSTHead(
+            config.num_features, self.backbone.patch_num * config.hidden_size,
+            config.num_classes,
+            dropout=config.head_dropout)
+        self.use_revin = config.use_revin
+        if self.use_revin:
+            self.revin = RevIN(
+                config.num_features, affine=config.affine, subtract_last=config.subtract_last)
+        self.output_attentions = config.output_attentions
+
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+
+        """
+        Forward pass of PatchTSTForForecasting.
+
+        Args:
+            inputs (Tensor): Input data with shape: [batch_size, input_len, num_features]
+
+        Returns:
+            torch.Tensor: outputs with shape [batch_size, num_classes]
+        """
+
+        if self.use_revin:
+            inputs = self.revin(inputs, "norm")
+        # [batch_size, num_features, patch_num, hidden_size]
+        hidden_states, attn_weights = self.backbone(inputs)
+        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, patch_num * hidden_size]
+        # [batch_size, output_len, num_features]
+        prediction = self.forecasting_head(hidden_states).transpose(1, 2)
+        if self.use_revin:
+            prediction = self.revin(prediction, "denorm")
+        if self.output_attentions:
+            return {"prediction": prediction, "attn_weights": attn_weights}
+        else:
+            return prediction
+
+
+class PatchTSTForReconstruction(nn.Module):
+    """
+    PatchTST for time series forecasting.
+    """
+    def __init__(self, config: PatchTSTConfig):
+        super().__init__()
+        self.backbone = PatchTSTBackbone(config)
+        self.flatten = nn.Flatten(start_dim=-2)
+        self.forecasting_head = PatchTSTHead(
+            self.backbone.patch_num * config.hidden_size,
+            config.input_len,
+            config.individual_head,
+            config.num_features,
+            config.head_dropout)
+        self.use_revin = config.use_revin
+        if self.use_revin:
+            self.revin = RevIN(
+                config.num_features, affine=config.affine, subtract_last=config.subtract_last)
+        self.output_attentions = config.output_attentions
+
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+
+        """
+        Forward pass of PatchTSTForReconstruction.
+
+        Args:
+            inputs (Tensor): Input data with shape: [batch_size, input_len, num_features]
+
+        Returns:
+            torch.Tensor: outputs with shape [batch_size, input_len, num_features]
+        """
+
+        if self.use_revin:
+            inputs = self.revin(inputs, "norm")
+        # [batch_size, num_features, patch_num, hidden_size]
+        hidden_states, attn_weights = self.backbone(inputs)
+        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, patch_num * hidden_size]
+        # [batch_size, input_len, num_features]
+        prediction = self.forecasting_head(hidden_states).transpose(1, 2)
+        if self.use_revin:
+            prediction = self.revin(prediction, "denorm")
+        if self.output_attentions:
+            return {"prediction": prediction, "attn_weights": attn_weights}
+        else:
+            return prediction

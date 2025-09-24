@@ -59,7 +59,7 @@ def add_temporal_features(df):
     if add_day_of_year:
         # numerical day_of_year
         doy = (df.index.dayofyear - 1) / 366 # df.index.month starts from 1. We need to minus 1 to make it start from 0.
-        timestamps.append(dom.values)
+        timestamps.append(doy.values)
 
     timestamps = np.stack(timestamps, axis=-1)
     return timestamps
@@ -69,14 +69,14 @@ def split_and_save_data(data, timestamps):
     train_ratio, val_ratio, _ = regular_settings['train_val_test_ratio']
     train_len = int(data.shape[0] * train_ratio)
     val_len = int(data.shape[0] * val_ratio)
-    
+
     train_data = data[:train_len].astype(np.float32)
     val_data = data[train_len : train_len + val_len].astype(np.float32)
     test_data = data[train_len + val_len :].astype(np.float32)
     train_timestamps = timestamps[:train_len].astype(np.float32)
     val_timestamps = timestamps[train_len : train_len + val_len].astype(np.float32)
     test_timestamps = timestamps[train_len + val_len :].astype(np.float32)
-    
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     np.save(os.path.join(output_dir, 'train_data.npy'), train_data)

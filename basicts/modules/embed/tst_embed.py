@@ -177,3 +177,50 @@ class SequenceEmbedding(nn.Module):
             embedded = self.value_embedding(torch.cat([inputs, inputs_timestamps.transpose(1,2)], dim=1))
         # embedded: [batch_size, num_features (+ num_timestamps), hidden_size]
         return self.dropout(embedded)
+
+
+class PatchEmbedding(nn.Module):
+    """
+    PatchEmbedding layer is used to embed the time series from the patch dimension to hidden dimension, \
+    i.e., [batch_size, seq_len, num_features] -> [batch_size * num_features, num_patches, hidden_size].
+    """
+
+    def __init__(
+            self,
+            hidden_size: int,
+            patch_len: int = 16,
+            stride: int = 8,
+            padding: bool = True,
+            dropout: float = 0.1):
+
+        super().__init__()
+
+        self.patch_len = patch_len
+        self.stride = stride
+
+        self.padding_layer = nn.ReplicationPad1d((0, stride)) if padding else None
+
+        self.value_embedding = nn.Linear(patch_len, hidden_size)
+        self.position_embedding = PositionEmbedding(hidden_size)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass of the PatchEmbedding layer.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape [batch_size, seq_len, num_features].
+
+        Returns:
+            torch.Tensor: Output tensor of shape [batch_size, num_features, num_patches, hidden_size].
+        """
+        inputs = inputs.transpose(1, 2)
+        if self.padding_layer is not None:
+            # padding: # [batch_size, num_features, seq_len + padding]
+            inputs = self.padding_layer(inputs)
+        # patching: # [batch_size, num_features, num_patches, patch_len]
+        patches = inputs.unfold(dimension=-1, size=self.patch_len, step=self.stride)
+        # embedding: # [batch_size * num_features, num_patches, hidden_size]
+        patches = patches.reshape(-1, patches.size(2), self.patch_len)
+        embedded = self.value_embedding(patches) + self.position_embedding(patches)
+        return self.dropout(embedded)
