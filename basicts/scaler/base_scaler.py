@@ -1,12 +1,14 @@
 from dataclasses import dataclass
+from typing import Union
 
+import numpy as np
 import torch
 
 
 @dataclass
-class BaseScaler:
+class BasicTSScaler:
     """
-    BaseScaler is an abstract class for data scaling and normalization methods.
+    BasicTSScaler is an abstract class for data scaling and normalization methods.
 
     Attributes:
         dataset_name (str): The name of the dataset, used to load the data.
@@ -15,10 +17,18 @@ class BaseScaler:
         rescale (bool): Flag indicating whether to apply rescaling.
     """
 
-    dataset_name: str
-    train_ratio: float
     norm_each_channel: bool
     rescale: bool
+
+    def fit(self, data: Union[np.ndarray, torch.Tensor]) -> None:
+        """
+        Fit the scaler to the training data.
+
+        Args:
+            data (torch.Tensor): Training data used to fit the scaler.
+        """
+
+        raise NotImplementedError("Subclasses should implement this method.")
 
     def transform(self, input_data: torch.Tensor) -> torch.Tensor:
         """

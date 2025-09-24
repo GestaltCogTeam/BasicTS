@@ -3,10 +3,10 @@ import json
 import numpy as np
 import torch
 
-from .base_scaler import BaseScaler
+from .base_scaler import BasicTSScaler
 
 
-class MinMaxScaler(BaseScaler):
+class MinMaxScaler(BasicTSScaler):
     """
     MinMaxScaler performs min-max normalization on the dataset, scaling the data to a specified range 
     (typically [0, 1] or [-1, 1]).

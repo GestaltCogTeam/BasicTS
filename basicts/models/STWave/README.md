@@ -1,0 +1,1 @@
+[STWave](https://ieeexplore.ieee.org/document/10184591) requires PyWavelets.
