@@ -907,7 +907,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
                 `False` means lower value is best, such as `loss`. Defaults to True.
         """
 
-        metric = self.meter_pool.get_avg(metric_name)
+        metric = self.meter_pool.get_value(metric_name)
         best_metric = self.best_metrics.get(metric_name)
         if best_metric is None or (metric > best_metric if greater_best else metric < best_metric):
             self.best_metrics[metric_name] = metric
