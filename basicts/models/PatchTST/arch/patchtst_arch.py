@@ -34,11 +34,12 @@ class PatchTSTBackbone(nn.Module):
         self.num_features = config.num_features
 
         # patching and embedding
+        padding = (0, config.patch_stride) if config.padding else None
         self.patch_embedding = PatchEmbedding(
-            config.hidden_size, config.patch_len, config.patch_stride, config.padding, config.fc_dropout)
-        self.patch_num = int((config.input_len - config.patch_len) / config.patch_stride + 1)
+            config.hidden_size, config.patch_len, config.patch_stride, padding, config.fc_dropout)
+        self.num_patches = int((config.input_len - config.patch_len) / config.patch_stride + 1)
         if config.padding:
-            self.patch_num += 1
+            self.num_patches += 1
 
         # Encoder
         norm_type = nn.LayerNorm if config.norm_type == "layer_norm" else PatchTSTBatchNorm
@@ -67,7 +68,7 @@ class PatchTSTBackbone(nn.Module):
             inputs (Tensor): Input data with shape: [batch_size, input_len, num_features]
 
         Returns:
-            torch.Tensor: outputs with shape [batch_size, num_features, patch_num, hidden_size]
+            torch.Tensor: outputs with shape [batch_size, num_features, num_patches, hidden_size]
             Optional[List[torch.Tensor]]: attention weights if output_attentions=True, else None
         """
 
@@ -89,13 +90,13 @@ class PatchTSTForForecasting(nn.Module):
             self.decomp_layer = MovingAverageDecomposition(config.moving_avg)
             self.seasonal_backbone = PatchTSTBackbone(config)
             self.trend_backbone = PatchTSTBackbone(config)
-            self.patch_num = self.seasonal_backbone.patch_num
+            self.num_patches = self.seasonal_backbone.num_patches
         else:
             self.backbone = PatchTSTBackbone(config)
-            self.patch_num = self.backbone.patch_num
+            self.num_patches = self.backbone.num_patches
         self.flatten = nn.Flatten(start_dim=-2)
         self.forecasting_head = PatchTSTHead(
-            self.patch_num * config.hidden_size,
+            self.num_patches * config.hidden_size,
             config.output_len,
             config.individual_head,
             config.num_features,
@@ -120,14 +121,14 @@ class PatchTSTForForecasting(nn.Module):
 
         if self.use_revin:
             inputs = self.revin(inputs, "norm")
-        # [batch_size, num_features, patch_num, hidden_size]
+        # [batch_size, num_features, num_patches, hidden_size]
         if self.decomp:
             seasonal_hidden_states, attn_weights = self.seasonal_backbone(inputs)
             trend_hidden_states, _ = self.trend_backbone(inputs)
             hidden_states = seasonal_hidden_states + trend_hidden_states
         else:
             hidden_states, attn_weights = self.backbone(inputs)
-        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, patch_num * hidden_size]
+        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, num_patches * hidden_size]
         # [batch_size, output_len, num_features]
         prediction = self.forecasting_head(hidden_states).transpose(1, 2)
         if self.use_revin:
@@ -148,7 +149,7 @@ class PatchTSTForClassification(nn.Module):
         self.backbone = PatchTSTBackbone(config)
         self.flatten = nn.Flatten(start_dim=1)
         self.forecasting_head = PatchTSTHead(
-            config.num_features, self.backbone.patch_num * config.hidden_size,
+            config.num_features, self.backbone.num_patches * config.hidden_size,
             config.num_classes,
             dropout=config.head_dropout)
         self.use_revin = config.use_revin
@@ -171,9 +172,9 @@ class PatchTSTForClassification(nn.Module):
 
         if self.use_revin:
             inputs = self.revin(inputs, "norm")
-        # [batch_size, num_features, patch_num, hidden_size]
+        # [batch_size, num_features, num_patches, hidden_size]
         hidden_states, attn_weights = self.backbone(inputs)
-        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, patch_num * hidden_size]
+        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, num_patches * hidden_size]
         # [batch_size, output_len, num_features]
         prediction = self.forecasting_head(hidden_states).transpose(1, 2)
         if self.use_revin:
@@ -193,7 +194,7 @@ class PatchTSTForReconstruction(nn.Module):
         self.backbone = PatchTSTBackbone(config)
         self.flatten = nn.Flatten(start_dim=-2)
         self.forecasting_head = PatchTSTHead(
-            self.backbone.patch_num * config.hidden_size,
+            self.backbone.num_patches * config.hidden_size,
             config.input_len,
             config.individual_head,
             config.num_features,
@@ -218,9 +219,9 @@ class PatchTSTForReconstruction(nn.Module):
 
         if self.use_revin:
             inputs = self.revin(inputs, "norm")
-        # [batch_size, num_features, patch_num, hidden_size]
+        # [batch_size, num_features, num_patches, hidden_size]
         hidden_states, attn_weights = self.backbone(inputs)
-        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, patch_num * hidden_size]
+        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, num_patches * hidden_size]
         # [batch_size, input_len, num_features]
         prediction = self.forecasting_head(hidden_states).transpose(1, 2)
         if self.use_revin:

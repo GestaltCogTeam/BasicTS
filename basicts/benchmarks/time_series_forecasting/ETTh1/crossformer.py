@@ -2,8 +2,9 @@ from typing import List, Sequence
 
 from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
-from basicts.models.Crossformer import Crossformer
+from basicts.models.Crossformer import Crossformer, CrossformerConfig
 from basicts.runners.callback import BasicTSCallback
+from basicts.metrics import masked_mse
 
 
 def Crossformer_ETTh1(
@@ -23,18 +24,16 @@ def Crossformer_ETTh1(
                     "The model should be DLinear and dataset should be ETTh1."
             else:
                 model = Crossformer(
-                    data_dim=7,
-                    in_len=input_len,
-                    out_len=output_len,
-                    seg_len=24,
-                    win_size=2,
-                    factor=10,
-                    hidden_size=256,
-                    d_ff = 256,
-                    n_heads=1,
-                    e_layers=2,
-                    dropout=0.2,
-                    baseline = False,
+                    CrossformerConfig(
+                        input_len=input_len,
+                        output_len=output_len,
+                        num_features=7,
+                        patch_len=24,
+                        hidden_size=256,
+                        intermediate_size=256,
+                        n_heads=1,
+                        dropout=0.2
+                    )
                 )
                 training_config = BasicTSForecastingConfig(
                     model=model,
@@ -44,6 +43,7 @@ def Crossformer_ETTh1(
                     seed=seed,
                     gpus=gpus,
                     batch_size=64,
+                    loss=masked_mse,
                     optimizer_params={"lr": 0.0005},
                     metrics=["MSE", "MAE"],
                 )

@@ -190,7 +190,7 @@ class PatchEmbedding(nn.Module):
             hidden_size: int,
             patch_len: int = 16,
             stride: int = 8,
-            padding: bool = True,
+            padding: Optional[tuple[int, int]] = None,
             dropout: float = 0.1):
 
         super().__init__()
@@ -198,7 +198,7 @@ class PatchEmbedding(nn.Module):
         self.patch_len = patch_len
         self.stride = stride
 
-        self.padding_layer = nn.ReplicationPad1d((0, stride)) if padding else None
+        self.padding_layer = nn.ReplicationPad1d(padding) if padding is not None else None
 
         self.value_embedding = nn.Linear(patch_len, hidden_size)
         self.position_embedding = PositionEmbedding(hidden_size)
@@ -212,7 +212,7 @@ class PatchEmbedding(nn.Module):
             x (torch.Tensor): Input tensor of shape [batch_size, seq_len, num_features].
 
         Returns:
-            torch.Tensor: Output tensor of shape [batch_size, num_features, num_patches, hidden_size].
+            torch.Tensor: Output tensor of shape [batch_size * num_features, num_patches, hidden_size].
         """
         inputs = inputs.transpose(1, 2)
         if self.padding_layer is not None:
