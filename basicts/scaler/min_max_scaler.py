@@ -1,7 +1,7 @@
 import json
 
-import torch
 import numpy as np
+import torch
 
 from .base_scaler import BaseScaler
 
@@ -52,8 +52,8 @@ class MinMaxScaler(BaseScaler):
 
         # compute minimum and maximum values for normalization
         if norm_each_channel:
-            self.min = torch.tensor(np.min(train_data, axis=0, keepdims=True))
-            self.max = torch.tensor(np.max(train_data, axis=0, keepdims=True))
+            self.min = np.min(train_data, axis=0, keepdims=True)
+            self.max = np.max(train_data, axis=0, keepdims=True)
         else:
             self.min = np.min(train_data)
             self.max = np.max(train_data)
@@ -72,7 +72,7 @@ class MinMaxScaler(BaseScaler):
         Returns:
             torch.Tensor: The normalized data with the same shape as the input.
         """
-        
+
         _min = self.min.to(input_data.device)
         _max = self.max.to(input_data.device)
         input_data[..., self.target_channel] = (input_data[..., self.target_channel] - _min) / (_max - _min)

@@ -1,3 +1,4 @@
+# pylint: disable=wrong-import-position
 import os
 import sys
 from argparse import ArgumentParser
@@ -6,6 +7,7 @@ sys.path.append(os.path.abspath(__file__ + '/../..'))
 os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import basicts
+
 
 def parse_args():
     parser = ArgumentParser(description='Evaluate time series forecasting model in BasicTS framework!')
@@ -16,6 +18,8 @@ def parse_args():
     parser.add_argument('-g', '--gpus', default='5')
     parser.add_argument('-d', '--device_type', default='gpu')
     parser.add_argument('-b', '--batch_size', default=None) # use the batch size in the config file
+    parser.add_argument('-ctx', '--context_length', type=int, default=None, help='context length for inference, only used for utsf models')
+    parser.add_argument('-pred', '--prediction_length', type=int, default=None, help='prediction length for inference, only used for utsf models')
 
     return parser.parse_args()
 
@@ -23,4 +27,5 @@ if __name__ == '__main__':
 
     args = parse_args()
 
-    basicts.launch_evaluation(cfg=args.config, ckpt_path=args.checkpoint, device_type=args.device_type, gpus=args.gpus, batch_size=args.batch_size)
+    basicts.launch_evaluation(cfg=args.config, ckpt_path=args.checkpoint, device_type=args.device_type, gpus=args.gpus,
+                              batch_size=args.batch_size, context_length=args.context_length, prediction_length=args.prediction_length)

@@ -1,4 +1,4 @@
-easy-torch
+easy-torch==1.3.3
 easydict
 packaging
 setproctitle
@@ -9,3 +9,6 @@ sympy
 openpyxl
 setuptools==59.5.0
 numpy==1.24.4
+tqdm==4.67.1
+tensorboard==2.18.0
+transformers==4.40.1

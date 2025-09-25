@@ -1,29 +1,29 @@
+import logging
 import os
 import time
-import logging
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Union, Optional, Dict
+from typing import Dict, Optional, Tuple, Union
 
 import setproctitle
-from tqdm import tqdm
-from packaging import version
 import torch
-from torch import nn
-from torch import optim
-from torch.utils.data import Dataset, DataLoader
-from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.utils.tensorboard import SummaryWriter
-from torch.utils.data.distributed import DistributedSampler
-
-from easytorch.core.meter_pool import MeterPool
-from easytorch.core.checkpoint import load_ckpt, save_ckpt, backup_last_ckpt, clear_ckpt
-from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
-from easytorch.core.optimizer_builder import build_optim, build_lr_scheduler
 from easytorch.config import get_ckpt_save_dir
-from easytorch.utils import TimePredictor, get_logger, get_local_rank, is_master, master_only, set_env
+from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
+                                       save_ckpt)
+from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
 from easytorch.device import to_device
+from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
+                             is_master, master_only, set_env)
+from packaging import version
+from torch import nn
+from torch.nn.parallel import DistributedDataParallel as DDP
+from torch.utils.data import DataLoader, Dataset
+from torch.utils.data.distributed import DistributedSampler
+from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
 
-from ..utils import get_dataset_name
+from ..utils import MeterPool, get_dataset_name
+from . import optim
+
 
 class BaseEpochRunner(metaclass=ABCMeta):
     """
@@ -85,6 +85,8 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
         self.val_interval = cfg.get('VAL', {}).get('INTERVAL', 1)
         self.test_interval = cfg.get('TEST', {}).get('INTERVAL', 1)
+
+        self.save_results = cfg.get('EVAL', {}).get('SAVE_RESULTS', False)
 
         # create checkpoint save dir
         if not os.path.isdir(self.ckpt_save_dir):
@@ -186,7 +188,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         """
 
         # TODO: support other optimizers here
-        return build_optim(optim_cfg, model)
+        return optim.build_optim(optim_cfg, model)
 
     def build_lr_scheduler(self, cfg: Dict) -> None:
         """
@@ -197,7 +199,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         """
         # create lr_scheduler
         if cfg.has('TRAIN.LR_SCHEDULER'):
-            self.scheduler = build_lr_scheduler(cfg['TRAIN.LR_SCHEDULER'], self.optim)
+            self.scheduler = optim.build_lr_scheduler(cfg['TRAIN.LR_SCHEDULER'], self.optim)
             self.logger.info('Set lr_scheduler: {}'.format(self.scheduler))
             self.register_epoch_meter('train/lr', 'train', '{:.2e}')
 
@@ -250,8 +252,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
         dataset = self.build_val_dataset(cfg)
         return build_data_loader(dataset, cfg['VAL.DATA'])
 
-    @staticmethod
-    def build_val_dataset(cfg: Dict) -> Dataset:
+    def build_val_dataset(self, cfg: Dict) -> Dataset:
         """It can be implement to build dataset for validation (not necessary).
 
         Args:
@@ -292,6 +293,22 @@ class BaseEpochRunner(metaclass=ABCMeta):
         """
 
         raise NotImplementedError('build_test_dataset method must be implemented.')
+
+    def build_inference_dataset(self, cfg: Dict, input_data: Union[str, list]) -> Dataset:
+        """
+        Build the inference dataset.
+
+        Args:
+            cfg (Dict): Configuration dictionary.
+
+        Returns:
+            Dataset: The inference dataset.
+
+        Raises:
+            NotImplementedError: Must be implemented in a subclass.
+        """
+
+        raise NotImplementedError('build_inference_dataset method must be implemented.')
 
     def init_training(self, cfg: Dict) -> None:
         """
@@ -370,6 +387,20 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.test_interval = cfg['TEST'].get('INTERVAL', 1)
         self.test_data_loader = self.build_test_data_loader(cfg)
         self.register_epoch_meter('test/time', 'test', '{:.2f} (s)', plt=False)
+
+    @master_only
+    def init_inference(self, cfg: Dict, input_data: Union[str, list]) -> None:
+        """
+        Initialize the inference data loader and related settings.
+
+        Args:
+            cfg (Dict): Configuration dictionary.
+            input_data (Union[str, list]): The input data file path or data list for inference.
+        """
+
+        self.inference_dataset = self.build_inference_dataset(cfg, input_data)
+        self.inference_dataset_loader = DataLoader(self.inference_dataset, batch_size=1, shuffle=False)
+        self.register_epoch_meter('inference/time', 'inference', '{:.2f} (s)', plt=False)
 
     # endregion Initialization Functions
 
@@ -494,7 +525,9 @@ class BaseEpochRunner(metaclass=ABCMeta):
 
     @torch.no_grad()
     @master_only
-    def test_pipeline(self, cfg: Optional[Dict] = None, train_epoch: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> None:
+    def test_pipeline(self, cfg: Optional[Dict] = None, train_epoch: Optional[int] = None,
+                      save_metrics: bool = False, save_results: bool = False,
+                      context_length: Optional[int] = None, prediction_length: Optional[int] = None) -> None: # pylint: disable=unused-argument
         """
         The complete test process.
 
@@ -503,7 +536,12 @@ class BaseEpochRunner(metaclass=ABCMeta):
             train_epoch (int, optional): Current epoch during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
             save_results (bool, optional): Save the test results. Defaults to False.
+            context_length (int, optional): Context length for inference, only used for utfs models. 
+            prediction_length (int, optional): Prediction length for inference, only used for utfs models
         """
+        # do not use the context_length and prediction_length here
+        context_length = None
+        prediction_length = None
 
         if train_epoch is None and cfg is not None:
             self.init_test(cfg)
@@ -514,22 +552,69 @@ class BaseEpochRunner(metaclass=ABCMeta):
         self.model.eval()
 
         # execute the test process
-        self.test(train_epoch=train_epoch, save_results=save_results, save_metrics=save_metrics)
+        self.test(train_epoch=train_epoch, save_metrics=save_metrics, save_results=save_results)
 
         test_end_time = time.time()
         self.update_epoch_meter('test/time', test_end_time - test_start_time)
 
         self.print_epoch_meters('test')
+
         if train_epoch is not None:
             self.plt_epoch_meters('test', train_epoch // self.test_interval)
 
+        if len(self.evaluation_horizons) > 0:
+            self.logger.info(f'Evaluation on horizons: {[h + 1 for h in self.evaluation_horizons]}.')
+            for i in self.evaluation_horizons:
+                self.print_epoch_meters(f'test @ horizon {i+1}')
+
         # logging here for intuitiveness
-        if save_results:
-            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results.npz")}.')
+        if self.save_results:
+            self.logger.info(f'Test results saved to {os.path.join(self.ckpt_save_dir, "test_results")}.')
         if save_metrics:
             self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
 
         self.on_test_end()
+
+    @torch.no_grad()
+    @master_only
+    # pylint: disable=unused-argument
+    def inference_pipeline(self, cfg: Optional[Dict] = None, input_data: Union[str, list] = '', output_data_file_path: str = '', **kwargs) -> tuple:
+        """
+        The complete inference process.
+
+        Args:
+            cfg (Dict, optional): Configuration dictionary.
+            input_data (Union[str, list], optional): The input data file path or data list for inference.
+            output_data_file_path (str, optional): The output data file path. Defaults to '' meaning no output file.
+            **kwargs: Additional keyword arguments for flexibility in inference.
+        """
+
+        # if isinstance(input_data, str):
+        #     pass
+
+        self.init_inference(cfg, input_data)
+
+        self.on_inference_start()
+
+        inference_start_time = time.time()
+        self.model.eval()
+
+        # execute the inference process
+        result = self.inference(save_result_path=output_data_file_path)
+
+        inference_end_time = time.time()
+        self.update_epoch_meter('inference/time', inference_end_time - inference_start_time)
+
+        self.print_epoch_meters('inference')
+
+        # logging here for intuitiveness
+        if output_data_file_path:
+            self.logger.info(f'inference results saved to {output_data_file_path}.')
+
+        self.on_inference_end()
+
+        return result
+
 
     # endregion Entries
 
@@ -576,7 +661,19 @@ class BaseEpochRunner(metaclass=ABCMeta):
         Args:
             train_epoch (int, optional): Current epoch during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
-            save_results (bool, optional): Save the test results. Defaults to False.
+
+        Raises:
+            NotImplementedError: Must be implemented in a subclass.
+        """
+
+        raise NotImplementedError('test method must be implemented.')
+
+    def inference(self, save_result_path: str = '') -> tuple:
+        """
+        Define the details of the inference process.
+
+        Args:
+            save_result_path (str, optional): The output data file path. Defaults to '' meaning no output file.
 
         Raises:
             NotImplementedError: Must be implemented in a subclass.
@@ -665,8 +762,20 @@ class BaseEpochRunner(metaclass=ABCMeta):
         pass
 
     @master_only
+    def on_inference_start(self) -> None:
+        """Callback at the start of inference."""
+
+        pass
+
+    @master_only
     def on_test_end(self) -> None:
         """Callback at the end of testing."""
+
+        pass
+
+    @master_only
+    def on_inference_end(self) -> None:
+        """Callback at the end of inference."""
 
         pass
 
@@ -690,7 +799,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
             )
             self.logger.info('Evaluating the best model on the test set.')
             self.load_model(ckpt_path=best_model_path, strict=True)
-            self.test_pipeline(cfg=cfg, train_epoch=train_epoch, save_metrics=True, save_results=True)
+            self.test_pipeline(cfg=cfg, train_epoch=train_epoch, save_metrics=True, save_results=self.save_results)
 
     # endregion Hook Functions
 
@@ -821,7 +930,7 @@ class BaseEpochRunner(metaclass=ABCMeta):
                 `False` means lower value is best, such as `loss`. Defaults to True.
         """
 
-        metric = self.meter_pool.get_avg(metric_name)
+        metric = self.meter_pool.get_value(metric_name)
         best_metric = self.best_metrics.get(metric_name)
         if best_metric is None or (metric > best_metric if greater_best else metric < best_metric):
             self.best_metrics[metric_name] = metric

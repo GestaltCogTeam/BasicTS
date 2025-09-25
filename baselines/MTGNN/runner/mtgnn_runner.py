@@ -17,36 +17,9 @@ class MTGNNRunner(SimpleTimeSeriesForecastingRunner):
         self.num_split = cfg.TRAIN.CUSTOM.NUM_SPLIT
         self.perm = None
 
-    def select_input_features(self, data: torch.Tensor) -> torch.Tensor:
-        """Select input features.
-
-        Args:
-            data (torch.Tensor): input history data, shape [B, L, N, C]
-
-        Returns:
-            torch.Tensor: reshaped data
-        """
-
-        # select feature using self.forward_features
-        if self.forward_features is not None:
-            data = data[:, :, :, self.forward_features]
-        return data
-
-    def select_target_features(self, data: torch.Tensor) -> torch.Tensor:
-        """Select target feature
-
-        Args:
-            data (torch.Tensor): prediction of the model with arbitrary shape.
-
-        Returns:
-            torch.Tensor: reshaped data with shape [B, L, N, C]
-        """
-
-        # select feature using self.target_features
-        data = data[:, :, :, self.target_features]
-        return data
-
     def forward(self, data: tuple, epoch: int = None, iter_num: int = None, train: bool = True, **kwargs) -> tuple:
+        data = self.preprocessing(data)
+
         if train:
             future_data, history_data, idx = data['target'], data['inputs'], data['idx']
         else:
@@ -68,6 +41,7 @@ class MTGNNRunner(SimpleTimeSeriesForecastingRunner):
         model_return["target"] = self.select_target_features(future_data)
         assert list(model_return["prediction"].shape)[:3] == [batch_size, seq_len, num_nodes], \
             "error shape of the output, edit the forward function to reshape it to [B, L, N, C]"
+        model_return = self.postprocessing(model_return)
         return model_return
 
     def train_iters(self, epoch: int, iter_index: int, data: Union[torch.Tensor, Tuple]) -> torch.Tensor:

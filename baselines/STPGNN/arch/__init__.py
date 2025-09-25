@@ -1,0 +1,1 @@
+from .stpgnn_arch import STPGNN

@@ -29,7 +29,7 @@ MODEL_PARAM = {
     "tnorm_bool": True,
     "snorm_bool": True,
     "in_dim"    : 2,
-    "out_dim"   : 12,
+    "out_dim"   : OUTPUT_LEN,
     "channels"  : 32,
     "kernel_size": 2,
     "blocks"    : 4,

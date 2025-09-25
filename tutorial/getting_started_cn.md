@@ -56,7 +56,19 @@ pip install -r requirements.txt
 
 ### 示例设置
 
-#### 示例 1：Python 3.9 + PyTorch 1.10.0 + CUDA 11.1
+#### 示例 1：Python 3.11 + PyTorch 2.5.1 + CUDA 12.4 (推荐)
+
+```bash
+# 安装 Python
+conda create -n BasicTS python=3.11
+conda activate BasicTS
+# 安装 PyTorch
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+# 安装其他依赖项
+pip install -r requirements.txt
+```
+
+#### 示例 2：Python 3.9 + PyTorch 1.10.0 + CUDA 11.1
 
 ```bash
 # 安装 Python
@@ -64,18 +76,6 @@ conda create -n BasicTS python=3.9
 conda activate BasicTS
 # 安装 PyTorch
 pip install torch==1.10.0+cu111 torchvision==0.11.0+cu111 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
-# 安装其他依赖项
-pip install -r requirements.txt
-```
-
-#### 示例 2：Python 3.11 + PyTorch 2.3.1 + CUDA 12.1
-
-```bash
-# 安装 Python
-conda create -n BasicTS python=3.11
-conda activate BasicTS
-# 安装 PyTorch
-pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
 # 安装其他依赖项
 pip install -r requirements.txt
 ```
@@ -175,4 +175,5 @@ BasicTS 的核心组件包括 `Dataset`、`Scaler`、`Model`、`Metrics`、`Runn
 - **📉 [了解评估指标设计并开发自定义损失函数与评估指标](./metrics_design_cn.md)**
 - **🏃‍♂️ [掌握执行器设计并创建自定义执行器](./runner_design_cn.md)**
 - **📜 [解析配置文件设计并自定义配置](./config_design_cn.md)**
+- **🎯 [探索使用BasicTS进行时间序列分类](./time_series_classification_cn.md)**
 - **🔍 [探索多种基线模型](../baselines/)**

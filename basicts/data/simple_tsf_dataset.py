@@ -1,5 +1,5 @@
-import json
 import inspect
+import json
 import logging
 from typing import List
 
@@ -24,8 +24,8 @@ class TimeSeriesForecastingDataset(BaseDataset):
         description (dict): Metadata about the dataset, such as shape and other properties.
     """
 
-    def __init__(self, dataset_name: str, train_val_test_ratio: List[float], mode: str, input_len: int, output_len: int, \
-        overlap: bool = False, logger: logging.Logger = None) -> None:
+    def __init__(self, dataset_name: str, train_val_test_ratio: List[float], mode: str, input_len: int,
+                 output_len: int, memmap: bool = False, overlap: bool = False, logger: logging.Logger = None) -> None:
         """
         Initializes the TimeSeriesForecastingDataset by setting up paths, loading data, and 
         preparing it according to the specified configurations.
@@ -45,7 +45,10 @@ class TimeSeriesForecastingDataset(BaseDataset):
             AssertionError: If `mode` is not one of ['train', 'valid', 'test'].
         """
         assert mode in ['train', 'valid', 'test'], f"Invalid mode: {mode}. Must be one of ['train', 'valid', 'test']."
-        super().__init__(dataset_name, train_val_test_ratio, mode, input_len, output_len, overlap)
+        super().__init__(dataset_name, train_val_test_ratio, mode, memmap)
+        self.input_len = input_len
+        self.output_len = output_len
+        self.overlap = overlap
         self.logger = logger
 
         self.data_file_path = f'datasets/{dataset_name}/data.dat'
@@ -109,14 +112,18 @@ class TimeSeriesForecastingDataset(BaseDataset):
 
         if self.mode == 'train':
             offset = self.output_len if self.overlap else 0
-            return data[:train_len + offset].copy()
+            seg = data[:train_len + offset]
         elif self.mode == 'valid':
             offset_left = self.input_len - 1 if self.overlap else 0
             offset_right = self.output_len if self.overlap else 0
-            return data[train_len - offset_left : train_len + valid_len + offset_right].copy()
+            seg = data[train_len - offset_left : train_len + valid_len + offset_right]
         else:  # self.mode == 'test'
             offset = self.input_len - 1 if self.overlap else 0
-            return data[train_len + valid_len - offset:].copy()
+            seg = data[train_len + valid_len - offset:]
+
+        if not self.memmap:
+            seg = seg.copy()
+        return seg
 
     def __getitem__(self, index: int) -> dict:
         """
@@ -131,6 +138,9 @@ class TimeSeriesForecastingDataset(BaseDataset):
         """
         history_data = self.data[index:index + self.input_len]
         future_data = self.data[index + self.input_len:index + self.input_len + self.output_len]
+        if self.memmap:
+            history_data = history_data.copy()
+            future_data = future_data.copy()
         return {'inputs': history_data, 'target': future_data}
 
     def __len__(self) -> int:

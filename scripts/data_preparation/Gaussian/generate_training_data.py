@@ -1,8 +1,7 @@
-import os
 import json
+import os
 
 import numpy as np
-
 
 # Hyperparameters
 dataset_name = 'Gaussian'
