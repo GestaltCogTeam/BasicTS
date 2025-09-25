@@ -12,7 +12,6 @@ from easytorch.config import get_ckpt_save_dir
 from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
                                        save_ckpt)
 from easytorch.core.data_loader import build_data_loader, build_data_loader_ddp
-from easytorch.core.meter_pool import MeterPool
 from easytorch.device import to_device
 from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
                              is_master, master_only, set_env)
@@ -23,7 +22,7 @@ from torch.utils.data import DataLoader, Dataset
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from ..utils import InfiniteGenerator, get_dataset_name
+from ..utils import InfiniteGenerator, MeterPool, get_dataset_name
 from ..utils.misc import \
     convert_iteration_save_strategy_to_epoch_save_strategy as \
     convert_save_strategy
@@ -742,21 +741,40 @@ class BaseIterationRunner(metaclass=ABCMeta):
 
         raise NotImplementedError()
 
-    def test_pipeline(self, cfg: Optional[Dict] = None, train_iteration: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> None:
-        """Test model.
+    def test_pipeline(self, cfg: Optional[Dict] = None, train_iteration: Optional[int] = None,
+                      save_metrics: bool = False, save_results: bool = False,
+                      context_length: Optional[int] = None, prediction_length: Optional[int] = None) -> None:
+        """Test model. Only for evaluation.
 
         Args:
             cfg (Dict, optional): Configuration dictionary. Defaults to None.
             train_iteration (int, optional): Current iteration during training. Defaults to None.
             save_metrics (bool, optional): Save the test metrics. Defaults to False.
             save_results (bool, optional): Save the test results. Defaults to False.
+            context_length (int, optional): Context length for inference, only used for utfs models. Defaults to None.
+            prediction_length (int, optional): Prediction length for inference, only used for utfs models
         """
+        # only for evaluation
+        if not hasattr(cfg, 'TEST'):
+            return
+
+        # add context_length and prediction_length to cfg
+        if context_length is not None:
+            if 'DATASET' in cfg:
+                cfg['DATASET']['PARAM']['input_len'] = context_length
+            else:
+                cfg['TEST']['DATA']['DATASET']['PARAM']['input_len'] = context_length
+        if prediction_length is not None:
+            if 'DATASET' in cfg:
+                cfg['DATASET']['PARAM']['output_len'] = prediction_length
+            else:
+                cfg['TEST']['DATA']['DATASET']['PARAM']['output_len'] = prediction_length
 
         if train_iteration is None and cfg is not None:
             self.init_test(cfg)
 
         self.logger.info('Start test.')
-        self.on_test_start()
+        self.on_test_start(cfg)
 
         test_start_time = time.time()
         self.model.eval()
@@ -777,13 +795,13 @@ class BaseIterationRunner(metaclass=ABCMeta):
         if save_metrics:
             self.logger.info(f'Test metrics saved to {os.path.join(self.ckpt_save_dir, "test_metrics.json")}.')
 
-        self.on_test_end()
+        self.on_test_end(cfg)
 
     @torch.no_grad()
     @master_only
     def test(self, train_iteration: Optional[int] = None, save_metrics: bool = False, save_results: bool = False) -> Dict:
         """
-        Define the details of the testing process.
+        Define the details of the testing process. Only for evaluation.
 
         Args:
             train_iteration (int, optional): Current epoch during training. Defaults to None.
@@ -815,7 +833,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
 
         self.init_inference(cfg, input_data, context_length, prediction_length)
 
-        self.on_inference_start()
+        self.on_inference_start(cfg)
 
         inference_start_time = time.time()
         self.model.eval()
@@ -832,7 +850,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
         if output_data_file_path:
             self.logger.info(f'inference results saved to {output_data_file_path}.')
 
-        self.on_inference_end()
+        self.on_inference_end(cfg)
 
         return result
 
@@ -850,25 +868,25 @@ class BaseIterationRunner(metaclass=ABCMeta):
         raise NotImplementedError('test method must be implemented.')
 
     @master_only
-    def on_test_start(self) -> None:
+    def on_test_start(self, cfg: Dict = None) -> None:
         """Callback at the start of testing."""
 
         pass
 
     @master_only
-    def on_inference_start(self) -> None:
+    def on_inference_start(self, cfg: Dict = None) -> None:
         """Callback at the start of inference."""
 
         pass
 
     @master_only
-    def on_test_end(self) -> None:
+    def on_test_end(self, cfg: Dict = None) -> None:
         """Callback at the end of testing."""
 
         pass
 
     @master_only
-    def on_inference_end(self) -> None:
+    def on_inference_end(self, cfg: Dict = None) -> None:
         """Callback at the end of inference."""
 
         pass
@@ -889,7 +907,7 @@ class BaseIterationRunner(metaclass=ABCMeta):
                 `False` means lower value is best, such as `loss`. Defaults to True.
         """
 
-        metric = self.meter_pool.get_avg(metric_name)
+        metric = self.meter_pool.get_value(metric_name)
         best_metric = self.best_metrics.get(metric_name)
         if best_metric is None or (metric > best_metric if greater_best else metric < best_metric):
             self.best_metrics[metric_name] = metric

@@ -126,3 +126,22 @@ BasicTS currently supports training **TimeMoE** and **ChronosBolt** on BLAST.
 > - The default config is tuned for BLAST (batch size, learning rate, and other hyper-parameters). Adjust them if your GPUs or hardware differ.  
 
 If you encounter any issues, feel free to open an issue on [BasicTS Issues](https://github.com/GestaltCogTeam/BasicTS/issues). Happy training!
+
+## 4. Model Evaluation
+
+We provide the **ChronosBolt**, **MOIRAI**, and **TimeMoE** model checkpoints trained with BLAST on [Hugging Face](https://huggingface.co/ZezhiShao/BLAST_CKPTS/tree/main).
+
+In addition, we offer one-click evaluation scripts for the **ETTh1, ETTh2, ETTm1, ETTm2,** and **Weather** datasets. These scripts can be found in the `evaluate_config` directory under each corresponding model.
+
+For example, if you would like to evaluate the **ChronosBolt** model, simply modify the `CHECKPOINT_PATH_List` in
+`baselines/ChronosBolt/evaluate_config/evaluate_all.py` to point to the weights you have downloaded or trained, and then run:
+
+```bash
+python baselines/ChronosBolt/evaluate_config/evaluate_all.py
+```
+
+This will generate the full evaluation results. Our reproduced results are provided in
+`baselines/ChronosBolt/evaluate_config/chronos_bolt_evaluation_results.txt`. Note that due to randomness in training and modifications to the evaluation pipeline, the results may not exactly match those reported in the original paper, but they should be very close (slightly better or slightly worse).
+
+The **TimeMoE** model follows the same procedure as ChronosBolt.
+For training and evaluation of the **MOIRAI** model, please refer to `baselines/MOIRAI/README.md`.
