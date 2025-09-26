@@ -430,26 +430,26 @@ class BasicTSRunner:
                     if self.should_optimizer_step:
                         self.callback_handler.trigger('on_optimizer_step', self)
                         self._optimizer_step()
-                forward_return = self.taskflow.postprocess(self, forward_return) # task specific postprocess
-                # update metrics meter
-                for metric_name, metric_fn in self.metrics.items():
-                    metric_value = self._metric_forward(metric_fn, forward_return)
-                    metric_weight = self.taskflow.get_weight(forward_return) # task specific metric weight for averaging
-                    self.update_meter(f'train/{metric_name}', metric_value.item(), metric_weight)
+                    forward_return = self.taskflow.postprocess(self, forward_return) # task specific postprocess
+                    # update metrics meter
+                    for metric_name, metric_fn in self.metrics.items():
+                        metric_value = self._metric_forward(metric_fn, forward_return)
+                        metric_weight = self.taskflow.get_weight(forward_return) # task specific metric weight for averaging
+                        self.update_meter(f'train/{metric_name}', metric_value.item(), metric_weight)
 
-                self.callback_handler.trigger('on_step_end', self, step=step)
-                self.on_step_end(step)
-                step_end_time = time.time()
-                self.update_meter('train/time', step_end_time - step_start_time)
+                    self.callback_handler.trigger('on_step_end', self, step=step)
+                    self.on_step_end(step)
+                    step_end_time = time.time()
+                    self.update_meter('train/time', step_end_time - step_start_time)
 
-                # step end
-                step += 1
-                # update progress bar
-                if step_pbar is not None:
-                    step_pbar.update()
-                # check if training should stop
-                if step >= self.num_steps:
-                    self.should_training_stop = True
+                    # step end
+                    step += 1
+                    # update progress bar
+                    if step_pbar is not None:
+                        step_pbar.update()
+                    # check if training should stop
+                    if step >= self.num_steps:
+                        self.should_training_stop = True
 
             # when training unit is epoch, call on epoch end
             if self.training_unit == 'epoch':
@@ -764,7 +764,8 @@ class BasicTSRunner:
             forward_return = {'prediction': forward_return}
         # add other keys and values in `data` to `forward_return`
         for k, v in data.items():
-            forward_return[k] = v
+            if k not in forward_return:
+                forward_return[k] = v
         return forward_return
 
     def _metric_forward(self, metric_fn: Callable, forward_return: Dict[str, Any]) -> torch.Tensor:

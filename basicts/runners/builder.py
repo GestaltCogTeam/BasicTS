@@ -118,7 +118,7 @@ class Builder:
         Returns:
             Dataset: dataset
         """
-        if cfg.dataset_params is not None:
+        if cfg.dataset_params:
             dataset_params = cfg.dataset_params
         else:
             sig = inspect.signature(cfg.dataset_type.__init__)
