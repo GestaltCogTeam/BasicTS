@@ -6,12 +6,21 @@ import shutil
 import numpy as np
 import pandas as pd
 
+# Current path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# target path
+base_dir = os.path.abspath(os.path.dirname(os.path.join(current_dir, '../..', '../..')))
+
 # Hyperparameters
 dataset_name = 'GBA'
-data_file_path = f'datasets/raw_data/{dataset_name}/{dataset_name}.h5'
-graph_file_path = f'datasets/raw_data/{dataset_name}/adj_{dataset_name}.npy'
-meta_file_path = f'datasets/raw_data/{dataset_name}/meta_{dataset_name}.csv'
-output_dir = f'datasets/{dataset_name}'
+data_file_path = base_dir + f'/datasets/raw_data/{dataset_name}/{dataset_name}.h5'
+graph_file_path = base_dir + f'/datasets/raw_data/{dataset_name}/adj_{dataset_name}.npy'
+meta_file_path = base_dir + f'/datasets/raw_data/{dataset_name}/meta_{dataset_name}.csv'
+'''data_file_path = f'/home/public/BasicTS_raw_data/{dataset_name}/{dataset_name}.h5'
+graph_file_path = f'/home/public/BasicTS_raw_data/{dataset_name}/adj_{dataset_name}.npy'
+meta_file_path = f'/home/public/BasicTS_raw_data/{dataset_name}/meta_{dataset_name}.csv'''
+output_dir = base_dir + f'/datasets/{dataset_name}'
 target_channel = [0]  # Target traffic flow channel
 add_time_of_day = True  # Add time of day as a feature
 add_day_of_week = True  # Add day of the week as a feature
@@ -20,15 +29,13 @@ add_day_of_year = False  # Add day of the year as a feature
 steps_per_day = 96  # Number of time steps per day
 frequency = 1440 // steps_per_day
 domain = 'traffic flow'
-feature_description = [domain, 'time of day', 'day of week']
+timestamps_desc = ['time of day', 'day of week']
 regular_settings = {
-    'INPUT_LEN': 12,
-    'OUTPUT_LEN': 12,
-    'TRAIN_VAL_TEST_RATIO': [0.6, 0.2, 0.2],
-    'NORM_EACH_CHANNEL': False,
-    'RESCALE': True,
-    'METRICS': ['MAE', 'RMSE', 'MAPE'],
-    'NULL_VAL': 0.0
+    'train_val_test_ratio': [0.6, 0.2, 0.2],
+    'norm_each_channel': False,
+    'rescale': True,
+    'metrics': ['MAE', 'RMSE', 'MAPE'],
+    'null_val': 0.0
 }
 
 def load_and_preprocess_data():
@@ -36,49 +43,67 @@ def load_and_preprocess_data():
     df = pd.read_hdf(data_file_path)
     data = np.expand_dims(df.values, axis=-1)
     data = data[..., target_channel]
+    
+    if data.ndim == 3 and data.shape[-1] == 1:
+        data = data.squeeze(axis=-1)
+    
     print(f'Raw time series shape: {data.shape}')
     return data, df
 
-def add_temporal_features(data, df):
+def add_temporal_features(df):
     '''Add time of day and day of week as features to the data.'''
-    _, n, _ = data.shape
-    feature_list = [data]
+    timestamps = []
 
     if add_time_of_day:
         time_of_day = (df.index.values - df.index.values.astype('datetime64[D]')) / np.timedelta64(1, 'D')
-        time_of_day_tiled = np.tile(time_of_day, [1, n, 1]).transpose((2, 1, 0))
-        feature_list.append(time_of_day_tiled)
+        timestamps.append(time_of_day)
 
     if add_day_of_week:
         day_of_week = df.index.dayofweek / 7
-        day_of_week_tiled = np.tile(day_of_week, [1, n, 1]).transpose((2, 1, 0))
-        feature_list.append(day_of_week_tiled)
+        timestamps.append(day_of_week)
 
     if add_day_of_month:
         # numerical day_of_month
         day_of_month = (df.index.day - 1 ) / 31 # df.index.day starts from 1. We need to minus 1 to make it start from 0.
-        day_of_month_tiled = np.tile(day_of_month, [1, n, 1]).transpose((2, 1, 0))
-        feature_list.append(day_of_month_tiled)
+        timestamps.append(day_of_month)
 
     if add_day_of_year:
         # numerical day_of_year
         day_of_year = (df.index.dayofyear - 1) / 366 # df.index.month starts from 1. We need to minus 1 to make it start from 0.
-        day_of_year_tiled = np.tile(day_of_year, [1, n, 1]).transpose((2, 1, 0))
-        feature_list.append(day_of_year_tiled)
+        timestamps.append(day_of_year)
 
-    data_with_features = np.concatenate(feature_list, axis=-1)  # L x N x C
-    return data_with_features
+    timestamps = np.stack(timestamps, axis=-1)
+    return timestamps
 
-def save_data(data):
+def split_and_save_data(data, timestamps):
     '''Save the preprocessed data to a binary file.'''
+    train_ratio, val_ratio, _ = regular_settings['train_val_test_ratio']
+    train_len = int(data.shape[0] * train_ratio)
+    val_len = int(data.shape[0] * val_ratio)
+
+    train_data = data[:train_len].astype(np.float32)
+    val_data = data[train_len: train_len + val_len].astype(np.float32)
+    test_data = data[train_len + val_len:].astype(np.float32)
+    train_timestamps = timestamps[:train_len].astype(np.float32)
+    val_timestamps = timestamps[train_len: train_len + val_len].astype(np.float32)
+    test_timestamps = timestamps[train_len + val_len:].astype(np.float32)
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    file_path = os.path.join(output_dir, 'data.dat')
-    fp = np.memmap(file_path, dtype='float32', mode='w+', shape=data.shape)
-    fp[:] = data[:]
-    fp.flush()
-    del fp
-    print(f'Data saved to {file_path}')
+
+    print(f"train_data shape: {train_data.shape}")
+    np.save(os.path.join(output_dir, 'train_data.npy'), train_data)
+    print(f"val_data shape: {val_data.shape}")
+    np.save(os.path.join(output_dir, 'val_data.npy'), val_data)
+    print(f"test_data shape: {test_data.shape}")
+    np.save(os.path.join(output_dir, 'test_data.npy'), test_data)
+    print(f"train_timestamps shape: {train_timestamps.shape}")
+    np.save(os.path.join(output_dir, 'train_timestamps.npy'), train_timestamps)
+    print(f"val_timestamps shape: {val_timestamps.shape}")
+    np.save(os.path.join(output_dir, 'val_timestamps.npy'), val_timestamps)
+    print(f"test_timestamps shape: {test_timestamps.shape}")
+    np.save(os.path.join(output_dir, 'test_timestamps.npy'), test_timestamps)
+    print(f'Data saved to {output_dir}')
 
 def save_graph():
     '''Save the adjacency matrix to the output directory.'''
@@ -93,35 +118,39 @@ def save_meta_data():
     output_meta_data_path = os.path.join(output_dir, 'meta.csv')
     shutil.copyfile(meta_file_path, output_meta_data_path)
 
-def save_description(data):
+def save_description(data, timestamps):
     '''Save a description of the dataset to a JSON file.'''
     description = {
         'name': dataset_name,
         'domain': domain,
-        'shape': data.shape,
-        'num_time_steps': data.shape[0],
-        'num_nodes': data.shape[1],
-        'num_features': data.shape[2],
-        'feature_description': feature_description,
-        'has_graph': graph_file_path is not None,
         'frequency (minutes)': frequency,
+        'shape': data.shape,
+        'timestamps_shape': timestamps.shape,
+        'timestamps_description': timestamps_desc,
+        'num_time_steps': data.shape[0],
+        'num_vars': data.shape[1],
+        'has_graph': graph_file_path is not None,
         'regular_settings': regular_settings
     }
-    description_path = os.path.join(output_dir, 'desc.json')
+    description_path = os.path.join(output_dir, 'meta.json')
     with open(description_path, 'w') as f:
         json.dump(description, f, indent=4)
     print(f'Description saved to {description_path}')
     print(description)
+    print('\n')
 
 def main():
+    
+    print(f"---------- Generating {dataset_name} data ----------")
+    
     # Load and preprocess data
     data, df = load_and_preprocess_data()
 
     # Add temporal features
-    data_with_features = add_temporal_features(data, df)
+    timestamps = add_temporal_features(df)
 
     # Save processed data
-    save_data(data_with_features)
+    split_and_save_data(data, timestamps)
 
     # Copy and save adjacency matrix
     save_graph()
@@ -130,7 +159,7 @@ def main():
     save_meta_data()
 
     # Save dataset description
-    save_description(data_with_features)
+    save_description(data, timestamps)
 
 if __name__ == '__main__':
     main()
