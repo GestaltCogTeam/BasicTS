@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from .agcrn_cell import AGCRNCell
+from ..config.agcrn_config import AGCRNConfig
 
 
 class AVWDCRNN(nn.Module):
@@ -56,27 +57,25 @@ class AGCRN(nn.Module):
     Venue: NeurIPS 2020
     Task: Spatial-Temporal Forecasting
     """
-
-    def __init__(self, num_nodes, input_dim, rnn_units, output_dim, horizon, num_layers, default_graph, embed_dim, cheb_k):
+        
+    def __init__(self, config: AGCRNConfig):
         super(AGCRN, self).__init__()
-        self.num_node = num_nodes
-        self.input_dim = input_dim
-        self.hidden_dim = rnn_units
-        self.output_dim = output_dim
-        self.horizon = horizon
-        self.num_layers = num_layers
+        self.num_node = config.num_nodes
+        self.input_dim = config.input_dim
+        self.hidden_dim = config.rnn_units
+        self.output_dim = config.output_dim
+        self.horizon = config.output_lens
+        self.num_layers = config.num_layers
 
-        self.default_graph = default_graph
         self.node_embeddings = nn.Parameter(torch.randn(
-            self.num_node, embed_dim), requires_grad=True)
+            self.num_node, config.embed_dim), requires_grad=True)
 
-        self.encoder = AVWDCRNN(num_nodes, input_dim, rnn_units, cheb_k,
-                                embed_dim, num_layers)
+        self.encoder = AVWDCRNN(self.num_node, self.input_dim, self.hidden_dim, config.cheb_k,
+                                config.embed_dim, self.num_layers)
 
         # predictor
         self.end_conv = nn.Conv2d(
-            1, horizon * self.output_dim, kernel_size=(1, self.hidden_dim), bias=True)
-
+            1, self.horizon * self.output_dim, kernel_size=(1, self.hidden_dim), bias=True)
         self.init_param()
 
     def init_param(self):
@@ -86,25 +85,28 @@ class AGCRN(nn.Module):
             else:
                 nn.init.uniform_(p)
 
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor, inputs_timestamps: torch.Tensor) -> torch.Tensor:
         """Feedforward function of AGCRN.
 
         Args:
-            history_data (torch.Tensor): inputs with shape [B, L, N, C].
+            inputs (torch.Tensor): inputs with shape [B, L, N].
+            inputs_timestamps (torch.Tensor): timestamps with shape [B, L, D].
 
         Returns:
-            torch.Tensor: outputs with shape [B, L, N, C]
+            torch.Tensor: outputs with shape [B, L, N]
         """
 
-        init_state = self.encoder.init_hidden(history_data.shape[0])
+        inputs = inputs.unsqueeze(-1)  # B, L, N, 1
+        inputs_timestamps = inputs_timestamps.unsqueeze(2).repeat(1, 1, self.num_node, 1)  # B, L, N, D
+        inputs = torch.cat((inputs, inputs_timestamps), dim=-1)  # B, L, N, 1+D
+        inputs = inputs[:, :, :, :self.input_dim]  # B, L, N, input_dim
+
+        init_state = self.encoder.init_hidden(inputs.shape[0])
         output, _ = self.encoder(
-            history_data, init_state, self.node_embeddings)  # B, T, N, hidden
+            inputs, init_state, self.node_embeddings)  # B, T, N, hidden
         output = output[:, -1:, :, :]  # B, 1, N, hidden
 
         # CNN based predictor
-        output = self.end_conv((output))  # B, T*C, N, 1
-        output = output.squeeze(-1).reshape(-1, self.horizon,
-                                            self.output_dim, self.num_node)
-        output = output.permute(0, 1, 3, 2)  # B, T, N, C
+        output = self.end_conv((output)).squeeze(-1)  # B, T*C, N, 1
 
         return output

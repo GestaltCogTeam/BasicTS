@@ -12,7 +12,7 @@ class DynamicGraphConstructor(nn.Module):
         # hidden dimension of
         self.hidden_dim = model_args['num_hidden']
         # trainable node embedding dimension
-        self.node_dim = model_args['node_hidden']
+        self.node_dim = model_args['node_dim']
 
         self.distance_function = DistanceFunction(**model_args)
         self.mask = Mask(**model_args)

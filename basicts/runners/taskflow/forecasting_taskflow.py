@@ -30,7 +30,6 @@ class BasicTSForecastingTaskFlow(BasicTSTaskFlow):
         data['targets'] = torch.where(targets_mask, data['targets'],
                                     torch.tensor(runner.cfg.null_to_num, device=data['targets'].device))
 
-        data['inputs_mask'] = inputs_mask # added by preprocessing
         data['targets_mask'] = targets_mask # added by preprocessing, will be used in loss function
         return data
 
@@ -40,6 +39,7 @@ class BasicTSForecastingTaskFlow(BasicTSTaskFlow):
         # inverse transform
         if runner.cfg.rescale and runner.scaler is not None:
             forward_return['prediction'] = runner.scaler.inverse_transform(forward_return['prediction'])
+            forward_return['targets'] = runner.scaler.inverse_transform(forward_return['targets'], forward_return['targets_mask'])
 
         return forward_return
 

@@ -8,7 +8,7 @@ class DistanceFunction(nn.Module):
         super().__init__()
         # attributes
         self.hidden_dim = model_args['num_hidden']
-        self.node_dim   = model_args['node_hidden']
+        self.node_dim   = model_args['node_dim']
         self.time_slot_emb_dim  = self.hidden_dim
         self.input_seq_len      = model_args['seq_length']
         # Time Series Feature Extraction

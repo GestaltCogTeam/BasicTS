@@ -7,15 +7,17 @@ from .inherent_block import InhBlock
 from .dynamic_graph_conv.dy_graph_conv import DynamicGraphConstructor
 from .decouple.estimation_gate import EstimationGate
 
+from ..config.d2stgnn_config import D2STGNNConfig
+
 
 class DecoupleLayer(nn.Module):
-    def __init__(self, hidden_dim, fk_dim=256, first=False, **model_args):
+    def __init__(self, hidden_dim, fk_dim=256, first=False, configs: D2STGNNConfig = None):
         super().__init__()
         self.spatial_gate = EstimationGate(
-            model_args['node_hidden'], model_args['time_emb_dim'], 64, model_args['seq_length'])
-        self.dif_layer = DifBlock(hidden_dim, fk_dim=fk_dim, **model_args)
+            configs['node_dim'], configs['time_emb_dim'], 64, configs['seq_length'])
+        self.dif_layer = DifBlock(hidden_dim, fk_dim=fk_dim, **configs)
         self.inh_layer = InhBlock(
-            hidden_dim, fk_dim=fk_dim, first=first, **model_args)
+            hidden_dim, fk_dim=fk_dim, first=first, **configs)
 
     def forward(self, X: torch.Tensor, dynamic_graph: torch.Tensor, static_graph, E_u, E_d, T_D, D_W):
         """decouple layer
@@ -50,49 +52,49 @@ class D2STGNN(nn.Module):
     Venue: VLDB 2022
     Task: Spatial-Temporal Forecasting
     """
-    def __init__(self, **model_args):
+    def __init__(self, configs: D2STGNNConfig):
         super().__init__()
         # attributes
-        self._in_feat = model_args['num_feat']
-        self._hidden_dim = model_args['num_hidden']
-        self._node_dim = model_args['node_hidden']
+        self._in_feat = configs['num_feat']
+        self._hidden_dim = configs['num_hidden']
+        self._node_dim = configs['node_dim']
         self._forecast_dim = 256
         self._output_hidden = 512
-        self._output_dim = model_args['seq_length']
+        self._output_dim = configs['seq_length']
 
-        self._num_nodes = model_args['num_nodes']
-        self._k_s = model_args['k_s']
-        self._k_t = model_args['k_t']
-        self._num_layers = 5
-        self._time_in_day_size = model_args['time_in_day_size']
-        self._day_in_week_size = model_args['day_in_week_size']
+        self._num_nodes = configs['num_nodes']
+        self._k_s = configs['k_s']
+        self._k_t = configs['k_t']
+        self._num_layers = configs['num_layers']
+        self._time_in_day_size = configs['time_in_day_size']
+        self._day_in_week_size = configs['day_in_week_size']
 
-        model_args['use_pre'] = False
-        model_args['dy_graph'] = True
-        model_args['sta_graph'] = True
+        configs['use_pre'] = False
+        configs['dy_graph'] = True
+        configs['sta_graph'] = True
 
-        self._model_args = model_args
+        self._configs = configs
 
         # start embedding layer
         self.embedding = nn.Linear(self._in_feat, self._hidden_dim)
 
         # time embedding
         self.T_i_D_emb = nn.Parameter(
-            torch.empty(288, model_args['time_emb_dim']))
+            torch.empty(288, configs['time_emb_dim']))
         self.D_i_W_emb = nn.Parameter(
-            torch.empty(7, model_args['time_emb_dim']))
+            torch.empty(7, configs['time_emb_dim']))
 
         # Decoupled Spatial Temporal Layer
         self.layers = nn.ModuleList([DecoupleLayer(
-            self._hidden_dim, fk_dim=self._forecast_dim, first=True, **model_args)])
+            self._hidden_dim, fk_dim=self._forecast_dim, first=True, configs=configs)])
         for _ in range(self._num_layers - 1):
             self.layers.append(DecoupleLayer(
-                self._hidden_dim, fk_dim=self._forecast_dim, **model_args))
+                self._hidden_dim, fk_dim=self._forecast_dim, configs=configs))
 
         # dynamic and static hidden graph constructor
-        if model_args['dy_graph']:
+        if configs['dy_graph']:
             self.dynamic_graph_constructor = DynamicGraphConstructor(
-                **model_args)
+                **configs)
 
         # node embeddings
         self.node_emb_u = nn.Parameter(
@@ -102,7 +104,7 @@ class D2STGNN(nn.Module):
 
         # output layer
         self.out_fc_1 = nn.Linear(self._forecast_dim, self._output_hidden)
-        self.out_fc_2 = nn.Linear(self._output_hidden, model_args['gap'])
+        self.out_fc_2 = nn.Linear(self._output_hidden, configs['gap'])
 
         self.reset_parameter()
 
@@ -115,18 +117,17 @@ class D2STGNN(nn.Module):
     def _graph_constructor(self, **inputs):
         E_d = inputs['E_d']
         E_u = inputs['E_u']
-        if self._model_args['sta_graph']:
+        if self._configs['sta_graph']:
             static_graph = [F.softmax(F.relu(torch.mm(E_d, E_u.T)), dim=1)]
         else:
             static_graph = []
-        if self._model_args['dy_graph']:
+        if self._configs['dy_graph']:
             dynamic_graph = self.dynamic_graph_constructor(**inputs)
         else:
             dynamic_graph = []
         return static_graph, dynamic_graph
 
     def _prepare_inputs(self, X):
-        num_feat = self._model_args['num_feat']
         # node embeddings
         node_emb_u = self.node_emb_u  # [N, d]
         node_emb_d = self.node_emb_d  # [N, d]
@@ -134,25 +135,29 @@ class D2STGNN(nn.Module):
         # [B, L, N, d]
         # In the datasets used in D2STGNN, the time_of_day feature is normalized to [0, 1]. We multiply it by 288 to get the index.
         # If you use other datasets, you may need to change this line.
-        T_i_D = self.T_i_D_emb[(X[:, :, :, num_feat] * self._time_in_day_size).type(torch.LongTensor)]
+        T_i_D = self.T_i_D_emb[(X[:, :, :, 1] * self._time_in_day_size).type(torch.LongTensor)]
         # [B, L, N, d]
-        D_i_W = self.D_i_W_emb[(X[:, :, :, num_feat+1] * self._day_in_week_size).type(torch.LongTensor)]
+        D_i_W = self.D_i_W_emb[(X[:, :, :, 2] * self._day_in_week_size).type(torch.LongTensor)]
         # traffic signals
-        X = X[:, :, :, :num_feat]
+        X = X[:, :, :, [0]]
 
         return X, node_emb_u, node_emb_d, T_i_D, D_i_W
 
-    def forward(self, history_data: torch.Tensor, future_data: torch.Tensor, batch_seen: int, epoch: int, train: bool, **kwargs) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor, inputs_timestamps: torch.Tensor) -> torch.Tensor:
         """
 
         Args:
-            history_data (Tensor): Input data with shape: [B, L, N, C]
-        
+            inputs (torch.Tensor): inputs with shape [B, L, N].
+            inputs_timestamps (torch.Tensor): timestamps with shape [B, L, D].
+
         Returns:
-            torch.Tensor: outputs with shape [B, L, N, C]
+            torch.Tensor: outputs with shape [B, L, N]
         """
 
-        X = history_data
+        inputs = inputs.unsqueeze(-1)  # B, L, N, 1
+        inputs_timestamps = inputs_timestamps.unsqueeze(2).repeat(1, 1, self._num_nodes, 1)  # B, L, N, D
+        X = torch.cat((inputs, inputs_timestamps), dim=-1)  # B, L, N, 1+D
+
         # ==================== Prepare Input Data ==================== #
         X, E_u, E_d, T_D, D_W = self._prepare_inputs(X)
 
@@ -185,5 +190,5 @@ class D2STGNN(nn.Module):
             forecast.shape[0], forecast.shape[2], -1)
 
         # reshape
-        forecast = forecast.transpose(1, 2).unsqueeze(-1)
+        forecast = forecast.transpose(1, 2)
         return forecast

@@ -47,7 +47,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
     - `loss` (cls): Loss function. You can pass it as a string in `basicts.metrics` module and it will be transformed \
         into cls automatically. Default: MAE.
     - `loss_args` (dict): Arguments for loss function, if needed. Default: {}.
-    - `optimizer` (str): Optimizer type. Default: Adam.
+    - `optimizer` (Optimizer): Optimizer type. Default: Adam.
     - `optimizer_params` (dict): Optimizer parameters. Default: {'lr': 0.0002, 'weight_decay': 0.0005}.
     - `patience` (int): Early stopping patience. Default: 5.
     - `seed` (int): Random seed. Default: 42.
@@ -110,7 +110,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
     loss: Callable = masked_mae # Loss function
 
     # Optimizer
-    optimizer: Optimizer = field(default=Adam, metadata={"help": "Optimizer type."})
+    optimizer: Optimizer = field(default=Adam, metadata={"help": "Optimizer class."})
     optimizer_params: dict = field(default_factory=lambda: {"lr": 2e-4, "weight_decay": 5e-4},
                                    metadata={"help": "Optimizer parameters."})
 
@@ -162,6 +162,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     # Evaluation parameters
     save_results: bool = False # Whether to save evaluation results in a numpy file. Default: False
+    evaluation_horizons: List[int] = None
 
     ############################## Environment Configuration ##############################
 

@@ -54,8 +54,8 @@ class ZScoreScaler(BasicTSScaler):
                 self.std = np.std(data, axis=0, keepdims=True)
                 self.std[self.std == 0] = 1.0  # prevent division by zero by setting std to 1 where it's 0
             else:
-                self.mean = np.mean(data)
-                self.std = np.std(data)
+                self.mean = [np.mean(data)]
+                self.std = [np.std(data)]
                 if self.std == 0:
                     self.std = 1.0  # prevent division by zero by setting std to 1 where it's 0
             self.mean, self.std = torch.Tensor(self.mean), torch.Tensor(self.std)

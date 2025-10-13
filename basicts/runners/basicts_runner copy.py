@@ -196,8 +196,7 @@ class BasicTSRunner:
         if self.scaler is not None:
             self.scaler.fit(self.train_data_loader.dataset.data)
         self.optimizer = Builder.build_optimizer(self.cfg, self.model)
-        if self.cfg.lr_scheduler is not None:
-            self.lr_scheduler = Builder.build_lr_scheduler(self.cfg, self.optimizer)
+        self.lr_scheduler = Builder.build_lr_scheduler(self.cfg, self.optimizer)
         if self.use_amp:
             self.register_meter('train/amp_scale', 'train', '{:.4f}')
         # fine tune
@@ -376,6 +375,7 @@ class BasicTSRunner:
 
         if self.training_unit == 'epoch':
             self.num_steps = (self.num_epochs - self.start_epoch) * self.step_per_epoch
+            self.start_step = 0
             step_pbar = None
 
         else: # training_unit == 'step'
@@ -402,8 +402,8 @@ class BasicTSRunner:
             if self.training_unit == 'epoch' and (step - 1) % self.step_per_epoch == 0:
                 self.on_epoch_start(self.epoch)
                 self.callback_handler.trigger('on_epoch_start', self, epoch=self.epoch)
-            # epoch pbar
-            data_loader = tqdm(data_loader) if get_local_rank() == 0 else data_loader
+                # epoch pbar
+                data_loader = tqdm(data_loader) if get_local_rank() == 0 else data_loader
 
             # data loop
             for data in data_loader:
@@ -419,6 +419,7 @@ class BasicTSRunner:
                 data = self.taskflow.preprocess(self, data) # task specific preprocess
                 with self.amp_ctx:
                     forward_return = self._forward(self.model, data, step, self.epoch)
+                    forward_return = self.taskflow.postprocess(self, forward_return) # task specific postprocess
                     self.callback_handler.trigger('on_compute_loss', self, epoch=self.epoch, step=step, data=data, forward_return=forward_return)
                     loss = self._metric_forward(self.loss, forward_return)
                 loss_weight = self.taskflow.get_weight(forward_return) # task specific metric weight for averaging
@@ -430,7 +431,6 @@ class BasicTSRunner:
                     if self.should_optimizer_step:
                         self.callback_handler.trigger('on_optimizer_step', self)
                         self._optimizer_step()
-                forward_return = self.taskflow.postprocess(self, forward_return) # task specific postprocess
                 # update metrics meter
                 for metric_name, metric_fn in self.metrics.items():
                     metric_value = self._metric_forward(metric_fn, forward_return)
@@ -564,9 +564,10 @@ class BasicTSRunner:
         if self.training_unit == 'epoch' and train_epoch is not None:
             # tensorboard plt meters
             self.plt_meters('val', train_epoch // self.val_interval)
+            self._save_best_model(train_epoch, 'val/' + self.target_metric, greater_best=greater_best)
         else: # training_unit is 'step'
             self.plt_meters('val', train_step // self.val_interval)
-        self._save_best_model(train_epoch, train_step, 'val/' + self.target_metric, greater_best=greater_best)
+            self._save_best_model(train_step, 'val/' + self.target_metric, greater_best=greater_best)
 
     @master_only
     def on_test_start(self) -> None:
@@ -652,7 +653,7 @@ class BasicTSRunner:
         if self.test_data_loader is not None and epoch % self.test_interval == 0:
             self._test(train_epoch=epoch)
         # save the model checkpoint
-        self._save_model(epoch, step)
+        self._save_model(epoch)
         # reset epoch meters
         self.reset_meters()
 
@@ -890,8 +891,10 @@ class BasicTSRunner:
             else:
                 self.model.load_state_dict(checkpoint_dict['model_state_dict'], strict=strict)
             self.optimizer.load_state_dict(checkpoint_dict['optim_state_dict'])
-            self.start_epoch = checkpoint_dict['epoch']
-            self.start_step = checkpoint_dict['step']
+            if self.training_unit == 'epoch':
+                self.start_epoch = checkpoint_dict[self.training_unit]
+            else: #self.training_unit == 'step'
+                self.start_step = checkpoint_dict[self.training_unit]
             if checkpoint_dict.get('best_metrics') is not None:
                 self.best_metrics = checkpoint_dict['best_metrics']
             if self.lr_scheduler is not None:
@@ -904,12 +907,11 @@ class BasicTSRunner:
             pass
 
     @master_only
-    def _save_model(self, epoch: int, step: int):
+    def _save_model(self, unit_count: int):
         """Save checkpoint every epoch.
 
         checkpoint format is {
             'epoch': current epoch ([1, num_epochs]),
-            'step': current step ([1, num_steps]),
             'model_state_dict': state_dict of model,
             'optim_state_dict': state_dict of optimizer
         }
@@ -918,22 +920,16 @@ class BasicTSRunner:
 
         Args:
             epoch (int): current epoch.
-            step (int): current step.
         """
 
         model = self.model.module if isinstance(self.model, DDP) else self.model
         ckpt_dict = {
-            'epoch': epoch,
-            'step': step,
+            self.training_unit: unit_count,
             'model_state_dict': model.state_dict(),
             'optim_state_dict': self.optimizer.state_dict(),
             'best_metrics': self.best_metrics
         }
 
-        if self.training_unit == 'epoch':
-            unit_count = epoch
-        else: # self.training_unit == 'step'
-            unit_count = step
         # save learning rate scheduler and amp scaler if available
         if self.lr_scheduler is not None:
             ckpt_dict['scheduler_state_dict'] = self.lr_scheduler.state_dict()
@@ -960,7 +956,7 @@ class BasicTSRunner:
                 clear_ckpt(self.ckpt_save_dir)
 
     @master_only
-    def _save_best_model(self, train_epoch: int, train_step: int, metric_name: str, greater_best: bool = True):
+    def _save_best_model(self, unit_count: int, metric_name: str, greater_best: bool = True):
         """Save the best model while training.
 
         Examples:
@@ -981,8 +977,7 @@ class BasicTSRunner:
             self.best_metrics[metric_name] = metric
             model = self.model.module if isinstance(self.model, DDP) else self.model
             ckpt_dict = {
-                'epoch': train_epoch,
-                'step': train_step,
+                self.training_unit: unit_count,
                 'model_state_dict': model.state_dict(),
                 'optim_state_dict': self.optimizer.state_dict(),
                 'best_metrics': self.best_metrics

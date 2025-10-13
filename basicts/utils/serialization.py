@@ -20,12 +20,11 @@ def get_regular_settings(dataset_name: str) -> dict:
         dict: Regular settings for the dataset.
     """
 
-    # read json file: datasets/dataset_name/desc.json
-    desc = load_dataset_desc(dataset_name)
-    regular_settings = desc['regular_settings']
+    # read json file: datasets/dataset_name/meta.json
+    regular_settings = load_meta_description(dataset_name)['regular_settings']
     return regular_settings
 
-def load_dataset_desc(dataset_name: str) -> str:
+def load_meta_description(dataset_name: str) -> str:
     """
     Get the description of a dataset.
     
@@ -37,7 +36,7 @@ def load_dataset_desc(dataset_name: str) -> str:
     """
 
     # read json file: datasets/dataset_name/desc.json
-    with open(f'datasets/{dataset_name}/desc.json', 'r') as f:
+    with open(f'datasets/{dataset_name}/meta.json', 'r') as f:
         desc = json.load(f)
     return desc
 
@@ -91,18 +90,20 @@ def dump_pkl(obj: object, file_path: str):
     with open(file_path, 'wb') as f:
         pickle.dump(obj, f)
 
-def load_adj(file_path: str, adj_type: str):
+def load_adj(dataset_name: str, adj_type: str):
     """
     Load and preprocess an adjacency matrix.
 
     Args:
-        file_path (str): Path to the file containing the adjacency matrix.
+        dataset_name (str): Name of the dataset.
         adj_type (str): Type of adjacency matrix preprocessing. Options: 'scalap', 'normlap', 'symnadj', 'transition', 'doubletransition', 'identity', 'original'.
 
     Returns:
         list: List of processed adjacency matrices.
         np.ndarray: Raw adjacency matrix.
     """
+
+    file_path = f'datasets/{dataset_name}/adj_mx.pkl'
 
     try:
         _, _, adj_mx = load_pkl(file_path)

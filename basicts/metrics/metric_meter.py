@@ -4,7 +4,6 @@ class AvgMeter:
 
     def __init__(self):
         self._sum: float = 0.
-        self.last: float = 0.
         self._count: int = 0
 
     def reset(self):
@@ -12,7 +11,6 @@ class AvgMeter:
         """
 
         self._sum = 0.
-        self.last = 0.
         self._count = 0
 
     def update(self, value: float, n: int = 1):
@@ -24,7 +22,6 @@ class AvgMeter:
         """
 
         self._sum += value * n
-        self.last = value
         self._count += n
 
     @property

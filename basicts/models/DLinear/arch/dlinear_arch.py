@@ -34,7 +34,7 @@ class DLinear(nn.Module):
             self.linear_seasonal = nn.Linear(config.input_len, config.output_len)
             self.linear_trend = nn.Linear(config.input_len, config.output_len)
 
-    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+    def forward(self, target=None, inputs: torch.Tensor = None) -> torch.Tensor:
         """Feed forward of DLinear.
 
         Args:

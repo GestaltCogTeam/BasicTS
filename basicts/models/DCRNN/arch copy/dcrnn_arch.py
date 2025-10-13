@@ -3,11 +3,11 @@ from torch import nn
 import numpy as np
 
 from .dcrnn_cell import DCGRUCell
-from ..config.dcrnn_config import DCRNNConfig
 
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 
 class Seq2SeqAttrs:
     def __init__(self, adj_mx, **model_kwargs):
@@ -89,21 +89,14 @@ class DCRNN(nn.Module, Seq2SeqAttrs):
     Task: Spatial-Temporal Forecasting
     """
 
-    def __init__(self, configs: DCRNNConfig):
+    def __init__(self, adj_mx, **model_kwargs):
         super().__init__()
-        Seq2SeqAttrs.__init__(self, **configs)
-        self.input_dim = configs.get('input_dim')
-        self.encoder_model = EncoderModel(**configs)
-        self.decoder_model = DecoderModel(**configs)
-        self.cl_decay_steps = int(configs.get("cl_decay_steps", 2000))
+        Seq2SeqAttrs.__init__(self, adj_mx, **model_kwargs)
+        self.encoder_model = EncoderModel(adj_mx, **model_kwargs)
+        self.decoder_model = DecoderModel(adj_mx, **model_kwargs)
+        self.cl_decay_steps = int(model_kwargs.get("cl_decay_steps", 2000))
         self.use_curriculum_learning = bool(
-            configs.get("use_curriculum_learning", False))
-        self.print_all_parameters()
-
-    def print_all_parameters(self):
-        for name, param in self.named_parameters():
-            if param.requires_grad:
-                print(name, param.data.shape)
+            model_kwargs.get("use_curriculum_learning", False))
 
     def _compute_sampling_threshold(self, batches_seen):
         return self.cl_decay_steps / (
@@ -139,48 +132,45 @@ class DCRNN(nn.Module, Seq2SeqAttrs):
         return outputs
 
 
-    def forward(self, inputs: torch.Tensor, inputs_timestamps: torch.Tensor, targets: torch.Tensor = None, step: int = None,) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor, inputs_timestamps: torch.Tensor, targets: torch.Tensor = None, batch_seen: int = None,) -> torch.Tensor:
         """
 
         Args:
             inputs (torch.Tensor): inputs with shape [B, L, N].
             inputs_timestamps (torch.Tensor): timestamps with shape [B, L, D].
-            targets (torch.Tensor, optional): targets with shape [B, L, N]. Defaults to None.
-            step (int, optional): current training step (batchs seen). Defaults to None.
 
         Returns:
             torch.Tensor: outputs with shape [B, L, N]
         """
 
         inputs = inputs.unsqueeze(-1)  # B, L, N, 1
-        inputs_timestamps = inputs_timestamps.unsqueeze(2).repeat(1, 1, self.num_nodes, 1)  # B, L, N, D
+        inputs_timestamps = inputs_timestamps.unsqueeze(2).repeat(1, 1, self._num_nodes, 1)  # B, L, N, D
         inputs = torch.cat((inputs, inputs_timestamps), dim=-1)  # B, L, N, 1+D
-        history_data = inputs[:, :, :, :self.input_dim]
-        future_data = targets.unsqueeze(-1)
+        history_data = inputs[:, :, :, self]
 
         # reshape data
         batch_size, length, num_nodes, channels = history_data.shape
         history_data = history_data.reshape(batch_size, length, num_nodes * channels)      # [B, L, N*C]
         history_data = history_data.transpose(0, 1)         # [L, B, N*C]
 
-        if self.training:
+        if future_data is not None:
             future_data = future_data[..., [0]]     # teacher forcing only use the first dimension.
             batch_size, length, num_nodes, channels = future_data.shape
             future_data = future_data.reshape(batch_size, length, num_nodes * channels)      # [B, L, N*C]
             future_data = future_data.transpose(0, 1)         # [L, B, N*C]
-        else:
-            future_data = None
 
         # DCRNN
         encoder_hidden_state = self.encoder(history_data)
         outputs = self.decoder(encoder_hidden_state, future_data,
-                               batches_seen=step)      # [L, B, N*C_out]
+                               batches_seen=batch_seen)      # [L, B, N*C_out]
 
         # reshape to B, L, N, C
         L, B, _ = outputs.shape
-        outputs = outputs.transpose(0, 1)  # [B, L, N]
+        outputs = outputs.transpose(0, 1)  # [B, L, N*C_out]
+        outputs = outputs.view(B, L, self.num_nodes,
+                               self.decoder_model.output_dim)
 
-        if self.training and step == 1:
+        if self.training and batch_seen == 0:
             print("Warning: decoder only takes the first dimension as groundtruth.")
             print("Parameter Number: ".format(count_parameters(self)))
             print(count_parameters(self))
