@@ -4,8 +4,7 @@ from typing import TYPE_CHECKING
 
 import torch
 from easytorch.device import to_device
-from easytorch.utils import (get_local_rank, get_world_size, is_master,
-                             master_only)
+from easytorch.utils import get_local_rank, get_world_size
 from easytorch.utils.data_prefetcher import DataLoaderX
 from easytorch.utils.env import get_rank
 from packaging import version
@@ -24,8 +23,12 @@ if TYPE_CHECKING:
 
 class Builder:
 
+    """
+    Builder class for constructing BasicTS objects, including model, dataset, optimizer, lr scheduler, and scaler.
+    """
+
     @staticmethod
-    def build_model(cfg: "BasicTSConfig", logger: Logger) -> torch.nn.Module:
+    def _build_model(cfg: "BasicTSConfig", logger: Logger) -> torch.nn.Module:
         """Build model.
 
         Initialize model by calling ```self.define_model```,
@@ -40,8 +43,9 @@ class Builder:
             model (nn.Module)
         """
 
-        logger.info('Building model.')
-        model = to_device(cfg.model)
+        logger.info("Building model.")
+        model = cfg.model(cfg.model_config)
+        model = to_device(model)
 
         # complie model
         if cfg.compile_model:
@@ -64,7 +68,7 @@ class Builder:
         return model
 
     @staticmethod
-    def build_data_loader(cfg: 'BasicTSConfig', mode: BasicTSMode, logger: Logger):
+    def _build_data_loader(cfg: "BasicTSConfig", mode: BasicTSMode, logger: Logger):
         """Build dataloader from BasicTSConfig
 
         structure of `data_cfg` is
@@ -108,7 +112,7 @@ class Builder:
         )
 
     @staticmethod
-    def _build_dataset(cfg: 'BasicTSConfig', mode: BasicTSMode) -> Dataset:
+    def _build_dataset(cfg: "BasicTSConfig", mode: BasicTSMode) -> Dataset:
         """Build a dataset with the given config and mode.
 
         Args:
@@ -137,15 +141,15 @@ class Builder:
         return cfg.dataset_type(**dataset_params)
 
     @staticmethod
-    def build_optimizer(cfg: "BasicTSConfig", model: torch.nn.Module) -> Optimizer:
+    def _build_optimizer(cfg: "BasicTSConfig", model: torch.nn.Module) -> Optimizer:
         return cfg.optimizer(model.parameters(), **cfg.optimizer_params)
 
     @staticmethod
-    def build_lr_scheduler(cfg: "BasicTSConfig", optimizer: torch.optim.Optimizer) -> LRScheduler:
+    def _build_lr_scheduler(cfg: "BasicTSConfig", optimizer: torch.optim.Optimizer) -> LRScheduler:
         return cfg.lr_scheduler(optimizer, **cfg.lr_scheduler_params)
 
     @staticmethod
-    def build_scaler(cfg: "BasicTSConfig") -> BasicTSScaler:
+    def _build_scaler(cfg: "BasicTSConfig") -> BasicTSScaler:
         sig = inspect.signature(cfg.scaler.__init__)
         scaler_params = {}
         for k, v in sig.parameters.items():

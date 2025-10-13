@@ -22,17 +22,15 @@ def iTransformer_ETTh1(
                     and training_config.dataset_name == "ETTh1", \
                     "The model should be iTransformer and dataset should be ETTh1."
             else:
-                model = iTransformerForForecasting(
-                    iTransformerConfig(
+                training_config = BasicTSForecastingConfig(
+                    model=iTransformerForForecasting,
+                    model_config=iTransformerConfig(
                         input_len=input_len,
                         output_len=output_len,
                         num_features=7,
                         hidden_size=32,
                         intermediate_size=32
-                    )
-                )
-                training_config = BasicTSForecastingConfig(
-                    model=model,
+                    ),
                     dataset_name="ETTh1",
                     input_len=input_len,
                     output_len=output_len,

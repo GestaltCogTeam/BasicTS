@@ -12,23 +12,26 @@ class BasicTSForecastingDataset(Dataset):
     A dataset class for time series forecasting problems.
     
     Attributes:
-        name (str): The name of the dataset.
+        dataset_name (str): The name of the dataset.
         input_len (int): The length of the input sequence (number of historical points).
         output_len (int): The length of the output sequence (number of future points to predict).
         mode (Union[BasicTSMode, str]): The mode of the dataset, indicating whether it is for training, validation, or testing.
         use_timestamps (bool): Flag to determine if timestamps should be used.
+        local (bool): Flag to determine if the dataset is local.
+        data_file_path (str | None): Path to the file containing the time series data. Default to "datasets/{dataset_name}".
         memmap (bool): Flag to determine if the dataset should be loaded using memory mapping.
     """
 
-    def __init__(self,
-        dataset_name: str,
-        input_len: int,
-        output_len: int,
-        mode: Union[BasicTSMode, str],
-        use_timestamps: bool = False,
-        local: bool = True,
-        data_file_path: Optional[str] = None,
-        memmap: bool = False) -> None:
+    def __init__(
+            self,
+            dataset_name: str,
+            input_len: int,
+            output_len: int,
+            mode: Union[BasicTSMode, str],
+            use_timestamps: bool = False,
+            local: bool = True,
+            data_file_path: Optional[str] = None,
+            memmap: bool = False) -> None:
         """
         Initializes the BasicTSForecastingDataset by setting up paths, loading data, and 
         preparing it according to the specified configurations.

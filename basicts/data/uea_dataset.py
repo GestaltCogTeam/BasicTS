@@ -1,8 +1,10 @@
-import logging
 import os
-from typing import List
+from typing import Union
 
+import numpy as np
 from torch.utils.data import Dataset
+
+from basicts.utils import BasicTSMode
 
 
 class UEADataset(Dataset):
@@ -21,28 +23,73 @@ class UEADataset(Dataset):
         description (dict): Metadata about the dataset, such as shape and other properties.
     """
 
-    def __init__(self, dataset_name: str, train_val_test_ratio: List[float], mode: str, memmap: bool = False,
-                 logger: logging.Logger = None) -> None:
+    def __init__(
+            self,
+            dataset_name: str,
+            mode: Union[BasicTSMode, str],
+            local: bool = True,
+            data_file_path: str | None = None,
+            memmap: bool = False) -> None:
         """
         Initializes the UEADataset by setting up paths, loading data, and 
         preparing it according to the specified configurations.
 
         Args:
-            dataset_name (str): The name of the dataset.
-            train_val_test_ratio (List[float]): Ratios for splitting the dataset into train, validation, and test sets.
-                Each value should be a float between 0 and 1, and their sum should ideally be 1.
-            mode (str): The operation mode of the dataset. Valid values are 'train', 'valid', or 'test'.
-            input_len (int): The length of the input sequence (number of historical points).
-            output_len (int): The length of the output sequence (number of future points to predict).
-            overlap (bool): Flag to determine if training/validation/test splits should overlap. 
-                Defaults to False for strictly non-overlapping periods. Set to True to allow overlap.
-            logger (logging.Logger): logger.
-
-        Raises:
-            AssertionError: If `mode` is not one of ['train', 'valid', 'test'].
+             dataset_name (str): The name of the dataset.
+             mode (BasicTSMode | str): The operation mode of the dataset. Valid values are "train", "valid", or "test".
+             local (bool, optional): Flag to determine if the dataset should be loaded locally. Defaults to True.
+             data_file_path (str | None, optional): Path to the file containing the time series data. Defaults to None.
+             memmap (bool, optional): Flag to determine if the dataset should be loaded using memory mapping. Defaults to False.
         """
-        assert mode in ['train', 'valid', 'test'], f"Invalid mode: {mode}. Must be one of ['train', 'valid', 'test']."
-        if mode == 'valid':
-            mode = 'test'
-        dataset_name = os.path.join('UEA', dataset_name)
-        super().__init__(dataset_name, train_val_test_ratio, mode, memmap, logger)
+
+        super().__init__()
+        if not local:
+            pass # TODO: support download remotely
+        self.data_file_path = data_file_path or f"datasets/UEA/{dataset_name}" # default file path
+        # UEA datasets have no validation set, so we use test set as validation set following the community practice
+        if mode == BasicTSMode.VAL:
+            mode = BasicTSMode.TEST
+        try:
+            self.inputs = np.load(
+                os.path.join(data_file_path, f"{mode}_inputs.npy"),
+                mmap_mode="r" if memmap else None)
+            self.labels = np.load(
+                os.path.join(data_file_path, f"{mode}_labels.npy"),
+                mmap_mode="r" if memmap else None)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(f"Cannot load dataset from {data_file_path}, Please set a correct local path."\
+                                    "If you want to download the dataset, please set the argument `local` to False.") from e
+        self.memmap = memmap
+
+    def __getitem__(self, index: int) -> dict:
+        """
+        Retrieves a sample from the dataset at the specified index, considering both the input and output lengths.
+
+        Args:
+            index (int): The index of the desired sample in the dataset.
+
+        Returns:
+            dict: A dictionary containing "inputs" and "target", where both are slices of the dataset corresponding to
+                  the historical input data and future prediction data, respectively.
+        """
+
+        if self.memmap:
+            return {
+                "inputs": self.inputs[index,...].copy(),
+                "target": self.labels[index].copy()
+                }
+
+        else:
+            return {
+                "inputs": self.inputs[index,...],
+                "target": self.labels[index]
+                }
+
+    def __len__(self) -> int:
+        """
+        Calculates the total number of samples available in the dataset, adjusted for the lengths of input and output sequences.
+
+        Returns:
+            int: The number of valid samples that can be drawn from the dataset, based on the configurations of input and output lengths.
+        """
+        return self.inputs.shape[0]

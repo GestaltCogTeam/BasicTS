@@ -17,6 +17,8 @@ from easydict import EasyDict
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import BasicTSTaskFlow
 
+from .model_config import BasicTSModelConfig
+
 
 @dataclass
 class BasicTSConfig(EasyDict):
@@ -28,7 +30,9 @@ class BasicTSConfig(EasyDict):
         d (dict, optional): Dictionary to initialize the configuration. Defaults to None.
     """
 
-    model: torch.nn.Module
+    model: type
+    model_config: BasicTSModelConfig
+
     dataset_name: str
     taskflow: BasicTSTaskFlow
     callbacks: List[BasicTSCallback]
@@ -116,6 +120,7 @@ class BasicTSConfig(EasyDict):
 
     ########################### Evaluation Configuration ##########################
 
+    eval_after_train: bool
     save_results: bool # Whether to save evaluation results in a numpy file. Default: False
 
     ############################## Environment Configuration ##############################

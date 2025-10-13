@@ -9,7 +9,7 @@ import torch
 from easytorch.utils import master_only
 from tqdm import tqdm
 
-from basicts.configs.forecasting_config import BasicTSForecastingConfig
+from basicts.configs.tsf_config import BasicTSForecastingConfig
 
 from ..metrics import ALL_METRICS
 from .base_epoch_runner import BaseEpochRunner

@@ -144,6 +144,7 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     ckpt_save_strategy: Union[int, list[int], tuple[int]] = val_interval
     finetune_from: str = None # Checkpoint path for fine-tuning. Default: None. If not specified, the model will be trained from scratch.
     strict_load: bool = True # Whether to strictly load the checkpoint. Default: True.
+    eval_after_train: bool = field(default=False, metadata={"help": "Whether to evaluate the model after training."})
     save_results: bool = False # Whether to save evaluation results in a numpy file. Default: False
 
     ############################## Environment Configuration ##############################

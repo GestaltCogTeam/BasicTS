@@ -37,7 +37,7 @@ class CurriculumLearning(BasicTSCallback):
             try:
                 forward_return["prediction"] = forward_return["prediction"][:, :cl_length, :]
                 forward_return["targets"] = forward_return["targets"][:, :cl_length, :]
-                forward_return['targets_mask'] = forward_return['targets_mask'][:, :cl_length, :]
+                forward_return["targets_mask"] = forward_return["targets_mask"][:, :cl_length, :]
             except KeyError as ke:
                 raise KeyError("Curriculum learning requires 'prediction' and 'targets' in forward_return.") from ke
             except IndexError as ie:

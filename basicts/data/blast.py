@@ -235,6 +235,8 @@ class BLAST(Dataset):
                 inputs = self._mask_anomaly(inputs)
                 targets = self._mask_anomaly(targets)
 
+        inputs = np.expand_dims(inputs, axis=-1)
+        targets = np.expand_dims(targets, axis=-1)
         return {"inputs": inputs, "targets": targets}
 
     def __len__(self):
