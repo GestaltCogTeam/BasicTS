@@ -1,1 +1,0 @@
-from .arch import MOIRAI

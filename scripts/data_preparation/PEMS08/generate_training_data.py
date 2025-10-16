@@ -1,6 +1,7 @@
-import os
 import json
+import os
 import shutil
+
 import numpy as np
 from generate_adj_mx import generate_adj_pems03 as generate_adj
 

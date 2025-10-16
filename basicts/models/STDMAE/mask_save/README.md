@@ -1,1 +1,0 @@
-Position the checkpoints here.

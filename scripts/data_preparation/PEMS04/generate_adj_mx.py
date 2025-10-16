@@ -1,5 +1,5 @@
-import os
 import csv
+import os
 import pickle
 
 import numpy as np

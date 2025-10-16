@@ -1,1 +1,0 @@
-from .cyclenet_arch import CycleNet

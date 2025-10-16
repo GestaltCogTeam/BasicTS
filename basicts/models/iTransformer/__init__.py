@@ -1,2 +1,0 @@
-from .arch import iTransformerBackbone, iTransformerForForecasting, iTransformerForClassification, iTransformerForReconstruction
-from .config.itransformer_config import iTransformerConfig

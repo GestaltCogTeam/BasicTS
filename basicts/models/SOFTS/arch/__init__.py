@@ -1,1 +1,0 @@
-from .softs_arch import SOFTS
