@@ -2,7 +2,6 @@ import unittest
 
 import numpy as np
 import torch
-
 from basicts.metrics.mse import masked_mse
 
 

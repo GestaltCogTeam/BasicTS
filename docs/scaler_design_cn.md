@@ -27,9 +27,9 @@ for data in dataloader:
 
 ## 🧑‍🔧 如何选择或自定义缩放器
 
-BasicTS 提供了几种常见的缩放器，例如 Z-Score 和 Min-Max 缩放器。您可以通过在配置文件中设置 `CFG.SCALER.TYPE` 来轻松切换缩放器。
+BasicTS 提供了几种常见的缩放器，例如 Z-Score 和 Min-Max 缩放器。您可以通过在配置文件中设置 `scaler` 来轻松切换缩放器。
 
-如果您需要自定义缩放器，可以扩展 `basicts.scaler.BaseScaler` 类，并实现 `transform` 和 `inverse_transform` 方法。或者，您也可以选择不继承该类，但仍然需要实现这两个方法。
+如果您需要自定义缩放器，可以扩展 `BasicTSScaler` 类，并实现 `transform` 和 `inverse_transform` 方法。或者，您也可以选择不继承该类，但仍然需要实现这两个方法。
 
 ## 🧑‍💻 进一步探索
 
@@ -39,7 +39,7 @@ BasicTS 提供了几种常见的缩放器，例如 Z-Score 和 Min-Max 缩放器
 - **🛠️ [了解数据缩放器设计并创建自定义缩放器](./scaler_design_cn.md)**
 - **🧠 [深入了解模型设计并构建自定义模型](./model_design_cn.md)**
 - **📉 [了解评估指标设计并开发自定义损失函数与评估指标](./metrics_design_cn.md)**
-- **🏃‍♂️ [掌握执行器设计并创建自定义执行器](./runner_design_cn.md)**
+- **🏃‍♂️ [掌握执行器设计并创建自定义执行器](runner_and_pipeline_cn.md)**
 - **📜 [解析配置文件设计并自定义配置](./config_design_cn.md)**
 - **🎯 [探索使用BasicTS进行时间序列分类](./time_series_classification_cn.md)**
 - **🔍 [探索多种基线模型](../baselines/)**

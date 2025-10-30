@@ -1,7 +1,7 @@
 <div align="center">
   <img src="assets/Basic-TS-logo-for-white.png#gh-light-mode-only" height=200>
   <img src="assets/Basic-TS-logo-for-black.png#gh-dark-mode-only" height=200>
-  <h3><b> A Fair and Scalable Time Series Forecasting Benchmark and Toolkit. </b></h3>
+  <h3><b> A Fair and Scalable Time Series Analysis Benchmark and Toolkit. </b></h3>
 </div>
 
 <div align="center">
@@ -38,13 +38,19 @@
 
 </div>
 
-$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series forecasting. It now supports a wide range of tasks and datasets, including spatial-temporal forecasting and long-term time series forecasting. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series forecasting models. You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md).
+$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series analysis. It now supports a wide range of tasks and datasets such as spatial-temporal forecasting, long-term time series forecasting, classification, and imputation. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series analysis models. You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md).
 
-🎉 **Update (Aug 2025):** BasicTS now supports **time series classification tasks and the UEA dataset!** Check out [how to use BasicTS for classification tasks](./tutorial/time_series_classification_cn.md).
+## 📢 Latest Updates
 
-🎉 **Update (June/July 2025):** Adds nine baselines: STDN, HimNet, STPGNN, CARD, TimeXer, Bi-Mamba, etc.
+🎉 **Update (Oct 2025)**: BasicTS now has built-in support for [**Selective Learning (NeurIPS'25)**](http://arxiv.org/abs/2510.25207), an effective training strategy to mitigate overfitting and enhance model performance and generalization. Users can import and use it directly from the callback module. [Usage Guide](https://github.com/GestaltCogTeam/selective-learning)
 
-🎉 **Update (May 2025):** BasicTS now supports training universal forecasting models—such as **TimeMoE** and **ChronosBolt**—with the [BLAST](https://arxiv.org/abs/2505.17871) corpus. BLAST enables **faster convergence**, **notable reductions in computational cost**, and superior performance even with limited resources. See [here](./tutorial/training_with_BLAST.md).  
+🎉 **Update (Oct 2025): BasicTS version 1.0 is released! New Features:**
+  - 🚀 **Quick Start with Three Lines of Code**: Install via pip, minimal API design for rapid model training and evaluation.
+  - 📦 **Modular Components, Ready to Use**: Provides plug-and-play components like Transformers and MLPs, allowing you to build your own model like building blocks.
+  - 🔄 **Multi-Task Support**: Natively supports three core tasks: time series forecasting, classification, and imputation.
+  - 🔧 **Highly Extensible Architecture**: Based on Taskflow and Callback mechanisms, enabling easy customization without modifying the Runner.
+
+🎉 **Update (May 2025):** BasicTS now supports training universal forecasting models (e.g., **TimeMoE** and **ChronosBolt**) using the [**BLAST (KDD'24)**](https://arxiv.org/abs/2505.17871) corpus. BLAST enables **faster convergence**, **significantly reduced computational costs**, and achieves superior performance even with limited resources.
 
 If you find this project helpful, please don't forget to give it a ⭐ Star to show your support. Thank you!
 

@@ -3,7 +3,7 @@ from typing import Any, Callable, List, Literal, Optional, Tuple
 import torch
 from torch import nn
 
-from .utils import build_layer_norm
+from .utils import build_layer
 
 
 class EncoderLayer(nn.Module):
@@ -24,13 +24,13 @@ class EncoderLayer(nn.Module):
         self.ffn_layer = ffn_layer
 
         self.pre_attn_norm = None if norm_position == "post" \
-            else build_layer_norm(layer_norm)
+            else build_layer(layer_norm)
         self.pre_ffn_norm = None if norm_position == "post" \
-            else build_layer_norm(layer_norm)
+            else build_layer(layer_norm)
         self.post_attn_norm = None if norm_position == "pre" \
-            else build_layer_norm(layer_norm)
+            else build_layer(layer_norm)
         self.post_ffn_norm = None if norm_position == "pre" \
-            else build_layer_norm(layer_norm)
+            else build_layer(layer_norm)
 
     def forward(
         self,

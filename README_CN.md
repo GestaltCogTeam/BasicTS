@@ -1,7 +1,7 @@
 <div align="center">
   <img src="assets/Basic-TS-logo-for-white.png#gh-light-mode-only" height=200>
   <img src="assets/Basic-TS-logo-for-black.png#gh-dark-mode-only" height=200>
-  <h3><b> 一个公平、可扩展的时间序列预测基准库和工具包 </b></h3>
+  <h3><b> 一个公平、可扩展的时间序列分析基准库和工具包 </b></h3>
 </div>
 
 <div align="center">
@@ -39,13 +39,19 @@
 
 </div>
 
-$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) 是一个面向时间序列预测的基准库和工具箱，现已支持时空预测、长序列预测等多种任务与数据集，涵盖统计模型、机器学习模型、深度学习模型等多类算法，为开发和评估时间序列预测模型提供了理想的工具。你可以在[快速上手](./tutorial/getting_started_cn.md)找到详细的教程。
+$\text{BasicTS}^{+}$ (**Basic** **T**ime **S**eries) 是一个面向时间序列分析的基准库和工具箱，现已支持时空预测、长序列预测、分类、插补等多种任务与数据集，涵盖统计模型、机器学习模型、深度学习模型等多类算法，为开发和评估时间序列预测模型提供了理想的工具。你可以在[快速上手](./tutorial/getting_started_cn.md)找到详细的教程。
 
-🎉 **更新（2025年8月）：BasicTS现已支持时间序列分类任务和UEA数据集!** 在这里了解[使用BasicTS进行分类任务](./tutorial/time_series_classification_cn.md)。
+## 📢 最新动态
 
-🎉 **更新（2025年6/7月）：** 添加了9个长序列预测基线：STDN, HimNet, STPGNN, CARD, TimeXer, Bi-Mamba 等。
+🎉 **更新（2025年10月）**：BasicTS 内置支持[**选择学习(NeurIPS'25)**](http://arxiv.org/abs/2510.25207)，一种有效缓解过拟合，增加模型性能和泛化性的训练策略。用户可以从回调模块中导入并直接使用。[使用说明](https://github.com/GestaltCogTeam/selective-learning)
 
-🎉 **更新（2025年5月）：** BasicTS 现已支持使用 [BLAST](https://arxiv.org/abs/2505.17871) 语料库训练通用预测模型（例如 **TimeMoE** 和 **ChronosBolt**）。BLAST 能够实现 **更快的收敛速度**、**显著降低计算成本**，并且即使在资源有限的情况下也能获得卓越性能。[查看](./tutorial/training_with_BLAST_cn.md)。
+🎉 **更新（2025年10月）：BasicTS 1.0版本发布了！新特性：**
+  - 🚀 **三行代码，快速上手**​​：pip install 安装，极简 API 设计，快速实现模型训练与评估。
+  - 📦 **模块化组件，开箱即用**​​：提供 Transformer、MLP 等即插即用的组件，像搭积木一样构建自己的模型。
+  - 🔄 **多任务支持**​​：原生支持时序预测、分类、插补三大核心任务。
+  - 🔧 **高可扩展架构**​​：基于 Taskflow 与 Callback 机制，无需修改 Runner 即可轻松定制。
+
+🎉 **更新（2025年5月）：** BasicTS 现已支持使用 [**BLAST (KDD'24)**](https://arxiv.org/abs/2505.17871) 语料库训练通用预测模型（例如 **TimeMoE** 和 **ChronosBolt**）。BLAST 能够实现 **更快的收敛速度**、**显著降低计算成本**，并且即使在资源有限的情况下也能获得卓越性能。
 
 如果你觉得这个项目对你有帮助，别忘了给个⭐Star支持一下，非常感谢！
 

@@ -5,7 +5,6 @@ import unittest
 
 import numpy as np
 import torch
-
 from basicts.scaler.min_max_scaler import MinMaxScaler
 
 

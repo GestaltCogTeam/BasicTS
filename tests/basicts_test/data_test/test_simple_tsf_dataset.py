@@ -4,7 +4,6 @@ import unittest
 from unittest.mock import mock_open, patch
 
 import numpy as np
-
 from basicts.data.simple_tsf_dataset import TimeSeriesForecastingDataset
 
 

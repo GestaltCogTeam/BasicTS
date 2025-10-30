@@ -4,7 +4,6 @@ import unittest
 
 import numpy as np
 import torch
-
 from basicts.scaler.z_score_scaler import ZScoreScaler
 
 

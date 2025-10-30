@@ -3,10 +3,10 @@ from typing import Union
 
 import numpy as np
 from basicts.utils import BasicTSMode
-from torch.utils.data import Dataset
+from .base_dataset import BasicTSDataset
 
 
-class UEADataset(Dataset):
+class UEADataset(BasicTSDataset):
     """
     A UEA dataset class for time series classification problems, handling the loading, parsing, and partitioning
     of time series data into training, validation, and testing sets based on provided ratios.
@@ -41,7 +41,7 @@ class UEADataset(Dataset):
              memmap (bool, optional): Flag to determine if the dataset should be loaded using memory mapping. Defaults to False.
         """
 
-        super().__init__()
+        super().__init__(dataset_name, mode, memmap)
         if not local:
             pass # TODO: support download remotely
         self.data_file_path = data_file_path or f"datasets/UEA/{dataset_name}" # default file path
@@ -92,3 +92,6 @@ class UEADataset(Dataset):
             int: The number of valid samples that can be drawn from the dataset, based on the configurations of input and output lengths.
         """
         return self.inputs.shape[0]
+
+    def data(self) -> np.ndarray:
+        return self.inputs

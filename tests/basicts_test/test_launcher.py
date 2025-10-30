@@ -2,10 +2,9 @@ import copy
 import unittest
 from unittest.mock import MagicMock, patch
 
-from easydict import EasyDict
-
 from basicts.launcher import (evaluation_func, launch_evaluation,
                               launch_training)
+from easydict import EasyDict
 
 
 class TestLauncher(unittest.TestCase):

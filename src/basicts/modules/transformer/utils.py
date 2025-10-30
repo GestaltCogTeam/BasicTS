@@ -52,21 +52,21 @@ def prepare_causal_attention_mask(
     combined_mask = (1.0 - combined_mask) * torch.finfo(dtype).min
     return combined_mask
 
-def build_layer_norm(
-    layer_norm: Callable | Tuple[Callable, Any],
+def build_layer(
+    layer: Callable | Tuple[Callable, Any],
 ) -> nn.Module:
-    """Build layer norm module.
+    """Build layer.
 
     Args:
-        layer_norm (Callable | Tuple[Callable, Any]): Layer norm function or tuple of layer norm function and kwargs.
+        layer (Callable | Tuple[Callable, Any]): Layer norm function or tuple of layer norm function and kwargs.
 
     Returns:
-        nn.Module: Layer norm module.
+        nn.Module: Layer module.
     """
-    if isinstance(layer_norm, Callable):
-        return layer_norm()
-    if isinstance(layer_norm, tuple):
-        norm_fn, norm_args = layer_norm
+    if isinstance(layer, Callable):
+        return layer()
+    if isinstance(layer, tuple):
+        norm_fn, norm_args = layer
         if isinstance(norm_args, dict):
             return norm_fn(**norm_args)
         elif isinstance(norm_args, (list, tuple)):
@@ -74,4 +74,4 @@ def build_layer_norm(
         else:
             return norm_fn(norm_args)
     else:
-        raise ValueError(f"layer_norm should be Callable or Tuple[Callable, Any], but got {type(layer_norm)}.")
+        raise ValueError(f"layer_norm should be Callable or Tuple[Callable, Any], but got {type(layer)}.")

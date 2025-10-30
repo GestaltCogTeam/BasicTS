@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Sequence
 
 import torch
 from torch import nn
@@ -57,6 +57,36 @@ class MovingAverageDecomposition(nn.Module):
             trend (torch.Tensor): Trend tensor of shape [batch_size, seq_len, num_features]
         """
         trend = self.moving_avg(inputs)
+        seasonal = inputs - trend
+        return seasonal, trend
+
+
+class MultiMovingAverageDecomposition(nn.Module):
+    """
+    Time series decomposition layer using multiple moving averages.
+    """
+    def __init__(self, kernel_size: Sequence[int], stride: int = 1):
+        super().__init__()
+        self.moving_avg = [MovingAverage(kernel, stride) for kernel in kernel_size]
+        self.layer = torch.nn.Linear(1, len(kernel_size))
+
+    def forward(self, inputs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Forward pass of the series decomposition block.
+
+        Args:
+            inputs (torch.Tensor): Input tensor of shape [batch_size, seq_len, num_features]
+
+        Returns:
+            seasonal (torch.Tensor): Seasonal tensor of shape [batch_size, seq_len, num_features]
+            trend (torch.Tensor): Trend tensor of shape [batch_size, seq_len, num_features]
+        """
+        trend=[]
+        for func in self.moving_avg:
+            moving_avg = func(inputs)
+            trend.append(moving_avg.unsqueeze(-1))
+        trend=torch.cat(trend,dim=-1)
+        trend = torch.sum(trend*nn.Softmax(-1)(self.layer(inputs.unsqueeze(-1))),dim=-1)
         seasonal = inputs - trend
         return seasonal, trend
 

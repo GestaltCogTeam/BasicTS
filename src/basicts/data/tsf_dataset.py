@@ -3,10 +3,10 @@ from typing import Union
 
 import numpy as np
 from basicts.utils.constants import BasicTSMode
-from torch.utils.data import Dataset
+from .base_dataset import BasicTSDataset
 
 
-class BasicTSForecastingDataset(Dataset):
+class BasicTSForecastingDataset(BasicTSDataset):
     """
     A dataset class for time series forecasting problems.
     
@@ -36,7 +36,7 @@ class BasicTSForecastingDataset(Dataset):
         preparing it according to the specified configurations.
 
         Args:
-            name (str): The name of the dataset.
+            dataset_name (str): The name of the dataset.
             input_len (int): The length of the input sequence (number of historical points).
             output_len (int): The length of the output sequence (number of future points to predict).
             mode (Union[BasicTSMode, str]): The mode of the dataset, indicating whether it is for training, validation, or testing.
@@ -45,7 +45,7 @@ class BasicTSForecastingDataset(Dataset):
             data_file_path (str | None): Path to the file containing the time series data. Default to "datasets/{name}".
             memmap (bool): Flag to determine if the dataset should be loaded using memory mapping.
         """
-        super().__init__()
+        super().__init__(dataset_name, mode, memmap)
         self.input_len = input_len
         self.output_len = output_len
         if not local:
@@ -53,7 +53,7 @@ class BasicTSForecastingDataset(Dataset):
         if data_file_path is None:
             data_file_path = f"datasets/{dataset_name}" # default file path
         try:
-            self.data = np.load(
+            self._data = np.load(
                 os.path.join(data_file_path, f"{mode}_data.npy"),
                 mmap_mode="r" if memmap else None)
             if use_timestamps:
@@ -78,8 +78,8 @@ class BasicTSForecastingDataset(Dataset):
                   the historical input data and future prediction data, respectively.
         """
         item = {}
-        history_data = self.data[index: index + self.input_len]
-        future_data = self.data[index + self.input_len: index + self.input_len + self.output_len]
+        history_data = self._data[index: index + self.input_len]
+        future_data = self._data[index + self.input_len: index + self.input_len + self.output_len]
         item["inputs"] = history_data.copy() if self.memmap else history_data
         item["targets"] = future_data.copy() if self.memmap else future_data
         if self.use_timestamps:
@@ -96,4 +96,8 @@ class BasicTSForecastingDataset(Dataset):
         Returns:
             int: The number of valid samples that can be drawn from the dataset, based on the configurations of input and output lengths.
         """
-        return len(self.data) - self.input_len - self.output_len + 1
+        return len(self._data) - self.input_len - self.output_len + 1
+
+    @property
+    def data(self) -> np.ndarray:
+        return self._data

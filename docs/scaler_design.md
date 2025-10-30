@@ -27,9 +27,9 @@ for data in dataloader:
 
 ## 🧑‍🔧 How to Select or Customize a Scaler
 
-BasicTS provides several common scalers, such as the Z-Score scaler and Min-Max scaler. You can easily switch scalers by setting `CFG.SCALER.TYPE` in the configuration file.
+BasicTS provides several common scalers, such as the Z-Score scaler and Min-Max scaler. You can easily switch scalers by setting `scaler` in the configuration file.
 
-If you need to customize a scaler, you can extend the `basicts.scaler.BaseScaler` class and implement the `transform` and `inverse_transform` methods. Alternatively, you can choose not to extend the class but must still implement these two methods.
+If you need to customize a scaler, you can extend the `BasicTSScaler` class and implement the `transform` and `inverse_transform` methods. Alternatively, you can choose not to extend the class but must still implement these two methods.
 
 ## 🧑‍💻 Explore Further
 
@@ -39,7 +39,7 @@ If you need to customize a scaler, you can extend the `basicts.scaler.BaseScaler
 - **🛠️ [Navigating The Scaler Convention and Designing Your Own Scaler](./scaler_design.md)**
 - **🧠 [Diving into the Model Convention and Creating Your Own Model](./model_design.md)**
 - **📉 [Examining the Metrics Convention and Developing Your Own Loss & Metrics](./metrics_design.md)**
-- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](./runner_design.md)**
+- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](runner_and_pipeline.md)**
 - **📜 [Interpreting the Config File Convention and Customizing Your Configuration](./config_design.md)**
 - **🎯 [Exploring Time Series Classification with BasicTS](./time_series_classification_cn.md)**
 - **🔍 [Exploring a Variety of Baseline Models](../baselines/)**

@@ -47,7 +47,7 @@ class MinMaxScaler(BasicTSScaler):
         if isinstance(data, np.ndarray):
             if self.norm_each_channel:
                 _min = np.min(data, axis=0, keepdims=True)
-                _max_min = np.max(data, axis=0, keepdims=True) - _min
+                _max_min = np.max(data, axis=-2, keepdims=True) - _min
                 _max_min[_max_min == 0] = 1.0
             else:
                 _min = np.min(data)
@@ -57,8 +57,8 @@ class MinMaxScaler(BasicTSScaler):
             self.stats['min'], self.stats['max-min'] = torch.Tensor(_min), torch.Tensor(_max_min)
         else:
             if self.norm_each_channel:
-                self.stats['min'] = torch.min(data, dim=0, keepdim=True)
-                self.stats['max-min'] = torch.max(data, dim=0, keepdim=True) - self.stats['min']
+                self.stats['min'] = torch.min(data, dim=-2, keepdim=True)
+                self.stats['max-min'] = torch.max(data, dim=-2, keepdim=True) - self.stats['min']
                 self.stats['max-min'][self.stats['max-min'] == 0] = 1.0
             else:
                 self.stats['min'] = torch.min(data)

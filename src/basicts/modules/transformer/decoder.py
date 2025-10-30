@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 from .kv_cache import KVCache
-from .utils import build_layer_norm
+from .utils import build_layer
 
 
 class DecoderOnlyLayer(nn.Module):
@@ -25,13 +25,13 @@ class DecoderOnlyLayer(nn.Module):
         self.ffn_layer = ffn_layer
 
         self.pre_attn_norm = None if norm_position == "post" \
-            else build_layer_norm(layer_norm)
+            else build_layer(layer_norm)
         self.pre_ffn_norm = None if norm_position == "post" \
-            else build_layer_norm(layer_norm)
+            else build_layer(layer_norm)
         self.post_attn_norm = None if norm_position == "pre" \
-            else build_layer_norm(layer_norm)
+            else build_layer(layer_norm)
         self.post_ffn_norm = None if norm_position == "pre" \
-            else build_layer_norm(layer_norm)
+            else build_layer(layer_norm)
 
     def forward(
         self,
@@ -170,18 +170,19 @@ class Seq2SeqDecoderLayer(nn.Module):
         self.self_attn = self_attn
         self.cross_attn = cross_attn
         self.ffn_layer = ffn_layer
-        norm_fn = layer_norm[0] if isinstance(layer_norm, tuple) else layer_norm
-        norm_kwargs = layer_norm[1] if isinstance(layer_norm, tuple) else {}
 
-        self.pre_attn_norm = None if norm_position == "post" else norm_fn(**norm_kwargs)
-        self.pre_ffn_norm = None if norm_position == "post" else norm_fn(**norm_kwargs)
-
-        self.post_attn_norm = None if norm_position == "pre" else norm_fn(**norm_kwargs)
-        self.post_ffn_norm = None if norm_position == "pre" else norm_fn(**norm_kwargs)
-
-        if self.cross_attn is not None:
-            self.pre_cross_norm = None if norm_position == "post" else norm_fn(**norm_kwargs)
-            self.post_cross_norm = None if norm_position == "pre" else norm_fn(**norm_kwargs)
+        self.pre_attn_norm = None if norm_position == "post" \
+            else build_layer(layer_norm)
+        self.pre_ffn_norm = None if norm_position == "post" \
+            else build_layer(layer_norm)
+        self.pre_cross_norm = None if norm_position == "post" \
+            else build_layer(layer_norm)
+        self.post_attn_norm = None if norm_position == "pre" \
+            else build_layer(layer_norm)
+        self.post_ffn_norm = None if norm_position == "pre" \
+            else build_layer(layer_norm)
+        self.post_cross_norm = None if norm_position == "pre" \
+            else build_layer(layer_norm)
 
     def forward(
         self,

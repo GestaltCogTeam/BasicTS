@@ -3,12 +3,11 @@ from basicts.modules.decomposition import MovingAverageDecomposition
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import CenteredLayerNorm
-from basicts.modules.transformer import AutoCorrelation, Encoder, EncoderLayer
+from basicts.modules.transformer import AutoCorrelation, Encoder
 from torch import nn
 
 from ..config.autoformer_config import AutoformerConfig
-from .decoder import AutoformerDecoder
-
+from .layers import AutoformerDecoder, AutoformerDecoderLayer, AutoformerEncoderLayer
 
 class Autoformer(nn.Module):
     """
@@ -21,8 +20,6 @@ class Autoformer(nn.Module):
 
     def __init__(self, config: AutoformerConfig):
         super().__init__()
-        self.input_len = config.input_len
-        self.output_len = config.output_len
         self.label_len = int(config.label_len)
         self.output_attentions = config.output_attentions
 
@@ -37,20 +34,35 @@ class Autoformer(nn.Module):
 
         self.encoder = Encoder(
             nn.ModuleList([
-                EncoderLayer(
+                AutoformerEncoderLayer(
                     AutoCorrelation(config.hidden_size, config.n_heads, config.dropout),
                     MLPLayer(
                         config.hidden_size,
                         config.intermediate_size,
                         hidden_act=config.hidden_act,
                         dropout=config.dropout),
-                    layer_norm=(CenteredLayerNorm, config.hidden_size),
-                    norm_position="post"
+                    (MovingAverageDecomposition, config.moving_avg)
                 ) for _ in range(config.num_encoder_layers)
             ]),
             layer_norm=CenteredLayerNorm(config.hidden_size),
         )
-        self.decoder = AutoformerDecoder(config)
+
+        self.decoder = AutoformerDecoder(
+            nn.ModuleList([
+                AutoformerDecoderLayer(
+                    AutoCorrelation(config.hidden_size, config.n_heads, config.dropout),
+                    AutoCorrelation(config.hidden_size, config.n_heads, config.dropout),
+                    MLPLayer(
+                        config.hidden_size,
+                        config.intermediate_size,
+                        hidden_act=config.hidden_act,
+                        dropout=config.dropout),
+                    (MovingAverageDecomposition, config.moving_avg),
+                    config=config
+                ) for _ in range(config.num_decoder_layers)
+            ]),
+            layer_norm=CenteredLayerNorm(config.hidden_size),
+        )
 
         self.projection = nn.Linear(config.hidden_size, config.num_features)
 

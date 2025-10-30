@@ -1,58 +1,66 @@
 # 📦 Dataset Design
 
+## 🎸 New Features
+
+Starting from version 1.0, BasicTS adopts a **data decoupling** design approach, allowing users to **use datasets with any data structure** by simply inheriting from the `BasicTSDataset` base class and implementing custom data loading logic.
+
+From version 1.0 onward, BasicTS no longer stores data and timestamps in a single four-dimensional tensor (\[batch_size, seq_len, num_features, num_timestamps + 1\]). Instead, it uses two separate three-dimensional tensors, **significantly reducing GPU memory usage**:
+- Time series data: \[batch_size, seq_len, num_features\]
+- Timestamp data: \[batch_size, num_features, num_timestamps\]
+
+## 📊 Built-in Datasets
+
 ## ⏬ Data Download
 
-To get started with the datasets, download the `all_data.zip` file from either [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe). After downloading, unzip the files into the `datasets/` directory:
+To start using the built-in datasets, first download the `all_data.zip` file from [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe). After downloading, extract the file to the `datasets/` directory:
 
 ```bash
-cd /path/to/BasicTS # not BasicTS/basicts
+cd /path/to/project
 unzip /path/to/all_data.zip -d datasets/
 ```
 
-These datasets are preprocessed and ready for immediate use.
+This is the default dataset storage path for BasicTS. However, you can also place datasets in any other directory and explicitly provide the root path in the `data_file_path` field within `dataset_params`.
+
+These datasets are preprocessed and ready to use.
+
+Online downloading of built-in datasets will be supported in the future; this feature is currently under development.
+
+## 🔬 Using Built-in Datasets
+
+Built-in datasets are typically used with BasicTS's built-in dataset classes, which are also the default options in configurations.
+
+Built-in dataset classes:
+- **Forecasting Task**: `BasicTSForecastingDataset`
+- **Classification Task**: `UEADataset`
+- **Imputation Task**: `BasicTSImputationDataset`
+
+These built-in dataset classes include the following parameters:
+- `dataset_name` (str): The name of the dataset.
+- `input_len` (int): The length of the input sequence, i.e., the number of historical data points.
+- `output_len` (int): (Forecasting task only) The length of the output sequence, i.e., the number of future data points to predict.
+- `mode` (BasicTSMode | str): The mode of the dataset, "TRAIN", "VAL", or "TEST", indicating whether it is used for training, validation, or testing. Set by the runner automatically; no manual assignment needed.
+- `use_timestamps` (bool): Flag to determine if timestamps should be used. Default is False.
+- `local` (bool): Whether the dataset is stored locally. (Under development)
+- `data_file_path` (str | None): Path to the file containing the time series data. Defaults to "datasets/{name}".
+- `memmap` (bool): Flag to determine if the dataset should be loaded using memory mapping. Enabling this saves memory but slows down training, so it is recommended only for very large datasets. Default is False.
+
+Generally, when using built-in datasets with default settings, you only need to specify `dataset_name`, `input_len`, and `output_len` (for forecasting tasks) in the configuration class.
 
 ## 💿 Data Format
 
-Each dataset contains at least two essential files: `data.dat` and `desc.json`:
+**In BasicTS, data provided by datasets must adhere to a standard format.** The `__getitem__` method should return a dictionary containing the following items:
+- `inputs`: Input data, a `torch.Tensor` with shape \[batch_size, input_len, num_features\]
+- `targets`: Target data (optional). A `torch.Tensor`. For forecasting and imputation tasks, shape is \[batch_size, output_len, num_features\]; for classification tasks, shape is \[batch_size, num_classes\]; for self-supervised tasks, this key is not required
+- `inputs_timestamps`: Timestamps for the input data (optional), a `torch.Tensor` with shape \[batch_size, input_len, num_timestamps\]
+- `targets_timestamps`: Timestamps for the target data (optional), a `torch.Tensor` with shape \[batch_size, output_len, num_timestamps\]
 
-- **`data.dat`**: This file stores the raw time series data in `numpy.memmap` format with a shape of [L, N, C].
-    - **L**: Number of time steps. Typically, the training, validation, and test sets are split along this dimension.
-    - **N**: Number of time series, also referred to as the number of nodes.
-    - **C**: Number of features. Usually, this includes [target feature, time of day, day of week, day of month, day of year], with the target feature being mandatory and the others optional.
-  
-- **`desc.json`**: This file contains metadata about the dataset, including:
-    - Dataset name
-    - Domain of the dataset
-    - Shape of the data
-    - Number of time slices
-    - Number of nodes (i.e., the number of time series)
-    - Feature descriptions
-    - Presence of prior graph structures
-    - Regular settings:
-        - Input and output lengths
-        - Ratios for training, validation, and test sets
-        - Whether normalization is applied individually to each channel (i.e., time series)
-        - Whether to re-normalize during evaluation
-        - Evaluation metrics
-        - Handling of outliers
+## 🧑‍🍳 How to Add or Customize a Dataset
 
-## 🧑‍💻 Dataset Class Design
-
-<div align="center">
-  <img src="figures/DatasetDesign.jpeg" height=350>
-</div>
-
-In time series forecasting, datasets are typically generated from raw time series data using a sliding window approach. As illustrated above, the raw time series is split into training, validation, and test sets along the time dimension, and samples are generated using a sliding window of size `inputs + targets`. Most datasets adhere to this structure.
-
-BasicTS provides a built-in `Dataset` class called [`TimeSeriesForecastingDataset`](../basicts/data/simple_tsf_dataset.py), designed specifically for time series data. This class generates samples in the form of a dictionary containing two objects: `inputs` and `target`. `inputs` represents the input data, while `target` represents the target data. Detailed documentation can be found in the class's comments.
-
-## 🧑‍🍳 How to Add or Customize Datasets
-
-If your dataset follows the structure described above, you can preprocess your data into the `data.dat` and `desc.json` format and place it in the `datasets/` directory, e.g., `datasets/YOUR_DATA/{data.dat, desc.json}`. BasicTS will then automatically recognize and utilize your dataset.
-
-For reference, you can review the scripts in `scripts/data_preparation/`, which are used to process datasets from `raw_data.zip` ([Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing), [Baidu Netdisk](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe)).
-
-If your dataset does not conform to the standard format or has specific requirements, you can define your own dataset class by inheriting from `torch.utils.data.Dataset`. In this custom class, the `__getitem__` method should return a dictionary containing `inputs` and `target`.
+You can use your custom dataset by following these three steps:
+1. Write a dataset class that inherits from the `BasicTSDataset` base class, which includes three fields: `dataset_name`, `mode`, and `memmap`.
+2. Implement your custom data loading and preprocessing logic by implementing the `__getitem__` and `__len__` methods. Note that while the actual storage structure of the data can be arbitrary, the data items returned by the `__getitem__` method should follow the specifications mentioned above.
+3. If you need to use a scaler to normalize the data, you must also override the `data` property method. This method provides the scaler with a view of the data to be normalized (as an `np.ndarray`), allowing the scaler to learn the distribution of the entire training set.
+4. In the configuration class, modify the `dataset_type` field to your own dataset class and set the corresponding `dataset_params`.
 
 ## 🧑‍💻 Explore Further
 
@@ -62,7 +70,7 @@ If your dataset does not conform to the standard format or has specific requirem
 - **🛠️ [Navigating The Scaler Convention and Designing Your Own Scaler](./scaler_design.md)**
 - **🧠 [Diving into the Model Convention and Creating Your Own Model](./model_design.md)**
 - **📉 [Examining the Metrics Convention and Developing Your Own Loss & Metrics](./metrics_design.md)**
-- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](./runner_design.md)**
+- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](runner_and_pipeline.md)**
 - **📜 [Interpreting the Config File Convention and Customizing Your Configuration](./config_design.md)**
 - **🎯 [Exploring Time Series Classification with BasicTS](./time_series_classification_cn.md)**
 - **🔍 [Exploring a Variety of Baseline Models](../baselines/)**

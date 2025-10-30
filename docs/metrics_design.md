@@ -1,25 +1,21 @@
 # 📉 Metrics Design
 
-## Interface Conventions
+## Interface Specification
 
-Metrics are essential components for evaluating model performance. In BasicTS, metrics are functions that take the model's predictions, ground truth values, and other parameters as inputs and return a scalar value to assess the model's performance.
+Metrics are an essential component for evaluating model performance. In BasicTS, a metric is a function that takes model predictions, ground truth values, and other parameters as input and returns a scalar value to assess model performance.
 
 A well-defined metric function should include the following parameters:
-- **prediction**: The predicted values from the model
-- **target**: The actual ground truth values
-- **null_val**: An optional parameter to handle missing values
+- **prediction**: The model's predictions
+- **targets**: The actual ground truth values
+- **targets_mask**: An optional parameter used to specify which points to compute the loss on (commonly used to mask missing values)
 
-The `prediction` and `target` parameters are mandatory, while the `null_val` parameter is optional but strongly recommended for handling missing values, which are common in time series data. 
-The `null_val` is automatically set based on the `CFG.NULL_VAL` value in the configuration file, which defaults to `np.nan`.
+`prediction` and `targets` are required parameters, while `targets_mask` is optional but highly recommended to handle missing values commonly found in time series data.
 
-Metric functions can also accept additional parameters, which are extracted from the model's return values and passed to the metric function. 
-
-> [!CAUTION]  
-> If these additional parameters (besides `prediction`, `target`, and `inputs`) require normalization or denormalization, please adjust the `preprocessing` and `postprocessing` functions in the `runner` accordingly.
+Metric functions can also accept other additional parameters, which will be extracted from the model's return value and passed to the metric function.
 
 ## Built-in Metrics in BasicTS
 
-BasicTS comes with several commonly used metrics, such as `MAE`, `MSE`, `RMSE`, `MAPE`, and `WAPE`. You can find these metrics implemented in the `basicts/metrics` directory.
+BasicTS provides a variety of commonly used metrics, such as `MAE`, `MSE`, `RMSE`, `MAPE`, and `WAPE`. You can find the implementations of these metrics in the `basicts.metrics` module.
 
 ## How to Implement Custom Metrics
 
@@ -36,23 +32,31 @@ class MyModel:
         ...
         return {
                 'prediction': prediction,
-                'target': target,
+                'targets': target,
                 'other_key1': other_value1,
                 'other_key2': other_value2,
                 'other_key3': other_value3,
                 ...
         }
 
-def my_metric_1(prediction, target, null_val=np.nan, other_key1=None, other_key2=None, ...):
+def my_metric_1(prediction, targets, targets_mask=None, other_key1=None, other_key2=None, ...):
     # Calculate the metric
     ...
 
-def my_metric_2(prediction, target, null_val=np.nan, other_key3=None, ...):
+def my_metric_2(prediction, targets, targets_mask=None, other_key3=None, ...):
     # Calculate the metric
     ...
 ```
 
 By adhering to these conventions, you can flexibly customize and extend the metrics in BasicTS to meet specific requirements.
+
+## 🧮 Meter
+
+> This section covers implementation details. It will not affect usage in most cases and can be skipped.
+
+In BasicTS, we use a `Meter` class to maintain metric values during training. BasicTS uses `AvgMeter` class by default, which incrementally updates and maintains the average value of the corresponding metric. This is suitable for most metrics.
+
+However, some metrics should not maintain a simple average. For example, RMSE involves taking the square root after averaging; incrementally updating and averaging at the end can lead to incorrect results (although it generally does not affect the final model training outcome). In such cases, a specialized meter should be used to implement the correct incremental calculation.
 
 ## 🧑‍💻 Explore Further
 
@@ -62,7 +66,7 @@ By adhering to these conventions, you can flexibly customize and extend the metr
 - **🛠️ [Navigating The Scaler Convention and Designing Your Own Scaler](./scaler_design.md)**
 - **🧠 [Diving into the Model Convention and Creating Your Own Model](./model_design.md)**
 - **📉 [Examining the Metrics Convention and Developing Your Own Loss & Metrics](./metrics_design.md)**
-- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](./runner_design.md)**
+- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](runner_and_pipeline.md)**
 - **📜 [Interpreting the Config File Convention and Customizing Your Configuration](./config_design.md)**
 - **🎯 [Exploring Time Series Classification with BasicTS](./time_series_classification_cn.md)**
 - **🔍 [Exploring a Variety of Baseline Models](../baselines/)**

@@ -52,8 +52,8 @@ class ZScoreScaler(BasicTSScaler):
         # fit from trainining dataset
         if isinstance(data, np.ndarray):
             if self.norm_each_channel:
-                mean = np.mean(data, axis=0, keepdims=True)
-                std = np.std(data, axis=0, keepdims=True)
+                mean = np.mean(data, axis=-2, keepdims=True)
+                std = np.std(data, axis=-2, keepdims=True)
                 std[std == 0] = 1.0  # prevent division by zero by setting std to 1 where it's 0
             else:
                 mean = np.mean(data)
@@ -63,8 +63,8 @@ class ZScoreScaler(BasicTSScaler):
             self.stats['mean'], self.stats['std'] = torch.Tensor(mean), torch.Tensor(std)
         else:
             if self.norm_each_channel:
-                self.stats['mean'] = torch.mean(data, dim=0, keepdim=True)
-                self.stats['std'] = torch.std(data, dim=0, keepdim=True)
+                self.stats['mean'] = torch.mean(data, dim=-2, keepdim=True)
+                self.stats['std'] = torch.std(data, dim=-2, keepdim=True)
                 self.stats['std'][self.stats['std'] == 0] = 1.0  # prevent division by zero by setting std to 1 where it's 0
             else:
                 self.stats['mean'] = torch.mean(data)

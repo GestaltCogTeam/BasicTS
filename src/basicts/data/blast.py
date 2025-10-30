@@ -4,11 +4,11 @@ from typing import Optional, Union
 
 import numpy as np
 from basicts.utils.constants import BasicTSMode
-from torch.utils.data import Dataset
+from .base_dataset import BasicTSDataset
 
 
 @dataclass
-class BLAST(Dataset):
+class BLAST(BasicTSDataset):
 
     """
     BLAST dataset for time series foundation model pretraining.
@@ -50,6 +50,8 @@ class BLAST(Dataset):
     min_valid_ratio: float = 0.5
     mask_anomaly: bool = False
     anomaly_threshold: float = 4.0
+    dataset_name: str = "BLAST"
+    memmap: bool = False
 
     def __post_init__(self):
         # load data
@@ -240,3 +242,7 @@ class BLAST(Dataset):
 
     def __len__(self):
         return self.data.shape[0]
+
+    @property
+    def data(self) -> np.ndarray:
+        return self._data

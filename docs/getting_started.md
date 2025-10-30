@@ -1,58 +1,43 @@
-# 🎉 Getting Started
+# 🎉 Quick Start
 
-Welcome to the BasicTS tutorial! This guide will walk you through the steps of training and evaluating a model using BasicTS.
+Welcome to the BasicTS tutorial! This guide will walk you through the process of training and evaluating models using BasicTS 1.0 step by step.
 
-Before diving in, let’s take a moment to introduce BasicTS.
+Before diving in, let's briefly introduce BasicTS.
 
 ***What is BasicTS?***
 
-> [!IMPORTANT]  
-> BasicTS is a powerful and flexible tool designed specifically for time series forecasting. Whether you are new to this field or an experienced professional, BasicTS provides reliable support. With BasicTS, you can effortlessly build, train, and evaluate your time series forecasting models. You can also compare the performance of various models to find the best solution. We have integrated over 30 algorithms and 20 datasets, with more being added continuously.
+> [!IMPORTANT]
+> BasicTS is a powerful and flexible toolkit designed specifically for time series analysis. Whether you are a novice in the field or an experienced professional, BasicTS provides reliable support for your work. With BasicTS, you can easily build, train, and evaluate time series forecasting models, as well as compare the performance of various models to find the optimal solution. We have integrated over 30 algorithms and 20 datasets, and we are continuously adding more.
 
-***Who Should Use BasicTS?***
+***Who should use BasicTS?***
 
-> [!IMPORTANT]  
-> BasicTS is perfect for both beginners and experts. For beginners looking to enter the world of time series forecasting, BasicTS allows you to quickly grasp the basic pipeline and build your own forecasting model. For experts, BasicTS offers a robust platform for rigorous model comparison, ensuring precise research and development.
+> [!IMPORTANT]
+> BasicTS is perfectly suited for both beginners and experts. For beginners looking to enter the field of time series analysis, BasicTS helps you quickly grasp the fundamental workflow and build your own analysis models. For experts, BasicTS provides a robust platform for rigorous model comparison, ensuring precision in research and development.
 
 ***Core Features***
 
-> [!IMPORTANT]  
-> Two key features define BasicTS: **fairness** and **scalability**. All models are trained and evaluated under the same conditions, eliminating biases introduced by external factors. This ensures trustworthy comparisons. Additionally, BasicTS is highly scalable, allowing customization of datasets, model structures, and metrics according to your needs. For example, to add a learning rate scheduler, simply specify `CFG.TRAIN.LR_SCHEDULER.TYPE = 'MultiStepLR'` in the configuration file.
+> [!IMPORTANT]
+> BasicTS has two key characteristics: **Fairness** and **Extensibility**.
+> **Fairness**: All models are trained and evaluated under identical conditions, eliminating biases introduced by external factors and ensuring reliable comparisons.
+> **Extensibility**: BasicTS is highly extensible, allowing customization of datasets, model architectures, and evaluation metrics as needed. In version 1.0, the extensibility of BasicTS has been significantly enhanced, enabling you to easily customize your own models and datasets according to your requirements.
 
-Now, let’s begin our journey and explore how to implement your time series forecasting projects with BasicTS!
+Now, let's get started on exploring how to realize your time series analysis projects with BasicTS!
 
-## ⏬ Cloning the Repository
+## 📦 Install BasicTS
 
-First, clone the BasicTS repository:
+We recommend installing BasicTS on a Linux system (such as Ubuntu or CentOS) with Python 3.8 or higher:
 
 ```bash
-cd /path/to/your/project
-git clone https://github.com/zezhishao/BasicTS.git
+pip install basicts-xxx-py3-x.whl
 ```
 
-## 💿 Installing Dependencies
+We recommend using https://docs.conda.io/en/latest/miniconda.html or https://www.anaconda.com/ to create a virtual Python environment.
 
-### Operating System
-
-We recommend using BasicTS on Linux systems (e.g., Ubuntu or CentOS).
-
-### Python
-
-Python 3.6 or higher is required (3.8 or higher is recommended).
-
-We recommend using [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/) to create a virtual Python environment.
+## 🔧 Install Dependencies
 
 ### PyTorch
 
-BasicTS is flexible regarding the PyTorch version. You can [install PyTorch](https://pytorch.org/get-started/previous-versions/) according to your Python version. We recommend using `pip` for installation.
-
-### Other Dependencies
-
-After ensuring PyTorch is installed correctly, you can install the other dependencies:
-
-```bash
-pip install -r requirements.txt
-```
+BasicTS is very flexible regarding PyTorch versions. You can https://pytorch.org/get-started/previous-versions/ according to your Python version. We recommend using `pip` for installation.
 
 ### Example Setups
 
@@ -64,8 +49,6 @@ conda create -n BasicTS python=3.11
 conda activate BasicTS
 # Install PyTorch
 pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
-# Install other dependencies
-pip install -r requirements.txt
 ```
 
 #### Example 2: Python 3.9 + PyTorch 1.10.0 + CUDA 11.1
@@ -76,93 +59,108 @@ conda create -n BasicTS python=3.9
 conda activate BasicTS
 # Install PyTorch
 pip install torch==1.10.0+cu111 torchvision==0.11.0+cu111 torchaudio==0.10.0 -f https://download.pytorch.org/whl/torch_stable.html
-# Install other dependencies
-pip install -r requirements.txt
 ```
 
-## 📦 Downloading Datasets
+## 🔍 Download Datasets
 
-You can download the `all_data.zip` file from [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe). Unzip the files to the `datasets/` directory:
+You can download the `all_data.zip` file from https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing or https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe. Extract the file to the `datasets/` directory:
 
 ```bash
 cd /path/to/BasicTS # not BasicTS/basicts
 unzip /path/to/all_data.zip -d datasets/
 ```
 
-These datasets have been preprocessed and are ready for use.
+These datasets are preprocessed and ready to use.
 
-> [!NOTE]  
-> The `data.dat` file is an array in `numpy.memmap` format that stores the raw time series data with a shape of [L, N, C], where L is the number of time steps, N is the number of time series, and C is the number of features.
-> 
-> The `desc.json` file is a dictionary that stores the dataset’s metadata, including the dataset name, domain, frequency, feature descriptions, regular settings, and null values.
-> 
-> Other files are optional and may contain additional information, such as `adj_mx.pkl`, which represents a predefined prior graph between the time series.
+> [!NOTE]
+> The `data.dat` file is an array stored in `numpy.memmap` format, containing the raw time series data with shape [L, N, C], where L is the number of time steps, N is the number of time series, and C is the number of features.
+>
+> The `desc.json` file is a dictionary storing the metadata of the dataset, including the dataset name, domain, frequency, feature descriptions, general settings, and missing values.
+>
+> Other files are optional and may contain additional information, such as `adj_mx.pkl` representing a predefined graph structure between time series.
 
-> [!NOTE]  
-> If you are interested in the preprocessing steps, you can refer to the [preprocessing script](../scripts/data_preparation) and `raw_data.zip`.
+> [!NOTE]
+> If you are interested in the preprocessing steps, you can refer to the ../scripts/data_preparation and `raw_data.zip`.
 
-## 🎯 Quick Tutorial: Train & Evaluate Your Model in Three Steps
+## 🎯 Quick Tutorial: Train and Evaluate Your Model in Three Lines of Code
 
-### Step 1: Define Your Model
+```python
+# train.py
 
-The `forward` function should follow the conventions of BasicTS. An example of the Multi-Layer Perceptron (`MLP`) model can be found in [examples/arch.py](../examples/arch.py).
+from basicts.models.DLinear import DLinear, DLinearConfig
+from basicts.configs import BasicTSForecastingConfig
+from basicts import BasicTSLauncher
 
-### Step 2: Define Your Runner
+def main():
 
-BasicTS provides a unified and standard pipeline in `basicts.runner.BaseTimeSeriesForecastingRunner`. You still need to define the specific forward process in the `forward` function within the **runner**. Fortunately, BasicTS provides a ready-to-use implementation in `basicts.runner.SimpleTimeSeriesForecastingRunner`, which can handle most situations. The runner for the `MLP` model can use this built-in runner.
+    # 1. Configure the model
+    model_config = DLinearConfig(input_len=336, output_len=336)
 
-### Step 3: Configure Your Configuration File
+    # 2. Configure the task
+    cfg = BasicTSForecastingConfig(
+        model=DLinear,
+        model_config=model_config,
+        dataset_name="ETTh1",
+        gpus="0",
+        ...
+    )
 
-All pipeline details and hyperparameters can be configured in a `.py` file. This configuration file allows you to import your model and runner and set all the options such as model, runner, dataset, scaler, optimizer, loss, and other hyperparameters. An example configuration file for the `MLP` model on the `PEMS08` dataset can be found in [examples/regular_config.py](../examples/regular_config.py).
+    # 3. Launch training
+    BasicTSLauncher.launch_training(cfg)
 
-> [!NOTE]  
-> The configuration file is the core of training and evaluation in BasicTS. [`Examples/complete_config.py`](../examples/complete_config.py) outlines all the options available for configuration.
+```
+
+### Step 1: Configure Your Model
+
+BasicTS provides a large number of commonly used models in `basicts.models`, which you can use directly. BasicTS uses configuration classes to configure models. Each configuration class contains detailed descriptions of every parameter needed to construct the model. For example, the configuration class for the DLinear model is `DLinearConfig`. You can find the `DLinearConfig` class in ../basicts/models/config/dlinear_config.py.
+
+If you want to use your own model, you need to follow the BasicTS specifications. For details, please see 🧠 ./model_design.md.
+
+### Step 2: Configure Your Task
+
+BasicTS supports various time series tasks, including forecasting, imputation, classification, etc. The task configuration class is the core of BasicTS. Almost all information about a BasicTS task is encapsulated in the task configuration class. Almost all configuration items have commonly used default values. You only need to configure the key parameters (1️⃣ model, 2️⃣ dataset) and modify a few settings (such as batch size, learning rate, etc.) to run the code.
+
+> [!NOTE]
+> You can find the configuration classes for each BasicTS task (e.g., the configuration class for the forecasting task is `BasicTSForecastingConfig`) and the meaning and configuration methods of each parameter in ../basicts/configs.
+
+Furthermore, in BasicTS configuration classes, you can also specify callbacks and taskflows to perform additional operations during training (such as curriculum learning) and customize data processing pipelines. For advanced usage of BasicTS configuration classes, please see 📜 ./config_design.md.
+
+### Step 3: Launch Training
+
+`BasicTSLauncher.launch_training` is the entry point for training. Call this method and pass in the task configuration to start training.
+
+> [!NOTE]
+> It is important to note that in DDP mode, `BasicTSLauncher.launch_training` needs to be wrapped in `if __name__ == '__main__':` to ensure that each process correctly initializes the model and dataset.
 
 ## 🥳 Run It!
 
-`basicts.launch_training` is the entry point for training. You can run the following command to train your model:
+In your project directory, run the following command to start training:
+```bash
+python train.py
+```
+During training, BasicTS will save the trained models to the `checkpoints/` directory by default and perform evaluation after training is complete (this can be changed via configuration). You can also choose to save evaluation metrics and results to the `checkpoints/` directory.
 
-- **Train the MLP Model Mentioned Above**
-
-    ```bash
-    python experiments/train.py -c examples/regular_config.py -g 0
-    ```
-
-or:
-
-- **Reproducing Other Built-in Models**
-
-    BasicTS provides a variety of built-in models. You can reproduce these models with the following command:
-
-    ```bash
-    python experiments/train.py -c baselines/${MODEL_NAME}/${DATASET_NAME}.py --gpus '0'
-    ```
-
-    Replace `${DATASET_NAME}` and `${MODEL_NAME}` with any supported models and datasets. For example, to run Graph WaveNet on the METR-LA dataset:
-
-    ```bash
-    python experiments/train.py -c baselines/GWNet/METR-LA.py --gpus '0'
-    ```
-
+You can find more runnable examples in the [examples](../examples) directory.
 ## How to Evaluate Your Model
 
-`basicts.launch_evaluation` is the entry point for evaluation. You can run the following command to evaluate your model:
+Of course, you can also manually evaluate the model after training: `BasicTSLauncher.launch_evaluation` is the entry point for evaluation. You can evaluate your model by executing the following Python code.
 
-```bash
-python experiments/evaluate.py -cfg {CONFIG_FILE}.py -ckpt {CHECKPOINT_PATH}.pth -g 0
+```python
+BasicTSLauncher.launch_evaluation(cfg, "checkpoints/your_checkpoint.pt")
 ```
 
-## 🧑‍💻 Explore Further
+## 🧑💻 Further Exploration
 
-This tutorial has equipped you with the fundamentals to get started with BasicTS, but there’s much more to discover. Before delving into advanced topics, let’s take a closer look at the structure of BasicTS:
+This tutorial has provided you with the basics of BasicTS, but there is much more to explore. Before delving into other topics, let's take a closer look at the structure of BasicTS:
 
 <div align="center">
-  <img src="figures/DesignConvention.jpeg" height=350>
+  
 </div>
 
-The core components of BasicTS include `Dataset`, `Scaler`, `Model`, `Metrics`, `Runner`, and `Config`. To streamline the debugging process, BasicTS operates as a localized framework, meaning all the code runs directly on your machine. There’s no need to pip install basicts; simply clone the repository, and you’re ready to run the code locally.
+The core components of BasicTS include `Dataset`, `Scaler`, `Model`, `Metrics`, `Runner`, and `Config`.
 
-Below are some advanced topics and additional features to help you maximize the potential of BasicTS:
+Here are some advanced topics and additional features to help you make the most of BasicTS:
+
 
 - **🎉 [Getting Stared](./getting_started.md)**
 - **💡 [Understanding the Overall Design Convention of BasicTS](./overall_design.md)**
@@ -170,7 +168,7 @@ Below are some advanced topics and additional features to help you maximize the 
 - **🛠️ [Navigating The Scaler Convention and Designing Your Own Scaler](./scaler_design.md)**
 - **🧠 [Diving into the Model Convention and Creating Your Own Model](./model_design.md)**
 - **📉 [Examining the Metrics Convention and Developing Your Own Loss & Metrics](./metrics_design.md)**
-- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](./runner_design.md)**
-- **📜 [Interpreting the Config File Convention and Customizing Your Configuration](./config_design.md)**
+- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](runner_and_pipeline.md)**
+- **📜 [Interpreting the Config File Convention and Advanced Configuration](./config_design.md)**
 - **🎯 [Exploring Time Series Classification with BasicTS](./time_series_classification_cn.md)**
 - **🔍 [Exploring a Variety of Baseline Models](../baselines/)**

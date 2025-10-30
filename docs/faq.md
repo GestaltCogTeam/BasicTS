@@ -11,7 +11,7 @@
 - **🛠️ [Navigating The Scaler Convention and Designing Your Own Scaler](./scaler_design.md)**
 - **🧠 [Diving into the Model Convention and Creating Your Own Model](./model_design.md)**
 - **📉 [Examining the Metrics Convention and Developing Your Own Loss &amp; Metrics](./metrics_design.md)**
-- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](./runner_design.md)**
+- **🏃‍♂️ [Mastering The Runner Convention and Building Your Own Runner](runner_and_pipeline.md)**
 - **📜 [Interpreting the Config File Convention and Customizing Your Configuration](./config_design.md)**
 - **🎯 [Exploring Time Series Classification with BasicTS](./time_series_classification_cn.md)**
 - **🔍 [Exploring a Variety of Baseline Models](../baselines/)**
