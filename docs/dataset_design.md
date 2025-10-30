@@ -12,7 +12,7 @@ From version 1.0 onward, BasicTS no longer stores data and timestamps in a singl
 
 ## ⏬ Data Download
 
-To start using the built-in datasets, first download the `all_data.zip` file from [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe). After downloading, extract the file to the `datasets/` directory:
+To start using the built-in datasets, first download the `all_data.zip` file from [Google Drive](https://drive.google.com/file/d/1m8jh1z4VNMgQ49DRwywyvYYgs3G5WBsB/view?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1UcZCCKPCeS7mHSnCO4-COA?pwd=j9ev). After downloading, extract the file to the `datasets/` directory:
 
 ```bash
 cd /path/to/project
