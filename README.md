@@ -25,7 +25,7 @@
 
 <div align="center">
 
-🎉 [**Getting Started**](./tutorial/getting_started.md) **|**
+🎉 [**Getting Started**](./docs/getting_started.md) **|**
 💡 [**Overall Design**](./tutorial/overall_design.md)
 
 📦 [**Dataset**](./tutorial/dataset_design.md) **|**
@@ -38,7 +38,7 @@
 
 </div>
 
-BasicTS (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series analysis. It now supports a wide range of tasks and datasets such as spatial-temporal forecasting, long-term time series forecasting, classification, and imputation. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series analysis models. You can find detailed tutorials in [Getting Started](./tutorial/getting_started.md).
+BasicTS (**Basic** **T**ime **S**eries) is a benchmark library and toolkit designed for time series analysis. It now supports a wide range of tasks and datasets such as spatial-temporal forecasting, long-term time series forecasting, classification, and imputation. It covers various types of algorithms such as statistical models, machine learning models, and deep learning models, making it an ideal tool for developing and evaluating time series analysis models. You can find detailed tutorials in [Getting Started](./docs/getting_started.md).
 
 ## 📢 Latest Updates
 
@@ -106,7 +106,7 @@ Support `logging` log system and `Tensorboard`, and encapsulate it as a unified 
 
 ## 🚀 Installation and Quick Start
 
-For detailed instructions, please refer to the [Getting Started](./tutorial/getting_started.md) tutorial.
+For detailed instructions, please refer to the [Getting Started](./docs/getting_started.md) tutorial.
 
 ## 📦 Supported Baselines
 
