@@ -25,7 +25,7 @@
 
 <div align="center">
 
-🎉 [**快速上手**](./tutorial/getting_started_cn.md) **|**
+🎉 [**快速上手**](./docs/getting_started_cn.md) **|**
 💡 [**总体设计**](./tutorial/overall_design_cn.md)
 
 📦 [**数据集 (Dataset)**](./tutorial/dataset_design_cn.md) **|**
@@ -107,7 +107,7 @@ BasicTS 提供 `logging` 日志系统和 `Tensorboard` 支持，并统一封装�
 
 ## 🚀 安装和快速上手
 
-详细的安装步骤请参考 [快速上手](./tutorial/getting_started_cn.md) 教程。
+详细的安装步骤请参考 [快速上手](./docs/getting_started_cn.md) 教程。
 
 ## 📦 支持的模型
 
