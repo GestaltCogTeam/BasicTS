@@ -1,4 +1,4 @@
-from typing import Callable, Literal, Optional, Tuple
+from typing import Callable, Literal, Optional, Tuple, Union
 
 import torch
 from torch import nn
@@ -17,7 +17,7 @@ class DecoderOnlyLayer(nn.Module):
         self,
         self_attn: nn.Module,
         ffn_layer: nn.Module,
-        layer_norm: Callable | Tuple[Callable, dict],
+        layer_norm: Union[Callable, Tuple[Callable, dict]],
         norm_position: Literal["pre", "post", "sandwich"] = "pre",
     ):
         super().__init__()
@@ -163,7 +163,7 @@ class Seq2SeqDecoderLayer(nn.Module):
         self_attn: nn.Module,
         cross_attn: nn.Module,
         ffn_layer: nn.Module,
-        layer_norm: Callable | Tuple[Callable, dict],
+        layer_norm: Union[Callable, Tuple[Callable, dict]],
         norm_position: Literal["pre", "post", "sandwich"] = "pre",
     ):
         super().__init__()

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple, Union
 
 import torch
 from torch import nn
@@ -53,7 +53,7 @@ def prepare_causal_attention_mask(
     return combined_mask
 
 def build_layer(
-    layer: Callable | Tuple[Callable, Any],
+    layer: Union[Callable, Tuple[Callable, Any]],
 ) -> nn.Module:
     """Build layer.
 

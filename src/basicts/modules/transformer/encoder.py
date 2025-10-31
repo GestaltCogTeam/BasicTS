@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Literal, Optional, Tuple
+from typing import Any, Callable, List, Literal, Optional, Tuple, Union
 
 import torch
 from torch import nn
@@ -16,7 +16,7 @@ class EncoderLayer(nn.Module):
         self,
         self_attn: nn.Module,
         ffn_layer: nn.Module,
-        layer_norm: Callable | Tuple[Callable, Any],
+        layer_norm: Union[Callable, Tuple[Callable, Any]],
         norm_position: Literal["pre", "post", "sandwich"] = "pre"
     ):
         super().__init__()

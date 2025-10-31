@@ -93,5 +93,6 @@ class UEADataset(BasicTSDataset):
         """
         return self.inputs.shape[0]
 
+    @property
     def data(self) -> np.ndarray:
         return self.inputs
