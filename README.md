@@ -32,9 +32,9 @@
 🛠️ [**Scaler**](./docs/scaler_design.md) **|**
 🧠 [**Model**](./docs/model_design.md) **|**
 📉 [**Metrics**](./docs/metrics_design.md) **|**
-🏃‍♂️ [**Runner**](./docs/runner_design.md) **|**
-📜 [**Config**](./docs/config_design.md.md) **|**
-📜 [**Baselines**](./baselines/)
+🏃‍♂️ [**Runner**](./docs/runner_and_pipeline.md) **|**
+📜 [**Config**](./docs/config_design.md) **|**
+📜 [**Baselines**](./src/basicts/models/)
 
 </div>
 
