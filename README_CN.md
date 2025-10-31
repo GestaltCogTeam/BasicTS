@@ -26,20 +26,20 @@
 <div align="center">
 
 🎉 [**快速上手**](./docs/getting_started_cn.md) **|**
-💡 [**总体设计**](./tutorial/overall_design_cn.md)
+💡 [**总体设计**](./docs/overall_design_cn.md)
 
-📦 [**数据集 (Dataset)**](./tutorial/dataset_design_cn.md) **|**
-🛠️ [**数据缩放 (Scaler)**](./tutorial/scaler_design_cn.md) **|**
-🧠 [**模型约定 (Model)**](./tutorial/model_design_cn.md) **|**
-📉 [**评估指标 (Metrics)**](./tutorial/metrics_design_cn.md)
+📦 [**数据集 (Dataset)**](./docs/dataset_design_cn.md) **|**
+🛠️ [**数据缩放 (Scaler)**](./docs/scaler_design_cn.md) **|**
+🧠 [**模型约定 (Model)**](./docs/model_design_cn.md) **|**
+📉 [**评估指标 (Metrics)**](./docs/metrics_design_cn.md)
 
-🏃‍♂️ [**执行器 (Runner)**](./tutorial/runner_design_cn.md) **|**
-📜 [**配置文件 (Config)**](./tutorial/config_design_cn.md) **|**
+🏃‍♂️ [**执行器 (Runner)**](./docs/runner_design_cn.md) **|**
+📜 [**配置文件 (Config)**](./docs/config_design_cn.md) **|**
 📜 [**基线模型 (Baselines)**](./baselines/)
 
 </div>
 
-BasicTS (**Basic** **T**ime **S**eries) 是一个面向时间序列分析的基准库和工具箱，现已支持时空预测、长序列预测、分类、插补等多种任务与数据集，涵盖统计模型、机器学习模型、深度学习模型等多类算法，为开发和评估时间序列预测模型提供了理想的工具。你可以在[快速上手](./tutorial/getting_started_cn.md)找到详细的教程。
+BasicTS (**Basic** **T**ime **S**eries) 是一个面向时间序列分析的基准库和工具箱，现已支持时空预测、长序列预测、分类、插补等多种任务与数据集，涵盖统计模型、机器学习模型、深度学习模型等多类算法，为开发和评估时间序列预测模型提供了理想的工具。你可以在[快速上手](./docs/getting_started_cn.md)找到详细的教程。
 
 ## 📢 最新动态
 
@@ -283,7 +283,7 @@ BasicTS 支持多种类型的数据集，涵盖时空预测、长序列预测及
 
 | 🏷️Name | 🌐Domain     | 📏Length | 📊Time Series Count | 🔄Graph | ⏱️Freq. | 🎯Task      |
 | :------- | :----------- | -------: | ------------------: | :------ | ------------: | :---------- |
-|   [BLAST](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/training_with_BLAST_cn.md)  |  Multiple |     4096 |      20000000       | False  |   Multiple  |     UFM     |
+|   [BLAST](https://github.com/GestaltCogTeam/BasicTS/blob/master/docs/training_with_BLAST_cn.md)  |  Multiple |     4096 |      20000000       | False  |   Multiple  |     UFM     |
 
 ## 📉 主要结果
 
