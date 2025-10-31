@@ -66,7 +66,7 @@ pip install torch==1.10.0+cu111 torchvision==0.11.0+cu111 torchaudio==0.10.0 -f 
 You can download the `all_data.zip` file from https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing or https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe. Extract the file to the `datasets/` directory:
 
 ```bash
-cd /path/to/BasicTS # not BasicTS/basicts
+cd /path/to/YourProject # not BasicTS/basicts
 unzip /path/to/all_data.zip -d datasets/
 ```
 

@@ -66,7 +66,7 @@ pip install torch==1.10.0+cu111 torchvision==0.11.0+cu111 torchaudio==0.10.0 -f 
 您可以从 [Google Drive](https://drive.google.com/drive/folders/14EJVODCU48fGK0FkyeVom_9lETh80Yjp?usp=sharing) 或 [百度网盘](https://pan.baidu.com/s/1shA2scuMdZHlx6pj35Dl7A?pwd=s2xe) 下载 `all_data.zip` 文件。将文件解压到 `datasets/` 目录：
 
 ```bash
-cd /path/to/BasicTS # not BasicTS/basicts
+cd /path/to/YourProject # not BasicTS/basicts
 unzip /path/to/all_data.zip -d datasets/
 ```
 
