@@ -26,14 +26,14 @@
 <div align="center">
 
 🎉 [**Getting Started**](./docs/getting_started.md) **|**
-💡 [**Overall Design**](./tutorial/overall_design.md)
+💡 [**Overall Design**](./docs/overall_design.md)
 
-📦 [**Dataset**](./tutorial/dataset_design.md) **|**
-🛠️ [**Scaler**](./tutorial/scaler_design.md) **|**
-🧠 [**Model**](./tutorial/model_design.md) **|**
-📉 [**Metrics**](./tutorial/metrics_design.md) **|**
-🏃‍♂️ [**Runner**](./tutorial/runner_design.md) **|**
-📜 [**Config**](./tutorial/config_design.md.md) **|**
+📦 [**Dataset**](./docs/dataset_design.md) **|**
+🛠️ [**Scaler**](./docs/scaler_design.md) **|**
+🧠 [**Model**](./docs/model_design.md) **|**
+📉 [**Metrics**](./docs/metrics_design.md) **|**
+🏃‍♂️ [**Runner**](./docs/runner_design.md) **|**
+📜 [**Config**](./docs/config_design.md.md) **|**
 📜 [**Baselines**](./baselines/)
 
 </div>
@@ -281,7 +281,7 @@ BasicTS support a variety of datasets, including ***spatial-temporal forecasting
 
 | 🏷️Name | 🌐Domain     | 📏Length | 📊Time Series Count | 🔄Graph | ⏱️Freq. | 🎯Task      |
 | :------- | :----------- | -------: | ------------------: | :------ | ------------: | :---------- |
-|   [BLAST](https://github.com/GestaltCogTeam/BasicTS/blob/master/tutorial/training_with_BLAST.md)  |  Multiple |     4096 |      20000000       | False  |   Multiple  |     UFM     |
+|   [BLAST](https://github.com/GestaltCogTeam/BasicTS/blob/master/docs/training_with_BLAST.md)  |  Multiple |     4096 |      20000000       | False  |   Multiple  |     UFM     |
 
 </details>
 
