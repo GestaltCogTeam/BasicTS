@@ -33,9 +33,9 @@
 🧠 [**模型约定 (Model)**](./docs/model_design_cn.md) **|**
 📉 [**评估指标 (Metrics)**](./docs/metrics_design_cn.md)
 
-🏃‍♂️ [**执行器 (Runner)**](./docs/runner_design_cn.md) **|**
+🏃‍♂️ [**执行器 (Runner)**](./docs/runner_and_pipeline_cn.md) **|**
 📜 [**配置文件 (Config)**](./docs/config_design_cn.md) **|**
-📜 [**基线模型 (Baselines)**](./baselines/)
+📜 [**基线模型 (Baselines)**](./src/basicts/models/)
 
 </div>
 
