@@ -25,15 +25,17 @@ class PatchMergingLayer(nn.Module):
             x (torch.Tensor): Input tensor of shape [batch_size * num_features, num_patches, hidden_size]
 
         Returns:
-            torch.Tensor: Output tensor of shape [batch_size * num_features, L//win_size, hidden_size]
+            torch.Tensor: Output tensor of shape [batch_size * num_features, num // win_size, hidden_size]
         """
-        _, num_patches, hidden_size = x.shape
-        # padding
+        num_patches = x.shape[1]
         pad_len = (self.win_size - num_patches % self.win_size) % self.win_size
         if pad_len > 0:
-            pad = x[:, :, -pad_len:, :]
-            x = torch.cat([x, pad], dim=-2)
-        x = x.reshape(-1, num_patches // self.win_size, self.win_size * hidden_size)
+            x = torch.cat([x, x[:, -pad_len:, :]], dim=1)
+        seg_to_merge = []
+        for i in range(self.win_size):
+            seg_to_merge.append(x[:, i::self.win_size, :])
+        # [batch_size * num_features, num_patches // win_size, win_size * hidden_size]
+        x = torch.cat(seg_to_merge, dim=-1)
         x = self.norm(x)
         x = self.linear(x)
         return x

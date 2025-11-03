@@ -88,6 +88,16 @@ class Crossformer(nn.Module):
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
 
+        """
+        Forward pass of the Crossformer model.
+
+        Args:
+            inputs (torch.Tensor): Input tensor of shape [batch_size, input_len, num_features]
+
+        Returns:
+            torch.Tensor: Output tensor of shape [batch_size, output_len, num_features]
+        """
+
         batch_size = inputs.size(0)
         base = inputs.mean(dim=1, keepdim=True) if self.baseline else 0
         # [batch_size * num_features, num_patches, hidden_size]
