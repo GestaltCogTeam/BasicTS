@@ -131,7 +131,7 @@ class BasicTSRunner:
         self.lr_scheduler = None
 
         # automatic mixed precision (amp)
-        model_dtype: str | torch.dtype = cfg.get("model_dtype", "float32")
+        model_dtype: Union[str, torch.dtype] = cfg.get("model_dtype", "float32")
         if isinstance(model_dtype, str):
             self.ptdtype = {"float32": torch.float32, "bfloat16": torch.bfloat16, "float16": torch.float16}[model_dtype]
         else:

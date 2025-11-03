@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
-
 from basicts.modules.norm import RevIN
 
 from ..config.mtsmixer_config import MTSMixerConfig
-
-from .mtsmixer_layers import MixerLayer, ChannelProjection
+from .mtsmixer_layers import ChannelProjection, MixerLayer
 
 
 class MTSMixer(nn.Module):

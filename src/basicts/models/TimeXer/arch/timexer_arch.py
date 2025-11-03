@@ -1,10 +1,9 @@
 import torch
-from torch import nn
-
 from basicts.modules.embed import PatchEmbedding, SequenceEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import RevIN
 from basicts.modules.transformer import MultiHeadAttention, Seq2SeqDecoder
+from torch import nn
 
 from ..config.timexer_config import TimeXerConfig
 from .layers import FlattenHead, TimeXerEncoderLayer

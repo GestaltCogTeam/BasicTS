@@ -1,12 +1,12 @@
+from typing import Any, Dict, List
+
 import torch
-from typing import Dict, Any, List
-
-from torch import nn
-from einops import rearrange
-
-from basicts.modules.transformer import Encoder, EncoderLayer, MultiHeadAttention
 from basicts.modules.mlps import MLPLayer
+from basicts.modules.transformer import (Encoder, EncoderLayer,
+                                         MultiHeadAttention)
 from basicts.runners.callback import AddAuxiliaryLoss
+from einops import rearrange
+from torch import nn
 
 from ..config.duet_config import DUETConfig
 from .linear_extractor_cluster import LinearExtractorCluster

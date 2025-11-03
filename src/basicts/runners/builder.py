@@ -98,9 +98,9 @@ class Builder:
         ) if torch.distributed.is_initialized() and mode == BasicTSMode.TRAIN else None
 
         shuffle = False if torch.distributed.is_initialized() and mode == BasicTSMode.TRAIN\
-              else cfg.get(f'{mode}_data_shuffle', False)
+              else cfg.get(f"{mode}_data_shuffle", False)
 
-        return (DataLoaderX if cfg.get(f"{mode}_data_prefetch") else DataLoader)(
+        return (DataLoaderX if cfg.get(f"{mode}_data_prefetch", False) else DataLoader)(
             dataset,
             collate_fn=cfg.get(f"{mode}_data_collate_fn", None),
             batch_size=cfg.get(f"{mode}_batch_size", 1),

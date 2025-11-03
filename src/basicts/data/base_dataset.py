@@ -1,8 +1,6 @@
 from typing import Union
 
 import numpy as np
-
-
 from basicts.utils.constants import BasicTSMode
 from torch.utils.data import Dataset
 

@@ -1,9 +1,8 @@
 from typing import Callable, Tuple
 
 import torch
-from torch import nn
-
 from basicts.modules.transformer import Seq2SeqDecoderLayer
+from torch import nn
 
 
 class FlattenHead(nn.Module):

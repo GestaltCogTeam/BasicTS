@@ -1,7 +1,6 @@
 import torch
-from torch import nn
-
 from basicts.modules import MLPLayer
+from torch import nn
 
 from ..config.lightts_config import LightTSConfig
 

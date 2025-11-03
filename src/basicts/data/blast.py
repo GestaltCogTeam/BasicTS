@@ -4,6 +4,7 @@ from typing import Optional, Union
 
 import numpy as np
 from basicts.utils.constants import BasicTSMode
+
 from .base_dataset import BasicTSDataset
 
 

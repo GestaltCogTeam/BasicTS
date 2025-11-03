@@ -3,6 +3,7 @@ from typing import Union
 
 import numpy as np
 from basicts.utils import BasicTSMode
+
 from .base_dataset import BasicTSDataset
 
 
@@ -93,5 +94,6 @@ class UEADataset(BasicTSDataset):
         """
         return self.inputs.shape[0]
 
+    @property
     def data(self) -> np.ndarray:
         return self.inputs

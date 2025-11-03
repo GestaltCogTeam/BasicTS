@@ -23,8 +23,8 @@ class GradAccumulation(BasicTSCallback):
         world_size = torch.distributed.get_world_size() if torch.distributed.is_initialized() else 1
         batch_size = runner.cfg.train_batch_size
         effective_batch_size = batch_size * world_size * self.accumulation_steps
-        runner.logger.info(f'Use gradient accumulation with step {self.accumulation_steps}.')
-        runner.logger.info(f'Effective batch size: {effective_batch_size}.')
+        runner.logger.info(f"Use gradient accumulation with step {self.accumulation_steps}.")
+        runner.logger.info(f"Effective batch size: {effective_batch_size}.")
 
     def on_backward(self, runner: "BasicTSRunner", loss: torch.Tensor):
         runner.should_optimizer_step = (self.current_steps + 1) % self.accumulation_steps == 0

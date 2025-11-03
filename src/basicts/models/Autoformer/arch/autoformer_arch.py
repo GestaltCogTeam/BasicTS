@@ -7,7 +7,9 @@ from basicts.modules.transformer import AutoCorrelation, Encoder
 from torch import nn
 
 from ..config.autoformer_config import AutoformerConfig
-from .layers import AutoformerDecoder, AutoformerDecoderLayer, AutoformerEncoderLayer
+from .layers import (AutoformerDecoder, AutoformerDecoderLayer,
+                     AutoformerEncoderLayer)
+
 
 class Autoformer(nn.Module):
     """
