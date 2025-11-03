@@ -22,6 +22,7 @@ class Autoformer(nn.Module):
 
     def __init__(self, config: AutoformerConfig):
         super().__init__()
+        self.output_len = config.output_len
         self.label_len = int(config.label_len)
         self.output_attentions = config.output_attentions
 
@@ -30,9 +31,17 @@ class Autoformer(nn.Module):
 
         # Embedding
         self.enc_embedding = FeatureEmbedding(
-            config.num_features, config.hidden_size, config.use_timestamps, config.timestamp_sizes, config.dropout)
+            config.num_features,
+            config.hidden_size,
+            use_timestamps=config.use_timestamps,
+            timestamp_sizes=config.timestamp_sizes,
+            dropout=config.dropout)
         self.dec_embedding = FeatureEmbedding(
-            config.num_features, config.hidden_size, config.use_timestamps, config.timestamp_sizes, config.dropout)
+            config.num_features,
+            config.hidden_size,
+            use_timestamps=config.use_timestamps,
+            timestamp_sizes=config.timestamp_sizes,
+            dropout=config.dropout)
 
         self.encoder = Encoder(
             nn.ModuleList([
