@@ -186,3 +186,7 @@ cython_debug/
 
 # not ignore requirements.txt
 !*requirements.txt
+
+# keep datasets in test
+!tests/smoke_test/datasets/
+!tests/smoke_test/datasets/**/*.npy
