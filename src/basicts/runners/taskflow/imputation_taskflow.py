@@ -31,8 +31,7 @@ class BasicTSImputationTaskFlow(BasicTSTaskFlow):
         # mask for self-supervised reconstruction
         inputs_rec_mask = reconstruction_mask(data['inputs'], runner.cfg.mask_ratio)
         data['inputs'] = data['inputs'] * inputs_rec_mask
-        data['targets_mask'] = inputs_null_mask
-        data['rec_mask'] = inputs_rec_mask
+        data['targets_mask'] = inputs_null_mask * ~inputs_rec_mask
 
         return data
 
@@ -42,12 +41,9 @@ class BasicTSImputationTaskFlow(BasicTSTaskFlow):
         # inverse transform
         if runner.cfg.rescale and runner.scaler is not None:
             forward_return['prediction'] = runner.scaler.inverse_transform(forward_return['prediction'])
-
-        forward_return['targets'] = forward_return['targets'][forward_return['rec_mask'] == 0]
-        forward_return['prediction'] = forward_return['prediction'][forward_return['rec_mask'] == 0]
         return forward_return
 
     def get_weight(self, forward_return: Dict[str, Any]) -> float:
         """Get the weight of the forward return"""
 
-        return (~forward_return['rec_mask']).sum().item()
+        return (forward_return['targets_mask']).sum().item()

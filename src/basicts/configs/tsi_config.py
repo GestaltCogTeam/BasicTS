@@ -2,11 +2,10 @@ from dataclasses import dataclass, field
 from typing import Callable, List, Literal, Tuple, Union
 
 import numpy as np
-from basicts.data import BasicTSForecastingDataset
+from basicts.data import BasicTSImputationDataset
 from basicts.metrics import masked_mae
 from basicts.runners.callback import BasicTSCallback
-from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
-                                      BasicTSTaskFlow)
+from basicts.runners.taskflow import BasicTSImputationTaskFlow, BasicTSTaskFlow
 from basicts.scaler import ZScoreScaler
 from torch.optim import Adam
 
@@ -84,7 +83,7 @@ class BasicTSImputationConfig(BasicTSConfig):
 
     seed: int = field(default=42, metadata={"help": "Random seed."})
 
-    taskflow: BasicTSTaskFlow = field(default=BasicTSForecastingTaskFlow(),
+    taskflow: BasicTSTaskFlow = field(default=BasicTSImputationTaskFlow(),
                                       metadata={"help": "Taskflow."})
 
     callbacks: List[BasicTSCallback] = field(default_factory=list,
@@ -99,7 +98,7 @@ class BasicTSImputationConfig(BasicTSConfig):
     ############################## Dataset and Scaler Configuration ##############################
 
     # Dataset settings
-    dataset_type: type = field(default=BasicTSForecastingDataset, metadata={"help": "Dataset type."})
+    dataset_type: type = field(default=BasicTSImputationDataset, metadata={"help": "Dataset type."})
     dataset_params: Union[dict, None] = field(default=None, metadata={"help": "Dataset parameters."})
     input_len: int = field(default=336, metadata={"help": "Input length."})
     mask_ratio: float = field(default=0.25, metadata={"help": "Mask ratio."})
