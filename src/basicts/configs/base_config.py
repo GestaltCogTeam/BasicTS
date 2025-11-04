@@ -1,5 +1,6 @@
 import copy
 import hashlib
+import importlib
 import inspect
 import json
 import os
@@ -166,18 +167,10 @@ class BasicTSConfig(EasyDict):
             self.val_batch_size = self.batch_size
             self.test_batch_size = self.batch_size
 
-        if self.model_config is None:
-            self.model_config = self._pack_params(self.model, keys_to_pop)
-
-        print(self.dataset_params)
-        if self.dataset_params is None:
-            self.dataset_params = self._pack_params(self.dataset_type, keys_to_pop)
-
-        if self.optimizer_params is None:
-            self.optimizer_params = self._pack_params(self.optimizer, keys_to_pop)
-
-        if self.lr_scheduler_params is None:
-            self.lr_scheduler_params = self._pack_params(self.lr_scheduler, keys_to_pop)
+        self.model_config = self._pack_params(self.model, self.model_config, keys_to_pop)
+        self.dataset_params = self._pack_params(self.dataset_type, self.dataset_params, keys_to_pop)
+        self.optimizer_params = self._pack_params(self.optimizer, self.optimizer_params, keys_to_pop)
+        self.lr_scheduler_params = self._pack_params(self.lr_scheduler, self.lr_scheduler_params, keys_to_pop)
 
         self.gpu_num = len(self.gpus.split(",")) if self.gpus else 0
 
@@ -197,35 +190,70 @@ class BasicTSConfig(EasyDict):
                 key = key.replace(".", "_").lower()
             return super().__getitem__(key)
 
+    @classmethod
+    def from_json(cls, json_file_path: str):
+        """Load config from a json file.
+
+        Args:
+            json_file_path (str): json file path
+        """
+        with open(json_file_path, "r", encoding="utf-8") as f:
+            json_str = f.read()
+        config_dict = json.loads(json_str)
+        for k, v in config_dict.items():
+            config_dict[k] = cls._construct_obj(v)
+        config = cls(**config_dict)
+        return config
+
     def _serialize(self) -> dict:
         serialized = {}
         for k, v in self.items():
             if not k.startswith("_"):
                 serialized[k] = self._serialize_obj(v)
-        serialized.pop("ckpt_save_dir")
         return serialized
 
-    def _pack_params(self, obj: type, keys_to_pop: set) -> dict:
+    @classmethod
+    def _construct_obj(cls, obj: object) -> object:
+        # List, tuple: Recursively construct objects in the list or tuple.
+        if isinstance(obj, list):
+            return [cls._construct_obj(v) for v in obj]
+        elif isinstance(obj, tuple):
+            return tuple(cls._construct_obj(v) for v in obj)
+        elif isinstance(obj, dict):
+            if set(obj.keys()) == {"name", "module"}:
+                module = importlib.import_module(obj["module"])
+                return getattr(module, obj["name"])
+            elif set(obj.keys()) == {"name", "module", "params"}:
+                module = importlib.import_module(obj["module"])
+                params = cls._construct_obj(obj["params"])
+                return getattr(module, obj["name"])(**params)
+            else: # Recursively construct objects in the dict.
+                return {k: cls._construct_obj(v) for k, v in obj.items()}
+        return obj
+
+    def _pack_params(self, obj: type, obj_params: dict, keys_to_pop: set) -> dict:
         """Pack params to the config and add the extra keys to `keys_to_pop`.
 
         Args:
             params (dict): params
+            obj_params (dict): params of the object
             keys_to_pop: set of keys to pop
 
         Returns:
             dict: packed params
         """
 
-        packed_params = {}
+        if obj_params is None:
+            obj_params = {}
         sig = inspect.signature(obj.__init__)
         for k in sig.parameters.keys():
             if k == "self":
                 continue
             elif k in self:
-                packed_params[k] = self[k]
                 keys_to_pop.add(k)
-
-        return packed_params
+                if k not in obj_params:
+                    obj_params[k] = self[k]
+        return obj_params
 
     def save(self):
         json_str = str(self)

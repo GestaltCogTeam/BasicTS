@@ -68,11 +68,11 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     ################################# Required Fields #################################
 
-    model: type
+    model: type = field(metadata={"help": "Model class. Must be specified."})
 
-    model_config: BasicTSModelConfig
+    model_config: BasicTSModelConfig = field(metadata={"help": "Model configuration. Must be specified."})
 
-    dataset_name: str
+    dataset_name: str = field(default=None, metadata={"help": "Dataset name. Must be specified if it is not in `dataset_params`."})
 
     ############################## General Configuration ##############################
 
