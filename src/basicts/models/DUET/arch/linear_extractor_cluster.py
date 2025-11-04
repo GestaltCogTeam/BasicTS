@@ -1,9 +1,9 @@
 import torch
-import torch.nn as nn
 from basicts.models.DLinear import DLinear, DLinearConfig
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import RevIN
 from einops import rearrange
+from torch import nn
 from torch.distributions.normal import Normal
 
 from ..config.duet_config import DUETConfig

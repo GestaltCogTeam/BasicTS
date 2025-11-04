@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Literal, Sequence
 
 from basicts.configs import BasicTSModelConfig
 

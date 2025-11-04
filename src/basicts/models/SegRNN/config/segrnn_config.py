@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Literal
 
 from basicts.configs import BasicTSModelConfig
 
