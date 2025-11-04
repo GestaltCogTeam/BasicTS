@@ -1,3 +1,3 @@
-from .informer_arch import Informer, InformerStack
+from .informer_arch import Informer
 
-__all__ = ["Informer", "InformerStack"]
+__all__ = ["Informer"]

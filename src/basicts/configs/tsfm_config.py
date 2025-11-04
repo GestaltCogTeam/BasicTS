@@ -12,57 +12,89 @@ from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
 from torch.optim import AdamW
 
 from .base_config import BasicTSConfig
+from .model_config import BasicTSModelConfig
 
 
 @dataclass
 class BasicTSFoundationModelConfig(BasicTSConfig):
 
     """
-    BasicTS Forecasting Config, including general configuration, dataset and scaler configuration, model configuration, \
+    BasicTS Foundation Model Config, including general configuration, dataset and scaler configuration, model configuration, \
     metrics configuration, training configuration, validation configuration, test configuration, evaluation configuration, \
     and environment configuration.
     
-    **Required Field:** Decorated by `NotEmptyField`
+    **Required Fields:** These fields must be specified for running BasicTS forecasting tasks.
     - `dataset_name` (str): Dataset name.
     - `model` (cls): Model class. You can pass its class name as string and it will be transformed into class type automatically.
     - `model_params` (EasyDict): Model parameters. You can pass it as dict and it will be transformed into EasyDict automatically.
-
-    **Lazy Field:** Decorated by `LazyField`. If not specified, these fields will be loaded lazily from regular setting files.
-    - `input_len` (int): The input length of time series.
-    - `output_len` (int): The output length of time series.
-    - `train_val_test_ratio` (List[float]): The split ratio of the dataset.
-    - `null_val` (float): The null value of the dataset.
-    - `rescale` (bool): Whether to rescale data.
-    - `norm_each_channel` (bool): Whether to normalize data for each channel independently.
     
-    **Hot Field:** Though these parameters have default settings, they are likely to be modified frequently.
+    **Hot Fields:** Though these parameters have default settings, they are likely to be modified frequently.
     - `gpus` (str|None): The used GPU devices (e.g., '0,1,2,3'). Default: None (on CPU).
-    - `num_epochs` (int): Number of epochs. Default: 100.
+    - `callbacks` (List[BasicTSCallback]): Callbacks. Specific functions such as early stopping, gradient clipping can be added \
+        to runner by callbacks. Default: [].
+    - `num_epochs` or `num_steps` (int): Number of epochs or steps of training. Only one of them should be specified. \
+        Default: `num_epochs=100` and `num_steps=None`.
     - `batch_size` (int): Batch size. If you specify this field, all dataloader will be setted to the same batch size. \
         You can also set them separately in `train_batch_size`, `val_batch_size`, and `test_batch_size`. Default: 64.
-    - `forward_features` (slice or List[int]): Using which forward features (in most cases, this equals to whether to \
-        use timestamps). Default: [0], i.e., only using temporal features.
     - `loss` (cls): Loss function. You can pass it as a string in `basicts.metrics` module and it will be transformed \
         into cls automatically. Default: MAE.
-    - `loss_args` (dict): Arguments for loss function, if needed. Default: {}.
-    - `optimizer` (str): Optimizer type. Default: Adam.
+    - `optimizer` (Optimizer): Optimizer type. Default: Adam.
     - `optimizer_params` (dict): Optimizer parameters. Default: {'lr': 0.0002, 'weight_decay': 0.0005}.
-    - `patience` (int): Early stopping patience. Default: 5.
+    - `lr_scheduler` (LRScheduler): Learning rate scheduler. Default: None.
+    - `lr_scheduler_params` (dict): Learning rate scheduler parameters. Default: {}.
     - `seed` (int): Random seed. Default: 42.
-    - `save_results` (bool): Whether to save results. Default: False.
+
+    **BasicTSObject parameters:** You can two ways to construct a BasicTSObject () except for model.
+    - Pass parameters as dict to the params field. For example:
+      
+      >>> config = BasicTSForecastingConfig(
+      >>>     dataset_params={
+      >>>         'input_len': 336,
+      >>>         'output_len': 336,
+      >>>         ...},
+      >>>     ...
+      >>> )
+    - Pass each parameter as field. For example:
+
+      >>> config = BasicTSFoundationModelConfig(
+      >>>     input_len=336,
+      >>>     output_len=336,
+      >>>     ...
+      >>> )
+      When using your own dataset, you can pass extra parameters by:
+
+      >>> config["your_param_key"] = your_param
     """
 
-    model: torch.nn.Module
-    dataset_name: str
-    taskflow: BasicTSTaskFlow = BasicTSForecastingTaskFlow()
-    callbacks: List[BasicTSCallback] = field(default_factory=list)
+    ################################# Required Fields #################################
+
+    model: type = field(metadata={"help": "Model class. Must be specified."})
+
+    model_config: BasicTSModelConfig = field(metadata={"help": "Model configuration. Must be specified."})
+
+    dataset_name: str = field(default=None, metadata={"help": "Dataset name. Must be specified if it is not in `dataset_params`."})
 
     ############################## General Configuration ##############################
 
-    # General settings
-    gpus: Optional[str] = None # Wether to use GPUs. The default is None (on CPU). For example, '0,1' is using 'cuda:0' and 'cuda:1'.
-    gpu_num: int = None # Post-init. Number of GPUs.
-    seed: int = 42 # Random seed.
+    gpus: Union[str, None] = field(
+        default=None,
+        metadata={"help": "Wether to use GPUs. The default is None (on CPU). For example, '0,1' is using 'cuda:0' and 'cuda:1'."})
+
+    gpu_num: int = field(default=0, metadata={"help": "Post-init. Number of GPUs."})
+
+    seed: int = field(default=42, metadata={"help": "Random seed."})
+
+    taskflow: BasicTSTaskFlow = field(default=BasicTSForecastingTaskFlow(),
+                                      metadata={"help": "Taskflow."})
+
+    callbacks: List[BasicTSCallback] = field(default_factory=list,
+                                             metadata={"help": "Callbacks."})
+
+    ddp_find_unused_parameters: bool = field(
+        default=False,
+        metadata={"help": "Controls the `find_unused_parameters parameter` of `torch.nn.parallel.DistributedDataParallel`."})
+
+    compile_model: bool = field(default=False, metadata={"help": "Whether to compile model."})
 
     ############################## Dataset and Scaler Configuration ##############################
 
@@ -88,9 +120,6 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     # In distributed computing, if there are unused parameters in the forward process, PyTorch usually raises a RuntimeError.
     # In such cases, this parameter should be set to True.
     model_dtype: Union[torch.dtype, str] = "bfloat16"
-    ddp_find_unused_parameters: bool = False
-
-    compile_model: bool = False
 
     ############################## Metrics Configuration ##############################
 

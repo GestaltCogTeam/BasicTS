@@ -4,14 +4,14 @@ import torch
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.transformer import (EncoderLayer, MultiHeadAttention,
-                                         Seq2SeqDecoder, Seq2SeqDecoderLayer,
+                                         ProbAttention, Seq2SeqDecoder,
+                                         Seq2SeqDecoderLayer,
                                          prepare_causal_attention_mask)
 from torch import nn
 
 from ..config.informer_config import InformerConfig
 from .conv import ConvLayer
 from .encoder import InformerEncoder
-from .prob_attention import ProbAttention
 
 
 class Informer(nn.Module):
@@ -58,7 +58,7 @@ class Informer(nn.Module):
                             hidden_act=config.hidden_act,
                             dropout=config.dropout
                             ),
-                        layer_norm=nn.LayerNorm(config.hidden_size),
+                        layer_norm=(nn.LayerNorm, config.hidden_size),
                         norm_position="post"
                 ) for _ in range(config.num_encoder_layers)
             ]),
@@ -84,7 +84,7 @@ class Informer(nn.Module):
                             hidden_act=config.hidden_act,
                             dropout=config.dropout
                             ),
-                        layer_norm=nn.LayerNorm(config.hidden_size),
+                        layer_norm=(nn.LayerNorm, config.hidden_size),
                         norm_position="post"
                         )
                     for _ in range(config.num_decoder_layers)
@@ -118,7 +118,7 @@ class Informer(nn.Module):
         dec_hidden_states = self.dec_embedding(targets, targets_timestamps)
         attention_mask = prepare_causal_attention_mask(
             (targets.shape[0], targets.shape[1]), dec_hidden_states)
-        dec_hidden_states, dec_self_attn_weights, dec_cross_attn_weights, _ = self.decoder(
+        dec_hidden_states, dec_self_attn_weights, dec_cross_attn_weights = self.decoder(
             dec_hidden_states, enc_hidden_states, attention_mask, output_attentions=self.output_attentions)
         prediction = self.projection(dec_hidden_states)[:, -self.output_len:, :]
 

@@ -2,14 +2,13 @@
 import math
 from typing import Optional, Tuple
 
-import numpy as np
 import torch
 from torch import nn
 
 
 class ProbAttention(nn.Module):
     """
-    Probabilistic Sparse Attention module.
+    Probabilistic Sparse Attention layer in Informer.
     Modified to follow BasicTS style with clear type hints and structure.
     """
     def __init__(self,
@@ -46,7 +45,7 @@ class ProbAttention(nn.Module):
         key_expand = key.unsqueeze(-3).expand(batch_size, n_heads, q_len, k_len, -1)
         index_sample = torch.randint(k_len, (q_len, sample_k))
         key_sample = key_expand[:, :, torch.arange(q_len).unsqueeze(1), index_sample, :]
-        q_k_sample = torch.matmul(query.unsqueeze(-2), key_sample.transpose(-2, -1)).squeeze(-2)
+        q_k_sample = torch.matmul(query.unsqueeze(-2), key_sample.transpose(-2, -1)).squeeze()
 
         # Select top-k queries based on sparsity measurement
         m = q_k_sample.max(-1)[0] - torch.div(q_k_sample.sum(-1), k_len)
@@ -67,18 +66,18 @@ class ProbAttention(nn.Module):
                      ) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
         """Update context with selected attention scores."""
 
-        batch_size, n_heads, q_len, _ = scores.size()
+        batch_size, n_heads, _, q_len = scores.size()
         if attention_mask is None:
-            context = value.mean(dim=-2).unsqueeze(-2).expand(
+            context = value.mean(dim=-2, keepdim=True).expand(
                 batch_size, n_heads, q_len, -1).clone()
         else:
             context = value.cumsum(dim=-2)
-            # prob mask
+            # get prob mask
             attention_mask = attention_mask.expand(-1, n_heads, -1, -1)
-            attention_mask[torch.arange(batch_size)[:, None, None],
-                           torch.arange(n_heads)[None, :, None],index, :] = -np.inf
+            batch_idx = torch.arange(batch_size, device=attention_mask.device)[:, None, None]
+            head_idx = torch.arange(n_heads, device=attention_mask.device)[None, :, None]
+            attention_mask = attention_mask[batch_idx, head_idx, index, :]
             scores = scores + attention_mask
-
         attn = torch.softmax(scores, dim=-1)
         attn = self.dropout(attn)
 
@@ -98,9 +97,9 @@ class ProbAttention(nn.Module):
     def forward(
         self,
         hidden_states: torch.Tensor,
-        key_value_states: Optional[torch.Tensor] = None,
         attention_mask: Optional[torch.Tensor] = None,
         output_attentions: bool = False,
+        key_value_states: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
 
         is_cross = key_value_states is not None
@@ -129,4 +128,4 @@ class ProbAttention(nn.Module):
         if not output_attentions:
             attn_weights = None
 
-        return output, attn_weights
+        return output, attn_weights, None
