@@ -6,7 +6,6 @@ from basicts.data import UEADataset
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import (BasicTSClassificationTaskFlow,
                                       BasicTSTaskFlow)
-from basicts.scaler import BasicTSScaler, ZScoreScaler
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 
@@ -110,7 +109,9 @@ class BasicTSClassificationConfig(BasicTSConfig):
         default=None, metadata={"help": "Batch size. If setted, all dataloaders will be setted to the same batch size."})
 
     # Scaler settings
-    scaler: BasicTSScaler = field(default=ZScoreScaler, metadata={"help": "Scaler type."})
+    scaler: type = field(default=None,
+        metadata={"help": "Scaler type. Default to None since classification task does not require rescale " \
+                  "and data can be normalized during preprocessing."})
     norm_each_channel: bool = field(default=True, metadata={"help": "Whether to normalize data for each channel independently."})
     rescale: bool = field(default=False, metadata={"help": "Whether to rescale data."})
 

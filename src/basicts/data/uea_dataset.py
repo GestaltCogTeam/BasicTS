@@ -51,13 +51,13 @@ class UEADataset(BasicTSDataset):
             mode = BasicTSMode.TEST
         try:
             self.inputs = np.load(
-                os.path.join(data_file_path, f"{mode}_inputs.npy"),
+                os.path.join(self.data_file_path, f"{mode}_inputs.npy"),
                 mmap_mode="r" if memmap else None)
             self.labels = np.load(
-                os.path.join(data_file_path, f"{mode}_labels.npy"),
+                os.path.join(self.data_file_path, f"{mode}_labels.npy"),
                 mmap_mode="r" if memmap else None)
         except FileNotFoundError as e:
-            raise FileNotFoundError(f"Cannot load dataset from {data_file_path}, Please set a correct local path."\
+            raise FileNotFoundError(f"Cannot load dataset from {self.data_file_path}, Please set a correct local path."\
                                     "If you want to download the dataset, please set the argument `local` to False.") from e
         self.memmap = memmap
 
@@ -76,13 +76,13 @@ class UEADataset(BasicTSDataset):
         if self.memmap:
             return {
                 "inputs": self.inputs[index,...].copy(),
-                "target": self.labels[index].copy()
+                "targets": self.labels[index].copy()
                 }
 
         else:
             return {
                 "inputs": self.inputs[index,...],
-                "target": self.labels[index]
+                "targets": self.labels[index]
                 }
 
     def __len__(self) -> int:

@@ -121,10 +121,14 @@ class BasicTSRunner:
         self.save_results = cfg.save_results
 
         # define loss function
-        self.loss = types.FunctionType(
-            cfg.loss.__code__,
-            cfg.loss.__globals__,
-            name="loss")
+        if isinstance(cfg.loss, nn.Module):
+            self.loss = cfg.loss
+            self.loss.__name__ = "loss"
+        else:
+            self.loss = types.FunctionType(
+                cfg.loss.__code__,
+                cfg.loss.__globals__,
+                name="loss")
 
         # declare optimizer and lr_scheduler
         self.optimizer = None
@@ -782,6 +786,11 @@ class BasicTSRunner:
             return forward_return["loss"] # loss has been computed in self.model.forward()
         covariate_names = inspect.signature(metric_fn).parameters.keys()
         args = {k: v for k, v in forward_return.items() if k in covariate_names}
+        # support pytorch loss function
+        if "prediction" not in args:
+            args["input"] = forward_return["prediction"]
+        if "targets" not in args:
+            args["target"] = forward_return["targets"]
         if callable(metric_fn):
             metric_value = metric_fn(**args)
         else:
