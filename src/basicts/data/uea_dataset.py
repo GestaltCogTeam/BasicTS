@@ -61,6 +61,10 @@ class UEADataset(BasicTSDataset):
                                     "If you want to download the dataset, please set the argument `local` to False.") from e
         self.memmap = memmap
 
+        # to be compatible with the original dataset shape
+        if self.inputs.ndim == 4:
+            self.inputs = np.squeeze(self.inputs, axis=-1)
+
     def __getitem__(self, index: int) -> dict:
         """
         Retrieves a sample from the dataset at the specified index, considering both the input and output lengths.
