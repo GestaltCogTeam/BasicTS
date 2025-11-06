@@ -12,11 +12,11 @@ From version 1.0 onward, BasicTS no longer stores data and timestamps in a singl
 
 ## ⏬ Data Download
 
-To start using the built-in datasets, first download the `all_data.zip` file from [Google Drive](https://drive.google.com/file/d/1m8jh1z4VNMgQ49DRwywyvYYgs3G5WBsB/view?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1UcZCCKPCeS7mHSnCO4-COA?pwd=j9ev). After downloading, extract the file to the `datasets/` directory:
+To start using the built-in datasets, first download the `datasets.zip` file from [Google Drive](https://drive.google.com/file/d/1m8jh1z4VNMgQ49DRwywyvYYgs3G5WBsB/view?usp=sharing) or [Baidu Netdisk](https://pan.baidu.com/s/1UcZCCKPCeS7mHSnCO4-COA?pwd=j9ev). After downloading, extract the file to the `datasets/` directory:
 
 ```bash
 cd /path/to/project
-unzip /path/to/all_data.zip -d datasets/
+unzip /path/to/datasets.zip -d datasets/
 ```
 
 This is the default dataset storage path for BasicTS. However, you can also place datasets in any other directory and explicitly provide the root path in the `data_file_path` field within `dataset_params`.
