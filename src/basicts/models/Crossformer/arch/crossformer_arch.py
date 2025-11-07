@@ -119,6 +119,6 @@ class Crossformer(nn.Module):
             pred_at_scale = rearrange(
                 pred_at_scale, "(b c) n p -> b (n p) c", b=batch_size, p=self.patch_len)
             # cut off padding: [batch_size, output_len, num_features]
-            prediction += pred_at_scale[:, :self.output_len, :]
+            prediction = prediction + pred_at_scale[:, :self.output_len, :]
 
         return prediction
