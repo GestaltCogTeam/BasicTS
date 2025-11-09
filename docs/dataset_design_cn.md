@@ -12,7 +12,7 @@
 
 ## ⏬ 数据下载
 
-要开始使用内置数据集，请先从 [Google Drive](https://drive.google.com/file/d/1m8jh1z4VNMgQ49DRwywyvYYgs3G5WBsB/view?usp=sharing) or [百度网盘](https://pan.baidu.com/s/1UcZCCKPCeS7mHSnCO4-COA?pwd=j9ev) 下载 `all_data.zip` 文件。下载后，将文件解压至 `datasets/` 目录：
+要开始使用内置数据集，请先从 [Google Drive](https://drive.google.com/file/d/1m8jh1z4VNMgQ49DRwywyvYYgs3G5WBsB/view?usp=sharing) or [百度网盘](https://pan.baidu.com/s/1UcZCCKPCeS7mHSnCO4-COA?pwd=j9ev) 下载 `datasets.zip` 文件。下载后，将文件解压至 `datasets/` 目录：
 
 ```bash
 cd /path/to/project
