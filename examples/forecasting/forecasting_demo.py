@@ -15,8 +15,6 @@ def main():
 
             # config iTransformer
             model_config = iTransformerConfig(
-                input_len=input_len,
-                output_len=output_len,
                 num_features=7,
                 hidden_size=32,
                 intermediate_size=32,
@@ -30,6 +28,8 @@ def main():
                 model=iTransformerForForecasting,
                 model_config=model_config,
                 dataset_name="ETTh1",
+                input_len=input_len,
+                output_len=output_len,
                 gpus="0",
                 callbacks=[EarlyStopping(), GradientClipping(1.0)], # use callbacks
                 seed=233,
