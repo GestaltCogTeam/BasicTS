@@ -890,11 +890,11 @@ class BasicTSRunner:
         """Save metrics results to self.ckpt_save_dir/test_metrics.json"""
 
         metrics_results = {}
-        metrics_results["overall"] = {k: self.meter_pool.get_value(f"test/{k}") for k in self.metrics.keys()}
+        metrics_results["overall"] = {k: self.meter_pool.get_value(f"test/{k}") for k in self.metrics}
         if self.eval_horizons is not None:
             for i in self.eval_horizons:
                 metrics_results[f"horizon_{i+1}"] = {
-                    k: self.meter_pool.get_value(f"test/{k}@h{i+1}") for k in self.metrics.keys()}
+                    k: self.meter_pool.get_value(f"test/{k}@h{i+1}") for k in self.metrics}
         with open(os.path.join(self.ckpt_save_dir, "test_metrics.json"), "w") as f:
             json.dump(metrics_results, f, indent=4)
         metrics_path = os.path.join(self.ckpt_save_dir, "test_metrics.json")
