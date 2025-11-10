@@ -4,7 +4,7 @@ import importlib
 import inspect
 import json
 import os
-from dataclasses import dataclass, field
+from dataclasses import MISSING, dataclass, field, fields
 from enum import Enum
 from functools import partial
 from numbers import Number
@@ -13,14 +13,16 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import torch
+from easydict import EasyDict
+from torch.optim.lr_scheduler import LRScheduler
+
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import BasicTSTaskFlow
-from easydict import EasyDict
 
 from .model_config import BasicTSModelConfig
 
 
-@dataclass
+@dataclass(init=False)
 class BasicTSConfig(EasyDict):
 
     """
@@ -70,7 +72,7 @@ class BasicTSConfig(EasyDict):
     ############################## Metrics Configuration ##############################
 
     # Metrics settings
-    metrics: List[str]
+    metrics: List[Union[str, Tuple[str, Callable]]]
     target_metric: str
     best_metric: Literal["min", "max"]
 
@@ -80,11 +82,12 @@ class BasicTSConfig(EasyDict):
     num_steps: int
 
     # Loss function
-    loss: Callable # Loss function
+    loss: Union[str, Callable] # Loss function
 
     # Optimizer
     optimizer: type
     optimizer_params: dict
+    lr: float
 
     # Learning rate scheduler
     lr_scheduler: type
@@ -137,6 +140,8 @@ class BasicTSConfig(EasyDict):
 
     _md5: str = field(default="")
     _serialized: dict = field(default_factory=dict)
+    _SHORTCUT_KEYS: List[str] = field(default_factory=lambda: \
+        ["batch_size", "input_len", "output_len", "use_timestamps", "memmap", "lr"])
     _TRAINING_INDEPENDENT_KEYS: List[str] = field(default_factory=lambda: \
         ["gpus", "memmap", "ddp_find_unused_parameters", "compile_model", "ckpt_save_strategy", \
          "train_data_prefetch", "train_data_num_workers", "train_data_pin_memory", \
@@ -158,24 +163,42 @@ class BasicTSConfig(EasyDict):
             self._serialized = self._serialize()
         return self._serialized
 
-    def __post_init__(self):
+    def __init__(self, **kwargs):
 
-        keys_to_pop = set(["batch_size"])
+        field_names = {f.name for f in fields(self)}
+
+        init_kwargs = {k: kwargs.pop(k) for k in list(kwargs.keys()) if k in field_names}
+
+        # handling default values / default_factory
+        for f in fields(self):
+            if f.name not in init_kwargs:
+                if f.default_factory is not MISSING:
+                    init_kwargs[f.name] = f.default_factory()
+                elif f.default is not MISSING:
+                    init_kwargs[f.name] = f.default
+
+        # set attributes from dataclass
+        for k, v in init_kwargs.items():
+            setattr(self, k, v)
+
+        # pass other kwargs to EasyDict
+        super().__init__(kwargs)
+
+        # sub-class post init
+        self.__post_init__()
 
         if self.batch_size is not None:
             self.train_batch_size = self.batch_size
             self.val_batch_size = self.batch_size
             self.test_batch_size = self.batch_size
 
-        self.model_config = self._pack_params(self.model, self.model_config, keys_to_pop)
-        self.dataset_params = self._pack_params(self.dataset_type, self.dataset_params, keys_to_pop)
-        self.optimizer_params = self._pack_params(self.optimizer, self.optimizer_params, keys_to_pop)
-        self.lr_scheduler_params = self._pack_params(self.lr_scheduler, self.lr_scheduler_params, keys_to_pop)
+        self.model_config = self._pack_params(self.model, self.model_config)
+        self.dataset_params = self._pack_params(self.dataset_type, self.dataset_params)
+        self.optimizer_params = self._pack_params(self.optimizer, self.optimizer_params)
+        self.lr_scheduler_params = self._pack_params(self.lr_scheduler, self.lr_scheduler_params)
 
         self.gpu_num = len(self.gpus.split(",")) if self.gpus else 0
 
-        for k in keys_to_pop:
-            self.pop(k)
 
     def __str__(self) -> str:
         return json.dumps(self.serialized, ensure_ascii=False, indent=4)
@@ -208,7 +231,8 @@ class BasicTSConfig(EasyDict):
     def _serialize(self) -> dict:
         serialized = {}
         for k, v in self.items():
-            if not k.startswith("_"):
+            # serialize only non-private attributes and non-shortcut keys
+            if not (k.startswith("_") or k in self._SHORTCUT_KEYS):
                 serialized[k] = self._serialize_obj(v)
         return serialized
 
@@ -231,28 +255,29 @@ class BasicTSConfig(EasyDict):
                 return {k: cls._construct_obj(v) for k, v in obj.items()}
         return obj
 
-    def _pack_params(self, obj: type, obj_params: dict, keys_to_pop: set) -> dict:
-        """Pack params to the config and add the extra keys to `keys_to_pop`.
+    def _pack_params(self, obj: type, obj_params: Union[dict, None]) -> dict:
+        """Pack params to the config and add the extra keys to `_keys_to_pop`.
 
         Args:
             params (dict): params
             obj_params (dict): params of the object
-            keys_to_pop: set of keys to pop
-
-        Returns:
-            dict: packed params
         """
 
         if obj_params is None:
             obj_params = {}
-        sig = inspect.signature(obj.__init__)
+
+        init_fn = obj_params.__init__ \
+            if isinstance(obj_params, BasicTSModelConfig) else obj.__init__
+        sig = inspect.signature(init_fn)
         for k in sig.parameters.keys():
             if k == "self":
                 continue
+            # `optimizer` in LRScheduler will be passed by builder
+            elif issubclass(obj, LRScheduler) and k == "optimizer":
+                continue
+            # short cut has higher priority than params in config
             elif k in self:
-                keys_to_pop.add(k)
-                if k not in obj_params:
-                    obj_params[k] = self[k]
+                obj_params[k] = self[k]
         return obj_params
 
     def save(self):

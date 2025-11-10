@@ -10,7 +10,7 @@ class TimeKANConfig(BasicTSModelConfig):
     Config class for TimeKAN model.
     """
 
-    input_len: int = field(metadata={"help": "Input sequence length."})
+    input_len: int = field(default=None, metadata={"help": "Input sequence length."})
     output_len: int = field(default=None, metadata={"help": "Output sequence length for forecasting task."})
     num_features: int = field(default=None, metadata={"help": "Number of features."})
     hidden_size: int = field(default=256, metadata={"help": "Hidden size."})

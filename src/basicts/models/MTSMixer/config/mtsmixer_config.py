@@ -10,9 +10,9 @@ class MTSMixerConfig(BasicTSModelConfig):
     Config class for MTSMixer model.
     """
 
-    input_len: int = field(metadata={"help": "Input sequence length."})
-    output_len: int = field(metadata={"help": "Output sequence length."})
-    num_features: int = field(default=1, metadata={"help": "Number of features."})
+    input_len: int = field(default=None, metadata={"help": "Input sequence length."})
+    output_len: int = field(default=None, metadata={"help": "Output sequence length."})
+    num_features: int = field(default=None, metadata={"help": "Number of features."})
     temporal_hidden_size: int = field(default=512, metadata={"help": "Hidden size for temporal mixing."})
     channel_hidden_size: int = field(default=16,
                                      metadata={"help": "Hidden size for channel mixing, which is typically" \

@@ -10,9 +10,9 @@ class CrossformerConfig(BasicTSModelConfig):
     Config class for Crossformer model.
     """
 
-    input_len: int = field(metadata={"help": "Input sequence length."})
-    output_len: int = field(metadata={"help": "Output sequence length."})
-    num_features: int = field(metadata={"help": "Number of features."})
+    input_len: int = field(default=None, metadata={"help": "Input sequence length."})
+    output_len: int = field(default=None, metadata={"help": "Output sequence length."})
+    num_features: int = field(default=None, metadata={"help": "Number of features."})
     num_layers: int = field(default=2, metadata={"help": "Number of layers (scales)."})
     hidden_size: int = field(default=512, metadata={"help": "Hidden size."})
     win_size: int = field(default=2, metadata={"help": "Window size."})

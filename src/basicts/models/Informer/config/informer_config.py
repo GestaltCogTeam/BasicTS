@@ -11,10 +11,10 @@ class InformerConfig(BasicTSModelConfig):
     Config class for Informer model.
     """
 
-    input_len: int = field(metadata={"help": "Input sequence length."})
-    output_len: int = field(metadata={"help": "Output sequence length."})
-    label_len: int = field(metadata={"help": "Label length for decoder."})
-    num_features: int = field(metadata={"help": "Number of features."})
+    input_len: int = field(default=None, metadata={"help": "Input sequence length."})
+    output_len: int = field(default=None, metadata={"help": "Output sequence length."})
+    label_len: int = field(default=None, metadata={"help": "Label length for decoder."})
+    num_features: int = field(default=None, metadata={"help": "Number of features."})
     hidden_size: int = field(default=512, metadata={"help": "Hidden size."})
     n_heads: int = field(default=8, metadata={"help": "Number of heads in multi-head attention."})
     prob_attn: bool = field(default=True, metadata={"help": "Whether to use ProbAttention."})

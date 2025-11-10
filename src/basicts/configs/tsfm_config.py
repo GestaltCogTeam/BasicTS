@@ -1,21 +1,21 @@
 from dataclasses import dataclass, field
-from typing import Callable, List, Literal, Optional, Union
+from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import torch
+from torch.optim import AdamW
+
 from basicts.data import BasicTSForecastingDataset
-from basicts.metrics import masked_mae
 from basicts.runners.callback import BasicTSCallback
-from basicts.runners.optim.lr_schedulers import CosineWarmup
 from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
                                       BasicTSTaskFlow)
-from torch.optim import AdamW
+from basicts.runners.optim.lr_schedulers import CosineWarmup
 
 from .base_config import BasicTSConfig
 from .model_config import BasicTSModelConfig
 
 
-@dataclass
+@dataclass(init=False)
 class BasicTSFoundationModelConfig(BasicTSConfig):
 
     """
@@ -124,7 +124,10 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     ############################## Metrics Configuration ##############################
 
     # Metrics settings
-    metrics: List[str] = field(default_factory=list) # Metrics functions, default: MAE, MSE, RMSE, MAPE, WAPE
+    metrics: List[Union[str, Tuple[str, Callable]]] = field(
+        default_factory=list,
+        metadata={"help": "Metric names. If metric is a string, it should be in `basicts.metrics.ALL_METRICS`. " \
+                  "Otherwise, it should be a tuple of (metric_name: str, metric_function: Callable)."})
     target_metric: str = "loss" # Target metric, used for saving best checkpoints. It should be in `metrics` or a string "loss".
     best_metric: Literal["min", "max"] = "min" # Best metric, used for saving best checkpoints. 'min' or 'max'. Default: 'min'. If 'max', the larger the metric, the better.
 
@@ -134,11 +137,13 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     num_steps: int = 10_000
 
     # Loss function
-    loss: Callable = masked_mae # Loss function
+    loss: Union[str, Callable] = field(
+        default="MAE", metadata={"help": "Loss function. If a string, it should be in `basicts.metrics.ALL_METRICS`."})
 
     # Optimizer
     optimizer: type = field(default=AdamW)
     optimizer_params: dict = field(default_factory=lambda: {"lr": 1e-3, "fused": True})
+    lr: float = field(default=1e-3, metadata={"help": "Learning rate."})
 
     # Learning rate scheduler
     lr_scheduler: type = field(default=CosineWarmup)
@@ -189,6 +194,3 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
         if self.ckpt_save_dir is None:
             self.ckpt_save_dir = \
                 f"checkpoints/{self.model.__class__.__name__}/{self.dataset_name}_{self.num_steps}"
-        self.gpu_num = len(self.gpus.split(",")) if self.gpus else 0
-
-        super().__post_init__()

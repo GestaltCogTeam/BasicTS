@@ -2,19 +2,19 @@ from dataclasses import dataclass, field
 from typing import Callable, List, Literal, Tuple, Union
 
 import numpy as np
+from torch.optim import Adam
+
 from basicts.data import BasicTSForecastingDataset
-from basicts.metrics import masked_mae
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
                                       BasicTSTaskFlow)
 from basicts.scaler import ZScoreScaler
-from torch.optim import Adam
 
 from .base_config import BasicTSConfig
 from .model_config import BasicTSModelConfig
 
 
-@dataclass
+@dataclass(init=False)
 class BasicTSForecastingConfig(BasicTSConfig):
 
     """
@@ -118,8 +118,10 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     ############################## Metrics Configuration ##############################
 
-    metrics: List[str] = field(
-        default_factory=lambda: ["MAE", "MSE", "RMSE", "MAPE", "WAPE"], metadata={"help": "Metric names."})
+    metrics: List[Union[str, Tuple[str, Callable]]] = field(
+        default_factory=lambda: ["MAE", "MSE", "RMSE", "MAPE", "WAPE"],
+        metadata={"help": "Metric names. If metric is a string, it should be in `basicts.metrics.ALL_METRICS`. " \
+                  "Otherwise, it should be a tuple of (metric_name: str, metric_function: Callable)."})
 
     target_metric: str = field(
         default="MAE",
@@ -138,13 +140,15 @@ class BasicTSForecastingConfig(BasicTSConfig):
     num_steps: Union[int, None] = field(
         default=None, metadata={"help": "Number of steps. If not None, the training will stop after `num_steps` steps."})
 
-    loss: Callable = field(default=masked_mae, metadata={"help": "Loss function."})
+    loss: Union[str, Callable] = field(
+        default="MAE", metadata={"help": "Loss function. If a string, it should be in `basicts.metrics.ALL_METRICS`."})
 
     # Optimizer
     optimizer: type = field(default=Adam, metadata={"help": "Optimizer class."})
     optimizer_params: dict = field(
         default_factory=lambda: {"lr": 2e-4, "weight_decay": 5e-4},
         metadata={"help": "Optimizer parameters."})
+    lr: float = field(default=2e-4, metadata={"help": "Learning rate."})
 
     # Learning rate scheduler
     lr_scheduler: Union[type, None] = field(default=None, metadata={"help": "Learning rate scheduler type."})
@@ -256,5 +260,3 @@ class BasicTSForecastingConfig(BasicTSConfig):
         if self.ckpt_save_dir is None:
             self.ckpt_save_dir = \
                 f"checkpoints/{self.model.__name__}/{self.dataset_name}_{self.num_epochs}_{self.input_len}_{self.output_len}"
-
-        super().__post_init__()

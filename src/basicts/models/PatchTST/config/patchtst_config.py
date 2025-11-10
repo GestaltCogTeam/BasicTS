@@ -11,7 +11,7 @@ class PatchTSTConfig(BasicTSModelConfig):
     Config class for PatchTST model.
     """
 
-    input_len: int = field(metadata={"help": "Input sequence length."})
+    input_len: int = field(default=None, metadata={"help": "Input sequence length."})
     output_len: int = field(default=None, metadata={"help": "Output sequence length for forecasting task."})
     num_features: int = field(default=None, metadata={"help": "Number of features."})
     num_classes: int = field(default=None, metadata={"help": "Number of classes for classification task."})

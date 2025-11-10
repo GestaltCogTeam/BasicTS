@@ -10,9 +10,9 @@ class STIDConfig(BasicTSModelConfig):
     Config class for STID model.
     """
 
-    input_len: int = field(metadata={"help": "Input sequence length."})
-    output_len: int = field(metadata={"help": "Output sequence length."})
-    num_features: int = field(metadata={"help": "Number of features."})
+    input_len: int = field(default=None, metadata={"help": "Input sequence length."})
+    output_len: int = field(default=None, metadata={"help": "Output sequence length."})
+    num_features: int = field(default=None, metadata={"help": "Number of features."})
     input_hidden_size: int = field(default=32, metadata={"help": "Hidden size of the imput embedding."})
     intermediate_size: int | None = field(default=None, metadata={"help": "Intermediate size of MLP layers. " \
                                                                   "If None, use hidden_size in STID."})

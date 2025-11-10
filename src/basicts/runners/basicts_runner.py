@@ -125,9 +125,15 @@ class BasicTSRunner:
             self.loss = cfg.loss
             self.loss.__name__ = "loss"
         else:
+            if isinstance(cfg.loss, str):
+                _loss = ALL_METRICS[cfg.loss]
+            elif isinstance(cfg.loss, Callable):
+                _loss = cfg.loss
+            else:
+                raise ValueError(f"Loss function {cfg.loss} is not a valid loss function.")
             self.loss = types.FunctionType(
-                cfg.loss.__code__,
-                cfg.loss.__globals__,
+                _loss.__code__,
+                _loss.__globals__,
                 name="loss")
 
         # declare optimizer and lr_scheduler
@@ -159,7 +165,14 @@ class BasicTSRunner:
         self.scaler: Optional[BasicTSScaler] = Builder._build_scaler(cfg) if cfg.scaler is not None else None
 
         # define metrics
-        self.metrics = {k: ALL_METRICS[k] for k in cfg.metrics if k in ALL_METRICS}
+        self.metrics = {}
+        for k in cfg.metrics:
+            if isinstance(k, str) and k in ALL_METRICS:
+                self.metrics[k] = ALL_METRICS[k]
+            elif isinstance(k, tuple) and isinstance(k[0], str) and isinstance(k[1], Callable):
+                self.metrics[k[0]] = k[1]
+            else:
+                self.logger.warning(f"Metric {k} not found in ALL_METRICS.")
         self.target_metric = cfg.target_metric
         self.metrics_best = cfg.best_metric
         assert self.target_metric in self.metrics or self.target_metric == "loss", f"Target metric {self.target_metric} not found in metrics."
@@ -221,9 +234,9 @@ class BasicTSRunner:
                 os.path.join(self.ckpt_save_dir, "tensorboard"),
                 purge_step=(self.start_epoch + 1) if self.start_epoch != 0 else None
             )
-        self.logger.info("Set optim: {}".format(self.optimizer))
+        self.logger.info("Set optim: {}".format(self.optimizer.__class__.__name__))
         if self.cfg.lr_scheduler is not None:
-            self.logger.info("Set lr_scheduler: {}".format(self.lr_scheduler))
+            self.logger.info("Set lr_scheduler: {}".format(self.lr_scheduler.__class__.__name__))
             self.register_meter("train/lr", "train", "{:.2e}")
 
         self.register_meter("train/loss", "train", "{:.4f}")
