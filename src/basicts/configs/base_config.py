@@ -263,6 +263,8 @@ class BasicTSConfig(EasyDict):
             obj_params (dict): params of the object
         """
 
+        if obj is None:
+            return obj_params
         if obj_params is None:
             obj_params = {}
 
