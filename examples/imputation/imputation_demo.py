@@ -1,6 +1,7 @@
 from basicts import BasicTSLauncher
 from basicts.configs import BasicTSImputationConfig
-from basicts.models.iTransformer import iTransformerForReconstruction, iTransformerConfig
+from basicts.models.iTransformer import (iTransformerConfig,
+                                         iTransformerForReconstruction)
 
 
 def main():

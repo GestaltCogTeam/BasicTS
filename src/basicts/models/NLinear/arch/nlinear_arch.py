@@ -1,6 +1,7 @@
 import torch
-from basicts.models.NLinear.config.nlinear_config import NLinearConfig
 from torch import nn
+
+from basicts.models.NLinear.config.nlinear_config import NLinearConfig
 
 
 class NLinear(nn.Module):

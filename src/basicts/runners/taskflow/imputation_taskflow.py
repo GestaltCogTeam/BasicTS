@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Any, Dict
 
 import torch
+
 from basicts.utils.mask import null_val_mask, reconstruction_mask
 
 from .basicts_taskflow import BasicTSTaskFlow

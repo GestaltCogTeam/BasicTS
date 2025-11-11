@@ -1,11 +1,12 @@
 from typing import List, Optional, Tuple
 
 import torch
+from torch import nn
+
 from basicts.modules.activations import ACT2FN
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.transformer import Encoder, Seq2SeqDecoder
-from torch import nn
 
 from ..config.ns_transformer_config import NonstationaryTransformerConfig
 from .ns_transformer_layers import (DSAttention,

@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Optional
 
 import torch
-from basicts.utils import RunnerStatus
 from easytorch.core.checkpoint import load_ckpt
 from easytorch.device import to_device
 from easytorch.utils import get_local_rank
@@ -9,6 +8,8 @@ from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.data._utils.collate import default_collate
+
+from basicts.utils import RunnerStatus
 
 from .callback import BasicTSCallback
 

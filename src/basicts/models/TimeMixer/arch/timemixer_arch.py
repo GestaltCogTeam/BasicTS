@@ -1,10 +1,11 @@
 from typing import Optional
 
 import torch
+from torch import nn
+
 from basicts.modules.decomposition import MovingAverageDecomposition
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.norm import RevIN
-from torch import nn
 
 from ..config.timemixer_config import TimeMixerConfig
 from .mixing_layers import PastDecomposableMixing

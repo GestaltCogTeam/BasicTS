@@ -1,7 +1,8 @@
 import torch
+from torch import nn
+
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.norm import RevIN
-from torch import nn
 
 from ..config.timesnet_config import TimesNetConfig
 from .times_block import TimesBlock

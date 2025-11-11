@@ -1,8 +1,9 @@
 from typing import Any, Callable, Optional, Tuple
 
 import torch
-from basicts.modules.transformer.utils import build_layer
 from torch import nn
+
+from basicts.modules.transformer.utils import build_layer
 
 from ..config.autoformer_config import AutoformerConfig
 

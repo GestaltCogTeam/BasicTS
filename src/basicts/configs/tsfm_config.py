@@ -3,12 +3,13 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import torch
+from torch.optim import AdamW
+
 from basicts.data import BasicTSForecastingDataset
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.optim.lr_schedulers import CosineWarmup
 from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
                                       BasicTSTaskFlow)
-from torch.optim import AdamW
 
 from .base_config import BasicTSConfig
 from .model_config import BasicTSModelConfig
