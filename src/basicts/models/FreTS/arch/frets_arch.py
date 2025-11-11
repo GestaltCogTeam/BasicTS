@@ -1,8 +1,7 @@
 import torch
+from basicts.modules import MLPLayer
 from torch import nn
 from torch.nn import functional as F
-
-from basicts.modules import MLPLayer
 
 from ..config.frets_config import FreTSConfig
 

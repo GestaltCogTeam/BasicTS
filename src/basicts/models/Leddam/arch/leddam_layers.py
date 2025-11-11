@@ -3,9 +3,8 @@ from typing import Any, Callable, Optional, Tuple, Union
 
 import torch
 import torch.nn.functional as F
-from torch import nn
-
 from basicts.modules.transformer import EncoderLayer
+from torch import nn
 
 
 class LeddamEncoderLayer(EncoderLayer):

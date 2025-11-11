@@ -13,11 +13,10 @@ from typing import Callable, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 import torch
-from easydict import EasyDict
-from torch.optim.lr_scheduler import LRScheduler
-
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import BasicTSTaskFlow
+from easydict import EasyDict
+from torch.optim.lr_scheduler import LRScheduler
 
 from .model_config import BasicTSModelConfig
 
