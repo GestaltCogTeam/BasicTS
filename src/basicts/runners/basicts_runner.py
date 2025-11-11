@@ -405,7 +405,7 @@ class BasicTSRunner:
         """
 
         if self.training_unit == "epoch":
-            self.num_steps = (self.num_epochs - self.start_epoch) * self.steps_per_epoch
+            self.num_steps = self.num_epochs * self.steps_per_epoch
             step_pbar = None
 
         else: # training_unit == "step"
