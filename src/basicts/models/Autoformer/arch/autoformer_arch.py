@@ -1,3 +1,5 @@
+from typing import Dict, Union
+
 import torch
 from basicts.modules.decomposition import MovingAverageDecomposition
 from basicts.modules.embed import FeatureEmbedding
@@ -81,9 +83,9 @@ class Autoformer(nn.Module):
             self,
             inputs: torch.Tensor,
             targets: torch.Tensor,
-            inputs_timestamps: torch.Tensor,
-            targets_timestamps: torch.Tensor
-            ) -> torch.Tensor:
+            inputs_timestamps: torch.Tensor = None,
+            targets_timestamps: torch.Tensor = None
+            ) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
         """
         Feed forward of Autoformer.
 
@@ -95,6 +97,7 @@ class Autoformer(nn.Module):
 
         Returns:
             Output data with shape: [batch_size, output_len, num_features]
+            Attention weights if output_attentions is True, otherwise None.
         """
 
         # decomp init
