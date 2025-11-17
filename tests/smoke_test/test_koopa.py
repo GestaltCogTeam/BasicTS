@@ -1,9 +1,9 @@
 import os
 import sys
 
-
 sys.path.append(os.path.abspath(__file__ + "/../../../src/"))
 os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__))))
+
 from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
 from basicts.models.Koopa.arch.koopa_arch import Koopa
