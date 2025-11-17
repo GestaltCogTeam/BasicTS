@@ -1,7 +1,7 @@
 import torch
 from basicts.runners.callback.callback import BasicTSCallback
 from easytorch.utils import get_logger
-
+from basicts.models.Koopa.arch.layers import FourierFilter
 logger = get_logger("KoopaMaskInitCallbackFullTrain")
 
 class KoopaMaskInitCallbackFullTrain(BasicTSCallback):
@@ -47,7 +47,6 @@ class KoopaMaskInitCallbackFullTrain(BasicTSCallback):
         idx = torch.topk(amps, k).indices.to(device)
 
         model.mask_spectrum = idx
-        from basicts.models.Koopa.arch.layers import FourierFilter
         for m in model.modules():
             if isinstance(m, FourierFilter):
                 m.mask_spectrum = idx
