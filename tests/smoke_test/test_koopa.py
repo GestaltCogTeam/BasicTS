@@ -1,3 +1,4 @@
+# pylint: disable=wrong-import-position
 import os
 import sys
 
@@ -8,7 +9,10 @@ from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
 from basicts.models.Koopa.arch.koopa_arch import Koopa
 from basicts.models.Koopa.config.koopa_config import KoopaConfig
-from basicts.runners.callback.koopa_mask_init import KoopaMaskInitCallbackFullTrain
+from basicts.runners.callback.koopa_mask_init import \
+    KoopaMaskInitCallbackFullTrain
+
+
 def test_koopa_smoke_test():
     output_len = 48
     input_len = 96
@@ -24,10 +28,10 @@ def test_koopa_smoke_test():
     BasicTSLauncher.launch_training(
         BasicTSForecastingConfig(
             model=Koopa,
-            dataset_name="ETTh2",
+            dataset_name="ETTh2_mini",
             model_config=koopa_config,
-            gpus='1',
-            num_epochs=10,
+            gpus=None,
+            num_epochs=1,
             input_len=input_len,
             output_len=output_len,
             lr=0.001,
