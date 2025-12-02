@@ -1,7 +1,9 @@
 import torch
 from torch import nn
-from .layers import FourierFilter, MLP, TimeInvKP, TimeVarKP
+
 from ..config.koopa_config import KoopaConfig
+from .layers import MLP, FourierFilter, TimeInvKP, TimeVarKP
+
 
 class Koopa(nn.Module):
     """

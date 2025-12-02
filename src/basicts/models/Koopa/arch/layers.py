@@ -1,6 +1,9 @@
 import math
+
 import torch
 from torch import nn
+
+
 class FourierFilter(nn.Module):
     """
     Fourier Filter: to time-variant and time-invariant term

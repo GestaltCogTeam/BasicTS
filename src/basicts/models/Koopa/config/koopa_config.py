@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 
 from basicts.configs import BasicTSModelConfig
 
+
 @dataclass
 class KoopaConfig(BasicTSModelConfig):
     """
