@@ -1,6 +1,7 @@
 import torch
-from basicts.modules import MLPLayer
 from torch import nn
+
+from basicts.modules import MLPLayer
 
 from ..config.mtsmixer_config import MTSMixerConfig
 

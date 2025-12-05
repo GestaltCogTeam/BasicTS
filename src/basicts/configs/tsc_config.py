@@ -2,12 +2,13 @@ from dataclasses import dataclass, field
 from typing import Callable, List, Literal, Tuple, Union
 
 import numpy as np
+from torch.nn import CrossEntropyLoss
+from torch.optim import Adam
+
 from basicts.data import UEADataset
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import (BasicTSClassificationTaskFlow,
                                       BasicTSTaskFlow)
-from torch.nn import CrossEntropyLoss
-from torch.optim import Adam
 
 from .base_config import BasicTSConfig
 from .model_config import BasicTSModelConfig

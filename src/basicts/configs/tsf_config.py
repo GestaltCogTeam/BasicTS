@@ -2,12 +2,13 @@ from dataclasses import dataclass, field
 from typing import Callable, List, Literal, Tuple, Union
 
 import numpy as np
+from torch.optim import Adam
+
 from basicts.data import BasicTSForecastingDataset
 from basicts.runners.callback import BasicTSCallback
 from basicts.runners.taskflow import (BasicTSForecastingTaskFlow,
                                       BasicTSTaskFlow)
 from basicts.scaler import ZScoreScaler
-from torch.optim import Adam
 
 from .base_config import BasicTSConfig
 from .model_config import BasicTSModelConfig

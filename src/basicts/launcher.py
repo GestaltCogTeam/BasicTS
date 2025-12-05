@@ -1,11 +1,12 @@
 import traceback
 from typing import Optional
 
-from basicts.configs.base_config import BasicTSConfig
-from basicts.runners import BasicTSRunner
 from easytorch.device import set_device_type
 from easytorch.launcher.dist_wrap import dist_wrap
 from easytorch.utils import get_logger, set_visible_devices
+
+from basicts.configs.base_config import BasicTSConfig
+from basicts.runners import BasicTSRunner
 
 
 class BasicTSLauncher:

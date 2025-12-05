@@ -1,13 +1,14 @@
 from typing import List, Optional, Tuple
 
 import torch
+from torch import nn
+
 from basicts.modules.activations import ACT2FN
 from basicts.modules.embed import SequenceEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import RevIN
 from basicts.modules.transformer import (Encoder, EncoderLayer,
                                          MultiHeadAttention)
-from torch import nn
 
 from ..config.itransformer_config import iTransformerConfig
 

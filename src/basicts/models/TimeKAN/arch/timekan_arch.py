@@ -1,7 +1,8 @@
 import torch
+from torch import nn
+
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.norm import RevIN
-from torch import nn
 
 from ..config.timekan_config import TimeKANConfig
 from .timekan_layers import FrequencyDecompLayer, FrequencyMixingLayer

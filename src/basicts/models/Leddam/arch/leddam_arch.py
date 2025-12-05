@@ -1,9 +1,10 @@
 import torch
+from torch import nn
+
 from basicts.modules import MLPLayer
 from basicts.modules.embed import PositionEmbedding, SequenceEmbedding
 from basicts.modules.norm import RevIN
 from basicts.modules.transformer import Encoder, MultiHeadAttention
-from torch import nn
 
 from ..config.leddam_config import LeddamConfig
 from .leddam_layers import (AutoAttention, LearnableDecomposition,

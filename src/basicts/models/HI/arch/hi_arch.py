@@ -3,8 +3,9 @@
 from typing import List
 
 import torch
-from basicts.runners.callback import NoBP
 from torch import nn
+
+from basicts.runners.callback import NoBP
 
 from ..config.hi_config import HIConfig
 

@@ -6,6 +6,7 @@ from .early_stopping import EarlyStopping
 from .grad_accumulation import GradAccumulation
 from .no_bp import NoBP
 from .selective_learning import SelectiveLearning
+from .koopa_mask_init import KoopaMaskInitCallbackFullTrain
 
 __ALL__ = [
     'AddAuxiliaryLoss',
@@ -17,4 +18,5 @@ __ALL__ = [
     'GradAccumulation',
     'NoBP',
     'SelectiveLearning',
+    'KoopaMaskInitCallbackFullTrain',
 ]

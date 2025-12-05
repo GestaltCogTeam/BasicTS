@@ -2,13 +2,14 @@
 from typing import List, Optional, Tuple
 
 import torch
+from torch import nn
+
 from basicts.modules.decomposition import MovingAverageDecomposition
 from basicts.modules.embed import PatchEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import RevIN
 from basicts.modules.transformer import (Encoder, EncoderLayer,
                                          MultiHeadAttention)
-from torch import nn
 
 from ..config.patchtst_config import PatchTSTConfig
 from .patchtst_layers import PatchTSTBatchNorm, PatchTSTHead

@@ -1,8 +1,9 @@
 from typing import Optional, Tuple
 
 import torch
-from basicts.modules.transformer import EncoderLayer, Seq2SeqDecoderLayer
 from torch import nn
+
+from basicts.modules.transformer import EncoderLayer, Seq2SeqDecoderLayer
 
 
 class DSAttention(nn.Module):

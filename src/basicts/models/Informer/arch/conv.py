@@ -1,6 +1,7 @@
 import torch
-from basicts.modules.activations import ACT2FN
 from torch import nn
+
+from basicts.modules.activations import ACT2FN
 
 
 class ConvLayer(nn.Module):

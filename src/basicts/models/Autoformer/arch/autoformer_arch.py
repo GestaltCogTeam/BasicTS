@@ -1,12 +1,13 @@
 from typing import Dict, Union
 
 import torch
+from torch import nn
+
 from basicts.modules.decomposition import MovingAverageDecomposition
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import CenteredLayerNorm
 from basicts.modules.transformer import AutoCorrelation, Encoder
-from torch import nn
 
 from ..config.autoformer_config import AutoformerConfig
 from .layers import (AutoformerDecoder, AutoformerDecoderLayer,

@@ -1,13 +1,14 @@
 from typing import Optional
 
 import torch
+from torch import nn
+
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.transformer import (EncoderLayer, MultiHeadAttention,
                                          ProbAttention, Seq2SeqDecoder,
                                          Seq2SeqDecoderLayer,
                                          prepare_causal_attention_mask)
-from torch import nn
 
 from ..config.informer_config import InformerConfig
 from .conv import ConvLayer

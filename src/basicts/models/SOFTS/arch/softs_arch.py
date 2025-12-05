@@ -1,9 +1,10 @@
 import torch
+from torch import nn
+
 from basicts.modules.embed import SequenceEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import RevIN
 from basicts.modules.transformer import Encoder, EncoderLayer
-from torch import nn
 
 from ..config.softs_config import SOFTSConfig
 from .star import STAR
