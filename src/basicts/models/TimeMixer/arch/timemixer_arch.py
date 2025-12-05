@@ -65,7 +65,7 @@ class TimeMixerBackBone(nn.Module):
                 trend_list.append(trend)
             return seasonal_list, trend_list
 
-    def _multi_scale_process_inputs(
+    def _prepare_multi_scale_inputs(
             self,
             inputs: torch.Tensor,
             inputs_timestamps: Optional[torch.Tensor] = None
@@ -82,7 +82,8 @@ class TimeMixerBackBone(nn.Module):
             sample = down_sampled
 
             if inputs_timestamps is not None:
-                multi_scale_timestamps.append(sample_ts[:, :, ::self.down_sampling_window])
+                multi_scale_timestamps.append(
+                    sample_ts[:, :, ::self.down_sampling_window].permute(0, 2, 1))
                 sample_ts = sample_ts[:, :, ::self.down_sampling_window]
 
         return multi_scale_inputs, multi_scale_timestamps
@@ -94,7 +95,7 @@ class TimeMixerBackBone(nn.Module):
                 decomp: bool = False,
                 ) -> tuple[list[torch.Tensor], Optional[list[torch.Tensor]]]:
 
-        x_list, x_ts_list = self._multi_scale_process_inputs(inputs, inputs_timestamps)
+        x_list, x_ts_list = self._prepare_multi_scale_inputs(inputs, inputs_timestamps)
         num_scales = len(x_list)
 
         for i in range(num_scales):
