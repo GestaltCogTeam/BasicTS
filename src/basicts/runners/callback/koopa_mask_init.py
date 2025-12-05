@@ -1,7 +1,9 @@
 import torch
-from basicts.runners.callback.callback import BasicTSCallback
 from easytorch.utils import get_logger
+
 from basicts.models.Koopa.arch.layers import FourierFilter
+from basicts.runners.callback.callback import BasicTSCallback
+
 logger = get_logger("KoopaMaskInitCallbackFullTrain")
 
 class KoopaMaskInitCallbackFullTrain(BasicTSCallback):
