@@ -118,6 +118,7 @@ class Autoformer(nn.Module):
             )
 
         # decoder
+        targets_timestamps = torch.cat([inputs_timestamps[:, -self.label_len:, :], targets_timestamps], dim=1)
         dec_hidden_states = self.dec_embedding(seasonal, targets_timestamps)
 
         dec_output, trend, dec_self_attn_weights, dec_cross_attn_weights = self.decoder(
