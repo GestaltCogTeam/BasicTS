@@ -59,8 +59,9 @@ class DSAttention(nn.Module):
 
         # Key/Value
         if is_cross: # cross-attn (typically does not use rope)
-            key = self._shape(self.k_proj(key_value_states), L)
-            value = self._shape(self.v_proj(key_value_states), L)
+            kv_len = key_value_states.size(1)
+            key = self._shape(self.k_proj(key_value_states), kv_len)
+            value = self._shape(self.v_proj(key_value_states), kv_len)
         else: # self-attn
             # compute key/value from hidden_states
             key = self._shape(self.k_proj(hidden_states), L)
@@ -227,7 +228,7 @@ class Projector(nn.Module):
         super().__init__()
 
         self.series_conv = nn.Conv1d(
-            input_size, 1, kernel_size, padding=2, padding_mode="circular", bias=False)
+            input_size, 1, kernel_size, padding=1, padding_mode="circular", bias=False)
 
         layers = [nn.Linear(2 * num_features, hidden_size), nn.ReLU()]
         for _ in range(num_layers - 1):

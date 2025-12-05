@@ -92,6 +92,7 @@ class NonstationaryTransformerBackbone(nn.Module):
             torch.Tensor: outputs with shape [batch_size, output_len, num_features]
         """
 
+        inputs_raw = inputs.clone().detach()
         # Normalization
         if inputs_mask is None:
             inputs_mask = torch.ones_like(inputs)
@@ -102,10 +103,10 @@ class NonstationaryTransformerBackbone(nn.Module):
             (inputs ** 2).sum(dim=1, keepdim=True) / valid_count + 1e-5)
         inputs /= self.std
 
-        tau = self.tau_learner(inputs, self.std)
+        tau = self.tau_learner(inputs_raw, self.std)
         tau_clamped = torch.clamp(tau, max=self.threshold)  # avoid numerical overflow
         tau = tau_clamped.exp()
-        delta = self.delta_learner(inputs, self.mean)
+        delta = self.delta_learner(inputs_raw, self.mean)
         hidden_states = self.enc_embedding(inputs, inputs_timestamps)
         hidden_states, attns = self.encoder(hidden_states, tau=tau, delta=delta)
         return hidden_states, attns, tau, delta
@@ -180,6 +181,7 @@ class NonstationaryTransformerForForecasting(nn.Module):
 
         enc_hidden_states, enc_attn_weights, tau, delta = self.backbone(inputs, inputs_timestamps)
         dec_hidden_states = torch.cat([inputs[:, -self.label_len:, :], torch.zeros_like(targets)], dim=1)
+        targets_timestamps = torch.cat([inputs_timestamps[:, -self.label_len:, :], targets_timestamps], dim=1)
         dec_hidden_states = self.dec_embedding(dec_hidden_states, targets_timestamps)
         dec_hidden_states, dec_self_attn_weights, dec_cross_attn_weights = self.decoder(
             dec_hidden_states, enc_hidden_states, tau=tau, delta=delta)
