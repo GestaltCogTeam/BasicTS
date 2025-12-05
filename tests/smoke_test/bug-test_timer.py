@@ -1,5 +1,4 @@
 # pylint: disable=wrong-import-position
-
 import os
 import sys
 
@@ -8,29 +7,24 @@ os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
-from basicts.models.DLinear import DLinear, DLinearConfig
+from basicts.models.Timer import Timer, TimerConfig
 
-
-def test_dlinear_smoke_test():
-    output_len = 64
-    input_len = 64
-    dlinear_config = DLinearConfig(
-        input_len=input_len,
+def test_timer_smoke_test():
+    output_len = 24
+    timer_config = TimerConfig(
         output_len=output_len,
-        individual=False,
     )
-
     BasicTSLauncher.launch_training(
         BasicTSForecastingConfig(
-            model=DLinear,
+            model=Timer,
             dataset_name="ETTh1_mini",
-            model_config=dlinear_config,
+            model_config=timer_config,
             gpus=None,
-            num_epochs=5,
-            input_len=input_len,
+            num_epochs=1,
             output_len=output_len,
+            lr=0.001
         )
     )
 
 if __name__ == "__main__":
-    test_dlinear_smoke_test()
+    test_timer_smoke_test()
