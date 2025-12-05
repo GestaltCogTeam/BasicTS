@@ -45,7 +45,7 @@ class SOFTS(nn.Module):
 
         self.use_revin = config.use_revin
         if self.use_revin:
-            self.revin = RevIN()
+            self.revin = RevIN(affine=False)
 
     def forward(self, inputs: torch.Tensor, inputs_timestamps: torch.Tensor) -> torch.Tensor:
         """
