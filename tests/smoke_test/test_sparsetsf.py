@@ -9,6 +9,7 @@ from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
 from basicts.models.SparseTSF import SparseTSF, SparseTSFConfig
 
+
 def test_sparsetsf_smoke_test():
     output_len = 24
     input_len = 96

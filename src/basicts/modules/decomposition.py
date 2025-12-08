@@ -1,3 +1,4 @@
+# pylint: disable=not-callable
 from typing import Sequence, Tuple
 
 import torch

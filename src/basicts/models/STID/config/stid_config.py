@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Optional
 
 from basicts.configs import BasicTSModelConfig
 
@@ -14,7 +15,7 @@ class STIDConfig(BasicTSModelConfig):
     output_len: int = field(default=None, metadata={"help": "Output sequence length."})
     num_features: int = field(default=None, metadata={"help": "Number of features."})
     input_hidden_size: int = field(default=32, metadata={"help": "Hidden size of the imput embedding."})
-    intermediate_size: int | None = field(default=None, metadata={"help": "Intermediate size of MLP layers. " \
+    intermediate_size: Optional[int] = field(default=None, metadata={"help": "Intermediate size of MLP layers. " \
                                                                   "If None, use hidden_size in STID."})
     hidden_act: str = field(default="relu", metadata={"help": "Activation function of MLP layers."})
     num_layers: int = field(default=1, metadata={"help": "Number of MLP layers."})

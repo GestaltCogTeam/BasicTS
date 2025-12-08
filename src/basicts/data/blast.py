@@ -244,12 +244,12 @@ class BLAST(BasicTSDataset):
 
     def __len__(self):
         return self.data.shape[0]
-    
+
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['_data']
+        del state["_data"]
         return state
-    
+
     def __setstate__(self, state):
         self.__dict__.update(state)
         self._data = self._load_data()

@@ -1,3 +1,4 @@
+# pylint: disable=not-callable
 import torch
 from easytorch.utils import get_logger
 

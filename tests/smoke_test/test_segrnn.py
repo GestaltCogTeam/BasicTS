@@ -9,6 +9,7 @@ from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
 from basicts.models.SegRNN import SegRNN, SegRNNConfig
 
+
 def test_segrnn_smoke_test():
     output_len = 24
     input_len = 96
