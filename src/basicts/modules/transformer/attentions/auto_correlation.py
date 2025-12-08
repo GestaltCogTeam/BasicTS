@@ -1,3 +1,4 @@
+# pylint: disable=not-callable
 import math
 from typing import Optional, Tuple
 

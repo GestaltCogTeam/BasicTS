@@ -9,6 +9,7 @@ from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
 from basicts.models.STID import STID, STIDConfig
 
+
 def test_stid_smoke_test():
     output_len = 24
     input_len = 96

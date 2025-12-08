@@ -8,7 +8,7 @@ os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 from basicts import BasicTSLauncher
 from basicts.configs import BasicTSImputationConfig
-from basicts.models.PatchTST import PatchTSTForReconstruction, PatchTSTConfig
+from basicts.models.PatchTST import PatchTSTConfig, PatchTSTForReconstruction
 
 
 def test_patchtstforr_smoke_test():

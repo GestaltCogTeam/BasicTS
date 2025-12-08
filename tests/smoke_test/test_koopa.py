@@ -8,8 +8,7 @@ os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
 from basicts.models.Koopa import Koopa, KoopaConfig
-from basicts.runners.callback import \
-    KoopaMaskInitCallbackFullTrain
+from basicts.runners.callback import KoopaMaskInitCallbackFullTrain
 
 
 def test_koopa_smoke_test():

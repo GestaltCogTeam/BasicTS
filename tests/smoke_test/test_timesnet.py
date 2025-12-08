@@ -7,7 +7,8 @@ os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
-from basicts.models.TimesNet import TimesNetForForecasting, TimesNetConfig
+from basicts.models.TimesNet import TimesNetConfig, TimesNetForForecasting
+
 
 def test_timesnet_smoke_test():
     output_len = 24
