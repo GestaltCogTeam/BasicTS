@@ -3,7 +3,6 @@ requires = ["setuptools>=45", "wheel"]
 
 [project]
 name = "BasicTS"
-version = "1.0.2"
 description = "A Fair and Scalable Time Series Analysis Toolkit and benchmark."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -24,6 +23,7 @@ dependencies = [
     "tensorboard==2.18.0",
     "transformers==4.40.1"
 ]
+dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://github.com/GestaltCogTeam/BasicTS"
@@ -31,3 +31,6 @@ Repository = "https://github.com/GestaltCogTeam/BasicTS"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+
+[tool.setuptools.dynamic]
+version = {attr = "basicts.__version__"}
