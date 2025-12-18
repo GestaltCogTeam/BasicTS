@@ -17,6 +17,5 @@ __ALL__ = [
     'EarlyStopping',
     'GradAccumulation',
     'NoBP',
-    'SelectiveLearning',
-    'KoopaMaskInitCallbackFullTrain',
+    'SelectiveLearning'
 ]

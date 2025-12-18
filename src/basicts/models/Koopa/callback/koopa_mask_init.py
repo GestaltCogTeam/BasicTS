@@ -3,22 +3,24 @@ import torch
 from easytorch.utils import get_logger
 
 from basicts.models.Koopa.arch.layers import FourierFilter
-from basicts.runners.callback.callback import BasicTSCallback
+from basicts.runners.callback import BasicTSCallback
 
-logger = get_logger("KoopaMaskInitCallbackFullTrain")
+logger = get_logger("BasicTS-training")
 
-class KoopaMaskInitCallbackFullTrain(BasicTSCallback):
+
+class KoopaMaskInitCallback(BasicTSCallback):
+    
     """Callback for initializing Koopa mask during training.
 
-    Changes made:
-    - Robust handling when training loader is empty.
-    - Ensure k >= 1 and k <= number of frequencies.
-    - Move mask indices and amps to model device.
-    - Update any existing FourierFilter module instances inside the model.
-    - Defensive typing of indices to torch.long.
+        Changes made:
+        - Robust handling when training loader is empty.
+        - Ensure k >= 1 and k <= number of frequencies.
+        - Move mask indices and amps to model device.
+        - Update any existing FourierFilter module instances inside the model.
+        - Defensive typing of indices to torch.long.
     """
 
-    def __init__(self, alpha=0.2):
+    def __init__(self, alpha: float = 0.2):
         super().__init__()
         self.alpha = alpha
 
@@ -40,7 +42,7 @@ class KoopaMaskInitCallbackFullTrain(BasicTSCallback):
             count += 1
 
         if count == 0:
-            print("No training data found — skip mask init.")
+            logger.info("No training data found, skipping mask init.")
             return
 
         amps = amps_sum / count  # (F,)

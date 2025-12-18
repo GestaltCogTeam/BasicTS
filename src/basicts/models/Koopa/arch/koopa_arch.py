@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+from ..callback.koopa_mask_init import KoopaMaskInitCallback
 from ..config.koopa_config import KoopaConfig
 from .layers import MLP, FourierFilter, TimeInvKP, TimeVarKP
 
@@ -13,6 +14,9 @@ class Koopa(nn.Module):
     Venue: NeurIPS 2024
     Task: Long-term Time Series Forecasting
     """
+
+    _required_callbacks: list[type] = [KoopaMaskInitCallback]
+
     def __init__(self, config: KoopaConfig):
         super().__init__()
         self.mask_spectrum = None
@@ -58,7 +62,7 @@ class Koopa(nn.Module):
                       decoder=self.time_var_decoder,
                       multistep=self.multistep)
             for _ in range(self.num_blocks)])
-    def forward(self, inputs: torch.Tensor = None) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         """
         Single-`inputs` forward to match runner API.
 
@@ -69,8 +73,6 @@ class Koopa(nn.Module):
             torch.Tensor: prediction tensor with shape [B, output_len, num_features] (may include trailing feature dim)
         """
         history_data = inputs
-        if history_data is None:
-            raise AssertionError('Model forward requires inputs(history data) as first argument.')
 
         if history_data.dim() == 4:
             x_enc = history_data[..., 0]
