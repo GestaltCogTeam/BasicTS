@@ -101,10 +101,10 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     # Dataset settings
     dataset_type: type = field(default=BasicTSForecastingDataset, metadata={"help": "Dataset type."})
     dataset_params: dict = field(default_factory=dict)
-    input_len: int = field(default=336, metadata={"help": "Input length."})
-    output_len: int = field(default=336, metadata={"help": "Output length."})
-    use_timestamps: bool = field(default=False, metadata={"help": "Whether to use timestamps as supplementary."})
-    memmap: bool = field(default=False, metadata={"help": "Whether to use memmap to load datasets."})
+    input_len: int = field(default=None, metadata={"help": "Input length."})
+    output_len: int = field(default=None, metadata={"help": "Output length."})
+    use_timestamps: bool = field(default=None, metadata={"help": "Whether to use timestamps as supplementary."})
+    memmap: bool = field(default=None, metadata={"help": "Whether to use memmap to load datasets."})
     batch_size: Optional[int] = field(default=None, metadata={"help": "Batch size. If setted, all dataloaders will be setted to the same batch size."})
     null_val: float = field(default=np.nan, metadata={"help": "Null value."})
     null_to_num: float = field(default=0.0, metadata={"help": "Null value to number."})
@@ -143,7 +143,7 @@ class BasicTSFoundationModelConfig(BasicTSConfig):
     # Optimizer
     optimizer: type = field(default=AdamW)
     optimizer_params: dict = field(default_factory=lambda: {"lr": 1e-3, "fused": True})
-    lr: float = field(default=1e-3, metadata={"help": "Learning rate."})
+    lr: float = field(default=None, metadata={"help": "Learning rate."})
 
     # Learning rate scheduler
     lr_scheduler: type = field(default=CosineWarmup)

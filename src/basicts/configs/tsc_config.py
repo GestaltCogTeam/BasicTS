@@ -100,9 +100,11 @@ class BasicTSClassificationConfig(BasicTSConfig):
 
     # Dataset settings
     dataset_type: type = field(default=UEADataset, metadata={"help": "Dataset type."})
-    dataset_params: Union[dict, None] = field(default=None, metadata={"help": "Dataset parameters."})
+    dataset_params: Union[dict, None] = field(
+        default_factory=lambda: {"memmap": False},
+        metadata={"help": "Dataset parameters."})
     use_timestamps: bool = field(default=False, metadata={"help": "Whether to use timestamps as supplementary."})
-    memmap: bool = field(default=False, metadata={"help": "Whether to use memmap to load datasets."})
+    memmap: bool = field(default=None, metadata={"help": "Whether to use memmap to load datasets."})
     null_val: float = field(default=np.nan, metadata={"help": "Null value."})
     null_to_num: float = field(default=0.0, metadata={"help": "Null value to number."})
 
@@ -149,7 +151,7 @@ class BasicTSClassificationConfig(BasicTSConfig):
     optimizer_params: dict = field(
         default_factory=lambda: {"lr": 2e-4, "weight_decay": 5e-4},
         metadata={"help": "Optimizer parameters."})
-    lr: float = field(default=2e-4, metadata={"help": "Learning rate."})
+    lr: float = field(default=None, metadata={"help": "Learning rate."})
 
     # Learning rate scheduler
     lr_scheduler: Union[type, None] = field(default=None, metadata={"help": "Learning rate scheduler type."})

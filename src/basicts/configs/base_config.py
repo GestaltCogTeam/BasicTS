@@ -282,7 +282,7 @@ class BasicTSConfig(EasyDict):
             elif issubclass(obj, LRScheduler) and k == "optimizer":
                 continue
             # short cut has higher priority than params in config
-            elif k in self:
+            elif k in self and self[k] is not None:
                 obj_params[k] = self[k]
         return obj_params
 

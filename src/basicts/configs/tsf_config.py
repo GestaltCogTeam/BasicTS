@@ -100,17 +100,26 @@ class BasicTSForecastingConfig(BasicTSConfig):
 
     # Dataset settings
     dataset_type: type = field(default=BasicTSForecastingDataset, metadata={"help": "Dataset type."})
-    dataset_params: Union[dict, None] = field(default=None, metadata={"help": "Dataset parameters."})
-    input_len: int = field(default=336, metadata={"help": "Input length."})
-    output_len: int = field(default=336, metadata={"help": "Output length."})
-    use_timestamps: bool = field(default=True, metadata={"help": "Whether to use timestamps as supplementary."})
-    memmap: bool = field(default=False, metadata={"help": "Whether to use memmap to load datasets."})
-    null_val: float = field(default=np.nan, metadata={"help": "Null value."})
-    null_to_num: float = field(default=0.0, metadata={"help": "Null value to number."})
-
+    dataset_params: Union[dict, None] = field(
+        default_factory=lambda: {
+            "input_len": 336,
+            "output_len": 336,
+            "use_timestamps": True,
+            "memmap": False,
+        }, metadata={"help": "Dataset parameters."})
+    
+    # shortcuts
+    input_len: int = field(default=None, metadata={"help": "Input length."})
+    output_len: int = field(default=None, metadata={"help": "Output length."})
+    use_timestamps: bool = field(default=None, metadata={"help": "Whether to use timestamps as supplementary."})
+    memmap: bool = field(default=None, metadata={"help": "Whether to use memmap to load datasets."})
     batch_size: Union[int, None] = field(
         default=None, metadata={"help": "Batch size. If setted, all dataloaders will be setted to the same batch size."})
 
+    
+    null_val: float = field(default=np.nan, metadata={"help": "Null value."})
+    null_to_num: float = field(default=0.0, metadata={"help": "Null value to number."})
+    
     # Scaler settings
     scaler: type = field(default=ZScoreScaler, metadata={"help": "Scaler type."})
     norm_each_channel: bool = field(default=True, metadata={"help": "Whether to normalize data for each channel independently."})
@@ -148,7 +157,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
     optimizer_params: dict = field(
         default_factory=lambda: {"lr": 2e-4, "weight_decay": 5e-4},
         metadata={"help": "Optimizer parameters."})
-    lr: float = field(default=2e-4, metadata={"help": "Learning rate."})
+    lr: float = field(default=None, metadata={"help": "Learning rate."})
 
     # Learning rate scheduler
     lr_scheduler: Union[type, None] = field(default=None, metadata={"help": "Learning rate scheduler type."})
