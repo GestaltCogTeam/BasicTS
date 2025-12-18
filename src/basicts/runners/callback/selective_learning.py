@@ -9,6 +9,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.data._utils.collate import default_collate
 
+from basicts.configs import BasicTSModelConfig
 from basicts.utils import RunnerStatus
 
 from .callback import BasicTSCallback
@@ -28,7 +29,8 @@ class SelectiveLearning(BasicTSCallback):
     Args:
         r_u (float, optional): Uncertainty mask ratio, a float in (0, 1). Default: None.
         r_a (float, optional): Anomaly mask ratio, a float in (0, 1). Default: None.
-        estimator (nn.Module, optional): Estimation model for anomaly mask. Default: None.
+        estimator (type, optional): Estimation model class for anomaly mask. Default: None.
+        estimator_config (BasicTSModelConfig, optional): Config of the estimation model. Default: None.
         ckpt_path (str, optional): Path to the checkpoint of the estimation model. Default: None.
     """
 
@@ -36,13 +38,14 @@ class SelectiveLearning(BasicTSCallback):
             self,
             r_u: Optional[float] = None,
             r_a: Optional[float] = None,
-            estimator: Optional[nn.Module] = None,
+            estimator: Optional[type] = None,
+            estimator_config: Optional[BasicTSModelConfig] = None,
             ckpt_path: Optional[str] = None):
 
         super().__init__()
         self.r_u = r_u
         self.r_a = r_a
-        self.estimator = estimator
+        self.estimator = estimator(estimator_config)
         self.ckpt_path = ckpt_path
 
         if self.r_a is not None and self.estimator is None:
@@ -57,6 +60,7 @@ class SelectiveLearning(BasicTSCallback):
     def on_train_start(self, runner: "BasicTSRunner"):
         runner.logger.info(f"Use selective learning with r_u={self.r_u}, r_a={self.r_a}.")
         self._load_estimator(runner)
+        self.estimator.eval()
         self.num_samples = len(runner.train_data_loader.dataset)
         runner.train_data_loader = _DataLoaderWithIndex(runner.train_data_loader)
 
@@ -82,15 +86,16 @@ class SelectiveLearning(BasicTSCallback):
 
             # Anomaly mask
             if self.r_a is not None:
-                est_fr = runner._forward(self.estimator, data, step=0)
-                residual_lb = torch.abs(est_fr["prediction"] - forward_return["targets"])
+                with torch.no_grad():
+                    est_foward_return = runner._forward(self.estimator, data, step=0)
+                residual_lb = torch.abs(est_foward_return["prediction"] - forward_return["targets"])
                 dist = residual - residual_lb
                 thresholds = torch.quantile(
                     dist, self.r_a, dim=1, keepdim=True)
                 ano_mask = dist > thresholds
                 forward_return["targets_mask"] = forward_return["targets_mask"] * ano_mask
 
-    def on_epoch_end(self, runner, **kwargs):
+    def on_epoch_end(self, runner: "BasicTSRunner", **kwargs):
         if self.r_u is not None:
             res_entropy = self._compute_entropy(self.history_residual)
             thresholds = torch.quantile(
