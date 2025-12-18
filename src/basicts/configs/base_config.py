@@ -343,7 +343,7 @@ class BasicTSConfig(EasyDict):
                     if not isinstance(is_default, bool):
                         raise ValueError(f"Parameter {k} of {obj.__class__.__name__} is not serializable.")
                     if not is_default:
-                        params[k] = repr(v)
+                        params[k] = self._serialize_obj(v)
 
             return {
                 "name": obj.__class__.__name__,
