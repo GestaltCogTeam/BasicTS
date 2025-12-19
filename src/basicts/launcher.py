@@ -47,19 +47,6 @@ class BasicTSLauncher:
             set_device_type("cpu")
             device_num = 0
 
-        def training_func(cfg: BasicTSConfig):
-            # init runner
-            runner = BasicTSRunner(cfg)
-            # init logger (after making ckpt save dir)
-            runner.init_logger(logger_name="BasicTS-training", log_file_name="training_log")
-            # train
-            try:
-                runner.train()
-            except BaseException as e:
-                # log exception to file
-                runner.logger.error(traceback.format_exc())
-                raise e
-
         train_dist = dist_wrap(
             training_func,
             node_num=cfg.get("dist_node_num", 1),
@@ -111,3 +98,16 @@ class BasicTSLauncher:
 
         # start the evaluation pipeline
         runner.eval(ckpt_path)
+
+def training_func(cfg: BasicTSConfig):
+    # init runner
+    runner = BasicTSRunner(cfg)
+    # init logger (after making ckpt save dir)
+    runner.init_logger(logger_name="BasicTS-training", log_file_name="training_log")
+    # train
+    try:
+        runner.train()
+    except BaseException as e:
+        # log exception to file
+        runner.logger.error(traceback.format_exc())
+        raise e
