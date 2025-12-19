@@ -107,7 +107,7 @@ class BasicTSForecastingConfig(BasicTSConfig):
             "use_timestamps": True,
             "memmap": False,
         }, metadata={"help": "Dataset parameters."})
-    
+
     # shortcuts
     input_len: int = field(default=None, metadata={"help": "Input length."})
     output_len: int = field(default=None, metadata={"help": "Output length."})
@@ -116,10 +116,10 @@ class BasicTSForecastingConfig(BasicTSConfig):
     batch_size: Union[int, None] = field(
         default=None, metadata={"help": "Batch size. If setted, all dataloaders will be setted to the same batch size."})
 
-    
+
     null_val: float = field(default=np.nan, metadata={"help": "Null value."})
     null_to_num: float = field(default=0.0, metadata={"help": "Null value to number."})
-    
+
     # Scaler settings
     scaler: type = field(default=ZScoreScaler, metadata={"help": "Scaler type."})
     norm_each_channel: bool = field(default=True, metadata={"help": "Whether to normalize data for each channel independently."})
