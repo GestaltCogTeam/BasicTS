@@ -28,7 +28,7 @@
 我们建议在 Linux 系统（如 Ubuntu 或 CentOS）上，在 Python 3.8 或更高版本上安装 BasicTS：
 
 ```bash
-pip install basicts-xxx-py3-x.whl
+pip install basicts
 ```
 
 我们推荐使用 [Miniconda](https://docs.conda.io/en/latest/miniconda.html) 或 [Anaconda](https://www.anaconda.com/) 来创建虚拟 Python 环境。

@@ -28,7 +28,7 @@ Now, let's get started on exploring how to realize your time series analysis pro
 We recommend installing BasicTS on a Linux system (such as Ubuntu or CentOS) with Python 3.8 or higher:
 
 ```bash
-pip install basicts-xxx-py3-x.whl
+pip install basicts
 ```
 
 We recommend using https://docs.conda.io/en/latest/miniconda.html or https://www.anaconda.com/ to create a virtual Python environment.
