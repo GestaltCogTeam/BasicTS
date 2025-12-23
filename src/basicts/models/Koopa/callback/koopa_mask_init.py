@@ -9,7 +9,7 @@ logger = get_logger("BasicTS-training")
 
 
 class KoopaMaskInitCallback(BasicTSCallback):
-    
+
     """Callback for initializing Koopa mask during training.
 
         Changes made:

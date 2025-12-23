@@ -7,7 +7,6 @@ import types
 from contextlib import nullcontext
 from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Union
 
-import numpy as np
 import setproctitle
 import torch
 from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
@@ -16,6 +15,7 @@ from easytorch.device import to_device
 from easytorch.utils import (TimePredictor, get_local_rank, get_logger,
                              is_master, master_only)
 from easytorch.utils.env import get_rank, set_tf32_mode, setup_determinacy
+from numpy.lib.format import open_memmap
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
@@ -34,7 +34,6 @@ from .taskflow import BasicTSTaskFlow
 if TYPE_CHECKING:
     from basicts.configs import BasicTSConfig
 
-from numpy.lib.format import open_memmap
 
 
 class BasicTSRunner:
