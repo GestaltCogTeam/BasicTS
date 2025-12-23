@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional, Union
 
 import numpy as np
+
 from basicts.utils.constants import BasicTSMode
 
 from .base_dataset import BasicTSDataset
@@ -56,7 +57,7 @@ class BLAST(BasicTSDataset):
 
     def __post_init__(self):
         # load data
-        self.data = self._load_data()
+        self._data = self._load_data()
         self.output_len = self.output_len or 0
 
         # minimum valid history sequence length
@@ -243,6 +244,15 @@ class BLAST(BasicTSDataset):
 
     def __len__(self):
         return self.data.shape[0]
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state["_data"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._data = self._load_data()
 
     @property
     def data(self) -> np.ndarray:

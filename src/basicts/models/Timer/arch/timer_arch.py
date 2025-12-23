@@ -1,11 +1,12 @@
 import torch
+from torch import nn
+
 from basicts.modules import MLPLayer
 from basicts.modules.embed import PatchEmbedding
 from basicts.modules.norm import RevIN
 from basicts.modules.transformer import (AutoRegressiveDecoder,
                                          DecoderOnlyLayer, MultiHeadAttention,
                                          prepare_causal_attention_mask)
-from torch import nn
 
 from ..config import TimerConfig
 

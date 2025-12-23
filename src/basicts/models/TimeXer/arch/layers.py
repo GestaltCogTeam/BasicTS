@@ -1,8 +1,9 @@
 from typing import Callable, Tuple
 
 import torch
-from basicts.modules.transformer import Seq2SeqDecoderLayer
 from torch import nn
+
+from basicts.modules.transformer import Seq2SeqDecoderLayer
 
 
 class FlattenHead(nn.Module):
@@ -86,4 +87,4 @@ class TimeXerEncoderLayer(Seq2SeqDecoderLayer):
         if not output_attentions:
             self_attn_weights = cross_attn_weights = None
 
-        return hidden_states, self_attn_weights, cross_attn_weights, None
+        return hidden_states, self_attn_weights, cross_attn_weights

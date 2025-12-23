@@ -1,8 +1,9 @@
 import torch
 import torch.nn.functional as F
+from torch import nn
+
 from basicts.modules.activations import ACT2FN
 from basicts.modules.mlps import MLPLayer
-from torch import nn
 
 
 class STAR(nn.Module):

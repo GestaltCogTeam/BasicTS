@@ -10,9 +10,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Union
 import numpy as np
 import setproctitle
 import torch
-from basicts.metrics import ALL_METRICS
-from basicts.scaler import BasicTSScaler
-from basicts.utils import BasicTSMode, MeterPool, RunnerStatus
 from easytorch.core.checkpoint import (backup_last_ckpt, clear_ckpt, load_ckpt,
                                        save_ckpt)
 from easytorch.device import to_device
@@ -24,6 +21,10 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+
+from basicts.metrics import ALL_METRICS
+from basicts.scaler import BasicTSScaler
+from basicts.utils import BasicTSMode, MeterPool, RunnerStatus
 
 from .builder import Builder
 from .callback import BasicTSCallbackHandler

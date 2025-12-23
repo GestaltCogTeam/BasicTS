@@ -1,10 +1,11 @@
 from typing import Iterable, Optional
 
 import torch
-from basicts.modules.mlps import MLPLayer
-from basicts.modules.transformer import MultiHeadAttention
 from einops import rearrange, repeat
 from torch import nn
+
+from basicts.modules.mlps import MLPLayer
+from basicts.modules.transformer import MultiHeadAttention
 
 
 class PatchMergingLayer(nn.Module):

@@ -2,13 +2,14 @@
 from typing import List, Optional, Tuple
 
 import torch
+from torch import nn
+
 from basicts.modules.decomposition import MovingAverageDecomposition
 from basicts.modules.embed import PatchEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import RevIN
 from basicts.modules.transformer import (Encoder, EncoderLayer,
                                          MultiHeadAttention)
-from torch import nn
 
 from ..config.patchtst_config import PatchTSTConfig
 from .patchtst_layers import PatchTSTBatchNorm, PatchTSTHead
@@ -147,10 +148,12 @@ class PatchTSTForClassification(nn.Module):
         self.num_classes = config.num_classes
         self.backbone = PatchTSTBackbone(config)
         self.flatten = nn.Flatten(start_dim=1)
-        self.forecasting_head = PatchTSTHead(
-            config.num_features, self.backbone.num_patches * config.hidden_size,
+        self.classification_head = PatchTSTHead(
+            self.backbone.num_patches * config.hidden_size * config.num_features,
             config.num_classes,
-            dropout=config.head_dropout)
+            config.individual_head,
+            config.num_features,
+            config.head_dropout)
         self.use_revin = config.use_revin
         if self.use_revin:
             self.revin = RevIN(
@@ -173,11 +176,9 @@ class PatchTSTForClassification(nn.Module):
             inputs = self.revin(inputs, "norm")
         # [batch_size, num_features, num_patches, hidden_size]
         hidden_states, attn_weights = self.backbone(inputs)
-        hidden_states = self.flatten(hidden_states) # [batch_size, num_features, num_patches * hidden_size]
-        # [batch_size, output_len, num_features]
-        prediction = self.forecasting_head(hidden_states).transpose(1, 2)
-        if self.use_revin:
-            prediction = self.revin(prediction, "denorm")
+        hidden_states = self.flatten(hidden_states) # [batch_size, num_features * num_patches * hidden_size]
+        # [batch_size, num_classes]
+        prediction = self.classification_head(hidden_states)
         if self.output_attentions:
             return {"prediction": prediction, "attn_weights": attn_weights}
         else:

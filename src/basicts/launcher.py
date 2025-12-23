@@ -1,11 +1,12 @@
 import traceback
 from typing import Optional
 
-from basicts.configs.base_config import BasicTSConfig
-from basicts.runners import BasicTSRunner
 from easytorch.device import set_device_type
 from easytorch.launcher.dist_wrap import dist_wrap
 from easytorch.utils import get_logger, set_visible_devices
+
+from basicts.configs.base_config import BasicTSConfig
+from basicts.runners import BasicTSRunner
 
 
 class BasicTSLauncher:
@@ -45,19 +46,6 @@ class BasicTSLauncher:
         else:
             set_device_type("cpu")
             device_num = 0
-
-        def training_func(cfg: BasicTSConfig):
-            # init runner
-            runner = BasicTSRunner(cfg)
-            # init logger (after making ckpt save dir)
-            runner.init_logger(logger_name="BasicTS-training", log_file_name="training_log")
-            # train
-            try:
-                runner.train()
-            except BaseException as e:
-                # log exception to file
-                runner.logger.error(traceback.format_exc())
-                raise e
 
         train_dist = dist_wrap(
             training_func,
@@ -110,3 +98,16 @@ class BasicTSLauncher:
 
         # start the evaluation pipeline
         runner.eval(ckpt_path)
+
+def training_func(cfg: BasicTSConfig):
+    # init runner
+    runner = BasicTSRunner(cfg)
+    # init logger (after making ckpt save dir)
+    runner.init_logger(logger_name="BasicTS-training", log_file_name="training_log")
+    # train
+    try:
+        runner.train()
+    except BaseException as e:
+        # log exception to file
+        runner.logger.error(traceback.format_exc())
+        raise e

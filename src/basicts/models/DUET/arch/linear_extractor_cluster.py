@@ -1,10 +1,11 @@
 import torch
-from basicts.models.DLinear import DLinear, DLinearConfig
-from basicts.modules.mlps import MLPLayer
-from basicts.modules.norm import RevIN
 from einops import rearrange
 from torch import nn
 from torch.distributions.normal import Normal
+
+from basicts.models.DLinear import DLinear, DLinearConfig
+from basicts.modules.mlps import MLPLayer
+from basicts.modules.norm import RevIN
 
 from ..config.duet_config import DUETConfig
 

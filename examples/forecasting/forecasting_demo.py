@@ -1,9 +1,11 @@
+from torch.optim.lr_scheduler import MultiStepLR
+
 from basicts import BasicTSLauncher
 from basicts.configs import BasicTSForecastingConfig
-from basicts.models.iTransformer import iTransformerForForecasting, iTransformerConfig
-from basicts.runners.callback import EarlyStopping, GradientClipping
 from basicts.metrics import masked_mse
-from torch.optim.lr_scheduler import MultiStepLR
+from basicts.models.iTransformer import (iTransformerConfig,
+                                         iTransformerForForecasting)
+from basicts.runners.callback import EarlyStopping, GradientClipping
 
 
 def main():
