@@ -1079,6 +1079,7 @@ class BasicTSRunner:
         inputs_path = os.path.join(save_dir, "inputs.npy")
         pred_path = os.path.join(save_dir, "prediction.npy")
         targets_path = os.path.join(save_dir, "targets.npy")
+        info_path = os.path.join(save_dir, "data_info.json")
 
         # create memmap files
         if batch_idx == 0:
@@ -1088,6 +1089,14 @@ class BasicTSRunner:
                                     shape=(total_samples, *prediction.shape[1:]))
             self._targets_memmap = np.memmap(targets_path, dtype=targets.dtype, mode="w+",
                                 shape=(total_samples, *targets.shape[1:]))
+            # save shape and dtype info
+            info = {
+                "inputs": {"shape": self._inputs_memmap.shape, "dtype": str(self._inputs_memmap.dtype)},
+                "prediction": {"shape": self._prediction_memmap.shape, "dtype": str(self._prediction_memmap.dtype)},
+                "targets": {"shape": self._targets_memmap.shape, "dtype": str(self._targets_memmap.dtype)},
+            }
+            with open(info_path, "w") as f:
+                json.dump(info, f, indent=4)
 
         start = batch_idx * inputs.shape[0]
         end = start + inputs.shape[0]
