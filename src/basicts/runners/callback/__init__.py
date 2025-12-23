@@ -16,5 +16,5 @@ __ALL__ = [
     'EarlyStopping',
     'GradAccumulation',
     'NoBP',
-    'SelectiveLearning',
+    'SelectiveLearning'
 ]

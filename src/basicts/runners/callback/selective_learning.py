@@ -1,14 +1,15 @@
 from typing import TYPE_CHECKING, Optional
 
 import torch
-from basicts.utils import RunnerStatus
 from easytorch.core.checkpoint import load_ckpt
 from easytorch.device import to_device
 from easytorch.utils import get_local_rank
-from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader
 from torch.utils.data._utils.collate import default_collate
+
+from basicts.configs import BasicTSModelConfig
+from basicts.utils import RunnerStatus
 
 from .callback import BasicTSCallback
 
@@ -27,7 +28,8 @@ class SelectiveLearning(BasicTSCallback):
     Args:
         r_u (float, optional): Uncertainty mask ratio, a float in (0, 1). Default: None.
         r_a (float, optional): Anomaly mask ratio, a float in (0, 1). Default: None.
-        estimator (nn.Module, optional): Estimation model for anomaly mask. Default: None.
+        estimator (type, optional): Estimation model class for anomaly mask. Default: None.
+        estimator_config (BasicTSModelConfig, optional): Config of the estimation model. Default: None.
         ckpt_path (str, optional): Path to the checkpoint of the estimation model. Default: None.
     """
 
@@ -35,18 +37,24 @@ class SelectiveLearning(BasicTSCallback):
             self,
             r_u: Optional[float] = None,
             r_a: Optional[float] = None,
-            estimator: Optional[nn.Module] = None,
+            estimator: Optional[type] = None,
+            estimator_config: Optional[BasicTSModelConfig] = None,
             ckpt_path: Optional[str] = None):
 
         super().__init__()
+
+        # config
         self.r_u = r_u
         self.r_a = r_a
         self.estimator = estimator
+        self.estimator_config = estimator_config
         self.ckpt_path = ckpt_path
 
-        if self.r_a is not None and self.estimator is None:
+        self.estimation_model = self.estimator(estimator_config)
+
+        if self.r_a is not None and self.estimation_model is None:
             raise RuntimeError("Anomaly mask ratio is set but estimation model is not provided.")
-        if self.estimator is not None and self.ckpt_path is None:
+        if self.estimation_model is not None and self.ckpt_path is None:
             raise RuntimeError("Estimation model is set but checkpoint path is not provided.")
 
         self.history_residual: torch.Tensor = None
@@ -56,6 +64,7 @@ class SelectiveLearning(BasicTSCallback):
     def on_train_start(self, runner: "BasicTSRunner"):
         runner.logger.info(f"Use selective learning with r_u={self.r_u}, r_a={self.r_a}.")
         self._load_estimator(runner)
+        self.estimation_model.eval()
         self.num_samples = len(runner.train_data_loader.dataset)
         runner.train_data_loader = _DataLoaderWithIndex(runner.train_data_loader)
 
@@ -81,15 +90,16 @@ class SelectiveLearning(BasicTSCallback):
 
             # Anomaly mask
             if self.r_a is not None:
-                est_fr = runner._forward(self.estimator, data, step=0)
-                residual_lb = torch.abs(est_fr["prediction"] - forward_return["targets"])
+                with torch.no_grad():
+                    est_foward_return = runner._forward(self.estimation_model, data, step=0)
+                residual_lb = torch.abs(est_foward_return["prediction"] - forward_return["targets"])
                 dist = residual - residual_lb
                 thresholds = torch.quantile(
                     dist, self.r_a, dim=1, keepdim=True)
                 ano_mask = dist > thresholds
                 forward_return["targets_mask"] = forward_return["targets_mask"] * ano_mask
 
-    def on_epoch_end(self, runner, **kwargs):
+    def on_epoch_end(self, runner: "BasicTSRunner", **kwargs):
         if self.r_u is not None:
             res_entropy = self._compute_entropy(self.history_residual)
             thresholds = torch.quantile(
@@ -98,13 +108,13 @@ class SelectiveLearning(BasicTSCallback):
 
     def _load_estimator(self, runner: "BasicTSRunner"):
 
-        runner.logger.info(f"Building estimation model {self.estimator.__class__.__name__}.")
-        self.estimator = to_device(self.estimator)
+        runner.logger.info(f"Building estimation model {self.estimation_model.__class__.__name__}.")
+        self.estimation_model = to_device(self.estimation_model)
 
         # DDP
         if torch.distributed.is_initialized():
-            self.estimator = DDP(
-                self.estimator,
+            self.estimation_model = DDP(
+                self.estimation_model,
                 device_ids=[get_local_rank()],
                 find_unused_parameters=runner.cfg.ddp_find_unused_parameters
             )
@@ -112,10 +122,10 @@ class SelectiveLearning(BasicTSCallback):
         # load model weights
         try:
             checkpoint_dict = load_ckpt(None, ckpt_path=self.ckpt_path, logger=runner.logger)
-            if isinstance(self.estimator, DDP):
-                self.estimator.module.load_state_dict(checkpoint_dict["model_state_dict"])
+            if isinstance(self.estimation_model, DDP):
+                self.estimation_model.module.load_state_dict(checkpoint_dict["model_state_dict"])
             else:
-                self.estimator.load_state_dict(checkpoint_dict["model_state_dict"])
+                self.estimation_model.load_state_dict(checkpoint_dict["model_state_dict"])
         except (IndexError, OSError) as e:
             raise OSError(f"Ckpt file {self.ckpt_path} does not exist") from e
 

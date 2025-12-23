@@ -1,9 +1,10 @@
 from math import ceil
 
 import torch
+from torch import nn
+
 from basicts.modules.embed import PatchEmbedding
 from basicts.modules.norm import RevIN
-from torch import nn
 
 from ..config.segrnn_config import SegRNNConfig
 

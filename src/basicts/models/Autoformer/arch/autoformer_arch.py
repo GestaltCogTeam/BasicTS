@@ -1,10 +1,13 @@
+from typing import Dict, Union
+
 import torch
+from torch import nn
+
 from basicts.modules.decomposition import MovingAverageDecomposition
 from basicts.modules.embed import FeatureEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import CenteredLayerNorm
 from basicts.modules.transformer import AutoCorrelation, Encoder
-from torch import nn
 
 from ..config.autoformer_config import AutoformerConfig
 from .layers import (AutoformerDecoder, AutoformerDecoderLayer,
@@ -81,9 +84,9 @@ class Autoformer(nn.Module):
             self,
             inputs: torch.Tensor,
             targets: torch.Tensor,
-            inputs_timestamps: torch.Tensor,
-            targets_timestamps: torch.Tensor
-            ) -> torch.Tensor:
+            inputs_timestamps: torch.Tensor = None,
+            targets_timestamps: torch.Tensor = None
+            ) -> Union[torch.Tensor, Dict[str, torch.Tensor]]:
         """
         Feed forward of Autoformer.
 
@@ -95,6 +98,7 @@ class Autoformer(nn.Module):
 
         Returns:
             Output data with shape: [batch_size, output_len, num_features]
+            Attention weights if output_attentions is True, otherwise None.
         """
 
         # decomp init
@@ -114,6 +118,7 @@ class Autoformer(nn.Module):
             )
 
         # decoder
+        targets_timestamps = torch.cat([inputs_timestamps[:, -self.label_len:, :], targets_timestamps], dim=1)
         dec_hidden_states = self.dec_embedding(seasonal, targets_timestamps)
 
         dec_output, trend, dec_self_attn_weights, dec_cross_attn_weights = self.decoder(

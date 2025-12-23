@@ -1,6 +1,7 @@
 import torch
-from basicts.modules.decomposition import MovingAverageDecomposition
 from torch import nn
+
+from basicts.modules.decomposition import MovingAverageDecomposition
 
 from ..config.dlinear_config import DLinearConfig
 

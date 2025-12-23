@@ -1,6 +1,7 @@
 from basicts import BasicTSLauncher
 from basicts.configs import BasicTSClassificationConfig
-from basicts.models.iTransformer import iTransformerForClassification, iTransformerConfig
+from basicts.models.iTransformer import (iTransformerConfig,
+                                         iTransformerForClassification)
 
 
 def main():

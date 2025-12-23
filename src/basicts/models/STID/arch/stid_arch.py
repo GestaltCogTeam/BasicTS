@@ -1,6 +1,7 @@
 import torch
-from basicts.modules import ResMLPLayer
 from torch import nn
+
+from basicts.modules import ResMLPLayer
 
 from ..config.stid_config import STIDConfig
 

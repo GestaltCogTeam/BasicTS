@@ -1,9 +1,11 @@
+# pylint: disable=not-callable
 from typing import Callable, Dict
 
 import torch
+from torch import nn
+
 from basicts.metrics import ALL_METRICS
 from basicts.modules.norm import RevIN
-from torch import nn
 
 from ..config.fits_config import FITSConfig
 

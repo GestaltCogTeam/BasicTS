@@ -8,8 +8,7 @@ os.chdir(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 from basicts.configs import BasicTSForecastingConfig
 from basicts.launcher import BasicTSLauncher
-from basicts.models.DLinear import DLinear
-from basicts.models.DLinear.config.dlinear_config import DLinearConfig
+from basicts.models.DLinear import DLinear, DLinearConfig
 
 
 def test_dlinear_smoke_test():

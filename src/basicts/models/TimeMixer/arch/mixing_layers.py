@@ -1,8 +1,9 @@
 import torch
+from torch import nn
+
 from basicts.modules.decomposition import (DFTDecomposition,
                                            MovingAverageDecomposition)
 from basicts.modules.mlps import MLPLayer
-from torch import nn
 
 from ..config.timemixer_config import TimeMixerConfig
 

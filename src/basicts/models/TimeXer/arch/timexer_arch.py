@@ -1,9 +1,10 @@
 import torch
+from torch import nn
+
 from basicts.modules.embed import PatchEmbedding, SequenceEmbedding
 from basicts.modules.mlps import MLPLayer
 from basicts.modules.norm import RevIN
 from basicts.modules.transformer import MultiHeadAttention, Seq2SeqDecoder
-from torch import nn
 
 from ..config.timexer_config import TimeXerConfig
 from .layers import FlattenHead, TimeXerEncoderLayer
@@ -93,7 +94,7 @@ class TimeXer(nn.Module):
         # add exogenous variables
         ex_hidden_states = self.ex_embed(inputs, inputs_timestamps)
 
-        hidden_states, self_attn_weights, cross_attn_weights, _ = self.encoder(
+        hidden_states, self_attn_weights, cross_attn_weights = self.encoder(
             hidden_states, ex_hidden_states, output_attentions=self.output_attentions)
         hidden_states = hidden_states.reshape(
             batch_size, self.num_features, self.num_patches + 1, -1)

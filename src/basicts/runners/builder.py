@@ -3,8 +3,6 @@ from logging import Logger
 from typing import TYPE_CHECKING
 
 import torch
-from basicts.scaler import BasicTSScaler
-from basicts.utils import BasicTSMode
 from easytorch.device import to_device
 from easytorch.utils import get_local_rank, get_world_size
 from easytorch.utils.data_prefetcher import DataLoaderX
@@ -15,6 +13,9 @@ from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 from torch.utils.data import DataLoader, Dataset
 from torch.utils.data.distributed import DistributedSampler
+
+from basicts.scaler import BasicTSScaler
+from basicts.utils import BasicTSMode
 
 if TYPE_CHECKING:
     from basicts.configs import BasicTSConfig
