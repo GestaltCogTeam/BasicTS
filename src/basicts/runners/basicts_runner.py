@@ -34,6 +34,8 @@ from .taskflow import BasicTSTaskFlow
 if TYPE_CHECKING:
     from basicts.configs import BasicTSConfig
 
+from numpy.lib.format import open_memmap
+
 
 class BasicTSRunner:
     """
@@ -1082,11 +1084,11 @@ class BasicTSRunner:
 
         # create memmap files
         if batch_idx == 0:
-            self._inputs_memmap = np.memmap(inputs_path, dtype=inputs.dtype, mode="w+",
+            self._inputs_memmap = open_memmap(inputs_path, dtype=inputs.dtype, mode="w+",
                                     shape=(total_samples, *inputs.shape[1:]))
-            self._prediction_memmap = np.memmap(pred_path, dtype=prediction.dtype, mode="w+",
+            self._prediction_memmap = open_memmap(pred_path, dtype=prediction.dtype, mode="w+",
                                     shape=(total_samples, *prediction.shape[1:]))
-            self._targets_memmap = np.memmap(targets_path, dtype=targets.dtype, mode="w+",
+            self._targets_memmap = open_memmap(targets_path, dtype=targets.dtype, mode="w+",
                                 shape=(total_samples, *targets.shape[1:]))
 
         start = batch_idx * inputs.shape[0]
