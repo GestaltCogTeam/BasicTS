@@ -44,7 +44,11 @@ class Builder:
         """
 
         logger.info("Building model.")
-        model = cfg.model(cfg.model_config)
+        if hasattr(cfg.model, "_input_normalization_defaults") or cfg.get("normalization") not in (None, "none", "None") or cfg.get("use_apt", False):
+            from basicts.models.normalization import build_normalized_forecaster
+            model = build_normalized_forecaster(cfg)
+        else:
+            model = cfg.model(cfg.model_config)
         model = to_device(model)
 
         # complie model
