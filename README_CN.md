@@ -163,6 +163,8 @@ MOIRAI (inference) | Unified Training of Universal Time Series Forecasting Trans
 
 | 📊Baseline    | 📝Title                                                                                                  | 📄Paper                                                | 💻Code                                                                        | 🏛Venue    | 🎯Task |
 | :------------ | :------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- | :---------------------------------------------------------------------------- | :--------- | :----- |
+| OLinear       | OLinear: A Linear Model for Time Series Forecasting in Orthogonally Transformed Domain                      | [Link](https://papers.neurips.cc/paper_files/paper/2025/hash/571c7e164fb1ffbcf2f84a63784451ec-Abstract-Conference.html) | [Link](https://github.com/jackyue1994/OLinear)                                    | NeurIPS'25 | LTSF   |
+| TQNet         | Temporal Query Network for Efficient Multivariate Time Series Forecasting                                  | [Link](https://proceedings.mlr.press/v267/lin25e.html)     | [Link](https://github.com/ACAT-SCUT/TQNet)                                        | ICML'25    | LTSF   |
 | S-D-Mamba         | Is Mamba Effective for Time Series Forecasting?                           | [Link](https://arxiv.org/abs/2403.11144v3)                  | [Link](https://github.com/wzhwzhwzh0921/S-D-Mamba)                                        | NeuroComputing'24 | LTSF   |
 | Bi-Mamba         | Bi-Mamba+: Bidirectional Mamba for Time Series Forecasting                           | [Link](https://arxiv.org/abs/2404.15772)                  | [Link](https://github.com/Leopold2333/Bi-Mamba4TS)                                        | arXiv'24 | LTSF   |
 | ModernTCN         | ModernTCN: A Modern Pure Convolution Structure for General Time Series Analysis                           | [Link](https://openreview.net/forum?id=vpJMJerXHU)                  | [Link](https://github.com/luodhhh/ModernTCN)                                        | ICLR'24 | LTSF   |
@@ -202,6 +204,20 @@ MOIRAI (inference) | Unified Training of Universal Time Series Forecasting Trans
 | HI            | Historical Inertia: A Powerful Baseline for Long Sequence Time-series Forecasting                        | [Link](https://arxiv.org/abs/2103.16349)                  | None                                                                          | CIKM'21    | LTSF   |
 | Autoformer    | Decomposition Transformers with Auto-Correlation for Long-Term Series Forecasting                        | [Link](https://arxiv.org/abs/2106.13008)                  | [Link](https://github.com/thuml/Autoformer)                                      | NeurIPS'21 | LTSF   |
 | Informer      | Beyond Efficient Transformer for Long Sequence Time-Series Forecasting                                   | [Link](https://arxiv.org/abs/2012.07436)                  | [Link](https://github.com/zhouhaoyi/Informer2020)                                | AAAI'21    | LTSF   |
+
+</details>
+
+<details open>
+  <summary><h3>预测归一化方法</h3></summary>
+
+| 📊Baseline | 📝Title | 📄Paper | 💻Code | 🏛Venue | 🎯Task |
+| :--------- | :------ | :------ | :----- | :------ | :----- |
+| APT | APT: Affine Prototype-Timestamp for Time Series Forecasting Under Distribution Shift | [Link](https://ojs.aaai.org/index.php/AAAI/article/view/38542) | [Link](https://github.com/blisky-li/APT) | AAAI'26 | LTSF |
+| FAN | Frequency Adaptive Normalization For Non-stationary Time Series Forecasting | [Link](https://proceedings.neurips.cc/paper_files/paper/2024/file/37c6d0bc4d2917dcbea693b18504bd87-Paper-Conference.pdf) | [Link](https://github.com/wayne155/FAN) | NeurIPS'24 | LTSF |
+| SAN | Adaptive Normalization for Non-stationary Time Series Forecasting: A Temporal Slice Perspective | [Link](https://proceedings.neurips.cc/paper_files/paper/2023/hash/2e19dab94882bc95ed094c4399cfda02-Abstract-Conference.html) | [Link](https://github.com/ustc-time-series/SAN) | NeurIPS'23 | LTSF |
+| Dish-TS | Dish-TS: A General Paradigm for Alleviating Distribution Shift in Time Series Forecasting | [Link](https://ojs.aaai.org/index.php/AAAI/article/view/25914) | [Link](https://github.com/weifantt/Dish-TS) | AAAI'23 | LTSF |
+| RevIN | Reversible Instance Normalization for Accurate Time-Series Forecasting against Distribution Shift | [Link](https://openreview.net/forum?id=cGDAkQo1C0p) | [Link](https://github.com/ts-kim/RevIN) | ICLR'22 | LTSF |
+| DAIN | Deep Adaptive Input Normalization for Time Series Forecasting | [Link](https://doi.org/10.1109/TNNLS.2019.2944933) | [Link](https://github.com/passalis/dain) | IEEE TNNLS'20 | LTSF |
 
 </details>
 

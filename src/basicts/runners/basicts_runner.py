@@ -5,6 +5,7 @@ import os
 import time
 import types
 from contextlib import nullcontext
+from importlib import import_module
 from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Union
 
 import numpy as np
@@ -105,6 +106,9 @@ class BasicTSRunner:
         # create model
         self.model_name: str = cfg.model.__name__
         forward_fn = cfg.model.forward
+        if hasattr(cfg.model, "_input_normalization_defaults") or cfg.get("normalization") not in (None, "none", "None") or cfg.get("use_apt", False):
+            normalization = import_module("basicts.models.normalization")
+            forward_fn = normalization.NormalizedForecaster.forward
         sig = inspect.signature(forward_fn)
         self.forward_params = list(sig.parameters.keys())
         self.forward_params.remove("inputs")
@@ -325,6 +329,11 @@ class BasicTSRunner:
             train_epoch (int, optional): current epoch if in training process.
         """
 
+        if hasattr(self.cfg.model, "_input_normalization_defaults") or self.cfg.get("normalization") not in (None, "none", "None") or self.cfg.get("use_apt", False):
+            core_model = getattr(self.model, "module", self.model)
+            if getattr(core_model, "normalization_stage", "joint") != "joint":
+                self.logger.info("Skip validation and checkpoint selection during APT warmup/calibration.")
+                return
         self.on_validate_start()
         self.callback_handler.trigger("on_validate_start", self)
         self.logger.info("Start validation.")
@@ -509,7 +518,7 @@ class BasicTSRunner:
             loss_weight = self.taskflow.get_weight(forward_return) # task specific metric weight for averaging
             self.update_meter(f"{meter_type}/loss", loss.item(), loss_weight)
             forward_return = self.taskflow.postprocess(self, forward_return)
-            if mode == BasicTSMode.EVAL:
+            if mode == BasicTSMode.EVAL and self.cfg.save_results:
                 self._save_results(step, forward_return)
             # evaluation on specific timesteps
             if self.eval_horizons is not None:
@@ -1082,6 +1091,7 @@ class BasicTSRunner:
 
         # create memmap files
         if batch_idx == 0:
+            self._results_samples_written = 0
             self._inputs_memmap = np.memmap(inputs_path, dtype=inputs.dtype, mode="w+",
                                     shape=(total_samples, *inputs.shape[1:]))
             self._prediction_memmap = np.memmap(pred_path, dtype=prediction.dtype, mode="w+",
@@ -1089,13 +1099,14 @@ class BasicTSRunner:
             self._targets_memmap = np.memmap(targets_path, dtype=targets.dtype, mode="w+",
                                 shape=(total_samples, *targets.shape[1:]))
 
-        start = batch_idx * inputs.shape[0]
+        start = self._results_samples_written
         end = start + inputs.shape[0]
 
         self._inputs_memmap[start:end] = inputs
         self._prediction_memmap[start:end] = prediction
         self._targets_memmap[start:end] = targets
-        if batch_idx == (total_samples // inputs.shape[0]):
+        self._results_samples_written = end
+        if end == total_samples:
             self._inputs_memmap.flush()
             self._prediction_memmap.flush()
             self._targets_memmap.flush()
