@@ -1,4 +1,5 @@
 import inspect
+from importlib import import_module
 from logging import Logger
 from typing import TYPE_CHECKING
 
@@ -44,7 +45,11 @@ class Builder:
         """
 
         logger.info("Building model.")
-        model = cfg.model(cfg.model_config)
+        if hasattr(cfg.model, "_input_normalization_defaults") or cfg.get("normalization") not in (None, "none", "None") or cfg.get("use_apt", False):
+            normalization = import_module("basicts.models.normalization")
+            model = normalization.build_normalized_forecaster(cfg)
+        else:
+            model = cfg.model(cfg.model_config)
         model = to_device(model)
 
         # complie model
